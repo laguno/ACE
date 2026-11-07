@@ -223,3 +223,13 @@ export function storno(m: Movimento, chiaviSettimanaGiaDate: boolean): Movimento
   if (chiaviSettimanaGiaDate || m.passi === 0) return null;
   return { passi: -m.passi, moltiplicatore: m.moltiplicatore };
 }
+
+/**
+ * Compito rispuntato dopo uno storno: di nuovo i passi base (senza bonus anticipo),
+ * motivo 'compito_rifatto' con lo stesso riferimento, una sola volta per compito,
+ * e solo prima delle chiavi della domenica della settimana del compito.
+ */
+export function passiCompitoRifatto(f: { stornato: boolean; giaRifatto: boolean; chiaviSettimanaGiaDate: boolean }): number {
+  if (!f.stornato || f.giaRifatto || f.chiaviSettimanaGiaDate) return 0;
+  return P.obbligatori.compiti;
+}

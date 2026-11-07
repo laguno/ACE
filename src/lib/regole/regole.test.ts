@@ -6,6 +6,7 @@ import {
   giornoDiScuola,
   moltiplicatoreRimonta,
   passiCompito,
+  passiCompitoRifatto,
   passiGestiCasa,
   passiQuiz,
   passiVoto,
@@ -114,4 +115,12 @@ describe('correzione delle spunte', () => {
   it('dopo le chiavi della domenica non si storna più', () => {
     expect(storno({ passi: 10, moltiplicatore: 1 }, true)).toBeNull();
   });
+});
+
+describe('compito rifatto dopo uno storno', () => {
+  const base = { stornato: true, giaRifatto: false, chiaviSettimanaGiaDate: false };
+  it('ridà i passi base, senza bonus anticipo', () => expect(passiCompitoRifatto(base)).toBe(CONFIG.passi.obbligatori.compiti));
+  it('una sola volta per compito', () => expect(passiCompitoRifatto({ ...base, giaRifatto: true })).toBe(0));
+  it('non dopo le chiavi della domenica', () => expect(passiCompitoRifatto({ ...base, chiaviSettimanaGiaDate: true })).toBe(0));
+  it('niente se il compito non era stato stornato', () => expect(passiCompitoRifatto({ ...base, stornato: false })).toBe(0));
 });
