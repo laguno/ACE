@@ -1,0 +1,259 @@
+{
+  "_nota": "Unica fonte dei numeri del gioco. Approvati dal signore il 7 novembre 2026. Si ritarano dopo due settimane d'uso: cambiare qui, non nel codice.",
+  "periodo": {
+    "inizio": "2026-11-23",
+    "fine": "2027-06-04",
+    "r_evolution_da": "2027-01-07"
+  },
+  "percorso": {
+    "totale_passi": 7200,
+    "costi_tappe": [
+      125,
+      135,
+      145,
+      160,
+      170,
+      180,
+      190,
+      200,
+      210,
+      225,
+      235,
+      245,
+      255,
+      265,
+      280,
+      290,
+      300,
+      310,
+      320,
+      330,
+      345,
+      355,
+      365,
+      375,
+      385,
+      395,
+      410
+    ],
+    "alternativa_r_evolution_dicembre": {
+      "totale_passi": 7600,
+      "costi_tappe": [
+        130,
+        140,
+        155,
+        165,
+        175,
+        190,
+        200,
+        210,
+        225,
+        235,
+        245,
+        260,
+        270,
+        280,
+        295,
+        305,
+        315,
+        330,
+        340,
+        350,
+        365,
+        375,
+        385,
+        400,
+        410,
+        420,
+        430
+      ]
+    }
+  },
+  "forzieri": [
+    {
+      "n": 1,
+      "tappa": 3,
+      "chiavi": 2
+    },
+    {
+      "n": 2,
+      "tappa": 6,
+      "chiavi": 4
+    },
+    {
+      "n": 3,
+      "tappa": 9,
+      "chiavi": 7
+    },
+    {
+      "n": 4,
+      "tappa": 12,
+      "chiavi": 14
+    },
+    {
+      "n": 5,
+      "tappa": 15,
+      "chiavi": 17
+    },
+    {
+      "n": 6,
+      "tappa": 18,
+      "chiavi": 21
+    },
+    {
+      "n": 7,
+      "tappa": 21,
+      "chiavi": 26
+    },
+    {
+      "n": 8,
+      "tappa": 24,
+      "chiavi": 31
+    },
+    {
+      "n": 9,
+      "tappa": 27,
+      "chiavi": 36
+    }
+  ],
+  "passi": {
+    "obbligatori": {
+      "cartella": 5,
+      "compiti": 10,
+      "borsa": 2,
+      "fogli": 2,
+      "ripasso": 10,
+      "dieci_minuti": 10
+    },
+    "compiti_anticipo": {
+      "giorni_prima_min": 2,
+      "moltiplicatore": 1.3,
+      "serie_max": "fine settimana"
+    },
+    "foto_compito": 2,
+    "studio_facoltativo": {
+      "max_al_giorno_per_tipo": 4,
+      "richiede_compiti_spuntati": true,
+      "flashcard_giro": 3,
+      "flashcard_secondi_prima_di_girare": 7,
+      "video_completo": 3,
+      "quiz": {
+        "soglia_giuste": 0.9,
+        "tentativi": {
+          "1": [
+            10,
+            6
+          ],
+          "2": [
+            6,
+            4
+          ],
+          "3": [
+            3,
+            2
+          ],
+          "4+": [
+            1,
+            1
+          ]
+        }
+      }
+    },
+    "gesti_casa": {
+      "voci": {
+        "scrivania": 2,
+        "lavastoviglie": 2,
+        "letto": 2,
+        "vestiti": 2
+      },
+      "tetto_giornaliero": 6
+    },
+    "voti": {
+      "9-10": 30,
+      "8": 20,
+      "7": 10,
+      "migliorato_almeno_6": 15,
+      "recupero_dopo_insufficienza": 20
+    },
+    "partite": {
+      "giocata": 10,
+      "vinta_in_piu": 15
+    },
+    "enigma_risolto": 20,
+    "nota_merito": 50,
+    "pagella_primo_quadrimestre": {
+      "media_7": 100,
+      "media_7_5": 200
+    },
+    "materia_da_insufficiente_a_sufficiente_in_pagella": 25,
+    "malus": {
+      "nota_disciplinare": -20,
+      "note_dimenticanza_ogni_3": -10,
+      "bagno": -1,
+      "antisportivo": -7,
+      "balla_o_imbroglio": -10
+    }
+  },
+  "chiavi_settimana": {
+    "prima": "almeno 70% dei passi obbligatori possibili",
+    "seconda": "in più nessuna nota (qualsiasi nota la toglie)",
+    "terza": "in più almeno 95% delle cose obbligatorie fatte",
+    "conteggio": "domenica sera"
+  },
+  "rimonta": {
+    "ritardo_tappe": 1.5,
+    "moltiplicatore": 1.25,
+    "solo_settimane_con_prima_chiave": true
+  },
+  "notifiche": {
+    "max_al_giorno": 3,
+    "solleciti": 1,
+    "sollecito_dopo_minuti": 45,
+    "caratteri_max": 60,
+    "silenzio_rimproveri_dopo": "21:00"
+  },
+  "popup": {
+    "max_per_apertura": 1,
+    "parole_max": 25,
+    "titolo_parole_max": 4,
+    "stesso_testo_non_prima_di_giorni": 7,
+    "priorita": [
+      "bastone",
+      "voto",
+      "forziere_tappa",
+      "altro"
+    ]
+  },
+  "frasi": {
+    "mantra": "Ogni giorno, passino passino",
+    "max_al_giorno": 1,
+    "non_ripetere_prima_di_giorni": 30
+  },
+  "calendario": {
+    "giorni_scuola": "lunedì-venerdì",
+    "vacanze": [
+      [
+        "2026-12-08",
+        "2026-12-08"
+      ],
+      [
+        "2026-12-24",
+        "2027-01-06"
+      ],
+      [
+        "2027-03-25",
+        "2027-03-30"
+      ],
+      [
+        "2027-06-02",
+        "2027-06-02"
+      ]
+    ],
+    "nota": "Calendario scolastico Emilia-Romagna 2026/27 come usato nella simulazione: da verificare con il calendario dell'istituto prima del rilascio.",
+    "bandierina": {
+      "peso_giorno_prima_r_evolution": 1.0,
+      "peso_giorno_dopo_r_evolution": 1.4,
+      "nota": "La bandierina avanza solo nei giorni di scuola; dopo l'arrivo di R-Evolution i giorni pesano di più perché i passi disponibili crescono (circa 230 contro 320 a settimana con impegno dell'80%)."
+    }
+  }
+}
