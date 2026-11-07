@@ -1,0 +1,690 @@
+{
+ "convenzione": "Immagini WebP in public/assets/: avatar 512 px trasparenti (avatar/<personaggio>/<id>.webp), oggetti 512 px (oggetti/<id>.webp), sfondi 1080x1920 (sfondi/<id>.webp). Gli id sono quelli usati nel copione (docs/05-copione.md). Le 64 pose di famiglia formano l'album; le pose dell'allenatore (sprint 2) vanno nella pagina 'La squadra'. Stelle e caramella sono di riserva: il gioco usa passo e chiavi.",
+ "avatar": [
+  {
+   "id": "lani-contenta",
+   "personaggio": "lani",
+   "categoria": "base",
+   "tono": "positivo",
+   "descrizione": "Mezzobusto, pollice in su, stelline",
+   "webp": "assets/avatar/lani/lani-contenta.webp"
+  },
+  {
+   "id": "lani-saluta",
+   "personaggio": "lani",
+   "categoria": "base",
+   "tono": "positivo",
+   "descrizione": "Figura intera, saluta con la mano",
+   "webp": "assets/avatar/lani/lani-saluta.webp"
+  },
+  {
+   "id": "lani-timida",
+   "personaggio": "lani",
+   "categoria": "base",
+   "tono": "neutro",
+   "descrizione": "Mezzobusto, sorriso timido, mano aperta",
+   "webp": "assets/avatar/lani/lani-timida.webp"
+  },
+  {
+   "id": "lani-oops",
+   "personaggio": "lani",
+   "categoria": "base",
+   "tono": "neutro",
+   "descrizione": "Mezzobusto, mano sulla testa, goccia di sudore: si è dimenticata qualcosa",
+   "webp": "assets/avatar/lani/lani-oops.webp"
+  },
+  {
+   "id": "lani-assonnata",
+   "personaggio": "lani",
+   "categoria": "momento",
+   "tono": "neutro",
+   "descrizione": "Pigiama e cuscino, sbadiglia, Zzz",
+   "webp": "assets/avatar/lani/lani-assonnata.webp"
+  },
+  {
+   "id": "lani-battuta",
+   "personaggio": "lani",
+   "categoria": "sport",
+   "tono": "positivo",
+   "descrizione": "In divisa, battuta con pallone lilla",
+   "webp": "assets/avatar/lani/lani-battuta.webp"
+  },
+  {
+   "id": "lani-divisa",
+   "personaggio": "lani",
+   "categoria": "sport",
+   "tono": "positivo",
+   "descrizione": "In divisa, pallone sottobraccio, pronta",
+   "webp": "assets/avatar/lani/lani-divisa.webp"
+  },
+  {
+   "id": "lani-festeggia",
+   "personaggio": "lani",
+   "categoria": "sport",
+   "tono": "positivo",
+   "descrizione": "In divisa, salta a braccia alzate, coriandoli",
+   "webp": "assets/avatar/lani/lani-festeggia.webp"
+  },
+  {
+   "id": "lani-compleanno",
+   "personaggio": "lani",
+   "categoria": "stagione",
+   "tono": "positivo",
+   "descrizione": "Vestito pastello, tiare, torta con candeline",
+   "webp": "assets/avatar/lani/lani-compleanno.webp"
+  },
+  {
+   "id": "lani-cima",
+   "personaggio": "lani",
+   "categoria": "stagione",
+   "tono": "positivo",
+   "descrizione": "Alza la coppa dorata, tiare, stelle: arrivo di Astra",
+   "webp": "assets/avatar/lani/lani-cima.webp"
+  },
+  {
+   "id": "lani-pioggia",
+   "personaggio": "lani",
+   "categoria": "stagione",
+   "tono": "neutro",
+   "descrizione": "Impermeabile azzurro, ombrello rosa",
+   "webp": "assets/avatar/lani/lani-pioggia.webp"
+  },
+  {
+   "id": "lani-primavera",
+   "personaggio": "lani",
+   "categoria": "stagione",
+   "tono": "positivo",
+   "descrizione": "Felpa rosa, petali di ciliegio",
+   "webp": "assets/avatar/lani/lani-primavera.webp"
+  },
+  {
+   "id": "lani-natale",
+   "personaggio": "lani",
+   "categoria": "stagione",
+   "tono": "positivo",
+   "descrizione": "Maglione natalizio, cappellino, regalo",
+   "webp": "assets/avatar/lani/lani-natale.webp"
+  },
+  {
+   "id": "lani-inverno",
+   "personaggio": "lani",
+   "categoria": "stagione",
+   "tono": "neutro",
+   "descrizione": "Cappotto lilla, sciarpa e berretto rosa, neve",
+   "webp": "assets/avatar/lani/lani-inverno.webp"
+  },
+  {
+   "id": "lani-buongiorno",
+   "personaggio": "lani",
+   "categoria": "momento",
+   "tono": "positivo",
+   "descrizione": "Pigiama, tazza, si stiracchia",
+   "webp": "assets/avatar/lani/lani-buongiorno.webp"
+  },
+  {
+   "id": "lani-determinata",
+   "personaggio": "lani",
+   "categoria": "momento",
+   "tono": "positivo",
+   "descrizione": "Fascia nei capelli, pugno chiuso",
+   "webp": "assets/avatar/lani/lani-determinata.webp"
+  },
+  {
+   "id": "lani-concentrata",
+   "personaggio": "lani",
+   "categoria": "momento",
+   "tono": "neutro",
+   "descrizione": "Tablet e matita, sguardo attento",
+   "webp": "assets/avatar/lani/lani-concentrata.webp"
+  },
+  {
+   "id": "lani-pensierosa",
+   "personaggio": "lani",
+   "categoria": "momento",
+   "tono": "neutro",
+   "descrizione": "Dito sul mento, simboli + - x :",
+   "webp": "assets/avatar/lani/lani-pensierosa.webp"
+  },
+  {
+   "id": "lani-dieci-minuti",
+   "personaggio": "lani",
+   "categoria": "momento",
+   "tono": "positivo",
+   "descrizione": "Plank sul tappetino",
+   "webp": "assets/avatar/lani/lani-dieci-minuti.webp"
+  },
+  {
+   "id": "lani-vr",
+   "personaggio": "lani",
+   "categoria": "momento",
+   "tono": "positivo",
+   "descrizione": "Visore e controller, in movimento",
+   "webp": "assets/avatar/lani/lani-vr.webp"
+  },
+  {
+   "id": "lani-frustrata",
+   "personaggio": "lani",
+   "categoria": "negativo",
+   "tono": "negativo-lieve",
+   "descrizione": "Guance gonfie, matita in mano, ci riprova",
+   "webp": "assets/avatar/lani/lani-frustrata.webp"
+  },
+  {
+   "id": "lani-broncio",
+   "personaggio": "lani",
+   "categoria": "negativo",
+   "tono": "negativo-lieve",
+   "descrizione": "Braccia conserte, broncio buffo",
+   "webp": "assets/avatar/lani/lani-broncio.webp"
+  },
+  {
+   "id": "lani-partita-persa",
+   "personaggio": "lani",
+   "categoria": "negativo",
+   "tono": "negativo-lieve",
+   "descrizione": "In divisa, imbronciata, pugno chiuso",
+   "nota": "Legge più arrabbiata che 'giù a testa alta'",
+   "webp": "assets/avatar/lani/lani-partita-persa.webp"
+  },
+  {
+   "id": "lani-stanca",
+   "personaggio": "lani",
+   "categoria": "negativo",
+   "tono": "neutro",
+   "descrizione": "In divisa, asciugamano e borraccia, sorriso stanco",
+   "webp": "assets/avatar/lani/lani-stanca.webp"
+  },
+  {
+   "id": "lani-detective",
+   "personaggio": "lani",
+   "categoria": "extra",
+   "tono": "positivo",
+   "descrizione": "Lente d'ingrandimento e bigliettino arrotolato: l'enigma del forziere",
+   "webp": "assets/avatar/lani/lani-detective.webp"
+  },
+  {
+   "id": "lani-sorpresa",
+   "personaggio": "lani",
+   "categoria": "extra",
+   "tono": "positivo",
+   "descrizione": "In ginocchio davanti al forziere aperto, mani sulle guance",
+   "webp": "assets/avatar/lani/lani-sorpresa.webp"
+  },
+  {
+   "id": "papa-pollice",
+   "personaggio": "papa",
+   "categoria": "base",
+   "tono": "positivo",
+   "descrizione": "Mezzobusto, pollice in su",
+   "webp": "assets/avatar/papa/papa-pollice.webp"
+  },
+  {
+   "id": "papa-applaude",
+   "personaggio": "papa",
+   "categoria": "tifo",
+   "tono": "positivo",
+   "descrizione": "Felpa CVR, applaude",
+   "webp": "assets/avatar/papa/papa-applaude.webp"
+  },
+  {
+   "id": "papa-passaggio",
+   "personaggio": "papa",
+   "categoria": "tifo",
+   "tono": "neutro",
+   "descrizione": "Felpa CVR, chiavi in mano",
+   "webp": "assets/avatar/papa/papa-passaggio.webp"
+  },
+  {
+   "id": "papa-festeggia",
+   "personaggio": "papa",
+   "categoria": "tifo",
+   "tono": "positivo",
+   "descrizione": "Felpa CVR, braccia alzate, coriandoli",
+   "webp": "assets/avatar/papa/papa-festeggia.webp"
+  },
+  {
+   "id": "papa-dispiaciuto",
+   "personaggio": "papa",
+   "categoria": "negativo",
+   "tono": "negativo-lieve",
+   "descrizione": "Braccia aperte per l'abbraccio",
+   "webp": "assets/avatar/papa/papa-dispiaciuto.webp"
+  },
+  {
+   "id": "papa-ci-pensiamo",
+   "personaggio": "papa",
+   "categoria": "negativo",
+   "tono": "negativo-lieve",
+   "descrizione": "Mano sul mento, preoccupato",
+   "webp": "assets/avatar/papa/papa-ci-pensiamo.webp"
+  },
+  {
+   "id": "papa-arrabbiato",
+   "personaggio": "papa",
+   "categoria": "extra",
+   "tono": "arrabbiato",
+   "descrizione": "Dito alzato, fumo dalle orecchie: rimprovero",
+   "nota": "Bastone: mamma per le note disciplinari, papà per le dimenticanze e la sera non chiusa (copione del 6 novembre)",
+   "webp": "assets/avatar/papa/papa-arrabbiato.webp"
+  },
+  {
+   "id": "mamma-pollice",
+   "personaggio": "mamma",
+   "categoria": "base",
+   "tono": "positivo",
+   "descrizione": "Mezzobusto, pollice in su",
+   "webp": "assets/avatar/mamma/mamma-pollice.webp"
+  },
+  {
+   "id": "mamma-applaude",
+   "personaggio": "mamma",
+   "categoria": "tifo",
+   "tono": "positivo",
+   "descrizione": "Felpa CVR, applaude",
+   "webp": "assets/avatar/mamma/mamma-applaude.webp"
+  },
+  {
+   "id": "mamma-passaggio",
+   "personaggio": "mamma",
+   "categoria": "tifo",
+   "tono": "neutro",
+   "descrizione": "Felpa CVR, chiavi in mano",
+   "webp": "assets/avatar/mamma/mamma-passaggio.webp"
+  },
+  {
+   "id": "mamma-festeggia",
+   "personaggio": "mamma",
+   "categoria": "tifo",
+   "tono": "positivo",
+   "descrizione": "Felpa CVR, braccia alzate, coriandoli",
+   "webp": "assets/avatar/mamma/mamma-festeggia.webp"
+  },
+  {
+   "id": "mamma-dispiaciuta",
+   "personaggio": "mamma",
+   "categoria": "negativo",
+   "tono": "negativo-lieve",
+   "descrizione": "Braccia aperte per l'abbraccio",
+   "webp": "assets/avatar/mamma/mamma-dispiaciuta.webp"
+  },
+  {
+   "id": "mamma-ci-pensiamo",
+   "personaggio": "mamma",
+   "categoria": "negativo",
+   "tono": "negativo-lieve",
+   "descrizione": "Mano sul mento, preoccupata",
+   "webp": "assets/avatar/mamma/mamma-ci-pensiamo.webp"
+  },
+  {
+   "id": "mamma-arrabbiata",
+   "personaggio": "mamma",
+   "categoria": "extra",
+   "tono": "arrabbiato",
+   "descrizione": "Urla, vena sulla fronte, fulmini",
+   "nota": "Bastone: mamma per le note disciplinari, papà per le dimenticanze e la sera non chiusa (copione del 6 novembre)",
+   "webp": "assets/avatar/mamma/mamma-arrabbiata.webp"
+  },
+  {
+   "id": "leo-cinque",
+   "personaggio": "leo",
+   "categoria": "affettuoso",
+   "tono": "positivo",
+   "descrizione": "Alza la mano per il cinque",
+   "webp": "assets/avatar/leo/leo-cinque.webp"
+  },
+  {
+   "id": "leo-festeggia",
+   "personaggio": "leo",
+   "categoria": "affettuoso",
+   "tono": "positivo",
+   "descrizione": "Salta a braccia alzate",
+   "webp": "assets/avatar/leo/leo-festeggia.webp"
+  },
+  {
+   "id": "leo-dispiaciuto",
+   "personaggio": "leo",
+   "categoria": "affettuoso",
+   "tono": "negativo-lieve",
+   "descrizione": "Mano sul cuore, cuoricino",
+   "webp": "assets/avatar/leo/leo-dispiaciuto.webp"
+  },
+  {
+   "id": "leo-copertina",
+   "personaggio": "leo",
+   "categoria": "extra",
+   "tono": "neutro",
+   "descrizione": "Copertina e dito in bocca, coccolone",
+   "webp": "assets/avatar/leo/leo-copertina.webp"
+  },
+  {
+   "id": "leo-ride",
+   "personaggio": "leo",
+   "categoria": "scherzoso",
+   "tono": "positivo",
+   "descrizione": "Ride sotto i baffi",
+   "webp": "assets/avatar/leo/leo-ride.webp"
+  },
+  {
+   "id": "leo-furbetto",
+   "personaggio": "leo",
+   "categoria": "scherzoso",
+   "tono": "positivo",
+   "descrizione": "Braccia conserte, sorrisetto",
+   "webp": "assets/avatar/leo/leo-furbetto.webp"
+  },
+  {
+   "id": "leo-linguaccia",
+   "personaggio": "leo",
+   "categoria": "scherzoso",
+   "tono": "dispettoso",
+   "descrizione": "Linguaccia, occhiolino, V",
+   "webp": "assets/avatar/leo/leo-linguaccia.webp"
+  },
+  {
+   "id": "leo-marameo",
+   "personaggio": "leo",
+   "categoria": "extra",
+   "tono": "dispettoso",
+   "descrizione": "Marameo con le mani alle orecchie e linguaccia",
+   "webp": "assets/avatar/leo/leo-marameo.webp"
+  },
+  {
+   "id": "leo-gamer",
+   "personaggio": "leo",
+   "categoria": "passioni",
+   "tono": "positivo",
+   "descrizione": "Cuffie in testa, controller",
+   "webp": "assets/avatar/leo/leo-gamer.webp"
+  },
+  {
+   "id": "leo-tennis",
+   "personaggio": "leo",
+   "categoria": "passioni",
+   "tono": "positivo",
+   "descrizione": "Colpo di racchetta",
+   "webp": "assets/avatar/leo/leo-tennis.webp"
+  },
+  {
+   "id": "leo-sbuffa",
+   "personaggio": "leo",
+   "categoria": "negativo",
+   "tono": "negativo-lieve",
+   "descrizione": "Guance gonfie, occhi al cielo, copertina",
+   "webp": "assets/avatar/leo/leo-sbuffa.webp"
+  },
+  {
+   "id": "leo-partita-persa",
+   "personaggio": "leo",
+   "categoria": "negativo",
+   "tono": "negativo-lieve",
+   "descrizione": "Cuffie al collo, braccia conserte, broncio",
+   "webp": "assets/avatar/leo/leo-partita-persa.webp"
+  },
+  {
+   "id": "nonno-pollice",
+   "personaggio": "nonno",
+   "categoria": "base",
+   "tono": "positivo",
+   "descrizione": "Il pollice del nonno",
+   "webp": "assets/avatar/nonno/nonno-pollice.webp"
+  },
+  {
+   "id": "nonno-passaggio",
+   "personaggio": "nonno",
+   "categoria": "base",
+   "tono": "neutro",
+   "descrizione": "Chiavi in mano, 'sbrigati che facciamo tardi'",
+   "webp": "assets/avatar/nonno/nonno-passaggio.webp"
+  },
+  {
+   "id": "bart-contento",
+   "personaggio": "bart",
+   "categoria": "animale",
+   "tono": "positivo",
+   "descrizione": "Scodinzola, lingua fuori",
+   "webp": "assets/avatar/bart/bart-contento.webp"
+  },
+  {
+   "id": "bart-festeggia",
+   "personaggio": "bart",
+   "categoria": "animale",
+   "tono": "positivo",
+   "descrizione": "Salta, coriandoli",
+   "webp": "assets/avatar/bart/bart-festeggia.webp"
+  },
+  {
+   "id": "bart-pallone",
+   "personaggio": "bart",
+   "categoria": "animale",
+   "tono": "positivo",
+   "descrizione": "Corre col pallone Molten in bocca (voluto così)",
+   "webp": "assets/avatar/bart/bart-pallone.webp"
+  },
+  {
+   "id": "bart-sonnecchia",
+   "personaggio": "bart",
+   "categoria": "animale",
+   "tono": "neutro",
+   "descrizione": "Dorme sul cuscino",
+   "nota": "Cuscino rosso invece che rosa",
+   "webp": "assets/avatar/bart/bart-sonnecchia.webp"
+  },
+  {
+   "id": "bart-triste",
+   "personaggio": "bart",
+   "categoria": "animale",
+   "tono": "negativo-lieve",
+   "descrizione": "Sdraiato, orecchie basse",
+   "webp": "assets/avatar/bart/bart-triste.webp"
+  },
+  {
+   "id": "lady-compiti",
+   "personaggio": "lady",
+   "categoria": "animale",
+   "tono": "dispettoso",
+   "descrizione": "Dorme sul quaderno dei compiti",
+   "webp": "assets/avatar/lady/lady-compiti.webp"
+  },
+  {
+   "id": "lady-dispettosa",
+   "personaggio": "lady",
+   "categoria": "animale",
+   "tono": "dispettoso",
+   "descrizione": "Gioca col pallone lilla",
+   "webp": "assets/avatar/lady/lady-dispettosa.webp"
+  },
+  {
+   "id": "lady-snob",
+   "personaggio": "lady",
+   "categoria": "animale",
+   "tono": "dispettoso",
+   "descrizione": "Seduta in alto, aria superiore",
+   "webp": "assets/avatar/lady/lady-snob.webp"
+  },
+  {
+   "id": "lady-fusa",
+   "personaggio": "lady",
+   "categoria": "animale",
+   "tono": "positivo",
+   "descrizione": "Occhi chiusi, cuoricini",
+   "webp": "assets/avatar/lady/lady-fusa.webp"
+  },
+  {
+   "id": "lady-offesa",
+   "personaggio": "lady",
+   "categoria": "animale",
+   "tono": "negativo-lieve",
+   "descrizione": "Pelo gonfio, coda dritta",
+   "webp": "assets/avatar/lady/lady-offesa.webp"
+  },
+  {
+   "id": "allenatore-timeout",
+   "personaggio": "allenatore",
+   "categoria": "squadra",
+   "tono": "neutro",
+   "descrizione": "Time-out: in ginocchio con la lavagnetta tattica",
+   "sprint": 2,
+   "album": "La squadra",
+   "webp": "assets/avatar/allenatore/allenatore-timeout.webp"
+  },
+  {
+   "id": "allenatore-applaude",
+   "personaggio": "allenatore",
+   "categoria": "squadra",
+   "tono": "positivo",
+   "descrizione": "Applaude con mezzo sorriso soddisfatto",
+   "sprint": 2,
+   "album": "La squadra",
+   "webp": "assets/avatar/allenatore/allenatore-applaude.webp"
+  },
+  {
+   "id": "allenatore-pollice",
+   "personaggio": "allenatore",
+   "categoria": "squadra",
+   "tono": "positivo",
+   "descrizione": "Pollice in su, fischietto al collo",
+   "sprint": 2,
+   "album": "La squadra",
+   "nota": "Sorgente a bassa risoluzione (491 px): da riscaricare da Gemini a piena risoluzione",
+   "webp": "assets/avatar/allenatore/allenatore-pollice.webp"
+  }
+ ],
+ "sfondi": [
+  {
+   "id": "sfondo-1-colline",
+   "mesi": "nov-dic",
+   "descrizione": "Colline di caramelle, con lecca-lecca e dolcetti",
+   "webp": "assets/sfondi/sfondo-1-colline.webp"
+  },
+  {
+   "id": "sfondo-1-colline-alt",
+   "mesi": "nov-dic",
+   "descrizione": "Colline, versione pulita senza lecca-lecca, cielo azzurro",
+   "nota": "Alternativa: più spazio libero per il percorso",
+   "webp": "assets/sfondi/sfondo-1-colline-alt.webp"
+  },
+  {
+   "id": "sfondo-2-montagne",
+   "mesi": "gen-feb",
+   "descrizione": "Montagne di zucchero glassate, pini pastello",
+   "webp": "assets/sfondi/sfondo-2-montagne.webp"
+  },
+  {
+   "id": "sfondo-3-nuvole",
+   "mesi": "mar-apr",
+   "descrizione": "Sopra le nuvole di zucchero filato, cime glassate in basso, cielo viola stellato in alto",
+   "webp": "assets/sfondi/sfondo-3-nuvole.webp"
+  },
+  {
+   "id": "sfondo-4-spazio",
+   "mesi": "mag-giu",
+   "descrizione": "Spazio viola, pianeti, stella dorata in cima",
+   "webp": "assets/sfondi/sfondo-4-spazio.webp"
+  }
+ ],
+ "oggetti": [
+  {
+   "id": "forziere-chiuso",
+   "descrizione": "Forziere chiuso lungo il percorso",
+   "webp": "assets/oggetti/forziere-chiuso.webp"
+  },
+  {
+   "id": "forziere-aperto",
+   "descrizione": "Forziere aperto con luce dorata",
+   "webp": "assets/oggetti/forziere-aperto.webp"
+  },
+  {
+   "id": "forziere-cima",
+   "descrizione": "Forziere speciale della cima",
+   "webp": "assets/oggetti/forziere-cima.webp"
+  },
+  {
+   "id": "stella-piena",
+   "descrizione": "Stella della settimana conquistata",
+   "nota": "Sostituito da chiavi e passi (6 novembre): resta solo come riserva",
+   "webp": "assets/oggetti/stella-piena.webp"
+  },
+  {
+   "id": "stella-vuota",
+   "descrizione": "Stella della settimana ancora da conquistare",
+   "nota": "Sostituito da chiavi e passi (6 novembre): resta solo come riserva",
+   "webp": "assets/oggetti/stella-vuota.webp"
+  },
+  {
+   "id": "coppa",
+   "descrizione": "Coppa: traguardi, cima",
+   "webp": "assets/oggetti/coppa.webp"
+  },
+  {
+   "id": "medaglia",
+   "descrizione": "Medaglia: pagella, traguardi",
+   "webp": "assets/oggetti/medaglia.webp"
+  },
+  {
+   "id": "bandierina",
+   "descrizione": "Bandierina del tempo sul percorso",
+   "webp": "assets/oggetti/bandierina.webp"
+  },
+  {
+   "id": "tappa-da-fare",
+   "descrizione": "Tappa del sentiero da raggiungere",
+   "webp": "assets/oggetti/tappa-da-fare.webp"
+  },
+  {
+   "id": "tappa-attuale",
+   "descrizione": "Tappa dove si trova Lani",
+   "webp": "assets/oggetti/tappa-attuale.webp"
+  },
+  {
+   "id": "tappa-fatta",
+   "descrizione": "Tappa completata",
+   "webp": "assets/oggetti/tappa-fatta.webp"
+  },
+  {
+   "id": "caramella",
+   "descrizione": "Simbolo dei punti",
+   "nota": "Sostituito da chiavi e passi (6 novembre): resta solo come riserva",
+   "webp": "assets/oggetti/caramella.webp"
+  },
+  {
+   "id": "razzo",
+   "descrizione": "Rimonta",
+   "webp": "assets/oggetti/razzo.webp"
+  },
+  {
+   "id": "lucchetto",
+   "descrizione": "Premio non ancora sbloccato",
+   "webp": "assets/oggetti/lucchetto.webp"
+  },
+  {
+   "id": "regalo",
+   "descrizione": "Premio",
+   "webp": "assets/oggetti/regalo.webp"
+  },
+  {
+   "id": "pallone",
+   "descrizione": "Pallone Molten tricolore: partite",
+   "webp": "assets/oggetti/pallone.webp"
+  },
+  {
+   "id": "passo",
+   "descrizione": "Impronta di scarpa da pallavolo: i passi",
+   "webp": "assets/oggetti/passo.webp"
+  },
+  {
+   "id": "chiave-piena",
+   "descrizione": "Chiave della settimana conquistata",
+   "webp": "assets/oggetti/chiave-piena.webp"
+  },
+  {
+   "id": "chiave-vuota",
+   "descrizione": "Chiave della settimana ancora da conquistare",
+   "webp": "assets/oggetti/chiave-vuota.webp"
+  },
+  {
+   "id": "mazzo-chiavi",
+   "descrizione": "Mazzo di chiavi: totale delle chiavi e lucchetto dei forzieri",
+   "webp": "assets/oggetti/mazzo-chiavi.webp"
+  }
+ ]
+}
