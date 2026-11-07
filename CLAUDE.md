@@ -4,6 +4,7 @@ ACE è un'app ad uso **solo familiare** per Leilani (Lani), 12 anni, seconda med
 
 ## Leggere prima di scrivere codice
 
+0. HANDOFF.md: leggilo per primo, sempre.
 1. `docs/06-sprint-1.md`: cosa si costruisce ora, in che ordine, criteri di fatto.
 2. `docs/02-regole-di-gioco.md` + `data/config-gioco.json`: regole e numeri (fonte autorevole).
 3. `docs/03-schermate.md` + `design/*.html`: schermate e stile.
@@ -15,7 +16,7 @@ ACE è un'app ad uso **solo familiare** per Leilani (Lani), 12 anni, seconda med
 
 - PWA: React + TypeScript + Vite + `vite-plugin-pwa`, deploy su Vercel.
 - Supabase (progetto `qonullxzhqvbfpiibqye`): Postgres con RLS, Auth, Storage (bucket privato `foto-pagine`), Edge Functions, cron.
-- Schema iniziale: `supabase/migrations/0001_schema_iniziale.sql` (da rivedere e applicare, non ancora applicato).
+- Schema iniziale: `supabase/migrations/0001_schema_iniziale.sql` (applicato il 7 novembre 2026).
 - Regole di gioco: `src/lib/regole/index.ts`, funzioni pure con test (`npm test`, vitest).
 - Immagini: `public/assets/` (WebP), catalogo in `data/manifest.json`. Non rigenerare né ritoccare gli avatar: sono disegnati con Gemini dal signore.
 
@@ -45,3 +46,7 @@ ACE è un'app ad uso **solo familiare** per Leilani (Lani), 12 anni, seconda med
 - `npm run prova:schema`: applica le migrazioni su PGlite e prova la sicurezza (cosa può fare Lani).
 - `npm run icone`: rigenera le icone della PWA in `public/icone/`.
 - `npm run simula`: simulazione Monte Carlo del percorso (Python 3), per la taratura.
+
+## Fine sessione
+
+A fine sessione, o quando il signore dice "chiudiamo", aggiorna HANDOFF.md, fai il commit e il push. Massimo una pagina: le cose concluse vanno nella sezione Decisioni prese o si tolgono.
