@@ -137,6 +137,7 @@
       "flashcard_giro": 3,
       "flashcard_secondi_prima_di_girare": 7,
       "video_completo": 3,
+      "video_frazione_minima_vista": 0.95,
       "quiz": {
         "soglia_giuste": 0.9,
         "tentativi": {

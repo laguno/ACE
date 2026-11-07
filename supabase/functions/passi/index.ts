@@ -1,0 +1,193 @@
+// Edge Function "passi": l'unica strada da un evento ai passi.
+//
+// L'app la chiama dopo una spunta o un'attività con { tipo, id }. La funzione rilegge la riga
+// dal database, applica le regole di src/lib/regole (numeri da data/config-gioco.json) e chiama
+// registra_passi, che è idempotente: richiamarla non dà mai passi doppi, quindi l'app può
+// ritentare senza pensieri. Chi chiama non conta: conta lo stato del database (il foglio
+// consegnato, per esempio, lo può segnare solo un genitore).
+//
+// Il moltiplicatore della rimonta non si applica qui: si sa solo la domenica sera se la settimana
+// ha preso la prima chiave (cron delle chiavi, tappa 5).
+import { createClient } from 'npm:@supabase/supabase-js@2';
+import * as R from '../../../src/lib/regole/index.ts';
+
+const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+const P = R.CONFIG.passi;
+
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+type Esito = { passi: number; motivo?: string; perche?: string };
+const niente = (perche: string): Esito => ({ passi: 0, perche });
+
+class Richiesta extends Error {}
+
+// ---------------------------------------------------------------- accesso al database
+
+async function riga(tabella: string, colonna: string, valore: string, colonne = '*') {
+  const { data, error } = await db.from(tabella).select(colonne).eq(colonna, valore).maybeSingle();
+  if (error) throw error;
+  if (!data) throw new Richiesta(`${tabella}: ${valore} non trovato`);
+  return data as Record<string, any>;
+}
+
+async function movimento(motivo: string, riferimento: string) {
+  const { data, error } = await db
+    .from('movimenti_passi')
+    .select('giorno')
+    .eq('motivo', motivo)
+    .eq('riferimento', riferimento)
+    .maybeSingle();
+  if (error) throw error;
+  return data as { giorno: string } | null;
+}
+
+async function chiaviGiaDate(g: Date): Promise<boolean> {
+  const { data, error } = await db.from('settimane').select('chiavi').eq('inizio', R.iso(R.lunedi(g))).maybeSingle();
+  if (error) throw error;
+  return data?.chiavi != null;
+}
+
+async function conta(tabella: string, filtri: (q: any) => any): Promise<number> {
+  const { count, error } = await filtri(db.from(tabella).select('*', { count: 'exact', head: true }));
+  if (error) throw error;
+  return count ?? 0;
+}
+
+async function registra(motivo: string, riferimento: string, passi: number, g: Date, datoDa?: string): Promise<Esito> {
+  if (passi === 0) return niente('non dà passi');
+  const { data, error } = await db.rpc('registra_passi', {
+    p_motivo: motivo,
+    p_riferimento: riferimento,
+    p_passi: passi,
+    p_giorno: R.iso(g),
+    p_dato_da: datoDa ?? null,
+  });
+  if (error) throw error;
+  return data ? { passi, motivo } : niente('già registrato');
+}
+
+/** Studio facoltativo: solo con i compiti per domani spuntati e fino a 4 al giorno per tipo. */
+// ponytail: conta e scrittura non sono atomiche; due giri finiti nello stesso istante possono fare il quinto.
+async function studioConta(tipo: R.TipoStudio, g: Date): Promise<boolean> {
+  const giaOggi = await conta('movimenti_passi', (q) => q.eq('motivo', tipo).eq('giorno', R.iso(g)));
+  const mancanti = await conta('compiti', (q) =>
+    q.eq('scadenza', R.iso(R.prossimoGiornoDiScuola(g))).is('fatto_il', null),
+  );
+  return R.studioConta(tipo, giaOggi, mancanti === 0);
+}
+
+// ---------------------------------------------------------------- un gestore per tipo di evento
+
+const gestori: Record<string, (id: string) => Promise<Esito>> = {
+  async compito(id) {
+    const c = await riga('compiti', 'id', id);
+    if (!c.fatto_il) return niente('non spuntato');
+    const g = R.giornoRoma(c.fatto_il);
+    if (!R.compitoInTempo(R.giorno(c.scadenza), g)) return niente('spuntato dopo la scadenza');
+    const storno = await movimento('storno', `compito:${id}`);
+    if (!storno) return registra('compito', id, R.passiCompito(R.giorno(c.scadenza), g), g);
+    // Rispuntato dopo uno storno: passi base, una volta, nella settimana dello storno e prima delle chiavi.
+    const stessaSettimana = R.iso(R.lunedi(g)) === R.iso(R.lunedi(R.giorno(storno.giorno)));
+    const passi = R.passiCompitoRifatto({
+      stornato: true,
+      giaRifatto: (await movimento('compito_rifatto', id)) !== null,
+      chiaviSettimanaGiaDate: !stessaSettimana || (await chiaviGiaDate(g)),
+    });
+    return registra('compito_rifatto', id, passi, g);
+  },
+
+  // id = data della serata ('YYYY-MM-DD'). Borsa (serve il calendario degli allenamenti, tappa 3)
+  // e dieci minuti (sprint 2) arriveranno qui.
+  async serata(id) {
+    const s = await riga('serate', 'data', id);
+    if (!s.cartella_il) return niente('cartella non spuntata');
+    const g = R.giorno(s.data);
+    if (R.iso(R.giornoRoma(s.cartella_il)) !== s.data) return niente('spuntata in un altro giorno');
+    if (!R.cartellaConta(g)) return niente('domani non c’è scuola');
+    return registra('cartella', `serata:${s.data}`, P.obbligatori.cartella, g);
+  },
+
+  async foglio(id) {
+    const f = await riga('fogli_firma', 'id', id);
+    if (!f.consegnato_il) return niente('consegna non confermata da un genitore');
+    return registra('foglio', id, P.obbligatori.fogli, R.giornoRoma(f.consegnato_il));
+  },
+
+  async ripasso(id) {
+    const s = await riga('sessioni_ripasso', 'id', id, 'fatta_il, verifiche(data)');
+    if (!s.fatta_il) return niente('non fatta');
+    const g = R.giornoRoma(s.fatta_il);
+    if (!R.ripassoInTempo(R.giorno(s.verifiche.data), g)) return niente('fatta dopo la verifica');
+    return registra('ripasso', id, P.obbligatori.ripasso, g);
+  },
+
+  async flashcard(id) {
+    const giro = await riga('flashcard_giri', 'id', id);
+    const g = R.giornoRoma(giro.fatto_il);
+    if (!R.giroValido(new Date(giro.iniziato_il), new Date(giro.fatto_il), giro.carte))
+      return niente('carte girate troppo in fretta');
+    if (!(await studioConta('flashcard', g))) return niente('compiti da finire o giri di oggi finiti');
+    return registra('flashcard', id, P.studio_facoltativo.flashcard_giro, g);
+  },
+
+  async quiz(id) {
+    const t = await riga('quiz_tentativi', 'id', id);
+    const g = R.giornoRoma(t.fatto_il);
+    if (!(await studioConta('quiz', g))) return niente('compiti da finire o quiz di oggi finiti');
+    return registra('quiz', id, R.passiQuiz(t.numero, t.giuste, t.totale), g);
+  },
+
+  async video(id) {
+    const v = await riga('video_visti', 'id', id, '*, video(durata_secondi)');
+    const g = R.giornoRoma(v.visto_il);
+    if (!R.videoValido(v.completo, v.secondi_visti, v.video?.durata_secondi)) return niente('video non visto tutto');
+    if (!(await studioConta('video', g))) return niente('compiti da finire o video di oggi finiti');
+    return registra('video', id, P.studio_facoltativo.video_completo, g);
+  },
+
+  async gesto(id) {
+    const ge = await riga('gesti_casa', 'id', id);
+    const { data: prima, error } = await db
+      .from('gesti_casa')
+      .select('voce')
+      .eq('data', ge.data)
+      .lt('creato_il', ge.creato_il);
+    if (error) throw error;
+    const passi = R.passiNuovoGesto((prima ?? []).map((p) => p.voce), ge.voce);
+    return registra('gesto', id, passi, R.giorno(ge.data), ge.dato_da);
+  },
+
+  async sgridata(id) {
+    const s = await riga('sgridate', 'id', id);
+    if (!['bagno', 'antisportivo', 'balla'].includes(s.tipo)) throw new Richiesta(`sgridata sconosciuta: ${s.tipo}`);
+    return registra('sgridata', id, R.passiSgridata(s.tipo), R.giorno(s.data), s.dato_da);
+  },
+};
+
+// ---------------------------------------------------------------- ingresso
+
+const risposta = (corpo: unknown, stato = 200) =>
+  new Response(JSON.stringify(corpo), { status: stato, headers: { ...CORS, 'Content-Type': 'application/json' } });
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
+  try {
+    const token = (req.headers.get('Authorization') ?? '').replace(/^Bearer /, '');
+    const { data: utente } = await db.auth.getUser(token);
+    if (!utente.user) return risposta({ errore: 'accesso richiesto' }, 401);
+    const { count } = await db.from('profili').select('id', { count: 'exact', head: true }).eq('id', utente.user.id);
+    if (!count) return risposta({ errore: 'profilo mancante' }, 403);
+
+    const { tipo, id } = await req.json();
+    const gestore = gestori[tipo];
+    if (!gestore || typeof id !== 'string') return risposta({ errore: 'tipo o id non validi' }, 400);
+    return risposta(await gestore(id));
+  } catch (e) {
+    if (e instanceof Richiesta) return risposta({ errore: e.message }, 400);
+    console.error(e);
+    return risposta({ errore: 'errore del server' }, 500);
+  }
+});
