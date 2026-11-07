@@ -206,3 +206,20 @@ export function moltiplicatoreRimonta(passiInizioSettimana: number, bandierinaIn
   if (r.solo_settimane_con_prima_chiave && chiaviPrese < 1) return 1;
   return r.moltiplicatore;
 }
+
+// ---------------------------------------------------------------- correzione delle spunte
+
+export interface Movimento {
+  passi: number;
+  moltiplicatore: number;
+}
+
+/**
+ * Storno di una spunta corretta da un genitore: un movimento opposto che annulla
+ * esattamente i passi presi (non è un malus). Vale solo finché le chiavi della
+ * settimana del movimento non sono state date (domenica sera); dopo, null.
+ */
+export function storno(m: Movimento, chiaviSettimanaGiaDate: boolean): Movimento | null {
+  if (chiaviSettimanaGiaDate || m.passi === 0) return null;
+  return { passi: -m.passi, moltiplicatore: m.moltiplicatore };
+}

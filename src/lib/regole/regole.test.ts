@@ -12,6 +12,7 @@ import {
   posizione,
   soglieTappe,
   statoForziere,
+  storno,
   studioConta,
 } from './index';
 
@@ -98,5 +99,19 @@ describe('bandierina e rimonta', () => {
     expect(moltiplicatoreRimonta(1000, 1500, 1)).toBe(1.25);
     expect(moltiplicatoreRimonta(1000, 1500, 0)).toBe(1);
     expect(moltiplicatoreRimonta(1000, 1300, 2)).toBe(1);
+  });
+});
+
+describe('correzione delle spunte', () => {
+  const saldo = (ms: Array<{ passi: number; moltiplicatore: number }>) =>
+    ms.reduce((a, m) => a + Math.round(m.passi * m.moltiplicatore), 0);
+
+  it('lo storno annulla esattamente i passi della spunta, anche con la rimonta', () => {
+    const m = { passi: 13, moltiplicatore: 1.25 };
+    expect(saldo([m, storno(m, false)!])).toBe(0);
+  });
+
+  it('dopo le chiavi della domenica non si storna più', () => {
+    expect(storno({ passi: 10, moltiplicatore: 1 }, true)).toBeNull();
   });
 });
