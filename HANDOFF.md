@@ -3,8 +3,8 @@
 ## Dove siamo
 
 Sprint 1, **tappa 1 (fondamenta)**, sul branch `tappa-1-fondamenta`, non ancora unito a `main`.
-- Fatto: progetto Vite + React + PWA; regole di gioco con test (21 verdi); schema `0001` rivisto, approvato da Jarvis e **applicato** su Supabase; utenti e profili creati (Lani, Papà, Mamma) e provata la RLS con l'utente di Lani sul database vero; accesso con sessione persistente e area genitori con PIN (da provare sul telefono); Vercel collegato a GitHub.
-- Manca per chiudere la tappa: Edge Function dei passi, prova sul telefono (accesso di Lani, PIN sull'iPad).
+- Fatto: progetto Vite + React + PWA; regole di gioco con test (29 verdi); schema `0001` rivisto, approvato da Jarvis e **applicato** su Supabase; utenti e profili creati (Lani, Papà, Mamma) e provata la RLS con l'utente di Lani sul database vero; accesso con sessione persistente e area genitori con PIN (da provare sul telefono); Vercel collegato a GitHub; Edge Function `passi` pubblicata e provata dal vivo (8 controlli).
+- Manca per chiudere la tappa: prova sul telefono di Lani (accesso, PIN sull'iPad), poi merge su `main`.
 
 ## Ultima sessione (7 novembre 2026)
 
@@ -22,11 +22,12 @@ Letti i documenti; aggiunte le regole dello storno e del compito rifatto; schema
 | 7/11 | signore | Icona provvisoria: pallone su fucsia; alternative Lani che saluta e il passo, sceglie Lani alla prima prova |
 | 7/11 | signore | Vercel: progetto `ace`, indirizzo `ace-passino.vercel.app`, `noindex`, anteprime sui push e produzione dal merge su `main` |
 | 7/11 | signore | Fogli da firmare: Lani segna "L'ho dato" (`dato_il`), i passi arrivano con la conferma del genitore |
+| 7/11 | signore | Config: `video_frazione_minima_vista` 0.95 (regola del 95% di Jarvis) |
 | 7/11 | Jarvis | Schema `0001` approvato con correzione: ore delle spunte di Lani messe dal server (`timbra_ora`), `flashcard_giri.iniziato_il` |
 
 ## Prossimo passo
 
-Edge Function dei passi con i controlli annotati in `docs/06-sprint-1.md`; poi prova sul telefono e merge della tappa 1 su `main`.
+Prova sul telefono e sull'iPad di Lani; merge della tappa 1 su `main`; poi tappa 2 (Nuvola, con il signore presente).
 
 ## In attesa di
 
@@ -37,6 +38,7 @@ Edge Function dei passi con i controlli annotati in `docs/06-sprint-1.md`; poi p
 - Iscrizioni chiuse in Supabase Auth: i nuovi utenti si creano dalla dashboard, con "Auto Confirm User" attivo.
 - Gli avvisi di Supabase su `forzieri_lani` (vista security definer) e sulle 5 funzioni RPC sono voluti: vedi i commenti nello schema.
 - `db push` va sempre con `--remote`, altrimenti la CLI cerca un database locale in Docker.
+- Edge Function `passi`: l'app la chiama con { tipo, id } dopo ogni spunta; mancano borsa (tappa 3), voti e note (tappa 2), rimonta (tappa 5). Si pubblica con `npx supabase functions deploy passi --use-api`.
 - L'inizio del giro di flash card arriva dal telefono: se serve più rigore, timbrarlo sul server (tappa 4).
 - Python non è installato su questo PC: `npm run simula` non parte.
 - Lo schema `0001` è applicato: le modifiche vanno in `0002` e successive.
