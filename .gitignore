@@ -8,3 +8,4 @@ supabase/.temp/
 # foto reali e materiale di famiglia: mai nel repository
 _fuori-app/
 foto-reali/
+.claude/settings.local.json
