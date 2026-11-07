@@ -137,13 +137,15 @@ create table flashcard (
 
 create table flashcard_giri (
   id uuid primary key default gen_random_uuid(),
+  iniziato_il timestamptz not null,       -- per il controllo dei 7 secondi a carta (Edge Function dei passi)
   fatto_il timestamptz not null default now(),
   materia_id text references materie (id),
   carte int not null,
   sapevo int not null,
   quasi int not null,
   non_sapevo int not null,
-  check (sapevo + quasi + non_sapevo = carte)
+  check (sapevo + quasi + non_sapevo = carte),
+  check (iniziato_il <= fatto_il)
 );
 
 create table quiz (
@@ -471,6 +473,40 @@ create trigger lani_solo_spunte before update on serate
   for each row execute function solo_colonne('cartella_il', 'borsa_il', 'dieci_minuti_il', 'chiusa_il');
 create trigger lani_solo_faccia before update on umore
   for each row execute function solo_colonne('faccia');
+
+-- Le ore delle spunte di Lani le mette il server, non il telefono: da null a valore
+-- diventa now(), e una spunta già data non si sposta. Così non si retrodata un compito
+-- per prendere il bonus anticipo. Genitori e server scrivono quello che vogliono.
+create or replace function timbra_ora() returns trigger
+language plpgsql set search_path = '' as $$
+declare
+  c text;
+  n jsonb := to_jsonb(new);
+  o jsonb := case when tg_op = 'UPDATE' then to_jsonb(old) else '{}'::jsonb end;
+begin
+  if auth.uid() is null or public.e_genitore() then
+    return new;
+  end if;
+  foreach c in array tg_argv loop
+    if n ->> c is not null then
+      n := jsonb_set(n, array[c], coalesce(nullif(o -> c, 'null'::jsonb), to_jsonb(now())));
+    end if;
+  end loop;
+  return jsonb_populate_record(new, n);
+end $$;
+
+create trigger lani_timbra before insert or update on compiti
+  for each row execute function timbra_ora('fatto_il');
+create trigger lani_timbra before insert or update on sessioni_ripasso
+  for each row execute function timbra_ora('fatta_il');
+create trigger lani_timbra before insert or update on fogli_firma
+  for each row execute function timbra_ora('dato_il');
+create trigger lani_timbra before insert or update on serate
+  for each row execute function timbra_ora('cartella_il', 'borsa_il', 'dieci_minuti_il', 'chiusa_il');
+create trigger lani_timbra before insert on flashcard_giri
+  for each row execute function timbra_ora('fatto_il');
+create trigger lani_timbra before insert on video_visti
+  for each row execute function timbra_ora('visto_il');
 
 -- Il numero del tentativo lo decide il server: è quello che fissa i passi del quiz.
 create or replace function numera_tentativo() returns trigger
