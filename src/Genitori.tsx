@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import * as R from './lib/regole';
+import { installata } from './Benvenuta';
 import { GIORNI, MESI } from './spunte';
 
 // Area genitori — design/Genitori.html. Tutto passa dal client del genitore (sul suo telefono la
@@ -29,6 +30,28 @@ export default function Genitori({ client, esci }: { client: SupabaseClient; esc
     return (data?.passi as number) ?? 0;
   };
   const props = { client, passi, avvisa: setAvviso };
+  const [avvio, setAvvio] = useState(() => {
+    try {
+      return localStorage.getItem('ace-avvio-genitori') !== 'fatto';
+    } catch {
+      return false;
+    }
+  });
+  if (avvio)
+    return (
+      <Avvio
+        client={client}
+        vai={(p) => {
+          try {
+            localStorage.setItem('ace-avvio-genitori', 'fatto');
+          } catch {
+            /* tornerà la prossima volta */
+          }
+          setPagina(p);
+          setAvvio(false);
+        }}
+      />
+    );
 
   return (
     <section className="sera genitori">
@@ -424,5 +447,50 @@ function Impostazioni({ client, avvisa }: Props) {
         <button className="principale">Salva PIN</button>
       </form>
     </>
+  );
+}
+
+/** Prima accensione dei genitori (design/Genitori-avvio.html): quattro cose, una volta sola. */
+function Avvio({ client, vai }: { client: SupabaseClient; vai: (p: Pagina) => void }) {
+  const [s, setS] = useState<{ nuvola: boolean; senzaPremio: number }>();
+  useEffect(() => {
+    Promise.all([
+      client.from('sync_log').select('esito').eq('fonte', 'nuvola').order('iniziato_il', { ascending: false }).limit(1),
+      client.from('forzieri').select('n', { count: 'exact', head: true }).is('premio', null),
+    ]).then(([l, f]) => setS({ nuvola: l.data?.[0]?.esito === 'ok', senzaPremio: f.count ?? 9 }));
+  }, []);
+  if (!s) return null;
+  const g = R.CONFIG.passi.gesti_casa;
+  const cose = [
+    { fatto: s.nuvola, titolo: 'Collega Nuvola', testo: 'Compiti, verifiche e voti arrivano alle 14:30 e alle 19:30' },
+    {
+      fatto: s.senzaPremio === 0,
+      titolo: 'Scegli i premi dei 9 forzieri',
+      testo: `Lani non li vede: vede solo l'enigma, vicino al forziere${s.senzaPremio ? ` (ne mancano ${s.senzaPremio})` : ''}`,
+    },
+    { fatto: false, titolo: 'Controlla gesti di casa e orari', testo: `Scrivania, lavastoviglie, letto, vestiti: +${g.voci.scrivania} ciascuno, al massimo ${g.tetto_giornaliero} al giorno` },
+    { fatto: installata(), titolo: 'Metti ACE sulla schermata Home', testo: 'Da Safari: Condividi, poi Aggiungi alla schermata Home. Senza, niente notifiche' },
+  ];
+  return (
+    <section className="sera avvio">
+      <p className="sopratitolo">Per mamma e papà</p>
+      <h1>Prepariamo ACE</h1>
+      <p>Quattro cose, una volta sola. Il resto lo fa ACE da solo, due volte al giorno.</p>
+      <div className="carta">
+        <ol>
+          {cose.map((c, i) => (
+            <li key={c.titolo} className={c.fatto ? 'fatto' : undefined}>
+              <span className="segno" aria-label={c.fatto ? 'fatto' : `passo ${i + 1}`}>{c.fatto ? '✓' : i + 1}</span>
+              <span>
+                <b>{c.titolo}</b>
+                <small>{c.testo}</small>
+              </span>
+            </li>
+          ))}
+        </ol>
+      </div>
+      <button className="principale largo" onClick={() => vai('premi')}>Scegli i premi</button>
+      <button className="secondario" onClick={() => vai('settimana')}>Lo faccio dopo</button>
+    </section>
   );
 }
