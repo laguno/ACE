@@ -87,6 +87,15 @@ Un voto insufficiente non dà passi, e **nessun voto ne toglie**.
 
 Le sgridate segnate dai genitori fanno partire subito il popup con il personaggio arrabbiato e mettono in attesa la figurina della serie nera (vedi Figurine). Tutto il resto toglie la possibilità di guadagnare, non passi già presi. Il saldo non scende sotto zero.
 
+## Correzione delle spunte
+
+Decisa dal signore il 7 novembre 2026. Se un genitore toglie una spunta sbagliata, il server registra uno **storno**: un movimento opposto (motivo `storno`, riferimento alla spunta) che annulla esattamente i passi di quella spunta, moltiplicatore compreso. Non è un malus: una spunta sbagliata non è un passo guadagnato.
+
+- Lo storno vale solo fino alla chiusura delle chiavi della domenica sera di quella settimana; dopo, passi e chiavi già dati non si toccano.
+- Se la spunta era un imbroglio voluto, i genitori segnano a parte la sgridata "balla −10".
+- Lani vede la correzione e chi l'ha fatta, senza popup di sgridata.
+- **Compito rifatto**: se Lani rispunta un compito stornato nella stessa settimana (prima delle chiavi della domenica), il server le ridà i passi base (10), senza bonus anticipo, con motivo `compito_rifatto` e lo stesso riferimento. Una sola volta per compito.
+
 ## Chiavi della settimana
 
 Contate la **domenica sera**, solo sulle cose obbligatorie:

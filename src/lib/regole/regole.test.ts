@@ -2,16 +2,30 @@ import { describe, expect, it } from 'vitest';
 import {
   CONFIG,
   bandierina,
+  cartellaConta,
+  compitoInTempo,
+  giorno,
+  giornoRoma,
+  giroValido,
+  iso,
+  lunedi,
+  passiNuovoGesto,
+  passiSgridata,
+  prossimoGiornoDiScuola,
+  ripassoInTempo,
+  videoValido,
   chiaviSettimana,
   giornoDiScuola,
   moltiplicatoreRimonta,
   passiCompito,
+  passiCompitoRifatto,
   passiGestiCasa,
   passiQuiz,
   passiVoto,
   posizione,
   soglieTappe,
   statoForziere,
+  storno,
   studioConta,
 } from './index';
 
@@ -98,5 +112,75 @@ describe('bandierina e rimonta', () => {
     expect(moltiplicatoreRimonta(1000, 1500, 1)).toBe(1.25);
     expect(moltiplicatoreRimonta(1000, 1500, 0)).toBe(1);
     expect(moltiplicatoreRimonta(1000, 1300, 2)).toBe(1);
+  });
+});
+
+describe('correzione delle spunte', () => {
+  const saldo = (ms: Array<{ passi: number; moltiplicatore: number }>) =>
+    ms.reduce((a, m) => a + Math.round(m.passi * m.moltiplicatore), 0);
+
+  it('lo storno annulla esattamente i passi della spunta, anche con la rimonta', () => {
+    const m = { passi: 13, moltiplicatore: 1.25 };
+    expect(saldo([m, storno(m, false)!])).toBe(0);
+  });
+
+  it('dopo le chiavi della domenica non si storna più', () => {
+    expect(storno({ passi: 10, moltiplicatore: 1 }, true)).toBeNull();
+  });
+});
+
+describe('compito rifatto dopo uno storno', () => {
+  const base = { stornato: true, giaRifatto: false, chiaviSettimanaGiaDate: false };
+  it('ridà i passi base, senza bonus anticipo', () => expect(passiCompitoRifatto(base)).toBe(CONFIG.passi.obbligatori.compiti));
+  it('una sola volta per compito', () => expect(passiCompitoRifatto({ ...base, giaRifatto: true })).toBe(0));
+  it('non dopo le chiavi della domenica', () => expect(passiCompitoRifatto({ ...base, chiaviSettimanaGiaDate: true })).toBe(0));
+  it('niente se il compito non era stato stornato', () => expect(passiCompitoRifatto({ ...base, stornato: false })).toBe(0));
+});
+
+describe('controlli della funzione dei passi', () => {
+  it('giorno a Roma anche quando il server è in UTC', () => {
+    // 23:30 UTC del 23/11 = 00:30 del 24/11 a Roma
+    expect(iso(giornoRoma('2026-11-23T23:30:00Z'))).toBe('2026-11-24');
+    expect(iso(lunedi(giorno('2026-11-29')))).toBe('2026-11-23');
+  });
+
+  it('compito spuntato dopo la scadenza: niente passi', () => {
+    expect(compitoInTempo(giorno('2026-11-24'), giorno('2026-11-24'))).toBe(true);
+    expect(compitoInTempo(giorno('2026-11-24'), giorno('2026-11-25'))).toBe(false);
+  });
+
+  it('cartella solo la sera prima di scuola, ripasso prima della verifica', () => {
+    expect(cartellaConta(giorno('2026-11-23'))).toBe(true); // lunedì sera
+    expect(cartellaConta(giorno('2026-11-27'))).toBe(false); // venerdì sera
+    expect(cartellaConta(giorno('2026-12-23'))).toBe(false); // vigilia delle vacanze
+    expect(ripassoInTempo(giorno('2026-11-27'), giorno('2026-11-26'))).toBe(true);
+    expect(ripassoInTempo(giorno('2026-11-27'), giorno('2026-11-27'))).toBe(false);
+  });
+
+  it('i compiti per domani del venerdì scadono lunedì', () => {
+    expect(iso(prossimoGiornoDiScuola(giorno('2026-11-27')))).toBe('2026-11-30');
+  });
+
+  it('giro di flash card valido solo con 7 secondi a carta', () => {
+    const inizio = new Date('2026-11-24T15:00:00Z');
+    expect(giroValido(inizio, new Date('2026-11-24T15:01:10Z'), 10)).toBe(true);
+    expect(giroValido(inizio, new Date('2026-11-24T15:01:09Z'), 10)).toBe(false);
+  });
+
+  it('video valido solo se visto almeno al 95%', () => {
+    expect(videoValido(true, 285, 300)).toBe(true);
+    expect(videoValido(true, 284, 300)).toBe(false);
+    expect(videoValido(false, 300, 300)).toBe(false);
+    expect(videoValido(true, 300, null)).toBe(false);
+  });
+
+  it('gesti di casa: il tetto vale anche dato un gesto alla volta', () => {
+    expect(passiNuovoGesto([], 'letto')).toBe(2);
+    expect(passiNuovoGesto(['letto', 'scrivania', 'vestiti'], 'lavastoviglie')).toBe(0);
+  });
+
+  it('sgridate', () => {
+    expect(passiSgridata('bagno')).toBe(-1);
+    expect(passiSgridata('balla')).toBe(-10);
   });
 });

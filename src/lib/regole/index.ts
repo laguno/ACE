@@ -5,7 +5,7 @@
  * Tutti i valori arrivano da data/config-gioco.json (unica fonte, approvata dal signore
  * il 7 novembre 2026). Per ritarare il gioco si cambia il JSON, non questo file.
  */
-import config from '../../../data/config-gioco.json';
+import config from '../../../data/config-gioco.json' with { type: 'json' };
 
 export type Config = typeof config;
 export const CONFIG: Config = config;
@@ -153,7 +153,7 @@ function startOfDay(d: Date): Date {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate());
 }
 
-function iso(d: Date): string {
+export function iso(d: Date): string {
   const p = (n: number) => String(n).padStart(2, '0');
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
 }
@@ -205,4 +205,113 @@ export function moltiplicatoreRimonta(passiInizioSettimana: number, bandierinaIn
   if (!indietro) return 1;
   if (r.solo_settimane_con_prima_chiave && chiaviPrese < 1) return 1;
   return r.moltiplicatore;
+}
+
+// ---------------------------------------------------------------- correzione delle spunte
+
+export interface Movimento {
+  passi: number;
+  moltiplicatore: number;
+}
+
+/**
+ * Storno di una spunta corretta da un genitore: un movimento opposto che annulla
+ * esattamente i passi presi (non è un malus). Vale solo finché le chiavi della
+ * settimana del movimento non sono state date (domenica sera); dopo, null.
+ */
+export function storno(m: Movimento, chiaviSettimanaGiaDate: boolean): Movimento | null {
+  if (chiaviSettimanaGiaDate || m.passi === 0) return null;
+  return { passi: -m.passi, moltiplicatore: m.moltiplicatore };
+}
+
+/**
+ * Compito rispuntato dopo uno storno: di nuovo i passi base (senza bonus anticipo),
+ * motivo 'compito_rifatto' con lo stesso riferimento, una sola volta per compito,
+ * e solo prima delle chiavi della domenica della settimana del compito.
+ */
+export function passiCompitoRifatto(f: { stornato: boolean; giaRifatto: boolean; chiaviSettimanaGiaDate: boolean }): number {
+  if (!f.stornato || f.giaRifatto || f.chiaviSettimanaGiaDate) return 0;
+  return P.obbligatori.compiti;
+}
+
+// ---------------------------------------------------------------- controlli dell'Edge Function dei passi
+
+/** Giorno di calendario a Roma di un istante, come Date a mezzanotte locale (in qualsiasi fuso giri il server). */
+export function giornoRoma(istante: string | Date): Date {
+  const [a, m, g] = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome' })
+    .format(new Date(istante))
+    .split('-')
+    .map(Number);
+  return new Date(a, m - 1, g);
+}
+
+/** Giorno da 'YYYY-MM-DD' (colonne date di Postgres) a mezzanotte locale. */
+export function giorno(s: string): Date {
+  const [a, m, g] = s.split('-').map(Number);
+  return new Date(a, m - 1, g);
+}
+
+/** Lunedì della settimana di `d`: chiave della tabella settimane. */
+export function lunedi(d: Date): Date {
+  const l = startOfDay(d);
+  l.setDate(l.getDate() - ((l.getDay() + 6) % 7));
+  return l;
+}
+
+/** Primo giorno di scuola dopo `d`: i "compiti per domani" scadono quel giorno. */
+export function prossimoGiornoDiScuola(d: Date): Date {
+  const g = startOfDay(d);
+  for (let i = 0; i < 30; i++) {
+    g.setDate(g.getDate() + 1);
+    if (giornoDiScuola(g)) return g;
+  }
+  return g;
+}
+
+/** Compito spuntato dopo il giorno di scadenza: nessun passo. */
+export function compitoInTempo(scadenza: Date, fattoIl: Date): boolean {
+  return startOfDay(fattoIl) <= startOfDay(scadenza);
+}
+
+/** Cartella: vale la sera prima di un giorno di scuola. */
+export function cartellaConta(sera: Date): boolean {
+  const dopo = startOfDay(sera);
+  dopo.setDate(dopo.getDate() + 1);
+  return giornoDiScuola(dopo);
+}
+
+/** Sessione di ripasso: vale se fatta prima del giorno della verifica. */
+export function ripassoInTempo(dataVerifica: Date, fattaIl: Date): boolean {
+  return startOfDay(fattaIl) < startOfDay(dataVerifica);
+}
+
+/** Giro di flash card valido solo se è durato almeno 7 secondi a carta. */
+export function giroValido(iniziatoIl: Date, fattoIl: Date, carte: number): boolean {
+  const minimo = carte * P.studio_facoltativo.flashcard_secondi_prima_di_girare * 1000;
+  return carte > 0 && fattoIl.getTime() - iniziatoIl.getTime() >= minimo;
+}
+
+/** Video valido solo se arrivato in fondo e visto per almeno il 95% della durata (non basta `completo`). */
+export function videoValido(completo: boolean, secondiVisti: number | null, durata: number | null): boolean {
+  if (!completo || !durata || secondiVisti == null) return false;
+  return secondiVisti >= P.studio_facoltativo.video_frazione_minima_vista * durata;
+}
+
+export type VoceGesto = keyof typeof P.gesti_casa.voci;
+
+/** Passi di un nuovo gesto di casa, tenendo conto di quelli già dati oggi e del tetto giornaliero. */
+export function passiNuovoGesto(giaOggi: VoceGesto[], voce: VoceGesto): number {
+  return passiGestiCasa([...giaOggi, voce]) - passiGestiCasa(giaOggi);
+}
+
+export type TipoSgridata = 'bagno' | 'antisportivo' | 'balla';
+const MALUS: Record<TipoSgridata, keyof typeof P.malus> = {
+  bagno: 'bagno',
+  antisportivo: 'antisportivo',
+  balla: 'balla_o_imbroglio',
+};
+
+/** Passi tolti da una sgridata segnata da un genitore. */
+export function passiSgridata(tipo: TipoSgridata): number {
+  return P.malus[MALUS[tipo]];
 }

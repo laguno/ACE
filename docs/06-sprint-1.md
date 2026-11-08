@@ -20,6 +20,12 @@ Ogni tappa si chiude con test verdi e una prova sul telefono.
    - Supabase: rivedere e applicare `0001_schema_iniziale.sql`; restringere le policy di Lani alle sole colonne previste; vista dei forzieri senza `premio` e `soluzione` per Lani.
    - Auth: profili Lani e genitori, PIN genitori.
    - `src/lib/regole` collegato al motore dei passi lato server (funzione `registra_passi` idempotente: una riga di `movimenti_passi` per evento, chiave unica `motivo + riferimento`).
+   - Edge Function dei passi: usa `src/lib/regole` e chiama `registra_passi`. Controlli chiesti da Jarvis nella revisione dello schema:
+     - giro di flash card valido solo se `fatto_il - iniziato_il >= carte × 7 secondi`;
+     - video valido solo se `secondi_visti >= 95%` di `durata_secondi` (non basta `completo = true`);
+     - compito spuntato dopo la scadenza: nessun passo;
+     - compito rispuntato dopo uno storno: `passiCompitoRifatto` (motivo `compito_rifatto`);
+     - risposta all'enigma solo tramite funzione sul server (valutazione IA, tentativi, +20): Lani non scrive su `forzieri`.
 2. **Nuvola**
    - Mappatura degli endpoint con il signore (lui accede, Claude legge solo le richieste di rete).
    - Edge Function `sync-nuvola` alle 14:30 e 19:30, `sync_log`, avviso ai genitori in caso di errore.
