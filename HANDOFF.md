@@ -56,7 +56,7 @@ Tappe 1-8 in una giornata: Nuvola e calendario provati dal vivo, IA provata dal 
 2. Prova completa in famiglia sui dispositivi veri, prima della sorpresa a Lani: installazione su iPhone/iPad, promemoria, spunte, studio, lampadina, enigma.
 3. Dal 23/11: controllare i primi passi, popup e figurine; il 29/11 alle 21:30 le prime chiavi (`sync_log` fonte chiavi). Dopo due settimane: taratura (serve Python per `npm run simula`).
 
-Debiti: "Da fotografare" (richieste di foto e Storage); riscatto della serie nera; frasi e citazioni (servono almeno 30 frasi per la regola dei 30 giorni); "PIN non giusto" anche per errori del server; video; umore del giorno; `spiega`, borsa, enigma e push provati solo con le prove (serve un accesso di Lani); protezione delle password trapelate da accendere (Auth, dashboard: la accende il signore).
+Debiti: "Da fotografare" (richieste di foto e Storage); riscatto della serie nera; frasi e citazioni da mostrare (32 caricate nella tabella `frasi` dalla migrazione 0017, fonte `data/frasi.json`; manca la scelta nei momenti: apertura, tappa, verifica, chiusura, una al giorno, mai la stessa prima di 30 giorni, mai nei rimproveri); "PIN non giusto" anche per errori del server; video; umore del giorno; `spiega`, borsa, enigma e push provati solo con le prove (serve un accesso di Lani); protezione delle password trapelate da accendere (Auth, dashboard: la accende il signore).
 
 ## In attesa di
 
@@ -67,7 +67,7 @@ Debiti: "Da fotografare" (richieste di foto e Storage); riscatto della serie ner
 - Iscrizioni chiuse in Supabase Auth: i nuovi utenti si creano dalla dashboard, con "Auto Confirm User" attivo.
 - Gli avvisi di Supabase su `forzieri_lani` (vista security definer) e sulle 5 funzioni RPC sono voluti: vedi i commenti nello schema.
 - `db push` sempre con `--remote --yes`; funzioni con `npx supabase functions deploy <nome> --use-api --yes`. Comandi composti (con `&&` o `|`) passano dal controllo automatico: `git push` e i deploy vanno lanciati da soli.
-- Schema `0001`-`0016` applicati: le modifiche vanno in `0017` e successive. Cron attivi: sync-nuvola, sync-calendario, chiavi, notifiche. Le migrazioni con "cron" nel nome non girano su PGlite.
+- Schema `0001`-`0017` applicati: le modifiche vanno in `0018` e successive. Cron attivi: sync-nuvola, sync-calendario, chiavi, notifiche. Le migrazioni con "cron" nel nome non girano su PGlite.
 - Segreti: `NUVOLA_UTENTE`, `NUVOLA_PASSWORD`, `CRON_SEGRETO` (anche nel Vault come `cron_segreto`), `GOOGLE_CALENDAR_ICS_URL`, `ANTHROPIC_API_KEY`, `VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY`/`VAPID_SUBJECT`. La chiave VAPID pubblica serve anche al client.
 - Nuvola: `/alunni` dà più schede; si usa anno più recente e id più alto (10928). Compiti, voti e lezioni non hanno id: chiavi costruite in `src/lib/nuvola`.
 - Supabase rifiuta UPDATE e DELETE senza WHERE anche dentro le funzioni (safeupdate); PGlite no.
