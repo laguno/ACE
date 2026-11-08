@@ -433,3 +433,6 @@ verify_jwt = false
 
 [functions.chiavi]
 verify_jwt = false
+
+[functions.notifiche]
+verify_jwt = false

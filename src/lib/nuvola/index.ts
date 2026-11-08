@@ -148,7 +148,7 @@ export function voti(valori: MateriaVoti[]) {
   });
 }
 
-type NotaNuvola = { id: number; data: string; tipologia: string; descrizione: string | null };
+type NotaNuvola = { id: number; data: string; tipologia: string; descrizione: string | null; materia?: string | null };
 
 export function note(valori: NotaNuvola[]) {
   return valori.map((n) => ({
@@ -156,6 +156,7 @@ export function note(valori: NotaNuvola[]) {
     data: giorno(n.data),
     tipo: tipoNota(n.tipologia),
     testo: n.descrizione,
+    materia_id: n.materia ? materiaId(n.materia) : null,
   }));
 }
 

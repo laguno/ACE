@@ -6,6 +6,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 import * as C from '../../../src/lib/calendario/index.ts';
 import * as R from '../../../src/lib/regole/index.ts';
 import { aggiornaForzieri } from '../_shared/forzieri.ts';
+import { accoda } from '../_shared/popup.ts';
 
 const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 
@@ -67,6 +68,10 @@ async function contaChiavi(lun: Date) {
     rimonta: molt > 1,
   });
   if (error) throw new Error(`settimane: ${error.message}`);
+  const mancano = conta.cosePossibili - conta.coseFatte;
+  await accoda(db, `chiavi:${da}`, `chiavi_${chiavi}` as 'chiavi_0', {
+    cosa: chiavi === 1 ? 'una settimana senza note' : `${mancano} ${mancano === 1 ? 'cosa' : 'cose'} in più`,
+  });
   return { settimana: da, chiavi, rimonta: molt > 1, ...conta, forzieri: await aggiornaForzieri(db) };
 }
 

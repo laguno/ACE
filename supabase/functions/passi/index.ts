@@ -226,7 +226,7 @@ Deno.serve(async (req) => {
     if (!gestore || typeof id !== 'string') return risposta({ errore: 'tipo o id non validi' }, 400);
     const esito = await gestore(id);
     // passi nuovi: forse si è arrivati a una tappa con forziere
-    const forzieri = esito.passi ? await aggiornaForzieri(db) : [];
+    const forzieri = esito.passi ? await aggiornaForzieri(db, esito.passi) : [];
     return risposta({ ...esito, forzieri });
   } catch (e) {
     if (e instanceof Richiesta) return risposta({ errore: e.message }, 400);

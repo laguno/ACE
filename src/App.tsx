@@ -6,6 +6,7 @@ import Oggi from './Oggi';
 import Sera from './Sera';
 import Studio from './Studio';
 import Astra from './Astra';
+import CodaPopup from './Popup';
 import { Album, Figurina } from './Figurine';
 import { oraAdesso, useGiornata } from './giornata';
 import * as C from './lib/calendario';
@@ -97,6 +98,7 @@ function Lani() {
           <Astra apri={setVoce} />
         )}
       </main>
+      <CodaPopup />
       <nav className="barra" aria-label="Sezioni">
         {VOCI.map((v) => (
           <button key={v} aria-current={v === voce || (v === 'Astra' && (voce === 'Figurina' || voce === 'Album')) ? 'page' : undefined} onClick={() => setVoce(v)}>
