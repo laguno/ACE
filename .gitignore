@@ -9,3 +9,6 @@ supabase/.temp/
 _fuori-app/
 foto-reali/
 .claude/settings.local.json
+e2e/risultati/
+playwright-report/
+test-results/

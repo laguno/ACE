@@ -77,3 +77,37 @@ describe('normalizzazione di Nuvola', () => {
     ]);
   });
 });
+
+describe('lezioni e orario', () => {
+  it('lezioni: una riga per argomento, con ora e materia', () => {
+    const l = N.lezioni([
+      {
+        ore: [
+          { numeroOra: 1, giorno: '2026-11-06T00:00:00+01:00', argomenti: [{ id: 603437, materia: 'MUSICA', nomeArgomento: 'Rondò' }] },
+        ],
+      },
+    ]);
+    expect(l).toEqual([{ nuvola_id: '603437-1', data: '2026-11-06', ora: 1, materia_id: 'musica', argomento: 'Rondò' }]);
+  });
+
+  it('orario: ultimo giorno uguale, in ordine di ora, senza doppioni', () => {
+    const r = [
+      { data: '2026-11-02', ora: 1, materia_id: 'storia' }, // lunedì vecchio
+      { data: '2026-11-09', ora: 3, materia_id: 'inglese' },
+      { data: '2026-11-09', ora: 1, materia_id: 'matematica' },
+      { data: '2026-11-09', ora: 2, materia_id: 'matematica' },
+      { data: '2026-11-10', ora: 1, materia_id: 'arte_e_immagine' }, // martedì
+    ];
+    expect(N.materieDelGiorno(r, 1)).toEqual(['matematica', 'inglese']);
+    expect(N.materieDelGiorno(r, 3)).toEqual([]);
+  });
+});
+
+describe('peso dei compiti', () => {
+  it('il più lungo pesa di più', () => {
+    const t = ['le battute del dialogo, pagina 16', 'pagine 36–38, esercizi 1–8', 'pagina 345 e problemi 380–382', 'pagine 340–352 e la scheda'];
+    const ordinati = [...t].sort((a, b) => N.peso(b) - N.peso(a));
+    expect(ordinati[0]).toBe('pagine 340–352 e la scheda');
+    expect(ordinati.at(-1)).toBe('le battute del dialogo, pagina 16');
+  });
+});

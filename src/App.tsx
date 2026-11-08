@@ -2,6 +2,10 @@ import { useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import Accesso from './Accesso';
 import AreaGenitori from './AreaGenitori';
+import Oggi from './Oggi';
+import Sera from './Sera';
+import { oraAdesso, useGiornata } from './giornata';
+import * as C from './lib/calendario';
 import { supabase, type Profilo } from './supabase';
 
 // R-Evolution resta nascosta nello sprint 1: comparirà con un popup di annuncio.
@@ -11,7 +15,6 @@ type Voce = (typeof VOCI)[number] | 'Genitori';
 export default function App() {
   const [sessione, setSessione] = useState<Session | null | undefined>();
   const [profilo, setProfilo] = useState<Profilo | null | undefined>();
-  const [voce, setVoce] = useState<Voce>('Oggi');
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSessione(data.session));
@@ -54,6 +57,18 @@ export default function App() {
       </main>
     );
 
+  return <Lani />;
+}
+
+/** Parte di Lani: si apre su Sera da un'ora prima della chiusura, altrimenti su Oggi. */
+function Lani() {
+  const giornata = useGiornata();
+  const [voce, setVoce] = useState<Voce>();
+  useEffect(() => {
+    if (giornata && !voce) setVoce(C.momento(oraAdesso(), giornata.chiusura) === 'sera' ? 'Sera' : 'Oggi');
+  }, [giornata]);
+  if (!voce) return null;
+
   if (voce === 'Genitori')
     return (
       <main>
@@ -65,7 +80,7 @@ export default function App() {
     <>
       <main>
         <button className="angolo" onClick={() => setVoce('Genitori')}>Genitori</button>
-        <h1>{voce}</h1>
+        {voce === 'Sera' ? <Sera /> : voce === 'Oggi' ? <Oggi /> : <h1>{voce}</h1>}
       </main>
       <nav className="barra" aria-label="Sezioni">
         {VOCI.map((v) => (
