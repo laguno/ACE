@@ -7,6 +7,7 @@ import Sera from './Sera';
 import Studio from './Studio';
 import Astra from './Astra';
 import CodaPopup from './Popup';
+import Benvenuta, { daAccogliere } from './Benvenuta';
 import { Album, Figurina } from './Figurine';
 import { oraAdesso, useGiornata } from './giornata';
 import * as C from './lib/calendario';
@@ -67,10 +68,12 @@ export default function App() {
 /** Parte di Lani: si apre su Sera da un'ora prima della chiusura, altrimenti su Oggi. */
 function Lani() {
   const giornata = useGiornata();
+  const [accogli, setAccogli] = useState(daAccogliere);
   const [voce, setVoce] = useState<Voce>();
   useEffect(() => {
     if (giornata && !voce) setVoce(C.momento(oraAdesso(), giornata.chiusura) === 'sera' ? 'Sera' : 'Oggi');
   }, [giornata]);
+  if (accogli) return <Benvenuta fine={() => setAccogli(false)} />;
   if (!voce) return null;
 
   if (voce === 'Genitori')

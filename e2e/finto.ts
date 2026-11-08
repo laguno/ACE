@@ -46,6 +46,11 @@ export async function finto(page: Page, t: Tabelle, funzioni: Record<string, unk
   await page.addInitScript((u) => {
     const b = (o: object) => btoa(JSON.stringify(o)).replace(/=+$/, '');
     const jwt = `${b({ alg: 'HS256', typ: 'JWT' })}.${b({ sub: u.id, exp: 4102444800, role: 'authenticated' })}.firma`;
+    // le accoglienze della prima accensione hanno le loro prove: qui risultano già viste
+    if (!sessionStorage.getItem('prova-accoglienza')) {
+      localStorage.setItem('ace-benvenuta', 'fatta');
+      localStorage.setItem('ace-avvio-genitori', 'fatto');
+    }
     localStorage.setItem(
       'ace-sessione',
       JSON.stringify({

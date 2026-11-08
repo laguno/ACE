@@ -214,3 +214,16 @@ main { position: relative; padding: 16px 16px calc(88px + env(safe-area-inset-bo
 .giorno legend { font-weight: 800; text-transform: capitalize; margin-bottom: 4px; }
 .modulo textarea { padding: 10px 14px; border: 2px solid var(--lilla); border-radius: 16px; font: inherit; color: var(--testo); }
 .genitori .numeri dt:last-child { font-size: 12px; }
+
+/* Prima accensione */
+.benvenuta { min-height: 100dvh; display: grid; align-content: center; }
+.benvenuta .carta { justify-items: center; text-align: center; }
+.benvenuta h1 { margin: 0; font-size: 32px; }
+.sezioni { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; text-align: left; }
+.sezioni li { display: flex; align-items: center; gap: 10px; }
+.frase { margin: 0; font: 800 22px/1.3 'Baloo 2', Nunito, sans-serif; color: var(--accento-premuto); }
+.avvio ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; }
+.avvio li { display: grid; grid-template-columns: 36px 1fr; gap: 10px; align-items: start; }
+.avvio .segno { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--lilla); font-weight: 800; }
+.avvio .fatto .segno { background: #2e7d32; color: #fff; }
+.avvio small { display: block; color: var(--testo-2); }
