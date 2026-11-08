@@ -15,6 +15,8 @@ function filtra(righe: Record<string, unknown>[], q: URLSearchParams) {
       if (op === 'is') return val === 'null' ? x == null : String(x) === val;
       if (op === 'gte') return String(x) >= val;
       if (op === 'lte') return String(x) <= val;
+      if (op === 'lt') return String(x) < val;
+      if (op === 'gt') return String(x) > val;
       if (op === 'in') return val.slice(1, -1).split(',').includes(String(x));
       return true;
     }),

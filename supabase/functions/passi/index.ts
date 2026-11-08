@@ -10,6 +10,7 @@
 // ha preso la prima chiave (cron delle chiavi, tappa 5).
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import * as R from '../../../src/lib/regole/index.ts';
+import * as C from '../../../src/lib/calendario/index.ts';
 
 const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 const P = R.CONFIG.passi;
@@ -69,6 +70,22 @@ async function registra(motivo: string, riferimento: string, passi: number, g: D
   return data ? { passi, motivo } : niente('già registrato');
 }
 
+/** Borsa: domani (giorno dopo la sera) c'è un allenamento o una partita di Lani nel calendario. */
+async function borsaServe(sera: Date): Promise<boolean> {
+  const da = new Date(sera);
+  da.setDate(da.getDate() + 1);
+  const a = new Date(da);
+  a.setDate(a.getDate() + 1);
+  // ponytail: giorno di Roma approssimato in UTC (±1 ora): gli allenamenti non sono a mezzanotte.
+  const { data, error } = await db
+    .from('impegni_famiglia')
+    .select('titolo')
+    .gte('inizio', `${R.iso(da)}T00:00:00+01:00`)
+    .lt('inizio', `${R.iso(a)}T00:00:00+01:00`);
+  if (error) throw error;
+  return C.serveBorsa((data ?? []).map((x) => x.titolo));
+}
+
 /** Studio facoltativo: solo con i compiti per domani spuntati e fino a 4 al giorno per tipo. */
 // ponytail: conta e scrittura non sono atomiche; due giri finiti nello stesso istante possono fare il quinto.
 async function studioConta(tipo: R.TipoStudio, g: Date): Promise<boolean> {
@@ -99,15 +116,19 @@ const gestori: Record<string, (id: string) => Promise<Esito>> = {
     return registra('compito_rifatto', id, passi, g);
   },
 
-  // id = data della serata ('YYYY-MM-DD'). Borsa (serve il calendario degli allenamenti, tappa 3)
-  // e dieci minuti (sprint 2) arriveranno qui.
+  // id = data della serata ('YYYY-MM-DD'): cartella e borsa (dieci minuti con lo sprint 2).
+  // Ognuna vale solo se spuntata quella sera; registra_passi è idempotente, quindi si
+  // può richiamare dopo ogni spunta.
   async serata(id) {
     const s = await riga('serate', 'data', id);
-    if (!s.cartella_il) return niente('cartella non spuntata');
     const g = R.giorno(s.data);
-    if (R.iso(R.giornoRoma(s.cartella_il)) !== s.data) return niente('spuntata in un altro giorno');
-    if (!R.cartellaConta(g)) return niente('domani non c’è scuola');
-    return registra('cartella', `serata:${s.data}`, P.obbligatori.cartella, g);
+    const quellaSera = (t: string | null) => !!t && R.iso(R.giornoRoma(t)) === s.data;
+    let passi = 0;
+    if (quellaSera(s.cartella_il) && R.cartellaConta(g))
+      passi += (await registra('cartella', `serata:${s.data}`, P.obbligatori.cartella, g)).passi;
+    if (quellaSera(s.borsa_il) && (await borsaServe(g)))
+      passi += (await registra('borsa', `serata:${s.data}`, P.obbligatori.borsa, g)).passi;
+    return passi ? { passi, motivo: 'serata' } : niente('niente di nuovo');
   },
 
   async foglio(id) {

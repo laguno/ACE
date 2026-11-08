@@ -23,7 +23,12 @@ function dati() {
       { data: '2026-10-27', ora: 1, materia_id: 'storia' },
     ],
     fogli_firma: [{ id: 'f1', titolo: 'Gita del benessere', scadenza: '2026-12-03', dato_il: null, consegnato_il: null }],
-    impostazioni: [{ chiave: 'materiale_cartella', valore: { 1: ['Borsa di pallavolo: il pulmino ti prende a scuola', 'Cartellina di tecnologia'] } }],
+    impostazioni: [{ chiave: 'materiale_cartella', valore: { 1: ['Cartellina di tecnologia'] } }],
+    impegni_famiglia: [
+      { titolo: 'Allenamento Pallavolo Leilani U-13', inizio: '2026-11-09T14:00:00Z', tutto_il_giorno: false },
+      { titolo: 'Tennis Leonardo', inizio: '2026-11-09T16:30:00Z', tutto_il_giorno: false },
+      { titolo: 'Tennis Leonardo', inizio: '2026-11-10T16:30:00Z', tutto_il_giorno: false },
+    ],
     serate: [],
     movimenti_passi: [],
   };
@@ -39,13 +44,13 @@ test('la sera mostra compiti, cartella del lunedì e fogli', async ({ page }) =>
   await page.getByRole('button', { name: 'Sera' }).click();
 
   await expect(page.getByRole('heading', { name: 'Pronta per lunedì?' })).toBeVisible();
-  await expect(page.getByText('0 su 4')).toBeVisible();
+  await expect(page.getByText('0 su 5')).toBeVisible();
   await expect(page.getByText('Pag 12 es 3')).toBeVisible();
   await expect(page.getByText('Per mercoledì')).toHaveCount(0);
   await expect(page.getByText('Lady si è sdraiata sul quaderno di Matematica.')).toBeVisible();
 
   const cartella = page.locator('.carta', { has: page.getByRole('heading', { name: 'Cartella' }) });
-  await expect(cartella.getByRole('checkbox')).toHaveCount(5);
+  await expect(cartella.getByRole('checkbox')).toHaveCount(4);
   await expect(cartella.getByText('Storia')).toHaveCount(0);
   await expect(page.getByRole('button', { name: "L'ho dato" })).toBeVisible();
   await page.screenshot({ path: 'e2e/risultati/sera.png', fullPage: true });
@@ -58,14 +63,14 @@ test('spunte: subito visibili, salvate, e la funzione passi chiamata', async ({ 
 
   await page.getByRole('checkbox', { name: /Pag 12 es 3/ }).check();
   await expect(page.getByRole('checkbox', { name: /Pag 12 es 3/ })).toBeDisabled();
-  await expect(page.getByText('1 su 4')).toBeVisible();
+  await expect(page.getByText('1 su 5')).toBeVisible();
   expect(t.compiti[0].fatto_il).not.toBeNull();
 
   const cartella = page.locator('.carta', { has: page.getByRole('heading', { name: 'Cartella' }) });
-  for (const voce of ['Italiano', 'Tecnologia', 'Matematica', /Borsa di pallavolo/]) await cartella.getByRole('checkbox', { name: voce, exact: typeof voce === 'string' }).check();
+  for (const voce of ['Italiano', 'Tecnologia', 'Matematica']) await cartella.getByRole('checkbox', { name: voce, exact: typeof voce === 'string' }).check();
   expect(t.serate).toHaveLength(0); // la cartella è pronta solo con l'ultima voce
   await cartella.getByRole('checkbox', { name: 'Cartellina di tecnologia' }).check();
-  await expect(page.getByText('2 su 4')).toBeVisible();
+  await expect(page.getByText('2 su 5')).toBeVisible();
   expect(t.serate[0]).toMatchObject({ data: '2026-11-08' });
 
   await page.getByRole('button', { name: "L'ho dato" }).click();
@@ -88,4 +93,30 @@ test('salvataggio fallito: la spunta torna indietro', async ({ page }) => {
   await page.getByRole('checkbox', { name: /Pag 12 es 3/ }).check();
   await expect(page.getByRole('alert')).toHaveText('Spunta non salvata. Riprova.');
   await expect(page.getByRole('checkbox', { name: /Pag 12 es 3/ })).not.toBeChecked();
+});
+
+test('borsa dal calendario: domani allenamento alle 15, la porti a scuola', async ({ page }) => {
+  const { chiamate, t } = await finto(page, dati());
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Sera' }).click();
+
+  const borsa = page.locator('.carta', { has: page.getByRole('heading', { name: 'Borsa' }) });
+  await expect(borsa.getByText('Allenamento domani alle 15:00: la porti a scuola.')).toBeVisible();
+  await expect(page.getByText('Domani in famiglia: Tennis Leonardo alle 17:30.', { exact: false })).toBeVisible();
+  for (const voce of ['Divisa', 'Ginocchiere', 'Scarpe', 'Borraccia']) await borsa.getByRole('checkbox', { name: voce }).check();
+  await expect(page.getByText('1 su 5')).toBeVisible();
+  expect(t.serate[0]).toMatchObject({ data: '2026-11-08' });
+  expect(t.serate[0].borsa_il).toBeTruthy();
+  await expect.poll(() => chiamate).toEqual([{ tipo: 'serata', id: '2026-11-08' }]);
+});
+
+test('senza allenamenti domani la borsa non c’è', async ({ page }) => {
+  const d = dati();
+  d.impegni_famiglia = [];
+  await finto(page, d);
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Sera' }).click();
+  await expect(page.getByRole('heading', { name: 'Pronta per lunedì?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Borsa' })).toHaveCount(0);
+  await expect(page.getByText('0 su 4')).toBeVisible();
 });

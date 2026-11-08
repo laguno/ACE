@@ -424,3 +424,6 @@ enabled = true
 # sync-nuvola controlla da sé chi chiama (segreto del cron o genitore): il cron non ha un JWT.
 [functions.sync-nuvola]
 verify_jwt = false
+
+[functions.sync-calendario]
+verify_jwt = false

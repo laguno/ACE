@@ -1,30 +1,73 @@
 import { useCallback, useEffect, useState } from 'react';
+import * as C from './lib/calendario';
 import * as N from './lib/nuvola';
 import * as R from './lib/regole';
 import { supabase } from './supabase';
 
 // Sera — design/Domani.html. Lani spunta; i passi li decide la funzione "passi" sul server.
-// Cartella dalle lezioni di Nuvola (orario). ponytail: borsa quando arriva il calendario di famiglia.
+// Cartella dalle lezioni di Nuvola (orario) più il materiale del giorno (impostazioni);
+// borsa e "Domani in famiglia" dal calendario di famiglia.
 
 type Compito = { id: string; testo: string; fatto_il: string | null; materie: { nome: string } | null };
 type Foglio = { id: string; titolo: string; scadenza: string | null; dato_il: string | null };
+type Impegno = { titolo: string; inizio: string; tutto_il_giorno: boolean };
 
 const GIORNI = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'];
+// ponytail: voci fisse dalla bozza; con l'area genitori (tappa 7) passano alle impostazioni.
+const VOCI_BORSA = ['Divisa', 'Ginocchiere', 'Scarpe', 'Borraccia'];
+const PRIMA_DI_USCIRE_DA_SCUOLA = '16:00';
 
 async function passi(tipo: string, id: string) {
   // l'esito non serve qui: i passi si rileggono da movimenti_passi
   await supabase.functions.invoke('passi', { body: { tipo, id } });
 }
 
+/** Lista a voci (cartella, borsa): spuntate una per una sul telefono, con l'ultima è pronta. */
+// ponytail: le voci spuntate si perdono se si chiude l'app prima dell'ultima.
+function Voci({ titolo, voci, pronta, quandoPronta, children }: {
+  titolo: string;
+  voci: string[];
+  pronta: boolean;
+  quandoPronta: () => void;
+  children?: React.ReactNode;
+}) {
+  const [messe, setMesse] = useState(new Set<string>());
+  function metti(v: string) {
+    const nuove = new Set(messe);
+    if (nuove.has(v)) nuove.delete(v);
+    else nuove.add(v);
+    setMesse(nuove);
+    if (voci.every((x) => nuove.has(x))) quandoPronta();
+  }
+  return (
+    <div className="carta">
+      <h2>{titolo}</h2>
+      {children}
+      <ul className="spunte">
+        {voci.map((v) => (
+          <li key={v}>
+            <label>
+              <input type="checkbox" checked={pronta || messe.has(v)} disabled={pronta} onChange={() => metti(v)} />
+              <span>{v}</span>
+            </label>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export default function Sera() {
   const oggi = R.giornoRoma(new Date());
   const domani = R.prossimoGiornoDiScuola(oggi);
+  const dopodomaniCal = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate() + 2);
+  const domaniCal = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate() + 1);
   const [compiti, setCompiti] = useState<Compito[]>();
   const [fogli, setFogli] = useState<Foglio[]>([]);
-  const [cartella, setCartella] = useState(false);
+  const [serata, setSerata] = useState({ cartella: false, borsa: false });
   const [passiOggi, setPassiOggi] = useState(0);
   const [orario, setOrario] = useState<string[]>([]);
-  const [messe, setMesse] = useState(new Set<string>());
+  const [impegni, setImpegni] = useState<Impegno[]>([]);
   const [errore, setErrore] = useState('');
 
   useEffect(() => {
@@ -34,24 +77,31 @@ export default function Sera() {
       supabase.from('lezioni').select('data, ora, materia_id').gte('data', R.iso(da)),
       supabase.from('materie').select('id, nome'),
       supabase.from('impostazioni').select('valore').eq('chiave', 'materiale_cartella').maybeSingle(),
-    ]).then(([l, m, i]) => {
+      supabase
+        .from('impegni_famiglia')
+        .select('titolo, inizio, tutto_il_giorno')
+        .gte('inizio', domaniCal.toISOString())
+        .lt('inizio', dopodomaniCal.toISOString())
+        .order('inizio'),
+    ]).then(([l, m, i, imp]) => {
       const nomi = new Map((m.data ?? []).map((x) => [x.id, x.nome]));
       const materiale: string[] = i.data?.valore?.[domani.getDay()] ?? [];
       setOrario([...N.materieDelGiorno(l.data ?? [], domani.getDay()).map((id) => nomi.get(id) ?? id), ...materiale]);
+      setImpegni(imp.data ?? []);
     });
-  }, [R.iso(domani)]);
+  }, [R.iso(oggi)]);
 
   const carica = useCallback(async () => {
     const [c, f, s, m] = await Promise.all([
       supabase.from('compiti').select('id, testo, fatto_il, materie(nome)').eq('scadenza', R.iso(domani)).order('creato_il'),
       supabase.from('fogli_firma').select('id, titolo, scadenza, dato_il').is('consegnato_il', null).order('scadenza'),
-      supabase.from('serate').select('cartella_il').eq('data', R.iso(oggi)).maybeSingle(),
+      supabase.from('serate').select('cartella_il, borsa_il').eq('data', R.iso(oggi)).maybeSingle(),
       supabase.from('movimenti_passi').select('passi, moltiplicatore').eq('giorno', R.iso(oggi)),
     ]);
     if (c.error || f.error) return setErrore('Non riesco a leggere la sera. Riprova tra poco.');
     setCompiti(c.data as unknown as Compito[]);
     setFogli(f.data ?? []);
-    setCartella(!!s.data?.cartella_il);
+    setSerata({ cartella: !!s.data?.cartella_il, borsa: !!s.data?.borsa_il });
     setPassiOggi((m.data ?? []).reduce((a, x) => a + Math.round(x.passi * x.moltiplicatore), 0));
   }, [R.iso(oggi)]);
 
@@ -72,30 +122,26 @@ export default function Sera() {
     carica();
   }
   const adesso = () => new Date().toISOString();
-
-  // Cartella: voci spuntate una per una (solo sul telefono); con l'ultima la cartella è pronta.
-  // ponytail: le voci spuntate si perdono se si chiude l'app prima dell'ultima.
-  const voci = orario.length ? orario : [`Cartella pronta per ${GIORNI[domani.getDay()]}`];
-  function metti(v: string) {
-    const nuove = new Set(messe);
-    if (nuove.has(v)) nuove.delete(v);
-    else nuove.add(v);
-    setMesse(nuove);
-    if (voci.every((x) => nuove.has(x)))
-      spunta(
-        () => setCartella(true),
-        () => supabase.from('serate').upsert({ data: R.iso(oggi), cartella_il: adesso() }),
-        'serata',
-        R.iso(oggi),
-      );
-  }
+  const chiudiSerata = (campo: 'cartella' | 'borsa') =>
+    spunta(
+      () => setSerata((s) => ({ ...s, [campo]: true })),
+      () => supabase.from('serate').upsert({ data: R.iso(oggi), [`${campo}_il`]: adesso() }),
+      'serata',
+      R.iso(oggi),
+    );
 
   if (!compiti) return errore ? <p role="alert">{errore}</p> : null;
 
   const conCartella = R.cartellaConta(oggi);
-  const cose = compiti.length + fogli.length + (conCartella ? 1 : 0);
+  const sport = impegni.find((i) => C.tipoImpegno(i.titolo) !== 'famiglia');
+  const famiglia = impegni.find((i) => C.tipoImpegno(i.titolo) === 'famiglia');
+  const conBorsa = !!sport;
+  const cose = compiti.length + fogli.length + (conCartella ? 1 : 0) + (conBorsa ? 1 : 0);
   const fatte =
-    compiti.filter((c) => c.fatto_il).length + fogli.filter((f) => f.dato_il).length + (conCartella && cartella ? 1 : 0);
+    compiti.filter((c) => c.fatto_il).length +
+    fogli.filter((f) => f.dato_il).length +
+    (conCartella && serata.cartella ? 1 : 0) +
+    (conBorsa && serata.borsa ? 1 : 0);
   const mancante = compiti.find((c) => !c.fatto_il);
 
   return (
@@ -148,24 +194,21 @@ export default function Sera() {
       </div>
 
       {conCartella && (
-        <div className="carta">
-          <h2>Cartella</h2>
-          <ul className="spunte">
-            {voci.map((v) => (
-              <li key={v}>
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={cartella || messe.has(v)}
-                    disabled={cartella}
-                    onChange={() => metti(v)}
-                  />
-                  <span>{v}</span>
-                </label>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <Voci
+          titolo="Cartella"
+          voci={orario.length ? orario : [`Cartella pronta per ${GIORNI[domani.getDay()]}`]}
+          pronta={serata.cartella}
+          quandoPronta={() => chiudiSerata('cartella')}
+        />
+      )}
+
+      {sport && (
+        <Voci titolo="Borsa" voci={VOCI_BORSA} pronta={serata.borsa} quandoPronta={() => chiudiSerata('borsa')}>
+          <p className="nota">
+            {C.tipoImpegno(sport.titolo) === 'partita' ? 'Partita' : 'Allenamento'} domani alle {C.oraRoma(sport.inizio)}
+            {R.giornoDiScuola(domaniCal) && C.oraRoma(sport.inizio) < PRIMA_DI_USCIRE_DA_SCUOLA ? ': la porti a scuola.' : '.'}
+          </p>
+        </Voci>
       )}
 
       {fogli.length > 0 && (
@@ -196,6 +239,13 @@ export default function Sera() {
             ))}
           </ul>
         </div>
+      )}
+
+      {famiglia && (
+        <p className="carta nota">
+          Domani in famiglia: {famiglia.titolo}
+          {famiglia.tutto_il_giorno ? '' : ` alle ${C.oraRoma(famiglia.inizio)}`}. Tienilo a mente per la cartella e la sveglia.
+        </p>
       )}
     </section>
   );

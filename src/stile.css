@@ -91,3 +91,4 @@ main { position: relative; padding: 16px 16px calc(88px + env(safe-area-inset-bo
 .foglio .principale { flex: none; padding: 0 20px; min-height: 44px; white-space: nowrap; }
 .dato { color: var(--testo-2); }
 .lady { margin: 8px 0 0; padding: 12px 14px; border-radius: 18px; background: var(--rosa); }
+.nota { margin: 0 0 4px; color: var(--testo-2); }
