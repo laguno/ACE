@@ -125,6 +125,25 @@ export function passiVoto({ voto, precedente, precedenteInsufficiente }: Voto): 
   return b;
 }
 
+/** Passi dei voti di una materia, in ordine di data: ognuno confrontato con quello prima. */
+export function passiVotiMateria(voti: number[]): number[] {
+  return voti.map((voto, i) =>
+    passiVoto(i ? { voto, precedente: voti[i - 1], precedenteInsufficiente: voti[i - 1] < 6 } : { voto }),
+  );
+}
+
+/** Nota di merito +50, disciplinare −20; le didattiche contano a gruppi di tre (malusDimenticanze). */
+export function passiNota(tipo: 'disciplinare' | 'didattica' | 'merito' | 'altro'): number {
+  if (tipo === 'merito') return P.nota_merito;
+  if (tipo === 'disciplinare') return P.malus.nota_disciplinare;
+  return 0;
+}
+
+/** Note per dimenticanza in ordine di data: −10 sulla terza, sesta, nona... (ne restituisce gli id). */
+export function malusDimenticanze(ids: string[]): string[] {
+  return ids.filter((_, i) => (i + 1) % 3 === 0);
+}
+
 // ---------------------------------------------------------------- chiavi della settimana
 
 export interface SettimanaObbligatori {

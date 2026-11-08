@@ -17,7 +17,8 @@ await db.exec(`
   alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
   alter default privileges in schema public grant execute on functions to anon, authenticated, service_role;
 `);
-for (const m of readdirSync('supabase/migrations').sort()) await db.exec(readFileSync(`supabase/migrations/${m}`, 'utf8'));
+// le migrazioni del cron usano pg_cron e pg_net, che PGlite non ha
+for (const m of readdirSync('supabase/migrations').sort().filter((f) => !f.includes('cron'))) await db.exec(readFileSync(`supabase/migrations/${m}`, 'utf8'));
 console.log('migrazioni applicate');
 
 const PAPA = '00000000-0000-0000-0000-00000000000a', LANI = '00000000-0000-0000-0000-00000000000b';
