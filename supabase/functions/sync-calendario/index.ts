@@ -4,6 +4,7 @@
 // Eventi con "privato" nel titolo esclusi. La chiamano il cron (ogni ora) o un genitore.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import ICAL from 'npm:ical.js@2.1.0';
+import { avvisaSeFallita } from '../_shared/push.ts';
 
 const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 const GIORNO = 864e5;
@@ -91,6 +92,7 @@ Deno.serve(async (req) => {
   } catch (e) {
     esito = 'errore';
     dettagli = { errore: e instanceof Error ? e.message.replace(/https?:\/\/\S+/g, '[indirizzo]') : 'errore imprevisto' };
+    await avvisaSeFallita(db, 'calendario', 'Il calendario', log!.id).catch((x) => console.error('avviso', x));
   }
   await db.from('sync_log').update({ finito_il: new Date().toISOString(), esito, dettagli }).eq('id', log!.id);
   return risposta({ esito, ...dettagli }, esito === 'ok' ? 200 : 502);

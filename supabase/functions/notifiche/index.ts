@@ -3,13 +3,12 @@
 // chiusura della sera) più un sollecito 45 minuti dopo la chiusura; ai genitori il riepilogo della
 // domenica. Mai rimproveri. Una per tipo al giorno: la chiave di notifiche_inviate lo garantisce.
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import webpush from 'npm:web-push@3.6.7';
 import * as C from '../../../src/lib/calendario/index.ts';
 import * as K from '../../../src/lib/copione/index.ts';
 import * as R from '../../../src/lib/regole/index.ts';
+import { inviaPush } from '../_shared/push.ts';
 
 const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
-webpush.setVapidDetails(Deno.env.get('VAPID_SUBJECT')!, Deno.env.get('VAPID_PUBLIC_KEY')!, Deno.env.get('VAPID_PRIVATE_KEY')!);
 
 const piu = (d: Date, n: number) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
 const finestra = (ora: string, da: string) => ora >= da && ora < C.sposta(da, 15);
@@ -18,20 +17,7 @@ async function manda(ruolo: 'lani' | 'genitore', tipo: string, testo: { titolo: 
   // prima si prenota il tipo del giorno: se c'è già, la notifica è partita
   const { error } = await db.from('notifiche_inviate').insert({ giorno, tipo, testo: testo.testo });
   if (error) return 0;
-  const { data: profili } = await db.from('profili').select('id').eq('ruolo', ruolo);
-  const { data: iscrizioni } = await db.from('push_iscrizioni').select('id, endpoint, chiavi').in('profilo_id', (profili ?? []).map((p) => p.id));
-  let inviate = 0;
-  for (const s of iscrizioni ?? []) {
-    try {
-      await webpush.sendNotification({ endpoint: s.endpoint, keys: s.chiavi }, JSON.stringify({ ...testo, tipo }));
-      inviate++;
-    } catch (e) {
-      const stato = (e as { statusCode?: number }).statusCode;
-      if (stato === 404 || stato === 410) await db.from('push_iscrizioni').delete().eq('id', s.id); // iscrizione scaduta
-      else console.error('push', stato);
-    }
-  }
-  return inviate;
+  return inviaPush(db, ruolo, { ...testo, tipo });
 }
 
 async function turno() {
@@ -75,8 +61,11 @@ async function turno() {
   }
 
   // chiusura della sera e sollecito 45 minuti dopo, se mancano ancora cose
-  const { data: imp } = await db.from('impostazioni').select('valore').eq('chiave', 'ora_chiusura').maybeSingle();
-  const chiusura = C.oraChiusura(imp?.valore?.[oggi.getDay()] ?? null, await impegniDi(oggi));
+  const { data: righe } = await db.from('impostazioni').select('chiave, valore').in('chiave', ['ora_chiusura', 'ora_chiusura_breve']);
+  const imp = Object.fromEntries((righe ?? []).map((r) => [r.chiave, r.valore]));
+  // venerdì e sabato con partita il giorno dopo: chiusura breve con la sola borsa
+  const soloBorsa = !R.cartellaConta(oggi) && C.partitaTra(await impegniDi(piu(oggi, 1)));
+  const chiusura = C.oraChiusura(imp.ora_chiusura?.[oggi.getDay()] ?? null, await impegniDi(oggi), soloBorsa ? (imp.ora_chiusura_breve ?? null) : null);
   if (chiusura) {
     if (finestra(ora, chiusura))
       inviate.chiusura = await manda('lani', 'chiusura', K.notifica(oggi.getDay() === 0 ? 'chiusura_domenica' : 'chiusura'), giorno);
@@ -85,9 +74,11 @@ async function turno() {
       const domani = R.iso(R.prossimoGiornoDiScuola(oggi));
       const [{ count: compiti }, { data: serata }] = await Promise.all([
         db.from('compiti').select('id', { count: 'exact', head: true }).eq('scadenza', domani).is('fatto_il', null),
-        db.from('serate').select('cartella_il').eq('data', giorno).maybeSingle(),
+        db.from('serate').select('cartella_il, borsa_il').eq('data', giorno).maybeSingle(),
       ]);
-      const mancano = (compiti ?? 0) + (R.cartellaConta(oggi) && !serata?.cartella_il ? 1 : 0);
+      const mancano = soloBorsa
+        ? serata?.borsa_il ? 0 : 1
+        : (compiti ?? 0) + (R.cartellaConta(oggi) && !serata?.cartella_il ? 1 : 0);
       if (mancano) inviate.sollecito = await manda('lani', 'sollecito', K.notifica('sollecito', { n: mancano }), giorno);
     }
   }

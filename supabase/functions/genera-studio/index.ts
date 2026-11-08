@@ -85,7 +85,7 @@ async function genera(v: { id: string; materia_id: string | null; data: string; 
   };
 
   const risposta = await claude.beta.messages.create({
-    model: 'claude-opus-5-5',
+    model: 'claude-sonnet-5-5', // decisione del signore (8/11): Sonnet qui, Opus solo per spiega
     max_tokens: 16000,
     betas: ['server-side-fallback-2026-07-01'],
     fallbacks: 'default',

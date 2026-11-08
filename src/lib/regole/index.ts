@@ -415,3 +415,12 @@ export function contaSettimana(s: {
 export function mondo(tappeFatte: number): 0 | 1 | 2 | 3 {
   return Math.min(3, Math.floor(Math.min(tappeFatte, 26) / 7)) as 0 | 1 | 2 | 3;
 }
+
+/**
+ * Caselle dello studio facoltativo di un giorno ("flashcard:2026-11-24:1" .. ":4"): ognuna è il
+ * riferimento di un movimento, così la chiave unica di movimenti_passi rende impossibile la quinta
+ * anche con due invii nello stesso istante (revisione di Jarvis, 8/11).
+ */
+export function caselleStudio(tipo: TipoStudio, giorno: string): string[] {
+  return Array.from({ length: P.studio_facoltativo.max_al_giorno_per_tipo }, (_, i) => `${tipo}:${giorno}:${i + 1}`);
+}

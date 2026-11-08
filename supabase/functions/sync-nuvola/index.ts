@@ -10,6 +10,7 @@ import * as N from '../../../src/lib/nuvola/index.ts';
 import * as R from '../../../src/lib/regole/index.ts';
 import { aggiornaForzieri } from '../_shared/forzieri.ts';
 import { accoda } from '../_shared/popup.ts';
+import { avvisaSeFallita } from '../_shared/push.ts';
 import * as K from '../../../src/lib/copione/index.ts';
 
 const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
@@ -219,13 +220,24 @@ async function passiVotiENote() {
   if (e1) throw new Passo(`voti: ${e1.message}`);
   // sessioni di ripasso fatte, per il popup "Le {n} sessioni di ripasso si vedono"
   const { data: sessioni } = await db.from('sessioni_ripasso').select('verifiche(materia_id, data)').not('fatta_il', 'is', null);
+  // passi già dati per ogni voto (voto + correzioni), per accorgersi dei voti corretti dal docente
+  const { data: mov } = await db.from('movimenti_passi').select('motivo, riferimento, passi').in('motivo', ['voto', 'voto_corretto']);
+  const dati = new Map<string, number>();
+  for (const m of mov ?? []) {
+    const id = m.motivo === 'voto' ? m.riferimento : m.riferimento.split(':')[0];
+    dati.set(id, (dati.get(id) ?? 0) + m.passi);
+  }
   const perMateria = Map.groupBy(voti ?? [], (v) => v.materia_id);
   for (const lista of perMateria.values()) {
     const numeri = lista.map((v) => Number(v.voto));
     const passi = R.passiVotiMateria(numeri);
     for (const [i, v] of lista.entries()) {
       if (v.data < inizio) continue;
+      const dato = dati.get(v.id);
       presi += await registra('voto', v.id, passi[i], v.data);
+      // voto corretto dal docente dopo i passi: un movimento con la sola differenza (revisione di Jarvis)
+      if (dato !== undefined && passi[i] !== dato)
+        presi += await registra('voto_corretto', `${v.id}:${numeri[i]}`, passi[i] - dato, R.iso(R.giornoRoma(new Date())));
       // ponytail: conta le sessioni delle verifiche della stessa materia fatte nei 14 giorni prima del voto
       const da = R.iso(new Date(R.giorno(v.data).getTime() - 14 * 864e5));
       const fatte = (sessioni ?? []).filter((s) => {
@@ -254,6 +266,7 @@ async function passiVotiENote() {
     const p = R.passiNota(n.tipo);
     presi += await registra('nota', n.id, p, n.data);
     if (n.tipo === 'disciplinare') await accoda(db, `nota:${n.id}`, 'nota_disciplinare', { materia: nome(n.materia_id), passi: segno(p) });
+    if (n.tipo === 'merito') await accoda(db, `nota:${n.id}`, 'nota_merito', { materia: nome(n.materia_id), passi: p });
   }
   const didattiche = (note ?? []).filter((n) => n.tipo === 'didattica');
   for (const id of R.malusDimenticanze(didattiche.map((n) => n.id))) {
@@ -296,7 +309,7 @@ Deno.serve(async (req) => {
     esito = 'errore';
     dettagli = { errore: e instanceof Passo ? e.message : 'errore imprevisto' };
     if (!(e instanceof Passo)) console.error(e);
-    // ponytail: l'avviso ai genitori arriva con le notifiche push (tappa 6); per ora resta nel sync_log.
+    await avvisaSeFallita(db, 'nuvola', 'Nuvola', log!.id).catch((x) => console.error('avviso', x));
   }
   await db.from('sync_log').update({ finito_il: new Date().toISOString(), esito, dettagli }).eq('id', log!.id);
   return risposta({ esito, ...dettagli }, esito === 'ok' ? 200 : 502);

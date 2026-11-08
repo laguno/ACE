@@ -25,10 +25,13 @@ export function useGiornata() {
     const oggi = R.giornoRoma(new Date());
     Promise.all([
       impegniTra(oggi, piuGiorni(oggi, 1)),
-      supabase.from('impostazioni').select('valore').eq('chiave', 'ora_chiusura').maybeSingle(),
-    ]).then(([impegni, i]) => {
-      const base: string | null = i.data?.valore?.[oggi.getDay()] ?? null;
-      setG({ impegni, chiusura: C.oraChiusura(base, impegni) });
+      impegniTra(piuGiorni(oggi, 1), piuGiorni(oggi, 2)),
+      supabase.from('impostazioni').select('chiave, valore').in('chiave', ['ora_chiusura', 'ora_chiusura_breve']),
+    ]).then(([impegni, domani, i]) => {
+      const imp = Object.fromEntries((i.data ?? []).map((r) => [r.chiave, r.valore]));
+      const base: string | null = imp.ora_chiusura?.[oggi.getDay()] ?? null;
+      const breve = C.partitaTra(domani) ? (imp.ora_chiusura_breve ?? null) : null;
+      setG({ impegni, chiusura: C.oraChiusura(base, impegni, breve) });
     });
   }, []);
   return g;

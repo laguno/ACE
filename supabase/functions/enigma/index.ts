@@ -21,7 +21,7 @@ const risposta = (corpo: unknown, stato = 200) =>
 
 async function chiedi<T>(sistema: string, contenuto: unknown, schema: object, effort: 'low' | 'medium'): Promise<T> {
   const r = await claude.beta.messages.create({
-    model: 'claude-opus-5-5',
+    model: 'claude-sonnet-5-5', // decisione del signore (8/11): Sonnet qui, Opus solo per spiega
     max_tokens: 4000,
     betas: ['server-side-fallback-2026-07-01'],
     fallbacks: 'default',
@@ -78,17 +78,18 @@ Deno.serve(async (req) => {
       if (f.tentativi_enigma >= massimo) return risposta({ giusta: false, rimasti: 0, passi: 0 });
       if (typeof testo !== 'string' || !testo.trim()) return risposta({ errore: 'risposta vuota' }, 400);
 
+      // il tentativo si conta prima, in modo atomico: si valuta solo se c'era ancora un tentativo
+      const { data: tentativi, error: et } = await db.rpc('tenta_enigma', { p_n: n, p_massimo: massimo });
+      if (et) throw et;
+      if (tentativi == null) return risposta({ giusta: false, rimasti: 0, passi: 0 });
+
       const { giusta } = await chiedi<{ giusta: boolean }>(
         GIUDICA,
         { soluzione: f.soluzione, risposta: testo.slice(0, 200) },
         { type: 'object', additionalProperties: false, required: ['giusta'], properties: { giusta: { type: 'boolean' } } },
         'low',
       );
-      const tentativi = f.tentativi_enigma + 1;
-      await db
-        .from('forzieri')
-        .update({ tentativi_enigma: tentativi, ...(giusta ? { enigma_risolto_il: new Date().toISOString() } : {}) })
-        .eq('n', n);
+      if (giusta) await db.from('forzieri').update({ enigma_risolto_il: new Date().toISOString() }).eq('n', n);
 
       let passi = 0;
       // +20 solo se indovinato prima di arrivare al forziere

@@ -5,19 +5,25 @@
 import type { SupabaseClient } from 'npm:@supabase/supabase-js@2';
 import * as R from '../../../src/lib/regole/index.ts';
 import { accoda } from './popup.ts';
+import manifest from '../../../data/manifest.json' with { type: 'json' };
 
 const ORDINE = { chiuso: 0, enigma: 1, aperto: 2, consegnato: 3 } as const;
 type Stato = keyof typeof ORDINE;
 
-// Figurine rare dei forzieri (docs/02): prima le pose senza un momento naturale, poi le altre
-// "extra"; la cima (forziere 9) dà lani-cima se non è già presa.
-// ponytail: elenco scelto da Claude, da confermare con il signore.
-const RARE = ['leo-tennis', 'leo-copertina', 'leo-dispiaciuto', 'leo-partita-persa', 'lani-detective', 'lani-sorpresa', 'leo-gamer', 'bart-festeggia'];
+// Figurine dei forzieri (revisione di Jarvis, 8/11): prima le pose senza un momento naturale, poi
+// le altre non ancora sbloccate, esclusa la serie nera e le pose che hanno il loro momento nel
+// copione (detective, sorpresa, leo-gamer, bart-festeggia). La cima dà lani-cima.
+const PRIMA = ['leo-tennis', 'leo-copertina', 'leo-dispiaciuto', 'leo-partita-persa'];
+const HANNO_UN_MOMENTO = new Set(['lani-detective', 'lani-sorpresa', 'leo-gamer', 'bart-festeggia', 'lani-cima']);
+const ALTRE = manifest.avatar
+  .filter((a) => a.personaggio !== 'allenatore' && a.tono !== 'arrabbiato' && a.tono !== 'dispettoso')
+  .map((a) => a.id)
+  .filter((id) => !PRIMA.includes(id) && !HANNO_UN_MOMENTO.has(id));
 
 async function figurinaRara(db: SupabaseClient, n: number) {
   const { data } = await db.from('figurine').select('posa').not('sbloccata_il', 'is', null);
   const prese = new Set((data ?? []).map((f) => f.posa));
-  const posa = (n === 9 && !prese.has('lani-cima') ? 'lani-cima' : RARE.find((p) => !prese.has(p))) ?? null;
+  const posa = (n === 9 && !prese.has('lani-cima') ? 'lani-cima' : [...PRIMA, ...ALTRE].find((p) => !prese.has(p))) ?? null;
   if (posa) await db.from('figurine').upsert({ posa, sbloccata_il: new Date().toISOString() });
   return posa;
 }

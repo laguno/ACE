@@ -96,14 +96,20 @@ async function borsaServe(sera: Date): Promise<boolean> {
   return C.serveBorsa((data ?? []).map((x) => x.titolo));
 }
 
-/** Studio facoltativo: solo con i compiti per domani spuntati e fino a 4 al giorno per tipo. */
-// ponytail: conta e scrittura non sono atomiche; due giri finiti nello stesso istante possono fare il quinto.
-async function studioConta(tipo: R.TipoStudio, g: Date): Promise<boolean> {
-  const giaOggi = await conta('movimenti_passi', (q) => q.eq('motivo', tipo).eq('giorno', R.iso(g)));
-  const mancanti = await conta('compiti', (q) =>
-    q.eq('scadenza', R.iso(R.prossimoGiornoDiScuola(g))).is('fatto_il', null),
-  );
-  return R.studioConta(tipo, giaOggi, mancanti === 0);
+/**
+ * Studio facoltativo: solo con i compiti per domani spuntati e fino a 4 al giorno per tipo.
+ * Il limite non si conta: ogni giro prova le caselle del giorno ("flashcard:2026-11-24:1".."4") e
+ * registra_passi, con la chiave unica, lascia passare un solo movimento per casella.
+ * ponytail: lo stesso giro inviato due volte prende due caselle; l'app lo invia una volta sola.
+ */
+async function registraStudio(tipo: R.TipoStudio, g: Date, passi: number): Promise<Esito> {
+  const mancanti = await conta('compiti', (q) => q.eq('scadenza', R.iso(R.prossimoGiornoDiScuola(g))).is('fatto_il', null));
+  if (!R.studioConta(tipo, 0, mancanti === 0)) return niente('compiti da finire');
+  for (const casella of R.caselleStudio(tipo, R.iso(g))) {
+    const esito = await registra(tipo, casella, passi, g);
+    if (esito.passi) return esito;
+  }
+  return niente(`${tipo}: giri di oggi finiti`);
 }
 
 // ---------------------------------------------------------------- un gestore per tipo di evento
@@ -160,8 +166,7 @@ const gestori: Record<string, (id: string) => Promise<Esito>> = {
     const g = R.giornoRoma(giro.fatto_il);
     if (!R.giroValido(new Date(giro.iniziato_il), new Date(giro.fatto_il), giro.carte))
       return niente('carte girate troppo in fretta');
-    if (!(await studioConta('flashcard', g))) return niente('compiti da finire o giri di oggi finiti');
-    return registra('flashcard', id, P.studio_facoltativo.flashcard_giro, g);
+    return registraStudio('flashcard', g, P.studio_facoltativo.flashcard_giro);
   },
 
   async quiz(id) {
@@ -185,16 +190,14 @@ const gestori: Record<string, (id: string) => Promise<Esito>> = {
       const { error } = await db.from('flashcard').upsert(carte, { onConflict: 'materia_id,fronte', ignoreDuplicates: true });
       if (error) throw error;
     }
-    if (!(await studioConta('quiz', g))) return niente('compiti da finire o quiz di oggi finiti');
-    return registra('quiz', id, R.passiQuiz(t.numero, t.giuste, t.totale), g);
+    return registraStudio('quiz', g, R.passiQuiz(t.numero, t.giuste, t.totale));
   },
 
   async video(id) {
     const v = await riga('video_visti', 'id', id, '*, video(durata_secondi)');
     const g = R.giornoRoma(v.visto_il);
     if (!R.videoValido(v.completo, v.secondi_visti, v.video?.durata_secondi)) return niente('video non visto tutto');
-    if (!(await studioConta('video', g))) return niente('compiti da finire o video di oggi finiti');
-    return registra('video', id, P.studio_facoltativo.video_completo, g);
+    return registraStudio('video', g, P.studio_facoltativo.video_completo);
   },
 
   async gesto(id) {

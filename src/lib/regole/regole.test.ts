@@ -266,3 +266,15 @@ describe('conteggio della settimana', async () => {
     expect([0, 6, 7, 14, 21, 26, 27].map(mondo)).toEqual([0, 0, 1, 2, 3, 3, 3]);
   });
 });
+
+describe('caselle dello studio facoltativo', async () => {
+  const { caselleStudio } = await import('./index');
+  it('quattro caselle al giorno per tipo', () => {
+    expect(caselleStudio('flashcard', '2026-11-24')).toEqual([
+      'flashcard:2026-11-24:1',
+      'flashcard:2026-11-24:2',
+      'flashcard:2026-11-24:3',
+      'flashcard:2026-11-24:4',
+    ]);
+  });
+});

@@ -52,7 +52,7 @@ test('mattina di lunedì: tre cose, passi di ieri, in famiglia', async ({ page }
 });
 
 test('pomeriggio di lunedì: compiti di martedì, il più lungo prima', async ({ page }) => {
-  await page.clock.setFixedTime(new Date('2026-11-09T17:45:00+01:00'));
+  await page.clock.install({ time: new Date('2026-11-09T17:45:00+01:00') });
   const { chiamate } = await finto(page, dati());
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Compiti per martedì' })).toBeVisible();
@@ -63,6 +63,7 @@ test('pomeriggio di lunedì: compiti di martedì, il più lungo prima', async ({
   await expect(page.getByText('Inizia dal primo: è il più lungo.')).toBeVisible();
   for (const c of await page.getByRole('checkbox').all()) await c.check();
   await expect(page.getByText('Compiti finiti. Il resto del pomeriggio è tuo.')).toBeVisible();
+  await page.clock.runFor(5100);
   await expect.poll(() => chiamate.length).toBe(3);
   await page.screenshot({ path: 'e2e/risultati/oggi-pomeriggio.png', fullPage: true });
 });
