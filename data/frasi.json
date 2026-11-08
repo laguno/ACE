@@ -1,0 +1,211 @@
+{
+  "_nota": "Frasi e citazioni per ACE (regola del copione: una al giorno al massimo, mai la stessa prima di 30 giorni, mai nei rimproveri). Preparate da Jarvis l'8 novembre 2026. Attribuzioni controllate: se l'autore non è certo, la frase è segnata 'proverbio' o 'anonimo' e la nota spiega perché. Il mantra 'Ogni giorno, passino passino' non è in elenco: ha regole sue. Le frasi di famiglia aggiunte dai genitori hanno la precedenza.",
+  "momenti": {
+    "apertura": "schermata di apertura del mattino",
+    "inizio_settimana": "buongiorno del lunedì",
+    "ripasso": "flash card e ripasso",
+    "settimana_storta": "dopo una settimana senza chiavi",
+    "rimonta": "quando parte la rimonta",
+    "tappa": "tappa raggiunta",
+    "verifica": "sera prima di una verifica",
+    "forziere_bloccato": "popup del lucchetto",
+    "partita": "giorno di partita (sprint 2)",
+    "allenamento": "dieci minuti (sprint 2)",
+    "cima": "solo alla cima",
+    "chiusura": "fine della chiusura serale"
+  },
+  "frasi": [
+    {
+      "testo": "Un viaggio di mille miglia comincia con un passo.",
+      "autore": "Lao Tzu",
+      "fonte": "Tao Te Ching, cap. 64 (traduzione libera)",
+      "momento": "inizio_settimana"
+    },
+    {
+      "testo": "Goccia a goccia si scava la pietra.",
+      "autore": "proverbio, dal latino",
+      "fonte": "«Gutta cavat lapidem»: Ovidio, Epistulae ex Ponto IV, 10, 5",
+      "momento": "ripasso"
+    },
+    {
+      "testo": "Chi va piano va sano e va lontano.",
+      "autore": "proverbio",
+      "fonte": null,
+      "momento": "settimana_storta"
+    },
+    {
+      "testo": "Roma non fu fatta in un giorno.",
+      "autore": "proverbio",
+      "fonte": null,
+      "momento": "rimonta"
+    },
+    {
+      "testo": "Il successo è la somma di piccoli sforzi, ripetuti giorno dopo giorno.",
+      "autore": "anonimo",
+      "fonte": "Spesso attribuita a Robert Collier, ma circola già nel 1932, prima di lui",
+      "momento": "tappa"
+    },
+    {
+      "testo": "Se sembra impossibile, allora si può fare.",
+      "autore": "Bebe Vio",
+      "fonte": "Titolo del suo libro, Rizzoli 2017",
+      "momento": "verifica"
+    },
+    {
+      "testo": "Non è perché le cose sono difficili che non osiamo: è perché non osiamo che sono difficili.",
+      "autore": "Seneca",
+      "fonte": "Lettere a Lucilio 104, 26",
+      "momento": "forziere_bloccato"
+    },
+    {
+      "testo": "Per aspera ad astra.",
+      "autore": "motto latino",
+      "fonte": null,
+      "momento": "cima"
+    },
+    {
+      "testo": "Nessun giorno senza una linea.",
+      "autore": "motto latino",
+      "fonte": "«Nulla dies sine linea»: l'abitudine del pittore Apelle, raccontata da Plinio il Vecchio, Naturalis historia XXXV, 84",
+      "momento": "chiusura"
+    },
+    {
+      "testo": "Affrettati lentamente.",
+      "autore": "motto latino",
+      "fonte": "«Festina lente»: il motto di Augusto, in Svetonio, Vita di Augusto 25",
+      "momento": "apertura"
+    },
+    {
+      "testo": "Ripetere giova.",
+      "autore": "motto latino",
+      "fonte": "«Repetita iuvant»",
+      "momento": "ripasso"
+    },
+    {
+      "testo": "Il lavoro tenace vince ogni cosa.",
+      "autore": "Virgilio",
+      "fonte": "Georgiche I, 145-146 («labor omnia vicit improbus»)",
+      "momento": "verifica"
+    },
+    {
+      "testo": "La fortuna aiuta gli audaci.",
+      "autore": "Virgilio",
+      "fonte": "Eneide X, 284 («audentes fortuna iuvat»)",
+      "momento": "partita"
+    },
+    {
+      "testo": "Chi ben comincia è a metà dell'opera.",
+      "autore": "proverbio",
+      "fonte": "Dal latino di Orazio, Epistole I, 2, 40 («dimidium facti qui coepit habet»)",
+      "momento": "inizio_settimana"
+    },
+    {
+      "testo": "Fatti non foste a viver come bruti, ma per seguir virtute e canoscenza.",
+      "autore": "Dante Alighieri",
+      "fonte": "Inferno XXVI, 119-120",
+      "momento": "verifica"
+    },
+    {
+      "testo": "Siamo ciò che facciamo ogni giorno: l'eccellenza non è un atto, ma un'abitudine.",
+      "autore": "Will Durant",
+      "fonte": "La storia della filosofia (1926), riassumendo Aristotele; spesso attribuita ad Aristotele stesso",
+      "momento": "tappa"
+    },
+    {
+      "testo": "Sbagliando s'impara.",
+      "autore": "proverbio",
+      "fonte": null,
+      "momento": "ripasso"
+    },
+    {
+      "testo": "L'unione fa la forza.",
+      "autore": "proverbio",
+      "fonte": null,
+      "momento": "partita"
+    },
+    {
+      "testo": "Chi la dura la vince.",
+      "autore": "proverbio",
+      "fonte": null,
+      "momento": "rimonta"
+    },
+    {
+      "testo": "Volere è potere.",
+      "autore": "proverbio",
+      "fonte": null,
+      "momento": "inizio_settimana"
+    },
+    {
+      "testo": "Non rimandare a domani quello che puoi fare oggi.",
+      "autore": "proverbio",
+      "fonte": null,
+      "momento": "apertura"
+    },
+    {
+      "testo": "Il buongiorno si vede dal mattino.",
+      "autore": "proverbio",
+      "fonte": null,
+      "momento": "apertura"
+    },
+    {
+      "testo": "Non importa quanto vai piano: l'importante è non fermarsi.",
+      "autore": "proverbio",
+      "fonte": "Spesso attribuito a Confucio, ma non si trova nei suoi testi",
+      "momento": "settimana_storta"
+    },
+    {
+      "testo": "Impara l'arte e mettila da parte.",
+      "autore": "proverbio",
+      "fonte": null,
+      "momento": "chiusura"
+    },
+    {
+      "testo": "Mente sana in corpo sano.",
+      "autore": "Giovenale",
+      "fonte": "Satire X, 356 («mens sana in corpore sano»)",
+      "momento": "allenamento"
+    },
+    {
+      "testo": "Più veloce, più in alto, più forte, insieme.",
+      "autore": "motto olimpico",
+      "fonte": "«Citius, altius, fortius – communiter», il motto dei Giochi olimpici dal 2021",
+      "momento": "partita"
+    },
+    {
+      "testo": "La fatica non è mai sprecata: soffri, ma sogni.",
+      "autore": "Gianni Mura",
+      "fonte": "Parlando di Pietro Mennea (citato da OA Sport, 2013)",
+      "momento": "allenamento"
+    },
+    {
+      "testo": "Dove c'è una volontà, c'è una strada.",
+      "autore": "proverbio",
+      "fonte": null,
+      "momento": "verifica"
+    },
+    {
+      "testo": "Chi semina raccoglie.",
+      "autore": "proverbio",
+      "fonte": null,
+      "momento": "tappa"
+    },
+    {
+      "testo": "Non si impara per la scuola, ma per la vita.",
+      "autore": "motto latino",
+      "fonte": "Rovescia una frase di Seneca, Lettere a Lucilio 106, 12, che criticava il contrario",
+      "momento": "verifica"
+    },
+    {
+      "testo": "Con la pazienza si arriva a tutto.",
+      "autore": "proverbio",
+      "fonte": null,
+      "momento": "settimana_storta"
+    },
+    {
+      "testo": "Un passo alla volta si fa tanta strada.",
+      "autore": "proverbio",
+      "fonte": null,
+      "momento": "chiusura"
+    }
+  ]
+}
