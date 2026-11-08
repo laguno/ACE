@@ -379,3 +379,39 @@ export function prossimaRevisione(intervallo: number, esito: Esito, oggi: Date):
   d.setDate(d.getDate() + (esito === 'sapevo' ? nuovo : 1));
   return { intervallo: nuovo, data: iso(d) };
 }
+
+// ---------------------------------------------------------------- conteggio della settimana
+
+/** Motivi dei movimenti che contano come cose obbligatorie (docs/02). */
+export const MOTIVI_OBBLIGATORI = ['compito', 'compito_rifatto', 'cartella', 'borsa', 'foglio', 'ripasso'] as const;
+
+/**
+ * Cose obbligatorie possibili e fatte in una settimana, per le chiavi della domenica.
+ * Possibili: compiti in scadenza, sere con la cartella (domani c'è scuola), sere con la borsa,
+ * fogli da consegnare, sessioni di ripasso previste. Fatte: i movimenti obbligatori della settimana.
+ */
+export function contaSettimana(s: {
+  compiti: number;
+  sereCartella: number;
+  sereBorsa: number;
+  fogli: number;
+  sessioni: number;
+  movimenti: { motivo: string; passi: number }[];
+  note: number;
+}): SettimanaObbligatori {
+  const o = P.obbligatori;
+  const fatti = s.movimenti.filter((m) => (MOTIVI_OBBLIGATORI as readonly string[]).includes(m.motivo) && m.passi > 0);
+  // ponytail: i dieci minuti (sprint 2) entreranno qui come sereDieciMinuti × o.dieci_minuti
+  return {
+    passiPossibili: s.compiti * o.compiti + s.sereCartella * o.cartella + s.sereBorsa * o.borsa + s.fogli * o.fogli + s.sessioni * o.ripasso,
+    passiFatti: fatti.reduce((a, m) => a + m.passi, 0),
+    cosePossibili: s.compiti + s.sereCartella + s.sereBorsa + s.fogli + s.sessioni,
+    coseFatte: fatti.length,
+    note: s.note,
+  };
+}
+
+/** Mondo del percorso (4 sfondi) dalla tappa in corso: 1-7, 8-14, 15-21, 22-27. */
+export function mondo(tappeFatte: number): 0 | 1 | 2 | 3 {
+  return Math.min(3, Math.floor(Math.min(tappeFatte, 26) / 7)) as 0 | 1 | 2 | 3;
+}

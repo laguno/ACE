@@ -8,6 +8,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import * as N from '../../../src/lib/nuvola/index.ts';
 import * as R from '../../../src/lib/regole/index.ts';
+import { aggiornaForzieri } from '../_shared/forzieri.ts';
 
 const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 const NUVOLA = 'https://nuvola.madisoft.it';
@@ -164,6 +165,7 @@ async function sincronizza() {
     note: await scrivi('note', note),
     lezioni: await scrivi('lezioni', N.lezioni(d.giorniLezioni).filter((l) => ids.has(l.materia_id))),
     passi: await passiVotiENote(),
+    forzieri: await aggiornaForzieri(db),
     studio: preparaStudio(),
   };
 }

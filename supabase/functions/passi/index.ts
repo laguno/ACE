@@ -11,6 +11,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import * as R from '../../../src/lib/regole/index.ts';
 import * as C from '../../../src/lib/calendario/index.ts';
+import { aggiornaForzieri } from '../_shared/forzieri.ts';
 
 const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 const P = R.CONFIG.passi;
@@ -223,7 +224,10 @@ Deno.serve(async (req) => {
     const { tipo, id } = await req.json();
     const gestore = gestori[tipo];
     if (!gestore || typeof id !== 'string') return risposta({ errore: 'tipo o id non validi' }, 400);
-    return risposta(await gestore(id));
+    const esito = await gestore(id);
+    // passi nuovi: forse si è arrivati a una tappa con forziere
+    const forzieri = esito.passi ? await aggiornaForzieri(db) : [];
+    return risposta({ ...esito, forzieri });
   } catch (e) {
     if (e instanceof Richiesta) return risposta({ errore: e.message }, 400);
     console.error(e);

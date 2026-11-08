@@ -236,3 +236,33 @@ describe('piano di ripasso e ripetizione', async () => {
     expect(prossimaRevisione(4, 'non_sapevo', g('2026-11-09'))).toEqual({ intervallo: 1, data: '2026-11-10' });
   });
 });
+
+describe('conteggio della settimana', async () => {
+  const { contaSettimana, chiaviSettimana, mondo } = await import('./index');
+  const P = CONFIG.passi.obbligatori;
+  it('possibili e fatti dalle cose obbligatorie, il resto non conta', () => {
+    const s = contaSettimana({
+      compiti: 6,
+      sereCartella: 5,
+      sereBorsa: 2,
+      fogli: 0,
+      sessioni: 2,
+      note: 0,
+      movimenti: [
+        ...Array(6).fill({ motivo: 'compito', passi: P.compiti }),
+        ...Array(5).fill({ motivo: 'cartella', passi: P.cartella }),
+        { motivo: 'borsa', passi: P.borsa },
+        { motivo: 'ripasso', passi: P.ripasso },
+        { motivo: 'flashcard', passi: 3 },
+        { motivo: 'storno', passi: -10 },
+      ],
+    });
+    expect(s.passiPossibili).toBe(6 * P.compiti + 5 * P.cartella + 2 * P.borsa + 2 * P.ripasso);
+    expect(s.coseFatte).toBe(13);
+    expect(s.cosePossibili).toBe(15);
+    expect(chiaviSettimana(s)).toBe(2); // 13/15 < 95%
+  });
+  it('mondi ogni 7 tappe, la cima resta nello spazio', () => {
+    expect([0, 6, 7, 14, 21, 26, 27].map(mondo)).toEqual([0, 0, 1, 2, 3, 3, 3]);
+  });
+});
