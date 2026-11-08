@@ -33,8 +33,11 @@ describe('chiusura e momento della giornata', async () => {
   it('giovedì con partita alle 19:45: chiusura alle 19:15', () => {
     expect(oraChiusura('20:30', [{ titolo: 'Partita Lani: FOXES', inizio: '2026-11-12T18:45:00Z' }])).toBe('19:15');
   });
-  it('venerdì: niente chiusura', () => {
+  it('venerdì: niente chiusura, salvo partita il giorno dopo (chiusura breve)', () => {
     expect(oraChiusura(null, [])).toBeNull();
+    expect(oraChiusura(null, [], '20:30')).toBe('20:30');
+    // venerdì con allenamento alle 18:30 e partita sabato: mezz'ora prima dell'allenamento
+    expect(oraChiusura(null, [allenamento('2026-11-13T17:30:00Z')], '20:30')).toBe('18:00');
   });
   it('momento: mattina, pomeriggio, sera da un’ora prima', () => {
     expect(momento('07:10', '20:30')).toBe('mattina');

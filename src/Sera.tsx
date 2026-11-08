@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import * as C from './lib/calendario';
 import * as N from './lib/nuvola';
 import * as R from './lib/regole';
-import { GIORNI, RigaCompito, SELECT_COMPITI, adesso, maiuscola, passi, spuntaCompito, type Compito } from './spunte';
+import { GIORNI, RigaCompito, SELECT_COMPITI, adesso, maiuscola, passi, spuntaCompito, useAnnulla, type Compito } from './spunte';
 import { supabase } from './supabase';
 
 // Sera — design/Domani.html. Lani spunta; i passi li decide la funzione "passi" sul server.
@@ -18,11 +18,12 @@ const PRIMA_DI_USCIRE_DA_SCUOLA = '16:00';
 
 /** Lista a voci (cartella, borsa): spuntate una per una sul telefono, con l'ultima è pronta. */
 // ponytail: le voci spuntate si perdono se si chiude l'app prima dell'ultima.
-function Voci({ titolo, voci, pronta, quandoPronta, children }: {
+function Voci({ titolo, voci, pronta, quandoPronta, onAnnulla, children }: {
   titolo: string;
   voci: string[];
   pronta: boolean;
   quandoPronta: () => void;
+  onAnnulla?: () => void;
   children?: React.ReactNode;
 }) {
   const [messe, setMesse] = useState(new Set<string>());
@@ -47,6 +48,11 @@ function Voci({ titolo, voci, pronta, quandoPronta, children }: {
           </li>
         ))}
       </ul>
+      {onAnnulla && (
+        <button className="lampadina annulla" onClick={onAnnulla}>
+          Annulla
+        </button>
+      )}
     </div>
   );
 }
@@ -103,10 +109,15 @@ export default function Sera() {
     carica();
   }, [carica]);
 
-  // La spunta si vede subito (subito()); se il salvataggio fallisce, carica() la toglie.
-  async function spunta(subito: () => void, azione: () => PromiseLike<{ error: unknown }>, tipo: string, id: string) {
+  // La spunta si vede subito (subito()); per 5 secondi si può annullare, poi parte l'invio.
+  // Se il salvataggio fallisce, carica() la toglie.
+  const attesa = useAnnulla();
+  function spunta(chiave: string, subito: () => void, azione: () => PromiseLike<{ error: unknown }>, tipo: string, id: string) {
     subito();
     setErrore('');
+    attesa.avvia(chiave, () => invia(azione, tipo, id));
+  }
+  async function invia(azione: () => PromiseLike<{ error: unknown }>, tipo: string, id: string) {
     const { error } = await azione();
     if (error) {
       setErrore('Spunta non salvata. Riprova.');
@@ -117,6 +128,7 @@ export default function Sera() {
   }
   const chiudiSerata = (campo: 'cartella' | 'borsa') =>
     spunta(
+      campo,
       () => setSerata((s) => ({ ...s, [campo]: true })),
       () => supabase.from('serate').upsert({ data: R.iso(oggi), [`${campo}_il`]: adesso() }),
       'serata',
@@ -129,10 +141,14 @@ export default function Sera() {
   const sport = impegni.find((i) => C.tipoImpegno(i.titolo) !== 'famiglia');
   const famiglia = impegni.find((i) => C.tipoImpegno(i.titolo) === 'famiglia');
   const conBorsa = !!sport;
-  const cose = compiti.length + fogli.length + (conCartella ? 1 : 0) + (conBorsa ? 1 : 0);
+  // venerdì e sabato con partita il giorno dopo: chiusura breve con la sola borsa (decisione 8/11)
+  const soloBorsa = !conCartella && C.partitaTra(impegni);
+  const visti = soloBorsa ? [] : compiti;
+  const fogliVisti = soloBorsa ? [] : fogli;
+  const cose = visti.length + fogliVisti.length + (conCartella ? 1 : 0) + (conBorsa ? 1 : 0);
   const fatte =
-    compiti.filter((c) => c.fatto_il).length +
-    fogli.filter((f) => f.dato_il).length +
+    visti.filter((c) => c.fatto_il).length +
+    fogliVisti.filter((f) => f.dato_il).length +
     (conCartella && serata.cartella ? 1 : 0) +
     (conBorsa && serata.borsa ? 1 : 0);
   const mancante = compiti.find((c) => !c.fatto_il);
@@ -140,7 +156,7 @@ export default function Sera() {
   return (
     <section className="sera">
       <p className="sopratitolo">{maiuscola(GIORNI[oggi.getDay()])} sera</p>
-      <h1>Pronta per {GIORNI[domani.getDay()]}?</h1>
+      <h1>Pronta per {GIORNI[(soloBorsa ? domaniCal : domani).getDay()]}?</h1>
       {cose > 0 && (
         <>
           <div className="avanzamento" role="progressbar" aria-valuemin={0} aria-valuemax={cose} aria-valuenow={fatte}>
@@ -154,6 +170,7 @@ export default function Sera() {
       )}
       {errore && <p role="alert">{errore}</p>}
 
+      {!soloBorsa && (
       <div className="carta">
         <h2>Compiti per domani</h2>
         {compiti.length === 0 && <p>Nessun compito su Nuvola per domani.</p>}
@@ -162,12 +179,15 @@ export default function Sera() {
             <RigaCompito
               key={c.id}
               c={c}
-              onSpunta={() =>
-                spuntaCompito(
-                  c.id,
-                  (fatto_il) => setCompiti((l) => l?.map((x) => (x.id === c.id ? { ...x, fatto_il } : x))),
-                  setErrore,
-                ).then(carica)
+              onSpunta={() => {
+                const segna = (fatto_il: string | null) => setCompiti((l) => l?.map((x) => (x.id === c.id ? { ...x, fatto_il } : x)));
+                segna(adesso());
+                attesa.avvia(c.id, () => spuntaCompito(c.id, segna, setErrore).then(carica));
+              }}
+              onAnnulla={
+                attesa.inAttesa(c.id)
+                  ? () => attesa.annulla(c.id, () => setCompiti((l) => l?.map((x) => (x.id === c.id ? { ...x, fatto_il: null } : x))))
+                  : undefined
               }
             />
           ))}
@@ -176,6 +196,7 @@ export default function Sera() {
           <p className="lady">Lady si è sdraiata sul quaderno di {mancante.materie?.nome ?? 'domani'}. Si sposta solo se lo apri.</p>
         )}
       </div>
+      )}
 
       {conCartella && (
         <Voci
@@ -183,11 +204,18 @@ export default function Sera() {
           voci={orario.length ? orario : [`Cartella pronta per ${GIORNI[domani.getDay()]}`]}
           pronta={serata.cartella}
           quandoPronta={() => chiudiSerata('cartella')}
+          onAnnulla={attesa.inAttesa('cartella') ? () => attesa.annulla('cartella', () => setSerata((s) => ({ ...s, cartella: false }))) : undefined}
         />
       )}
 
       {sport && (
-        <Voci titolo="Borsa" voci={VOCI_BORSA} pronta={serata.borsa} quandoPronta={() => chiudiSerata('borsa')}>
+        <Voci
+          titolo="Borsa"
+          voci={VOCI_BORSA}
+          pronta={serata.borsa}
+          quandoPronta={() => chiudiSerata('borsa')}
+          onAnnulla={attesa.inAttesa('borsa') ? () => attesa.annulla('borsa', () => setSerata((s) => ({ ...s, borsa: false }))) : undefined}
+        >
           <p className="nota">
             {C.tipoImpegno(sport.titolo) === 'partita' ? 'Partita' : 'Allenamento'} domani alle {C.oraRoma(sport.inizio)}
             {R.giornoDiScuola(domaniCal) && C.oraRoma(sport.inizio) < PRIMA_DI_USCIRE_DA_SCUOLA ? ': la porti a scuola.' : '.'}
@@ -195,20 +223,25 @@ export default function Sera() {
         </Voci>
       )}
 
-      {fogli.length > 0 && (
+      {fogliVisti.length > 0 && (
         <div className="carta">
           <h2>Da far firmare</h2>
           <ul className="spunte">
             {fogli.map((f) => (
               <li key={f.id} className="foglio">
                 <span>{f.titolo}</span>
-                {f.dato_il ? (
+                {attesa.inAttesa(f.id) ? (
+                  <button className="lampadina annulla" onClick={() => attesa.annulla(f.id, () => setFogli((l) => l.map((x) => (x.id === f.id ? { ...x, dato_il: null } : x))))}>
+                    Annulla
+                  </button>
+                ) : f.dato_il ? (
                   <span className="dato">Dato, aspetta la firma</span>
                 ) : (
                   <button
                     className="principale"
                     onClick={() =>
                       spunta(
+                        f.id,
                         () => setFogli((l) => l.map((x) => (x.id === f.id ? { ...x, dato_il: adesso() } : x))),
                         () => supabase.from('fogli_firma').update({ dato_il: adesso() }).eq('id', f.id),
                         'foglio',

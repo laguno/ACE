@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { supabase } from './supabase';
 
 // Pezzi comuni a Oggi e Sera: la spunta di un compito e il suo aspetto.
@@ -17,9 +18,16 @@ export async function passi(tipo: string, id: string): Promise<number> {
   return data?.passi ?? 0;
 }
 
-export function RigaCompito({ c, numero, onSpunta, onAiuto }: { c: Compito; numero?: number; onSpunta: () => void; onAiuto?: () => void }) {
+export function RigaCompito({ c, numero, onSpunta, onAiuto, onAnnulla }: {
+  c: Compito;
+  numero?: number;
+  onSpunta: () => void;
+  onAiuto?: () => void;
+  /** presente nei 5 secondi dopo la spunta */
+  onAnnulla?: () => void;
+}) {
   return (
-    <li className={onAiuto ? 'con-aiuto' : undefined}>
+    <li className={onAiuto || onAnnulla ? 'con-aiuto' : undefined}>
       <label>
         <input type="checkbox" checked={!!c.fatto_il} disabled={!!c.fatto_il} onChange={onSpunta} />
         <span>
@@ -27,6 +35,11 @@ export function RigaCompito({ c, numero, onSpunta, onAiuto }: { c: Compito; nume
           <b>{c.materie?.nome ?? 'Compito'}</b>: {c.testo}
         </span>
       </label>
+      {onAnnulla && (
+        <button className="lampadina annulla" onClick={onAnnulla}>
+          Annulla
+        </button>
+      )}
       {onAiuto && !c.fatto_il && (
         <button className="lampadina" onClick={onAiuto} aria-label={`Non ho capito: ${c.materie?.nome ?? 'compito'}`}>
           Non ho capito
@@ -49,4 +62,30 @@ export async function spuntaCompito(
     return errore('Spunta non salvata. Riprova.');
   }
   await passi('compito', id);
+}
+
+/**
+ * "Annulla" per 5 secondi dopo una spunta, prima dell'invio al server (revisione di Jarvis): la
+ * spunta si vede subito, l'invio parte allo scadere; dopo, la correzione resta dei genitori.
+ * Se si cambia schermata prima dei 5 secondi, l'invio parte lo stesso.
+ */
+export const SECONDI_ANNULLA = 5;
+export function useAnnulla() {
+  const [attesa, setAttesa] = useState<Record<string, number>>({});
+  const togli = (id: string) => setAttesa(({ [id]: _, ...resto }) => resto);
+  return {
+    inAttesa: (id: string) => id in attesa,
+    avvia(id: string, invia: () => void) {
+      const t = window.setTimeout(() => {
+        togli(id);
+        invia();
+      }, SECONDI_ANNULLA * 1000);
+      setAttesa((a) => ({ ...a, [id]: t }));
+    },
+    annulla(id: string, torna: () => void) {
+      window.clearTimeout(attesa[id]);
+      togli(id);
+      torna();
+    },
+  };
 }

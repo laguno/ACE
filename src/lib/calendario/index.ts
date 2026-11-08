@@ -34,9 +34,15 @@ export function sposta(ora: string, minuti: number): string {
 /**
  * Ora della chiusura serale (docs/01): quella base del giorno (impostazioni), ma se Lani ha un
  * allenamento o una partita che inizia dopo le 17, si chiude mezz'ora prima di uscire (martedì
- * 18:30 -> 18:00, partita del giovedì). Senza base (venerdì, sabato) niente chiusura.
+ * 18:30 -> 18:00, partita del giovedì). Senza base (venerdì, sabato) niente chiusura, salvo una
+ * partita il giorno dopo: allora chiusura breve (solo la borsa) all'ora "breve" (decisione 8/11).
  */
-export function oraChiusura(base: string | null, impegniDiOggi: { titolo: string; inizio: string }[]): string | null {
+export function oraChiusura(
+  base: string | null,
+  impegniDiOggi: { titolo: string; inizio: string }[],
+  breve: string | null = null,
+): string | null {
+  base ??= breve;
   const tardi = impegniDiOggi
     .filter((i) => tipoImpegno(i.titolo) !== 'famiglia')
     .map((i) => oraRoma(i.inizio))
@@ -51,3 +57,6 @@ export function momento(ora: string, chiusura: string | null): 'mattina' | 'pome
   if (chiusura && ora >= sposta(chiusura, -60)) return 'sera';
   return 'pomeriggio';
 }
+
+/** C'è una partita di Lani tra questi impegni (per la chiusura breve del venerdì e del sabato). */
+export const partitaTra = (impegni: { titolo: string }[]) => impegni.some((i) => tipoImpegno(i.titolo) === 'partita');

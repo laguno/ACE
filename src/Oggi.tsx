@@ -3,7 +3,7 @@ import { impegniTra, piuGiorni, oraAdesso, useGiornata, type Impegno } from './g
 import * as C from './lib/calendario';
 import * as N from './lib/nuvola';
 import * as R from './lib/regole';
-import { GIORNI, MESI, RigaCompito, SELECT_COMPITI, maiuscola, spuntaCompito, type Compito } from './spunte';
+import { GIORNI, MESI, RigaCompito, SELECT_COMPITI, adesso, maiuscola, spuntaCompito, useAnnulla, type Compito } from './spunte';
 import { attivaNotifiche, notifichePossibili } from './notifiche';
 import { supabase } from './supabase';
 
@@ -127,6 +127,7 @@ function Pomeriggio({ chiusura }: { chiusura: string | null }) {
   const [compiti, setCompiti] = useState<Compito[]>();
   const [errore, setErrore] = useState('');
   const [aiuto, setAiuto] = useState<Compito>();
+  const attesa = useAnnulla();
 
   useEffect(() => {
     supabase
@@ -165,7 +166,11 @@ function Pomeriggio({ chiusura }: { chiusura: string | null }) {
                   key={c.id}
                   c={c}
                   numero={i + 1}
-                  onSpunta={() => spuntaCompito(c.id, segna(c.id), setErrore)}
+                  onSpunta={() => {
+                    segna(c.id)(adesso());
+                    attesa.avvia(c.id, () => spuntaCompito(c.id, segna(c.id), setErrore));
+                  }}
+                  onAnnulla={attesa.inAttesa(c.id) ? () => attesa.annulla(c.id, () => segna(c.id)(null)) : undefined}
                   onAiuto={() => setAiuto(c)}
                 />
               ))}

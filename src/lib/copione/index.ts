@@ -22,6 +22,7 @@ export const POPUP = {
   // note (bastone)
   nota_disciplinare: { priorita: 1, posa: 'mamma-arrabbiata', titolo: 'Nota', testo: 'Nota disciplinare in {materia}. {passi}, e salta la seconda chiave. Stasera ne parliamo.' },
   nota_terza_dimenticanza: { priorita: 1, posa: 'papa-arrabbiato', titolo: 'Terza dimenticanza', testo: 'Terza nota per dimenticanze: {passi}. Da domani doppia spunta sulla cartella.' },
+  nota_merito: { priorita: 2, posa: 'mamma-festeggia', titolo: 'Nota di merito', testo: 'Nota di merito in {materia}: +{passi}. Questa va sul frigo.' },
   // casa: gesti e sgridate segnati dai genitori
   gesto_papa: { priorita: 4, posa: 'papa-pollice', titolo: 'Passi di casa', testo: 'Papà: +{passi}, {cosa}.' },
   gesto_mamma: { priorita: 4, posa: 'mamma-pollice', titolo: 'Passi di casa', testo: 'Mamma: +{passi}, {cosa}.' },

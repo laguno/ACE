@@ -227,3 +227,4 @@ main { position: relative; padding: 16px 16px calc(88px + env(safe-area-inset-bo
 .avvio .segno { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--lilla); font-weight: 800; }
 .avvio .fatto .segno { background: #2e7d32; color: #fff; }
 .avvio small { display: block; color: var(--testo-2); }
+.annulla { background: var(--rosa); color: var(--accento-premuto); }
