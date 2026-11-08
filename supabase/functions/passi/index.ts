@@ -157,6 +157,24 @@ const gestori: Record<string, (id: string) => Promise<Esito>> = {
   async quiz(id) {
     const t = await riga('quiz_tentativi', 'id', id);
     const g = R.giornoRoma(t.fatto_il);
+    // le domande sbagliate diventano flash card (una carta uguale non si duplica)
+    if (t.sbagliate?.length) {
+      const q = await riga('quiz', 'id', t.quiz_id);
+      const carte = t.sbagliate
+        .map((n: number) => q.domande[n])
+        .filter(Boolean)
+        .map((d: { testo: string; opzioni: string[]; giusta: number; spiegazione: string }) => ({
+          materia_id: q.materia_id,
+          argomento: q.argomento,
+          verifica_id: q.verifica_id,
+          tipo: 'domanda',
+          fronte: d.testo,
+          retro: `${d.opzioni[d.giusta]}. ${d.spiegazione}`,
+          fonte: 'quiz_sbagliato',
+        }));
+      const { error } = await db.from('flashcard').upsert(carte, { onConflict: 'materia_id,fronte', ignoreDuplicates: true });
+      if (error) throw error;
+    }
     if (!(await studioConta('quiz', g))) return niente('compiti da finire o quiz di oggi finiti');
     return registra('quiz', id, R.passiQuiz(t.numero, t.giuste, t.totale), g);
   },

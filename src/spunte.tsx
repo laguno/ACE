@@ -11,9 +11,10 @@ export const adesso = () => new Date().toISOString();
 
 export const SELECT_COMPITI = 'id, testo, fatto_il, materie(nome)';
 
-/** La funzione "passi" decide i passi dallo stato del database; l'esito non serve al client. */
-export async function passi(tipo: string, id: string) {
-  await supabase.functions.invoke('passi', { body: { tipo, id } });
+/** La funzione "passi" decide i passi dallo stato del database; restituisce quanti ne ha dati. */
+export async function passi(tipo: string, id: string): Promise<number> {
+  const { data } = await supabase.functions.invoke('passi', { body: { tipo, id } });
+  return data?.passi ?? 0;
 }
 
 export function RigaCompito({ c, numero, onSpunta }: { c: Compito; numero?: number; onSpunta: () => void }) {

@@ -4,6 +4,7 @@ import Accesso from './Accesso';
 import AreaGenitori from './AreaGenitori';
 import Oggi from './Oggi';
 import Sera from './Sera';
+import Studio from './Studio';
 import { oraAdesso, useGiornata } from './giornata';
 import * as C from './lib/calendario';
 import { supabase, type Profilo } from './supabase';
@@ -80,7 +81,7 @@ function Lani() {
     <>
       <main>
         <button className="angolo" onClick={() => setVoce('Genitori')}>Genitori</button>
-        {voce === 'Sera' ? <Sera /> : voce === 'Oggi' ? <Oggi /> : <h1>{voce}</h1>}
+        {voce === 'Sera' ? <Sera /> : voce === 'Oggi' ? <Oggi /> : voce === 'Studio' ? <Studio /> : <h1>{voce}</h1>}
       </main>
       <nav className="barra" aria-label="Sezioni">
         {VOCI.map((v) => (

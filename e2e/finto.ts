@@ -23,11 +23,18 @@ function filtra(righe: Record<string, unknown>[], q: URLSearchParams) {
   );
 }
 
-// Unisce le tabelle collegate chieste nel select, per esempio materie(nome).
-function unisci(t: Tabelle, riga: Record<string, unknown>, select: string | null) {
-  if (!select?.includes('materie(')) return riga;
-  const m = t.materie?.find((x) => x.id === riga.materia_id);
-  return { ...riga, materie: m ? { nome: m.nome } : null };
+// Unisce le tabelle collegate chieste nel select: materie(nome) è il genitore (materia_id), le
+// altre sono figlie collegate con <singolare>_id (verifiche -> verifica_id).
+const SINGOLARE: Record<string, string> = { verifiche: 'verifica', quiz: 'quiz' };
+function unisci(t: Tabelle, nome: string, riga: Record<string, unknown>, select: string | null) {
+  const fuori = { ...riga };
+  for (const [, x] of (select ?? '').matchAll(/(\w+)\(/g)) {
+    if (x === 'materie') {
+      const m = t.materie?.find((y) => y.id === riga.materia_id);
+      fuori.materie = m ? { nome: m.nome } : null;
+    } else fuori[x] = (t[x] ?? []).filter((c) => c[`${SINGOLARE[nome] ?? nome}_id`] === riga.id);
+  }
+  return fuori;
 }
 
 export async function finto(page: Page, t: Tabelle, utente = { id: 'lani', ruolo: 'lani', nome: 'Lani' }) {
@@ -68,9 +75,18 @@ export async function finto(page: Page, t: Tabelle, utente = { id: 'lani', ruolo
     const uno = (req.headers()['accept'] ?? '').includes('vnd.pgrst.object');
 
     if (metodo === 'GET' || metodo === 'HEAD') {
-      const trovate = filtra(righe, url.searchParams).map((r) => unisci(t, r, url.searchParams.get('select')));
+      const trovate = filtra(righe, url.searchParams).map((r) => unisci(t, nome, r, url.searchParams.get('select')));
       if (uno) return trovate.length ? json(trovate[0]) : json({ code: 'PGRST116', message: 'nessuna riga' }, 406);
-      return json(trovate);
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        headers: {
+          'content-range': `0-${Math.max(0, trovate.length - 1)}/${trovate.length}`,
+          'access-control-expose-headers': 'content-range',
+          'access-control-allow-origin': '*',
+        },
+        body: JSON.stringify(trovate),
+      });
     }
     if (metodo === 'PATCH') {
       const corpo = req.postDataJSON();
@@ -80,13 +96,15 @@ export async function finto(page: Page, t: Tabelle, utente = { id: 'lani', ruolo
     }
     if (metodo === 'POST') {
       const nuove = [req.postDataJSON()].flat();
-      const chiave = url.searchParams.get('on_conflict') ?? Object.keys(nuove[0])[0];
-      for (const n of nuove) {
-        const c = righe.find((r) => r[chiave] === n[chiave]);
-        if (c) Object.assign(c, n);
-        else righe.push({ ...n });
-      }
-      return json(nuove, 201);
+      const chiave = url.searchParams.get('on_conflict');
+      const salvate = nuove.map((n) => {
+        const c = chiave && righe.find((r) => r[chiave] === n[chiave]);
+        if (c) return Object.assign(c, n);
+        const riga = { id: `nuovo-${righe.length + 1}`, numero: 1, ...n };
+        righe.push(riga);
+        return riga;
+      });
+      return json(uno ? salvate[0] : salvate, 201);
     }
     return json({ message: `non previsto: ${metodo} ${nome}` }, 400);
   });

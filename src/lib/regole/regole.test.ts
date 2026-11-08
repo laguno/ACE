@@ -209,3 +209,30 @@ describe('voti e note da Nuvola', () => {
     expect(malusDimenticanze(['a', 'b', 'c', 'd', 'e', 'f', 'g'])).toEqual(['c', 'f']);
   });
 });
+
+describe('piano di ripasso e ripetizione', async () => {
+  const { pianoRipasso, prossimaRevisione, giorno: g } = await import('./index');
+  it('quattro sessioni nei quattro giorni prima', () => {
+    expect(pianoRipasso(g('2026-11-16'), g('2026-11-09'))).toEqual([
+      { numero: 1, data: '2026-11-12', tipo: 'rilettura_flashcard' },
+      { numero: 2, data: '2026-11-13', tipo: 'flashcard_mappa' },
+      { numero: 3, data: '2026-11-14', tipo: 'quiz' },
+      { numero: 4, data: '2026-11-15', tipo: 'quiz_errori' },
+    ]);
+  });
+  it('con due giorni: rilettura e quiz; verifica domani: solo quiz', () => {
+    expect(pianoRipasso(g('2026-11-12'), g('2026-11-10')).map((s) => s.tipo)).toEqual(['rilettura_flashcard', 'quiz']);
+    expect(pianoRipasso(g('2026-11-12'), g('2026-11-11'))).toEqual([{ numero: 1, data: '2026-11-11', tipo: 'quiz' }]);
+    expect(pianoRipasso(g('2026-11-12'), g('2026-11-12'))).toEqual([]);
+  });
+  it('salta i giorni con la partita', () => {
+    const p = pianoRipasso(g('2026-11-16'), g('2026-11-09'), ['2026-11-14']);
+    expect(p.map((s) => s.data)).toEqual(['2026-11-11', '2026-11-12', '2026-11-13', '2026-11-15']);
+  });
+  it('intervalli: sapevo raddoppia, quasi domani, non sapevo da capo', () => {
+    expect(prossimaRevisione(1, 'sapevo', g('2026-11-09'))).toEqual({ intervallo: 2, data: '2026-11-11' });
+    expect(prossimaRevisione(4, 'sapevo', g('2026-11-09'))).toEqual({ intervallo: 8, data: '2026-11-17' });
+    expect(prossimaRevisione(4, 'quasi', g('2026-11-09'))).toEqual({ intervallo: 4, data: '2026-11-10' });
+    expect(prossimaRevisione(4, 'non_sapevo', g('2026-11-09'))).toEqual({ intervallo: 1, data: '2026-11-10' });
+  });
+});

@@ -334,3 +334,48 @@ const MALUS: Record<TipoSgridata, keyof typeof P.malus> = {
 export function passiSgridata(tipo: TipoSgridata): number {
   return P.malus[MALUS[tipo]];
 }
+
+// ---------------------------------------------------------------- studio: piano e ripetizione
+
+export type TipoSessione = 'rilettura_flashcard' | 'flashcard_mappa' | 'quiz' | 'quiz_errori';
+
+/**
+ * Piano di ripasso di una verifica (docs/03): fino a 4 sessioni nei giorni prima, l'ultima la sera
+ * prima. Con meno giorni si comprime tenendo l'inizio (rilettura) e la fine (quiz). I giorni
+ * occupati (partite) si saltano. Nessuna sessione il giorno stesso della verifica.
+ */
+export function pianoRipasso(
+  dataVerifica: Date,
+  oggi: Date,
+  occupati: string[] = [],
+): { numero: number; data: string; tipo: TipoSessione }[] {
+  const liberi: Date[] = [];
+  const g = startOfDay(dataVerifica);
+  for (let i = 1; i <= 7 && liberi.length < 4; i++) {
+    const d = new Date(g);
+    d.setDate(d.getDate() - i);
+    if (d < startOfDay(oggi)) break;
+    if (!occupati.includes(iso(d))) liberi.unshift(d);
+  }
+  const tipi: Record<number, TipoSessione[]> = {
+    4: ['rilettura_flashcard', 'flashcard_mappa', 'quiz', 'quiz_errori'],
+    3: ['rilettura_flashcard', 'quiz', 'quiz_errori'],
+    2: ['rilettura_flashcard', 'quiz'],
+    1: ['quiz'],
+    0: [],
+  };
+  return tipi[liberi.length].map((tipo, i) => ({ numero: i + 1, data: iso(liberi[i]), tipo }));
+}
+
+export type Esito = 'sapevo' | 'quasi' | 'non_sapevo';
+
+/**
+ * Ripetizione a intervalli crescenti: "sapevo" raddoppia l'intervallo, "quasi" torna domani con lo
+ * stesso intervallo ("le incerte tornano domani"), "non sapevo" riparte da 1.
+ */
+export function prossimaRevisione(intervallo: number, esito: Esito, oggi: Date): { intervallo: number; data: string } {
+  const nuovo = esito === 'sapevo' ? Math.max(2, intervallo * 2) : esito === 'quasi' ? intervallo : 1;
+  const d = startOfDay(oggi);
+  d.setDate(d.getDate() + (esito === 'sapevo' ? nuovo : 1));
+  return { intervallo: nuovo, data: iso(d) };
+}

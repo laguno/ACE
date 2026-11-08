@@ -427,3 +427,6 @@ verify_jwt = false
 
 [functions.sync-calendario]
 verify_jwt = false
+
+[functions.genera-studio]
+verify_jwt = false
