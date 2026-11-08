@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
+import * as N from './lib/nuvola';
 import * as R from './lib/regole';
 import { supabase } from './supabase';
 
 // Sera — design/Domani.html. Lani spunta; i passi li decide la funzione "passi" sul server.
-// ponytail: cartella senza l'elenco delle materie (arriva con l'orario da Nuvola) e senza borsa
-// (serve il calendario di famiglia): sono i prossimi passi della tappa 3.
+// Cartella dalle lezioni di Nuvola (orario). ponytail: borsa quando arriva il calendario di famiglia.
 
 type Compito = { id: string; testo: string; fatto_il: string | null; materie: { nome: string } | null };
 type Foglio = { id: string; titolo: string; scadenza: string | null; dato_il: string | null };
@@ -23,7 +23,21 @@ export default function Sera() {
   const [fogli, setFogli] = useState<Foglio[]>([]);
   const [cartella, setCartella] = useState(false);
   const [passiOggi, setPassiOggi] = useState(0);
+  const [orario, setOrario] = useState<string[]>([]);
+  const [messe, setMesse] = useState(new Set<string>());
   const [errore, setErrore] = useState('');
+
+  useEffect(() => {
+    const da = new Date(oggi);
+    da.setDate(da.getDate() - 21);
+    Promise.all([
+      supabase.from('lezioni').select('data, ora, materia_id').gte('data', R.iso(da)),
+      supabase.from('materie').select('id, nome'),
+    ]).then(([l, m]) => {
+      const nomi = new Map((m.data ?? []).map((x) => [x.id, x.nome]));
+      setOrario(N.materieDelGiorno(l.data ?? [], domani.getDay()).map((id) => nomi.get(id) ?? id));
+    });
+  }, [R.iso(domani)]);
 
   const carica = useCallback(async () => {
     const [c, f, s, m] = await Promise.all([
@@ -56,6 +70,23 @@ export default function Sera() {
     carica();
   }
   const adesso = () => new Date().toISOString();
+
+  // Cartella: voci spuntate una per una (solo sul telefono); con l'ultima la cartella è pronta.
+  // ponytail: le voci spuntate si perdono se si chiude l'app prima dell'ultima.
+  const voci = orario.length ? [...orario, 'Diario e astuccio'] : [`Cartella pronta per ${GIORNI[domani.getDay()]}`];
+  function metti(v: string) {
+    const nuove = new Set(messe);
+    if (nuove.has(v)) nuove.delete(v);
+    else nuove.add(v);
+    setMesse(nuove);
+    if (voci.every((x) => nuove.has(x)))
+      spunta(
+        () => setCartella(true),
+        () => supabase.from('serate').upsert({ data: R.iso(oggi), cartella_il: adesso() }),
+        'serata',
+        R.iso(oggi),
+      );
+  }
 
   if (!compiti) return errore ? <p role="alert">{errore}</p> : null;
 
@@ -118,24 +149,19 @@ export default function Sera() {
         <div className="carta">
           <h2>Cartella</h2>
           <ul className="spunte">
-            <li>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={cartella}
-                  disabled={cartella}
-                  onChange={() =>
-                    spunta(
-                      () => setCartella(true),
-                      () => supabase.from('serate').upsert({ data: R.iso(oggi), cartella_il: adesso() }),
-                      'serata',
-                      R.iso(oggi),
-                    )
-                  }
-                />
-                <span>Cartella pronta per {GIORNI[domani.getDay()]}</span>
-              </label>
-            </li>
+            {voci.map((v) => (
+              <li key={v}>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={cartella || messe.has(v)}
+                    disabled={cartella}
+                    onChange={() => metti(v)}
+                  />
+                  <span>{v}</span>
+                </label>
+              </li>
+            ))}
           </ul>
         </div>
       )}
