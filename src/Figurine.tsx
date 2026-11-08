@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import manifest from '../data/manifest.json' with { type: 'json' };
 import { supabase } from './supabase';
+import { ArrowLeft } from '@phosphor-icons/react';
+import { useSfondo } from './kit';
+import { nomeFigurina } from './lib/copione';
 
 // Figurina di Lani (design/Figurina.html) e Album da 64 (design/Album.html).
 
@@ -25,6 +28,7 @@ const INDIZI: Record<string, string> = {
 };
 
 export function Figurina({ chiudi }: { chiudi: () => void }) {
+  useSfondo('sera');
   const [d, setD] = useState<{ voti: Voto[]; passi: number; chiavi: number; obiettivo: number }>();
   useEffect(() => {
     Promise.all([
@@ -54,10 +58,18 @@ export function Figurina({ chiudi }: { chiudi: () => void }) {
   const fmt = (n: number | null) => (n === null ? '–' : n.toLocaleString('it-IT', { minimumFractionDigits: 1, maximumFractionDigits: 2 }));
 
   return (
-    <section className="sera">
+    <section className="schermo figurina-pagina">
+      <Indietro chiudi={chiudi} />
       <div className="carta figurina">
-        <img src="/assets/avatar/lani/lani-divisa.webp" alt="Lani in divisa, numero 9" width={180} height={180} />
-        <h1>Lani, n. 9</h1>
+        <div className="fascia">
+          <span>R-Evolution U13</span>
+          <b aria-hidden>9</b>
+          <img src="/assets/avatar/lani/lani-divisa.webp" alt="Lani in divisa, numero 9" width={150} height={150} />
+        </div>
+        <div className="nome">
+          <h1>Lani, n. 9</h1>
+          <small>seconda media</small>
+        </div>
         <dl className="numeri">
           <div>
             <dt>Media</dt>
@@ -72,7 +84,10 @@ export function Figurina({ chiudi }: { chiudi: () => void }) {
             <dd>{d.chiavi}</dd>
           </div>
         </dl>
-        <p className="nota">Obiettivo liceo: media {fmt(d.obiettivo)}</p>
+        <p className="obiettivo">
+          <span>Obiettivo liceo: media {fmt(d.obiettivo)}</span>
+          {generale !== null && generale < d.obiettivo && <b>mancano {fmt(d.obiettivo - generale)}</b>}
+        </p>
         <div className="avanzamento" role="progressbar" aria-valuemin={0} aria-valuemax={10} aria-valuenow={generale ?? 0} aria-label="Media verso l'obiettivo">
           <span style={{ width: `${Math.min(100, ((generale ?? 0) / d.obiettivo) * 100)}%` }} />
         </div>
@@ -98,12 +113,21 @@ export function Figurina({ chiudi }: { chiudi: () => void }) {
           })}
         </ul>
       </div>
-      <button className="principale largo" onClick={chiudi}>Torna ad Astra</button>
     </section>
   );
 }
 
+/** "← Astra" in alto, come nelle bozze; il nome per chi usa il lettore resta "Torna ad Astra". */
+function Indietro({ chiudi }: { chiudi: () => void }) {
+  return (
+    <button className="indietro" onClick={chiudi} aria-label="Torna ad Astra">
+      <ArrowLeft size={20} weight="bold" aria-hidden /> Astra
+    </button>
+  );
+}
+
 export function Album({ chiudi }: { chiudi: () => void }) {
+  useSfondo('panna');
   const [prese, setPrese] = useState<Set<string>>();
   useEffect(() => {
     supabase
@@ -122,22 +146,28 @@ export function Album({ chiudi }: { chiudi: () => void }) {
     return (
       <li key={p.id} className={presa ? 'presa' : 'da-scoprire'}>
         <img src={`/${p.webp}`} alt={presa ? p.descrizione : ''} width={96} height={96} loading="lazy" />
-        <small>{presa ? p.id.split('-').slice(1).join(' ') : nera ? 'Si riscatta con 7 giorni fatti bene' : INDIZI[p.categoria] ?? 'Da scoprire'}</small>
+        {presa ? <b>{nomeFigurina(p.id)}</b> : <b aria-hidden>???</b>}
+        {!presa && <small>{nera ? 'Si riscatta con 7 giorni fatti bene' : INDIZI[p.categoria] ?? 'Da scoprire'}</small>}
       </li>
     );
   };
 
   return (
-    <section className="sera">
-      <h1>Album</h1>
-      <p>
-        {prese64} di {POSE.length}
-      </p>
+    <section className="schermo album-pagina">
+      <Indietro chiudi={chiudi} />
+      <h1>Album delle figurine</h1>
+      <div className="album-conto">
+        <div className="avanzamento" aria-hidden>
+          <span style={{ width: `${(prese64 / POSE.length) * 100}%` }} />
+        </div>
+        <p>
+          {prese64} di {POSE.length}
+        </p>
+      </div>
       <ul className="album">{normali.map((p) => casella(p, false))}</ul>
       <h2>Serie nera</h2>
       <p className="nota">Non danno passi: si sbloccano con il riscatto. L'album si completa anche senza.</p>
       <ul className="album">{nere.map((p) => casella(p, true))}</ul>
-      <button className="principale largo" onClick={chiudi}>Torna ad Astra</button>
     </section>
   );
 }

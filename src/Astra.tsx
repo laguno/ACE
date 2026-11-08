@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { ImageSquare } from '@phosphor-icons/react';
+import { useSfondo } from './kit';
 import * as R from './lib/regole';
 import { supabase } from './supabase';
 
@@ -18,30 +20,57 @@ const img = (cartella: string, id: string) => `/assets/${cartella}/${id}.webp`;
 const SOGLIE = R.soglieTappe();
 const tappaDi = (passi: number) => Math.min(SOGLIE.length, R.posizione(passi).tappeFatte + 1);
 
+// Mappa del sentiero (bozza Main): 27 tappe dal basso (la terra) all'alto (le stelle), a serpentina.
+// Unico posto con posizioni assolute (indicazioni di Jarvis). x in percentuale, y in px.
+const PASSO = 112;
+const MARGINE = 90;
+const ALTEZZA = MARGINE * 2 + (SOGLIE.length - 1) * PASSO;
+const punto = (t: number) => ({ x: 50 + 19 * Math.sin(t * 0.85), y: MARGINE + (SOGLIE.length - t) * PASSO });
+
+/** Curva morbida per i punti (Catmull-Rom convertita in Bézier), in coordinate x% / y px. */
+function curva(punti: { x: number; y: number }[]) {
+  if (punti.length < 2) return '';
+  let d = `M ${punti[0].x} ${punti[0].y}`;
+  for (let i = 0; i < punti.length - 1; i++) {
+    const [p0, p1, p2, p3] = [punti[i - 1] ?? punti[i], punti[i], punti[i + 1], punti[i + 2] ?? punti[i + 1]];
+    d += ` C ${p1.x + (p2.x - p0.x) / 6} ${p1.y + (p2.y - p0.y) / 6}, ${p2.x - (p3.x - p1.x) / 6} ${p2.y - (p3.y - p1.y) / 6}, ${p2.x} ${p2.y}`;
+  }
+  return d;
+}
+
 export default function Astra({ apri }: { apri: (pagina: 'Figurina' | 'Album') => void }) {
-  const [dati, setDati] = useState<{ passi: number; chiavi: number; settimana: number | null; forzieri: Forziere[] }>();
+  const [dati, setDati] = useState<{ passi: number; chiavi: number; settimana: number | null; forzieri: Forziere[]; album: number }>();
   const [scelto, setScelto] = useState<number>();
+  useSfondo('panna');
 
   async function carica() {
-    const [s, c, w, f] = await Promise.all([
+    const [s, c, w, f, a] = await Promise.all([
       supabase.from('saldo_passi').select('passi').maybeSingle(),
       supabase.from('chiavi_totali').select('chiavi').maybeSingle(),
       supabase.from('settimane').select('chiavi').not('chiavi', 'is', null).order('inizio', { ascending: false }).limit(1),
       supabase.from('forzieri_lani').select('n, stato, enigma, premio, tentativi_enigma, enigma_risolto_il').order('n'),
+      supabase.from('figurine').select('posa', { count: 'exact', head: true }).not('sbloccata_il', 'is', null),
     ]);
-    setDati({ passi: s.data?.passi ?? 0, chiavi: c.data?.chiavi ?? 0, settimana: w.data?.[0]?.chiavi ?? null, forzieri: (f.data ?? []) as Forziere[] });
+    setDati({
+      passi: s.data?.passi ?? 0,
+      chiavi: c.data?.chiavi ?? 0,
+      settimana: w.data?.[0]?.chiavi ?? null,
+      forzieri: (f.data ?? []) as Forziere[],
+      album: a.count ?? 0,
+    });
   }
   useEffect(() => {
     carica();
   }, []);
-  // il percorso va dall'alto (la cima) in basso: si parte mostrando dove è Lani
+  // il sentiero va dall'alto (la cima) in basso: si parte mostrando dove è Lani
   useEffect(() => {
     if (dati && !scelto) document.querySelector('.qui')?.scrollIntoView({ block: 'center' });
   }, [dati, scelto]);
   if (!dati) return null;
 
   const pos = R.posizione(dati.passi);
-  const mondo = MONDI[R.mondo(pos.tappeFatte)];
+  const nMondo = R.mondo(pos.tappeFatte);
+  const mondo = MONDI[nMondo];
   const qui = tappaDi(dati.passi);
   const oggi = R.giornoRoma(new Date());
   const bandierina = tappaDi(R.bandierina(oggi));
@@ -50,74 +79,116 @@ export default function Astra({ apri }: { apri: (pagina: 'Figurina' | 'Album') =
 
   if (scelto) return <SchedaForziere f={forziere(scelto)} n={scelto} passi={dati.passi} chiavi={dati.chiavi} chiudi={() => (setScelto(undefined), carica())} />;
 
-  const righe = [];
-  for (let t = SOGLIE.length; t >= 1; t--) {
-    const conf = R.CONFIG.forzieri.find((x) => x.tappa === t);
-    const stato = t <= pos.tappeFatte ? 'fatta' : t === qui ? 'attuale' : 'da-fare';
-    righe.push(
-      <li key={t} className={`tappa ${stato}`}>
-        <img src={img('oggetti', `tappa-${stato}`)} alt="" width={40} height={40} />
-        <span className="nome-tappa">
-          Tappa {t}
-          <small>{SOGLIE[t - 1].toLocaleString('it-IT')} passi</small>
-        </span>
-        {t === qui && !pos.inCima && (
-          <span className="qui">
-            <img src={img('avatar/lani', 'lani-saluta')} alt="Lani" width={56} height={56} />
-            Sei qui: mancano {pos.mancanoPassi}
-          </span>
-        )}
-        {t === bandierina && (
-          <span className="bandiera">
-            <img src={img('oggetti', 'bandierina')} alt="" width={28} height={28} />
-            Il calendario è qui
-          </span>
-        )}
-        {t === natale && t !== bandierina && <span className="traguardo">Vacanze di Natale</span>}
-        {conf && (
-          <button className={`forziere ${forziere(conf.n)?.stato ?? 'chiuso'}`} onClick={() => setScelto(conf.n)} aria-label={`Forziere ${conf.n}`}>
-            <img
-              src={img('oggetti', conf.n === 9 ? 'forziere-cima' : ['aperto', 'consegnato'].includes(forziere(conf.n)?.stato ?? '') ? 'forziere-aperto' : 'forziere-chiuso')}
-              alt=""
-              width={48}
-              height={48}
-            />
-            <small>{conf.chiavi} chiavi</small>
-          </button>
-        )}
-      </li>,
-    );
-  }
+  const punti = SOGLIE.map((_, i) => punto(i + 1));
+  const fatti = punti.slice(0, qui);
 
   return (
     <section className="astra">
-      <div className="mondo" style={{ backgroundImage: `url(${img('sfondi', mondo.sfondo)})` }}>
-        <p className="sopratitolo">{mondo.nome}</p>
-        <h1>Astra</h1>
-        <p className="mantra">Ogni giorno, passino passino.</p>
-        <div className="saldi">
+      <div className="astra-sfondo" style={{ backgroundImage: `url(${img('sfondi', mondo.sfondo)})` }} aria-hidden />
+      <header className="carta astra-testata">
+        <div className="astra-titolo">
           <span>
-            <img src={img('oggetti', 'passo')} alt="" width={32} height={32} />
-            {dati.passi.toLocaleString('it-IT')} passi
+            <p className="sopratitolo">Mondo {nMondo + 1} di 4</p>
+            <h1>{mondo.nome}</h1>
+            <p className="mantra">Ogni giorno, passino passino.</p>
           </span>
-          <span>
-            <img src={img('oggetti', 'mazzo-chiavi')} alt="" width={32} height={32} />
-            {dati.chiavi} {dati.chiavi === 1 ? 'chiave' : 'chiavi'}
+          <button className="astra-figurina" onClick={() => apri('Figurina')} aria-label="La tua figurina">
+            <img src={img('avatar/lani', 'lani-saluta')} alt="" width={64} height={64} />
+          </button>
+        </div>
+        <div className="astra-saldi">
+          {dati.settimana !== null ? (
+            <span className="chiavi-settimana">
+              <small>Chiavi della settimana</small>
+              <span aria-label={`Chiavi dell'ultima settimana: ${dati.settimana} su 3`}>
+                {[1, 2, 3].map((k) => (
+                  <img key={k} src={img('oggetti', k <= dati.settimana! ? 'chiave-piena' : 'chiave-vuota')} alt="" width={30} height={30} />
+                ))}
+              </span>
+            </span>
+          ) : (
+            <span className="chiavi-settimana">
+              <img src={img('oggetti', 'mazzo-chiavi')} alt="" width={30} height={30} />
+              <small>
+                {dati.chiavi} {dati.chiavi === 1 ? 'chiave' : 'chiavi'}
+              </small>
+            </span>
+          )}
+          <span className="saldo">
+            <img src={img('oggetti', 'passo')} alt="" width={30} height={30} />
+            <b>{dati.passi.toLocaleString('it-IT')}</b>
+            <span className="solo-lettori"> passi</span>
           </span>
         </div>
         {dati.settimana !== null && (
-          <p className="chiavi-settimana" aria-label={`Chiavi dell'ultima settimana: ${dati.settimana} su 3`}>
-            {[1, 2, 3].map((k) => (
-              <img key={k} src={img('oggetti', k <= dati.settimana! ? 'chiave-piena' : 'chiave-vuota')} alt="" width={36} height={36} />
-            ))}
+          <p className="nota astra-chiavi-totali">
+            <span>
+              {dati.chiavi} {dati.chiavi === 1 ? 'chiave' : 'chiavi'}
+            </span>{' '}
+            in tutto
           </p>
         )}
+      </header>
+
+      <div className="mappa" style={{ height: ALTEZZA }}>
+        <svg className="sentiero" viewBox={`0 0 100 ${ALTEZZA}`} preserveAspectRatio="none" aria-hidden>
+          <path d={curva(punti)} className="strada" />
+          <path d={curva(punti)} className="puntini" />
+          <path d={curva(fatti)} className="fatta" />
+        </svg>
+        <ol className="tappe">
+        {punti.map((p, i) => {
+          const t = i + 1;
+          const conf = R.CONFIG.forzieri.find((x) => x.tappa === t);
+          const stato = t <= pos.tappeFatte ? 'fatta' : t === qui ? 'attuale' : 'da-fare';
+          const aDestra = p.x < 50; // etichette e forzieri dalla parte con più spazio
+          const fz = conf && forziere(conf.n);
+          return (
+            <li key={t} className={`tappa ${stato}`} style={{ left: `${p.x}%`, top: p.y }}>
+              <img className="sasso" src={img('oggetti', `tappa-${stato}`)} alt="" width={stato === 'attuale' ? 66 : 50} height={stato === 'attuale' ? 66 : 50} />
+              <span className="solo-lettori">Tappa {t}</span>
+              {t === qui && !pos.inCima && (
+                <>
+                  <p className="qui">
+                    <b>{SOGLIE[t - 1].toLocaleString('it-IT')}</b>
+                    <span>Sei qui: mancano {pos.mancanoPassi}</span>
+                  </p>
+                  <img className={`lani-sentiero ${aDestra ? 'destra' : 'sinistra'}`} src={img('avatar/lani', 'lani-saluta')} alt="Lani" width={120} height={120} />
+                </>
+              )}
+              {t === bandierina && (
+                <p className="bandiera">
+                  <img src={img('oggetti', 'bandierina')} alt="" width={36} height={36} />
+                  <span>Il calendario è qui</span>
+                </p>
+              )}
+              {t === natale && t !== bandierina && (
+                <p className={`traguardo ${aDestra ? 'destra' : 'sinistra'}`}>
+                  <b>Vacanze di Natale</b>
+                </p>
+              )}
+              {conf && (
+                <button className={`forziere ${fz?.stato ?? 'chiuso'} ${aDestra !== (t === qui) ? 'destra' : 'sinistra'}`} onClick={() => setScelto(conf.n)} aria-label={`Forziere ${conf.n}`}>
+                  <img
+                    src={img('oggetti', conf.n === 9 ? 'forziere-cima' : ['aperto', 'consegnato'].includes(fz?.stato ?? '') ? 'forziere-aperto' : 'forziere-chiuso')}
+                    alt=""
+                    width={76}
+                    height={76}
+                  />
+                  <small>
+                    {SOGLIE[conf.tappa - 1].toLocaleString('it-IT')} · {conf.chiavi} chiavi
+                  </small>
+                </button>
+              )}
+            </li>
+          );
+        })}
+        </ol>
       </div>
-      <div className="collegamenti">
-        <button className="secondario" onClick={() => apri('Figurina')}>La tua figurina</button>
-        <button className="secondario" onClick={() => apri('Album')}>Album</button>
-      </div>
-      <ol className="percorso">{righe}</ol>
+
+      <button className="album-fluttuante" onClick={() => apri('Album')}>
+        <ImageSquare size={24} weight="bold" aria-hidden /> Album {dati.album}/64
+      </button>
     </section>
   );
 }
