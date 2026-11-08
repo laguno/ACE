@@ -36,6 +36,20 @@ Tappe 1-8 in una giornata: Nuvola e calendario provati dal vivo, IA provata dal 
 | 8/11 | signore | Il lunedì Lani va a scuola con la borsa di pallavolo (pulmino Revolution da scuola) e la cartellina di tecnologia; niente "diario e astuccio" fisso |
 | 8/11 | signore | Claude lavora da solo con prove automatiche; può pubblicare funzioni e applicare migrazioni (permesso aggiunto) |
 
+## Revisione di Jarvis (8/11, approvata dal signore)
+
+Fatto sul branch `rifiniture-jarvis` (non ancora unito né pubblicato): caselle dello studio facoltativo (`caselleStudio`, `registraStudio` in passi); enigma con tentativo atomico (`tenta_enigma`, migrazione 0016 applicata); figurine dei forzieri (prima le 4 senza momento, poi le altre non nere, la cima lani-cima); Sonnet 5.5 per genera-studio ed enigma, Opus 5.5 solo per spiega; pg_net spostato in extensions (0015 applicata, cron provati); `impostazioni.ora_chiusura_breve` 20:30 (0016).
+
+Da fare prima del 23/11:
+- pubblicare passi, enigma, genera-studio (e le altre che importano `_shared`) dopo i test, poi merge;
+- "Annulla" per 5 secondi dopo ogni spunta di Lani, prima dell'invio al server;
+- nota di merito nel copione: "Nota di merito | mamma-festeggia | Nota di merito in {materia}: +50. Questa va sul frigo. | applauso", titolo "Nota di merito", con test, e popup in sync-nuvola;
+- venerdì e sabato con partita il giorno dopo: chiusura breve con la sola borsa (ora_chiusura_breve o mezz'ora prima dello sport): oraChiusura, Sera, notifiche;
+- avviso push ai genitori alla prima sincronizzazione fallita di fila;
+- (priorità bassa) voto corretto dal docente: movimento "voto_corretto" con la sola differenza, riferimento chiave del voto + nuovo valore.
+
+Approvate tutte le altre scelte qui sotto; obiettivo liceo 7,35. La protezione delle password trapelate la accende il signore.
+
 ## Da confermare (scelte fatte da Claude, il signore può cambiarle)
 
 - Voti e note danno passi solo dal 23/11 (`periodo.inizio`); i voti di prima contano solo come "precedente".
