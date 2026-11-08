@@ -1,14 +1,22 @@
-/* Stile "zucchero filato": valori da docs/03-schermate.md */
+/* Kit "zucchero filato" (design/Stile.html): colori, caratteri, sfondi, barra. */
 :root {
-  --testo: #3d2350;
-  --testo-2: #5e4470;
-  --accento: #c2185b;
+  --panna: #fff6fa;       /* fondo di ogni schermata */
+  --testo: #3d2350;       /* prugna: testi */
+  --testo-2: #5e4470;     /* prugna chiaro: testi secondari */
+  --accento: #c2185b;     /* fucsia scuro: bottoni e azioni */
   --accento-premuto: #8e0f42;
-  --panna: #fff6fa;
+  --fucsia: #e23d8e;      /* strada fatta, progressi (mai testo) */
+  --rosa-bordo: #ffc8e1;  /* bordi e superfici */
   --rosa: #ffe3ef;
   --lilla: #f3e6fd;
+  --lilla-medio: #cdb8f5; /* strada da fare */
+  --azzurrino: #bfe6ff;   /* cielo del mattino */
+  --burro: #ffe27a;       /* stelle e oro */
+  --burro-chiaro: #fff3c4;
+  --notte: #2f2a6e;       /* cielo della sera */
   --ombra: 0 10px 24px rgba(123, 106, 224, 0.14);
-  color-scheme: light;
+  --ombra-barra: 0 10px 28px rgba(123, 106, 224, 0.28);
+  color-scheme: light only; /* Chrome per Android non deve scurire la pagina */
 }
 * { box-sizing: border-box; }
 body {
@@ -16,28 +24,61 @@ body {
   min-height: 100dvh;
   background: var(--panna);
   color: var(--testo);
-  font: 700 16px/1.4 Nunito, system-ui, sans-serif;
+  font: 600 16px/1.4 Nunito, system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
 }
+/* sfondi per momento, come nelle bozze (le percentuali delle bozze su 844 px, in px) */
+body[data-sfondo='mattina'] { background: linear-gradient(180deg, var(--azzurrino) 0, #e9f5ff 220px, var(--panna) 390px) no-repeat, var(--panna); }
+body[data-sfondo='pomeriggio'] { background: linear-gradient(180deg, var(--lilla) 0, var(--panna) 253px) no-repeat, var(--panna); }
+body[data-sfondo='sera'] { background: linear-gradient(180deg, var(--lilla-medio) 0, var(--lilla) 169px, var(--panna) 320px) no-repeat, var(--panna); }
 h1, h2 { font-family: 'Baloo 2', Nunito, sans-serif; font-weight: 800; }
-main { position: relative; padding: 16px 16px calc(88px + env(safe-area-inset-bottom)); }
+b, strong { font-weight: 800; }
+/* colonna fluida da 360 a 430 px, centrata sull'iPad */
+main { position: relative; width: min(100%, 430px); margin: 0 auto; padding: 16px 16px calc(100px + env(safe-area-inset-bottom)); }
+
+/* Barra di navigazione flottante a pillola, con icone Phosphor */
 .barra {
   position: fixed;
-  inset: auto 0 0;
+  z-index: 5;
+  left: 50%;
+  bottom: calc(14px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: min(100% - 28px, 402px);
+  height: 66px;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  padding: 6px;
+  border-radius: 28px;
   background: #fff;
-  box-shadow: var(--ombra);
+  box-shadow: var(--ombra-barra);
 }
 .barra button {
-  min-height: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
   border: 0;
-  border-radius: 999px;
+  border-radius: 22px;
   background: none;
   color: var(--testo-2);
-  font: inherit;
+  font: 800 11px Nunito, sans-serif;
 }
-.barra button[aria-current='page'] { background: var(--rosa); color: var(--accento-premuto); }
+.barra button[aria-current='page'] { background: var(--rosa); color: var(--accento); }
+
+/* Testata delle schermate: testo a sinistra, avatar sticker che sborda a destra */
+.testata { display: grid; grid-template-columns: 1fr auto; align-items: start; margin: 0 -16px 0 0; min-height: 170px; }
+.testata-testo { display: flex; flex-direction: column; gap: 4px; padding: 14px 0 12px 4px; }
+.testata h1 { margin: 0; font-size: 31px; line-height: 1.02; }
+.testata .riga, .testata .riga p { margin: 0; font-size: 15px; line-height: 1.4; color: var(--testo-2); }
+.testata-avatar { margin: -6px 0 -20px -24px; }
+.sticker { display: block; object-fit: contain; pointer-events: none; user-select: none; }
+.riquadro { flex: none; width: 46px; height: 46px; border-radius: 16px; display: grid; place-items: center; color: var(--testo); }
+.riquadro-rosa { background: var(--rosa); }
+.riquadro-lilla { background: var(--lilla); }
+.riquadro-burro { background: var(--burro-chiaro); }
+.link-genitori { display: block; margin: 24px auto 0; min-height: 44px; padding: 0 16px; border: 0; background: none; color: var(--testo-2); font: 700 14px Nunito, sans-serif; text-decoration: underline; }
 
 .carta { background: #fff; border-radius: 28px; box-shadow: var(--ombra); padding: 20px; }
 .modulo { display: grid; gap: 14px; }
@@ -62,18 +103,6 @@ main { position: relative; padding: 16px 16px calc(88px + env(safe-area-inset-bo
 .principale:active { background: var(--accento-premuto); }
 .principale:disabled { opacity: 0.6; }
 .secondario { width: 100%; margin-top: 12px; border: 2px solid var(--accento); background: #fff; color: var(--accento); }
-.angolo {
-  position: absolute;
-  top: 12px;
-  right: 16px;
-  min-height: 44px;
-  padding: 0 14px;
-  border: 0;
-  border-radius: 999px;
-  background: var(--lilla);
-  color: var(--testo-2);
-  font: inherit;
-}
 
 /* Sera */
 .sera { display: grid; gap: 16px; }

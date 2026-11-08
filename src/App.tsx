@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { BookOpen, MoonStars, Star, Sun } from '@phosphor-icons/react';
 import type { Session } from '@supabase/supabase-js';
 import Accesso from './Accesso';
 import AreaGenitori from './AreaGenitori';
@@ -15,6 +16,8 @@ import { supabase, type Profilo } from './supabase';
 
 // R-Evolution resta nascosta nello sprint 1: comparirà con un popup di annuncio.
 const VOCI = ['Oggi', 'Studio', 'Sera', 'Astra'] as const;
+// icone di servizio Phosphor (design/Stile.html): bold, la sezione attiva piena in fucsia scuro
+const ICONE = { Oggi: Sun, Studio: BookOpen, Sera: MoonStars, Astra: Star };
 type Voce = (typeof VOCI)[number] | 'Genitori' | 'Figurina' | 'Album';
 
 export default function App() {
@@ -86,7 +89,6 @@ function Lani() {
   return (
     <>
       <main>
-        <button className="angolo" onClick={() => setVoce('Genitori')}>Genitori</button>
         {voce === 'Sera' ? (
           <Sera />
         ) : voce === 'Oggi' ? (
@@ -100,14 +102,22 @@ function Lani() {
         ) : (
           <Astra apri={setVoce} />
         )}
+        <button className="link-genitori" onClick={() => setVoce('Genitori')}>
+          Genitori
+        </button>
       </main>
       <CodaPopup />
       <nav className="barra" aria-label="Sezioni">
-        {VOCI.map((v) => (
-          <button key={v} aria-current={v === voce || (v === 'Astra' && (voce === 'Figurina' || voce === 'Album')) ? 'page' : undefined} onClick={() => setVoce(v)}>
-            {v}
-          </button>
-        ))}
+        {VOCI.map((v) => {
+          const attiva = v === voce || (v === 'Astra' && (voce === 'Figurina' || voce === 'Album'));
+          const Icona = ICONE[v];
+          return (
+            <button key={v} aria-current={attiva ? 'page' : undefined} onClick={() => setVoce(v)}>
+              <Icona size={24} weight={attiva ? 'fill' : 'bold'} aria-hidden />
+              {v}
+            </button>
+          );
+        })}
       </nav>
     </>
   );
