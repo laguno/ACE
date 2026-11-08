@@ -33,9 +33,11 @@ export default function Sera() {
     Promise.all([
       supabase.from('lezioni').select('data, ora, materia_id').gte('data', R.iso(da)),
       supabase.from('materie').select('id, nome'),
-    ]).then(([l, m]) => {
+      supabase.from('impostazioni').select('valore').eq('chiave', 'materiale_cartella').maybeSingle(),
+    ]).then(([l, m, i]) => {
       const nomi = new Map((m.data ?? []).map((x) => [x.id, x.nome]));
-      setOrario(N.materieDelGiorno(l.data ?? [], domani.getDay()).map((id) => nomi.get(id) ?? id));
+      const materiale: string[] = i.data?.valore?.[domani.getDay()] ?? [];
+      setOrario([...N.materieDelGiorno(l.data ?? [], domani.getDay()).map((id) => nomi.get(id) ?? id), ...materiale]);
     });
   }, [R.iso(domani)]);
 
@@ -73,7 +75,7 @@ export default function Sera() {
 
   // Cartella: voci spuntate una per una (solo sul telefono); con l'ultima la cartella è pronta.
   // ponytail: le voci spuntate si perdono se si chiude l'app prima dell'ultima.
-  const voci = orario.length ? [...orario, 'Diario e astuccio'] : [`Cartella pronta per ${GIORNI[domani.getDay()]}`];
+  const voci = orario.length ? orario : [`Cartella pronta per ${GIORNI[domani.getDay()]}`];
   function metti(v: string) {
     const nuove = new Set(messe);
     if (nuove.has(v)) nuove.delete(v);
@@ -98,7 +100,7 @@ export default function Sera() {
 
   return (
     <section className="sera">
-      <p className="sopratitolo">{GIORNI[oggi.getDay()]} sera</p>
+      <p className="sopratitolo">{GIORNI[oggi.getDay()].replace(/^./, (c) => c.toUpperCase())} sera</p>
       <h1>Pronta per {GIORNI[domani.getDay()]}?</h1>
       {cose > 0 && (
         <>

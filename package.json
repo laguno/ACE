@@ -11,10 +11,12 @@
     "test": "vitest run",
     "icone": "node scripts/icone.mjs",
     "simula": "python3 scripts/simula_passi.py 7200 125",
-    "prova:schema": "node scripts/prova-schema.mjs"
+    "prova:schema": "node scripts/prova-schema.mjs",
+    "prova:schermate": "playwright test"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.15",
+    "@playwright/test": "^1.56.1",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.2.1",
