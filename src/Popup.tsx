@@ -8,10 +8,22 @@ import { supabase } from './supabase';
 // Un popup per apertura dell'app (docs/05): il più importante in coda (bastone, voto, forziere e
 // tappa, altro), poi il più vecchio. Dopo le 21 i rimproveri di mamma e papà aspettano il mattino.
 // I popup più vecchi di 3 giorni non si mostrano più.
+// Aspetto: lo stampo delle bozze Popup-forziere, -lucchetto, -bastone, -enigma (anello colorato,
+// avatar che sborda, titolo grande, riga della figurina in fondo).
 
-type Popup = { id: string; priorita: number; posa: string; titolo: string; testo: string; figurina: string | null };
+type Popup = { id: string; priorita: number; situazione: string; posa: string; titolo: string; testo: string; figurina: string | null };
 const GIORNI_VALIDO = 3;
 const immagine = (posa: string) => manifest.avatar.find((a) => a.id === posa)?.webp ?? manifest.oggetti.find((o) => o.id === posa)?.webp;
+
+/** Tono del popup: decide l'anello, il colore del titolo e del pulsante. */
+function tono(p: Popup): 'festa' | 'lucchetto' | 'bastone' | 'enigma' | 'calmo' {
+  if (p.priorita === 1) return 'bastone';
+  if (p.situazione === 'forziere_lucchetto') return 'lucchetto';
+  if (p.situazione === 'enigma_comparso') return 'enigma';
+  if (['forziere_aperto', 'cima', 'tappa', 'chiavi_3', 'voto_9', 'voto_recupero', 'voto_migliorato', 'nota_merito'].includes(p.situazione)) return 'festa';
+  return 'calmo';
+}
+const CON_CORIANDOLI = ['forziere_aperto', 'cima'];
 
 export default function CodaPopup() {
   const [p, setP] = useState<Popup>();
@@ -21,7 +33,7 @@ export default function CodaPopup() {
       const da = new Date(Date.now() - GIORNI_VALIDO * 864e5).toISOString();
       const { data } = await supabase
         .from('popup_coda')
-        .select('id, priorita, posa, titolo, testo, figurina')
+        .select('id, priorita, situazione, posa, titolo, testo, figurina')
         .is('mostrato_il', null)
         .gte('creato_il', da)
         .order('priorita')
@@ -41,19 +53,39 @@ export default function CodaPopup() {
     supabase.from('popup_coda').update({ mostrato_il: adesso() }).eq('id', p.id).then();
     setP(undefined);
   };
+  const t = tono(p);
   const src = immagine(p.posa);
+  const malus = t === 'bastone' ? p.testo.match(/[−-]\d+/)?.[0] : undefined;
 
   return (
     <div className="velo" role="dialog" aria-modal="true" aria-labelledby="popup-titolo">
-      <div className="popup">
-        {src && <img src={`/${src}`} alt="" width={160} height={160} />}
+      {CON_CORIANDOLI.includes(p.situazione) && <Coriandoli />}
+      <div className={`popup popup-${t}`}>
+        <div className="popup-avatar" aria-hidden>
+          {p.situazione === 'forziere_lucchetto' && <img src="/assets/oggetti/lucchetto.webp" alt="" width={110} height={110} />}
+          {src && <img src={`/${src}`} alt="" width={t === 'lucchetto' ? 120 : 200} height={t === 'lucchetto' ? 120 : 200} />}
+          {p.situazione === 'forziere_aperto' && <img className="popup-oggetto" src="/assets/oggetti/forziere-aperto.webp" alt="" width={110} height={110} />}
+        </div>
+        {malus && <span className="bollino-malus">{malus}</span>}
         <h2 id="popup-titolo">{p.titolo}</h2>
         <p>{p.testo}</p>
-        {p.figurina && <p className="riga-figurina">{p.figurina}</p>}
+        {t === 'lucchetto' && <p className="popup-riquadro">I passi ti fanno camminare, le chiavi aprono i forzieri.</p>}
         <button className="principale largo" onClick={chiudi} autoFocus>
           Ok
         </button>
+        {p.figurina && <p className="riga-figurina">{p.figurina}</p>}
       </div>
+    </div>
+  );
+}
+
+/** Coriandoli leggeri, solo per forziere e cima; spenti con prefers-reduced-motion (CSS). */
+function Coriandoli() {
+  return (
+    <div className="coriandoli" aria-hidden>
+      {Array.from({ length: 18 }, (_, i) => (
+        <span key={i} style={{ left: `${(i * 37) % 100}%`, animationDelay: `${(i % 6) * 0.15}s`, background: ['#E23D8E', '#FFE27A', '#CDB8F5', '#BFE6FF'][i % 4] }} />
+      ))}
     </div>
   );
 }
