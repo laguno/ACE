@@ -92,3 +92,26 @@ main { position: relative; padding: 16px 16px calc(88px + env(safe-area-inset-bo
 .dato { color: var(--testo-2); }
 .lady { margin: 8px 0 0; padding: 12px 14px; border-radius: 18px; background: var(--rosa); }
 .nota { margin: 0 0 4px; color: var(--testo-2); }
+
+/* Oggi */
+.cose { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; counter-reset: cosa; }
+.cose li { display: grid; gap: 2px; padding-left: 44px; position: relative; min-height: 44px; counter-increment: cosa; }
+.cose li::before {
+  content: counter(cosa);
+  position: absolute; left: 0; top: 2px;
+  width: 32px; height: 32px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--rosa); color: var(--accento-premuto); font-weight: 800;
+}
+.cose span { color: var(--testo-2); }
+.pillola { margin: 0; padding: 12px 18px; border-radius: 999px; background: #ffe27a; color: var(--testo); width: fit-content; }
+.famiglia summary { list-style: none; cursor: pointer; min-height: 44px; display: flex; align-items: center; }
+.famiglia summary::-webkit-details-marker { display: none; }
+.famiglia summary h2 { margin: 0; }
+.famiglia summary::after { content: '▾'; margin-left: auto; color: var(--testo-2); }
+.famiglia:not([open]) summary::after { content: '▸'; }
+.famiglia ul { margin: 8px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.numero {
+  display: inline-grid; place-items: center; width: 24px; height: 24px; margin-right: 6px;
+  border-radius: 50%; background: var(--lilla); color: var(--testo); font-size: 14px;
+}

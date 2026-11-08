@@ -2,25 +2,19 @@ import { useCallback, useEffect, useState } from 'react';
 import * as C from './lib/calendario';
 import * as N from './lib/nuvola';
 import * as R from './lib/regole';
+import { GIORNI, RigaCompito, SELECT_COMPITI, adesso, maiuscola, passi, spuntaCompito, type Compito } from './spunte';
 import { supabase } from './supabase';
 
 // Sera — design/Domani.html. Lani spunta; i passi li decide la funzione "passi" sul server.
 // Cartella dalle lezioni di Nuvola (orario) più il materiale del giorno (impostazioni);
 // borsa e "Domani in famiglia" dal calendario di famiglia.
 
-type Compito = { id: string; testo: string; fatto_il: string | null; materie: { nome: string } | null };
 type Foglio = { id: string; titolo: string; scadenza: string | null; dato_il: string | null };
 type Impegno = { titolo: string; inizio: string; tutto_il_giorno: boolean };
 
-const GIORNI = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'];
 // ponytail: voci fisse dalla bozza; con l'area genitori (tappa 7) passano alle impostazioni.
 const VOCI_BORSA = ['Divisa', 'Ginocchiere', 'Scarpe', 'Borraccia'];
 const PRIMA_DI_USCIRE_DA_SCUOLA = '16:00';
-
-async function passi(tipo: string, id: string) {
-  // l'esito non serve qui: i passi si rileggono da movimenti_passi
-  await supabase.functions.invoke('passi', { body: { tipo, id } });
-}
 
 /** Lista a voci (cartella, borsa): spuntate una per una sul telefono, con l'ultima è pronta. */
 // ponytail: le voci spuntate si perdono se si chiude l'app prima dell'ultima.
@@ -93,7 +87,7 @@ export default function Sera() {
 
   const carica = useCallback(async () => {
     const [c, f, s, m] = await Promise.all([
-      supabase.from('compiti').select('id, testo, fatto_il, materie(nome)').eq('scadenza', R.iso(domani)).order('creato_il'),
+      supabase.from('compiti').select(SELECT_COMPITI).eq('scadenza', R.iso(domani)).order('creato_il'),
       supabase.from('fogli_firma').select('id, titolo, scadenza, dato_il').is('consegnato_il', null).order('scadenza'),
       supabase.from('serate').select('cartella_il, borsa_il').eq('data', R.iso(oggi)).maybeSingle(),
       supabase.from('movimenti_passi').select('passi, moltiplicatore').eq('giorno', R.iso(oggi)),
@@ -121,7 +115,6 @@ export default function Sera() {
     await passi(tipo, id);
     carica();
   }
-  const adesso = () => new Date().toISOString();
   const chiudiSerata = (campo: 'cartella' | 'borsa') =>
     spunta(
       () => setSerata((s) => ({ ...s, [campo]: true })),
@@ -146,7 +139,7 @@ export default function Sera() {
 
   return (
     <section className="sera">
-      <p className="sopratitolo">{GIORNI[oggi.getDay()].replace(/^./, (c) => c.toUpperCase())} sera</p>
+      <p className="sopratitolo">{maiuscola(GIORNI[oggi.getDay()])} sera</p>
       <h1>Pronta per {GIORNI[domani.getDay()]}?</h1>
       {cose > 0 && (
         <>
@@ -166,26 +159,17 @@ export default function Sera() {
         {compiti.length === 0 && <p>Nessun compito su Nuvola per domani.</p>}
         <ul className="spunte">
           {compiti.map((c) => (
-            <li key={c.id}>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={!!c.fatto_il}
-                  disabled={!!c.fatto_il}
-                  onChange={() =>
-                    spunta(
-                      () => setCompiti((l) => l?.map((x) => (x.id === c.id ? { ...x, fatto_il: adesso() } : x))),
-                      () => supabase.from('compiti').update({ fatto_il: adesso() }).eq('id', c.id),
-                      'compito',
-                      c.id,
-                    )
-                  }
-                />
-                <span>
-                  <b>{c.materie?.nome ?? 'Compito'}</b>: {c.testo}
-                </span>
-              </label>
-            </li>
+            <RigaCompito
+              key={c.id}
+              c={c}
+              onSpunta={() =>
+                spuntaCompito(
+                  c.id,
+                  (fatto_il) => setCompiti((l) => l?.map((x) => (x.id === c.id ? { ...x, fatto_il } : x))),
+                  setErrore,
+                ).then(carica)
+              }
+            />
           ))}
         </ul>
         {mancante && (

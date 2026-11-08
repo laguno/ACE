@@ -23,3 +23,31 @@ export function oraRoma(istante: string): string {
     new Date(istante),
   );
 }
+
+/** "HH:MM" ± minuti. */
+export function sposta(ora: string, minuti: number): string {
+  const [h, m] = ora.split(':').map(Number);
+  const t = h * 60 + m + minuti;
+  return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`;
+}
+
+/**
+ * Ora della chiusura serale (docs/01): quella base del giorno (impostazioni), ma se Lani ha un
+ * allenamento o una partita che inizia dopo le 17, si chiude mezz'ora prima di uscire (martedì
+ * 18:30 -> 18:00, partita del giovedì). Senza base (venerdì, sabato) niente chiusura.
+ */
+export function oraChiusura(base: string | null, impegniDiOggi: { titolo: string; inizio: string }[]): string | null {
+  const tardi = impegniDiOggi
+    .filter((i) => tipoImpegno(i.titolo) !== 'famiglia')
+    .map((i) => oraRoma(i.inizio))
+    .find((o) => o >= '17:00');
+  if (tardi) return sposta(tardi, -30);
+  return base;
+}
+
+/** Su quale momento si apre l'app: mattina fino alle 14, sera da un'ora prima della chiusura. */
+export function momento(ora: string, chiusura: string | null): 'mattina' | 'pomeriggio' | 'sera' {
+  if (ora < '14:00') return 'mattina';
+  if (chiusura && ora >= sposta(chiusura, -60)) return 'sera';
+  return 'pomeriggio';
+}

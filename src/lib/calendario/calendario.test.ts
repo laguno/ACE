@@ -20,3 +20,27 @@ describe('calendario di famiglia', () => {
     expect(oraRoma('2026-11-09T14:00:00Z')).toBe('15:00');
   });
 });
+
+describe('chiusura e momento della giornata', async () => {
+  const { oraChiusura, momento } = await import('./index');
+  const allenamento = (inizio: string) => ({ titolo: 'Allenamento Pallavolo Leilani U-13', inizio });
+  it('martedì: allenamento alle 18:30, si chiude alle 18:00', () => {
+    expect(oraChiusura('20:30', [allenamento('2026-11-10T17:30:00Z')])).toBe('18:00');
+  });
+  it('lunedì: allenamento alle 15, resta la chiusura delle 20:30', () => {
+    expect(oraChiusura('20:30', [allenamento('2026-11-09T14:00:00Z')])).toBe('20:30');
+  });
+  it('giovedì con partita alle 19:45: chiusura alle 19:15', () => {
+    expect(oraChiusura('20:30', [{ titolo: 'Partita Lani: FOXES', inizio: '2026-11-12T18:45:00Z' }])).toBe('19:15');
+  });
+  it('venerdì: niente chiusura', () => {
+    expect(oraChiusura(null, [])).toBeNull();
+  });
+  it('momento: mattina, pomeriggio, sera da un’ora prima', () => {
+    expect(momento('07:10', '20:30')).toBe('mattina');
+    expect(momento('15:00', '20:30')).toBe('pomeriggio');
+    expect(momento('19:30', '20:30')).toBe('sera');
+    expect(momento('17:05', '18:00')).toBe('sera');
+    expect(momento('21:00', null)).toBe('pomeriggio');
+  });
+});

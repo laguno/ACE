@@ -102,3 +102,12 @@ describe('lezioni e orario', () => {
     expect(N.materieDelGiorno(r, 3)).toEqual([]);
   });
 });
+
+describe('peso dei compiti', () => {
+  it('il più lungo pesa di più', () => {
+    const t = ['le battute del dialogo, pagina 16', 'pagine 36–38, esercizi 1–8', 'pagina 345 e problemi 380–382', 'pagine 340–352 e la scheda'];
+    const ordinati = [...t].sort((a, b) => N.peso(b) - N.peso(a));
+    expect(ordinati[0]).toBe('pagine 340–352 e la scheda');
+    expect(ordinati.at(-1)).toBe('le battute del dialogo, pagina 16');
+  });
+});

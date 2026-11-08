@@ -196,3 +196,18 @@ export function materieDelGiorno<T extends { data: string; ora: number; materia_
     .map((r) => r.materia_id!);
   return [...new Set(ids)];
 }
+
+/**
+ * Quanto è lungo un compito, a occhio: pagine e esercizi negli intervalli ("pag 340-352",
+ * "es 1-8") più i numeri singoli. Serve solo a mettere il più lungo per primo.
+ * ponytail: stima grezza sul testo; se sbaglia spesso, chiedere a Lani una stima di minuti.
+ */
+export function peso(testo: string): number {
+  let p = 0;
+  const senzaIntervalli = testo.replace(/(\d+)\s*[-–]\s*(\d+)/g, (_, a, b) => {
+    p += Math.max(1, Number(b) - Number(a) + 1);
+    return ' ';
+  });
+  p += (senzaIntervalli.match(/\d+/g) ?? []).length;
+  return p + testo.length / 200;
+}
