@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import Accesso from './Accesso';
 import AreaGenitori from './AreaGenitori';
+import Sera from './Sera';
 import { supabase, type Profilo } from './supabase';
 
 // R-Evolution resta nascosta nello sprint 1: comparirà con un popup di annuncio.
@@ -65,7 +66,7 @@ export default function App() {
     <>
       <main>
         <button className="angolo" onClick={() => setVoce('Genitori')}>Genitori</button>
-        <h1>{voce}</h1>
+        {voce === 'Sera' ? <Sera /> : <h1>{voce}</h1>}
       </main>
       <nav className="barra" aria-label="Sezioni">
         {VOCI.map((v) => (
