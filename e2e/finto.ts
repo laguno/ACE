@@ -31,7 +31,11 @@ function unisci(t: Tabelle, nome: string, riga: Record<string, unknown>, select:
   for (const [, x] of (select ?? '').matchAll(/(\w+)\(/g)) {
     if (x === 'materie') {
       const m = t.materie?.find((y) => y.id === riga.materia_id);
-      fuori.materie = m ? { nome: m.nome } : null;
+      fuori.materie = m ? { nome: m.nome, abbreviazione: m.abbreviazione } : null;
+    } else if (`${SINGOLARE[x] ?? x}_id` in riga) {
+      // genitore (es. sessioni_ripasso.verifiche): un oggetto, con le sue materie
+      const g = (t[x] ?? []).find((y) => y.id === riga[`${SINGOLARE[x] ?? x}_id`]);
+      fuori[x] = g ? unisci(t, x, g, 'materie(nome)') : null;
     } else fuori[x] = (t[x] ?? []).filter((c) => c[`${SINGOLARE[nome] ?? nome}_id`] === riga.id);
   }
   return fuori;

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Check, Lightbulb } from '@phosphor-icons/react';
 import { supabase } from './supabase';
 
 // Pezzi comuni a Oggi e Sera: la spunta di un compito e il suo aspetto.
@@ -28,10 +29,15 @@ export function RigaCompito({ c, numero, onSpunta, onAiuto, onAnnulla }: {
 }) {
   return (
     <li className={onAiuto || onAnnulla ? 'con-aiuto' : undefined}>
-      <label>
+      <label className={numero !== undefined ? 'numerata' : undefined}>
         <input type="checkbox" checked={!!c.fatto_il} disabled={!!c.fatto_il} onChange={onSpunta} />
+        {/* nel pomeriggio il numero dell'ordine fa da casella (bozza Pomeriggio): con la spunta diventa ✓ */}
+        {numero !== undefined && (
+          <span className="bollino" aria-hidden>
+            {c.fatto_il ? <Check size={18} weight="bold" /> : numero}
+          </span>
+        )}
         <span>
-          {numero !== undefined && <span className="numero">{numero}</span>}
           <b>{c.materie?.nome ?? 'Compito'}</b>: {c.testo}
         </span>
       </label>
@@ -40,9 +46,9 @@ export function RigaCompito({ c, numero, onSpunta, onAiuto, onAnnulla }: {
           Annulla
         </button>
       )}
-      {onAiuto && !c.fatto_il && (
-        <button className="lampadina" onClick={onAiuto} aria-label={`Non ho capito: ${c.materie?.nome ?? 'compito'}`}>
-          Non ho capito
+      {onAiuto && !c.fatto_il && !onAnnulla && (
+        <button className="tondo" onClick={onAiuto} aria-label={`Non ho capito: ${c.materie?.nome ?? 'compito'}`}>
+          <Lightbulb size={26} weight="bold" aria-hidden />
         </button>
       )}
     </li>

@@ -92,7 +92,7 @@ function Lani() {
         {voce === 'Sera' ? (
           <Sera />
         ) : voce === 'Oggi' ? (
-          <Oggi />
+          <Oggi apri={setVoce} />
         ) : voce === 'Studio' ? (
           <Studio />
         ) : voce === 'Figurina' ? (

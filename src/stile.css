@@ -80,7 +80,7 @@ main { position: relative; width: min(100%, 430px); margin: 0 auto; padding: 16p
 .riquadro-burro { background: var(--burro-chiaro); }
 .link-genitori { display: block; margin: 24px auto 0; min-height: 44px; padding: 0 16px; border: 0; background: none; color: var(--testo-2); font: 700 14px Nunito, sans-serif; text-decoration: underline; }
 
-.carta { background: #fff; border-radius: 28px; box-shadow: var(--ombra); padding: 20px; }
+.carta { background: #fff; border-radius: 26px; box-shadow: var(--ombra); padding: 16px; }
 .modulo { display: grid; gap: 14px; }
 .modulo label { display: grid; gap: 6px; color: var(--testo-2); }
 .modulo input {
@@ -122,28 +122,48 @@ main { position: relative; width: min(100%, 430px); margin: 0 auto; padding: 16p
 .lady { margin: 8px 0 0; padding: 12px 14px; border-radius: 18px; background: var(--rosa); }
 .nota { margin: 0 0 4px; color: var(--testo-2); }
 
-/* Oggi */
-.cose { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; counter-reset: cosa; }
-.cose li { display: grid; gap: 2px; padding-left: 44px; position: relative; min-height: 44px; counter-increment: cosa; }
-.cose li::before {
-  content: counter(cosa);
-  position: absolute; left: 0; top: 2px;
-  width: 32px; height: 32px; border-radius: 50%;
-  display: grid; place-items: center;
-  background: var(--rosa); color: var(--accento-premuto); font-weight: 800;
+/* Oggi (bozze Oggi e Pomeriggio) */
+.schermo { display: flex; flex-direction: column; gap: 10px; }
+.schermo .carta { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border-radius: 26px; }
+.schermo .carta h2 { margin: 0 0 4px; font-size: 19px; line-height: 1.15; }
+.schermo .carta p { margin: 0; font-size: 15px; }
+.cose { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.cose li { display: flex; gap: 12px; align-items: center; padding: 4px 0; }
+.cose li > span { display: flex; flex-direction: column; min-width: 0; }
+.cose b { font: 800 17px/1.15 'Baloo 2', Nunito, sans-serif; }
+.cose small { font-size: 13px; line-height: 1.35; color: var(--testo-2); }
+.pillola-oro, .pillola-lilla {
+  display: flex; align-items: center; gap: 10px; margin: 0; width: 100%;
+  padding: 6px 16px 6px 8px; border-radius: 999px; background: #fff;
+  font: 800 14px/1.3 Nunito, sans-serif; color: var(--testo); text-align: left;
 }
-.cose span { color: var(--testo-2); }
-.pillola { margin: 0; padding: 12px 18px; border-radius: 999px; background: #ffe27a; color: var(--testo); width: fit-content; }
-.famiglia summary { list-style: none; cursor: pointer; min-height: 44px; display: flex; align-items: center; }
+.pillola-oro { border: 3px solid var(--burro); }
+.pillola-lilla { border: 3px solid var(--lilla-medio); min-height: 66px; }
+.famiglia { padding: 8px 14px 10px 8px; border-radius: 22px; background: var(--lilla); }
+.famiglia summary { list-style: none; cursor: pointer; min-height: 44px; display: flex; align-items: center; gap: 10px; }
 .famiglia summary::-webkit-details-marker { display: none; }
-.famiglia summary h2 { margin: 0; }
+.famiglia summary h2 { margin: 0; font: 800 13px Nunito, sans-serif; color: var(--testo-2); }
 .famiglia summary::after { content: '▾'; margin-left: auto; color: var(--testo-2); }
 .famiglia:not([open]) summary::after { content: '▸'; }
-.famiglia ul { margin: 8px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; }
-.numero {
-  display: inline-grid; place-items: center; width: 24px; height: 24px; margin-right: 6px;
-  border-radius: 50%; background: var(--lilla); color: var(--testo); font-size: 14px;
-}
+.famiglia-avatar { display: flex; flex: none; }
+.famiglia-avatar .sticker + .sticker { margin-left: -12px; }
+.famiglia ul { margin: 0 0 0 4px; padding: 0; list-style: none; display: grid; gap: 4px; font-size: 14px; }
+.riga-chiavi { flex-direction: row !important; justify-content: space-between; align-items: center; gap: 10px; }
+.riga-chiavi > span { display: flex; flex-direction: column; gap: 2px; }
+.riga-chiavi small { font-size: 14px; font-weight: 800; color: var(--testo-2); }
+.chiavi { display: flex; gap: 2px; }
+.collegamento { display: flex; align-items: center; gap: 4px; min-height: 44px; border: 0; background: none; color: var(--accento); font: 800 14px Nunito, sans-serif; }
+.piccola { display: flex; gap: 6px; align-items: flex-start; font-size: 13px !important; }
+/* pomeriggio: il numero dell'ordine fa da casella */
+.ordine li { padding: 6px 0; border-bottom: 2px dashed var(--lilla); }
+.ordine li:last-child { border-bottom: 0; }
+.numerata { position: relative; align-items: center !important; }
+.numerata input[type='checkbox'] { position: absolute; left: 0; top: 50%; translate: 0 -50%; width: 44px; height: 44px; opacity: 0; margin: 0; cursor: pointer; }
+.bollino { flex: none; width: 34px; height: 34px; margin: 5px; border-radius: 50%; display: grid; place-items: center; background: var(--rosa); color: var(--accento); font: 800 17px 'Baloo 2', Nunito, sans-serif; }
+.numerata input:checked ~ .bollino { background: var(--accento); color: #fff; }
+.numerata input:focus-visible ~ .bollino { outline: 3px solid var(--accento); outline-offset: 2px; }
+.numerata input:checked ~ span:last-child { color: var(--testo-2); text-decoration: line-through; }
+.tondo { flex: none; width: 52px; height: 52px; border-radius: 50%; border: 3px solid var(--lilla-medio); background: #fff; color: var(--testo); display: grid; place-items: center; }
 
 /* Studio */
 .studio { display: grid; gap: 16px; }
@@ -257,3 +277,8 @@ main { position: relative; width: min(100%, 430px); margin: 0 auto; padding: 16p
 .avvio .fatto .segno { background: #2e7d32; color: #fff; }
 .avvio small { display: block; color: var(--testo-2); }
 .annulla { background: var(--rosa); color: var(--accento-premuto); }
+/* ritocchi dal confronto (Oggi) */
+.testata .sopratitolo { min-height: 0; display: block; margin: 0; font: 800 14px Nunito, sans-serif; color: var(--testo-2); }
+.ordine label { font-size: 15px; line-height: 1.35; }
+.ordine .tondo { width: 44px; height: 44px; }
+.secondario.compatto { width: auto; align-self: flex-end; margin-top: 4px; min-height: 44px; padding: 0 18px; display: inline-flex; align-items: center; gap: 8px; border-width: 3px; border-color: var(--lilla-medio); color: var(--testo); }
