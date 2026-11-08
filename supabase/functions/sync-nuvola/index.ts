@@ -1,5 +1,5 @@
-// Edge Function "sync-nuvola": legge compiti, verifiche, voti e note da Nuvola (sola lettura) e li
-// scrive nel database. La chiamano il cron (14:30 e 19:30, con l'intestazione x-cron-segreto) o un
+// Edge Function "sync-nuvola": legge compiti, verifiche, voti e note da Nuvola (sola lettura), li
+// scrive nel database e assegna i passi di voti e note. La chiamano il cron (14:30 e 19:30, con l'intestazione x-cron-segreto) o un
 // genitore dall'app. Credenziali solo nei segreti NUVOLA_UTENTE / NUVOLA_PASSWORD.
 //
 // Accesso (mappato l'8 novembre 2026): nuvola.madisoft.it rimanda al Keycloak
@@ -7,6 +7,7 @@
 // seguono i rimandi con i cookie fino all'area tutore, poi /api-studente/v1/login-from-web dà il token.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import * as N from '../../../src/lib/nuvola/index.ts';
+import * as R from '../../../src/lib/regole/index.ts';
 
 const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 const NUVOLA = 'https://nuvola.madisoft.it';
@@ -159,7 +160,54 @@ async function sincronizza() {
     verifiche: await scrivi('verifiche', verifiche),
     voti: await scrivi('voti', voti),
     note: await scrivi('note', note),
+    passi: await passiVotiENote(),
   };
+}
+
+// ---------------------------------------------------------------- passi di voti e note
+
+// Rilegge dal database (non da Nuvola) e chiama registra_passi, che è idempotente: ogni giro
+// ricalcola tutto e scrive solo i movimenti nuovi. Contano solo voti e note dall'inizio del gioco
+// (config.periodo.inizio); i voti di prima servono solo da "precedente".
+// ponytail: se un docente corregge un voto dopo i passi, il movimento resta quello di prima.
+async function registra(motivo: string, riferimento: string, passi: number, giorno: string) {
+  if (passi === 0) return 0;
+  const { data, error } = await db.rpc('registra_passi', {
+    p_motivo: motivo,
+    p_riferimento: riferimento,
+    p_passi: passi,
+    p_giorno: giorno,
+  });
+  if (error) throw new Passo(`registra_passi: ${error.message}`);
+  return data ? 1 : 0;
+}
+
+async function passiVotiENote() {
+  const inizio = R.CONFIG.periodo.inizio;
+  let nuovi = 0;
+
+  const { data: voti, error: e1 } = await db.from('voti').select('id, materia_id, data, voto').order('data').order('nuvola_id');
+  if (e1) throw new Passo(`voti: ${e1.message}`);
+  const perMateria = Map.groupBy(voti ?? [], (v) => v.materia_id);
+  for (const lista of perMateria.values()) {
+    const passi = R.passiVotiMateria(lista.map((v) => Number(v.voto)));
+    for (const [i, v] of lista.entries()) if (v.data >= inizio) nuovi += await registra('voto', v.id, passi[i], v.data);
+  }
+
+  const { data: note, error: e2 } = await db
+    .from('note')
+    .select('id, data, tipo')
+    .gte('data', inizio)
+    .order('data')
+    .order('nuvola_id');
+  if (e2) throw new Passo(`note: ${e2.message}`);
+  for (const n of note ?? []) nuovi += await registra('nota', n.id, R.passiNota(n.tipo), n.data);
+  const didattiche = (note ?? []).filter((n) => n.tipo === 'didattica');
+  for (const id of R.malusDimenticanze(didattiche.map((n) => n.id))) {
+    const n = didattiche.find((x) => x.id === id)!;
+    nuovi += await registra('note_dimenticanza', id, R.CONFIG.passi.malus.note_dimenticanza_ogni_3, n.data);
+  }
+  return nuovi;
 }
 
 // ---------------------------------------------------------------- ingresso

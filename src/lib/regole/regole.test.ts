@@ -22,6 +22,9 @@ import {
   passiGestiCasa,
   passiQuiz,
   passiVoto,
+  passiVotiMateria,
+  passiNota,
+  malusDimenticanze,
   posizione,
   soglieTappe,
   statoForziere,
@@ -182,5 +185,27 @@ describe('controlli della funzione dei passi', () => {
   it('sgridate', () => {
     expect(passiSgridata('bagno')).toBe(-1);
     expect(passiSgridata('balla')).toBe(-10);
+  });
+});
+
+describe('voti e note da Nuvola', () => {
+  const P = CONFIG.passi;
+  it('voti di una materia: confronto con il precedente e recupero', () => {
+    expect(passiVotiMateria([7.5, 5, 6, 9])).toEqual([
+      P.voti['7'],
+      0,
+      P.voti.migliorato_almeno_6 + P.voti.recupero_dopo_insufficienza,
+      P.voti['9-10'] + P.voti.migliorato_almeno_6,
+    ]);
+  });
+  it('note: merito e disciplinare, le altre zero', () => {
+    expect(passiNota('merito')).toBe(P.nota_merito);
+    expect(passiNota('disciplinare')).toBe(P.malus.nota_disciplinare);
+    expect(passiNota('didattica')).toBe(0);
+    expect(passiNota('altro')).toBe(0);
+  });
+  it('dimenticanze: malus sulla terza, sesta...', () => {
+    expect(malusDimenticanze(['a', 'b'])).toEqual([]);
+    expect(malusDimenticanze(['a', 'b', 'c', 'd', 'e', 'f', 'g'])).toEqual(['c', 'f']);
   });
 });
