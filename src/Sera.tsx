@@ -4,6 +4,8 @@ import * as N from './lib/nuvola';
 import * as R from './lib/regole';
 import { GIORNI, RigaCompito, SELECT_COMPITI, adesso, maiuscola, passi, spuntaCompito, useAnnulla, type Compito } from './spunte';
 import { supabase } from './supabase';
+import { Check } from '@phosphor-icons/react';
+import { Sticker, Testata } from './kit';
 
 // Sera — design/Domani.html. Lani spunta; i passi li decide la funzione "passi" sul server.
 // Cartella dalle lezioni di Nuvola (orario) più il materiale del giorno (impostazioni);
@@ -18,12 +20,14 @@ const PRIMA_DI_USCIRE_DA_SCUOLA = '16:00';
 
 /** Lista a voci (cartella, borsa): spuntate una per una sul telefono, con l'ultima è pronta. */
 // ponytail: le voci spuntate si perdono se si chiude l'app prima dell'ultima.
-function Voci({ titolo, voci, pronta, quandoPronta, onAnnulla, children }: {
+function Voci({ titolo, voci, pronta, quandoPronta, onAnnulla, colore, children }: {
   titolo: string;
   voci: string[];
   pronta: boolean;
   quandoPronta: () => void;
   onAnnulla?: () => void;
+  /** pastiglie lilla per la cartella, rosa per la borsa (bozza Domani) */
+  colore: 'lilla' | 'rosa';
   children?: React.ReactNode;
 }) {
   const [messe, setMesse] = useState(new Set<string>());
@@ -38,11 +42,12 @@ function Voci({ titolo, voci, pronta, quandoPronta, onAnnulla, children }: {
     <div className="carta">
       <h2>{titolo}</h2>
       {children}
-      <ul className="spunte">
+      <ul className="pastiglie">
         {voci.map((v) => (
           <li key={v}>
-            <label>
+            <label className={`chip chip-${colore}`}>
               <input type="checkbox" checked={pronta || messe.has(v)} disabled={pronta} onChange={() => metti(v)} />
+              <Check size={16} weight="bold" aria-hidden className="segno" />
               <span>{v}</span>
             </label>
           </li>
@@ -154,20 +159,26 @@ export default function Sera() {
   const mancante = compiti.find((c) => !c.fatto_il);
 
   return (
-    <section className="sera">
-      <p className="sopratitolo">{maiuscola(GIORNI[oggi.getDay()])} sera</p>
-      <h1>Pronta per {GIORNI[(soloBorsa ? domaniCal : domani).getDay()]}?</h1>
-      {cose > 0 && (
-        <>
-          <div className="avanzamento" role="progressbar" aria-valuemin={0} aria-valuemax={cose} aria-valuenow={fatte}>
-            <span style={{ width: `${(fatte / cose) * 100}%` }} />
-          </div>
-          <p>
-            {fatte} su {cose}
-            {passiOggi > 0 && `, già +${passiOggi} passi`}.
-          </p>
-        </>
-      )}
+    <section className="schermo sera">
+      <Testata
+        sfondo="sera"
+        posa="lani-assonnata"
+        sopra={`${maiuscola(GIORNI[oggi.getDay()])} sera`}
+        titolo={`Pronta per ${GIORNI[(soloBorsa ? domaniCal : domani).getDay()]}?`}
+        riga={
+          cose > 0 && (
+            <>
+              <div className="avanzamento" role="progressbar" aria-valuemin={0} aria-valuemax={cose} aria-valuenow={fatte}>
+                <span style={{ width: `${(fatte / cose) * 100}%` }} />
+              </div>
+              <p className="conto">
+                {fatte} su {cose}
+                {passiOggi > 0 && `, già +${passiOggi} passi`}.
+              </p>
+            </>
+          )
+        }
+      />
       {errore && <p role="alert">{errore}</p>}
 
       {!soloBorsa && (
@@ -193,7 +204,10 @@ export default function Sera() {
           ))}
         </ul>
         {mancante && (
-          <p className="lady">Lady si è sdraiata sul quaderno di {mancante.materie?.nome ?? 'domani'}. Si sposta solo se lo apri.</p>
+          <p className="lady con-lady">
+            Lady si è sdraiata sul quaderno di {mancante.materie?.nome ?? 'domani'}. Si sposta solo se lo apri.
+            <Sticker posa="lady-compiti" misura={92} className="lady-sticker" />
+          </p>
         )}
       </div>
       )}
@@ -204,6 +218,7 @@ export default function Sera() {
           voci={orario.length ? orario : [`Cartella pronta per ${GIORNI[domani.getDay()]}`]}
           pronta={serata.cartella}
           quandoPronta={() => chiudiSerata('cartella')}
+          colore="lilla"
           onAnnulla={attesa.inAttesa('cartella') ? () => attesa.annulla('cartella', () => setSerata((s) => ({ ...s, cartella: false }))) : undefined}
         />
       )}
@@ -214,9 +229,10 @@ export default function Sera() {
           voci={VOCI_BORSA}
           pronta={serata.borsa}
           quandoPronta={() => chiudiSerata('borsa')}
+          colore="rosa"
           onAnnulla={attesa.inAttesa('borsa') ? () => attesa.annulla('borsa', () => setSerata((s) => ({ ...s, borsa: false }))) : undefined}
         >
-          <p className="nota">
+          <p className="nota accento">
             {C.tipoImpegno(sport.titolo) === 'partita' ? 'Partita' : 'Allenamento'} domani alle {C.oraRoma(sport.inizio)}
             {R.giornoDiScuola(domaniCal) && C.oraRoma(sport.inizio) < PRIMA_DI_USCIRE_DA_SCUOLA ? ': la porti a scuola.' : '.'}
           </p>
@@ -224,7 +240,7 @@ export default function Sera() {
       )}
 
       {fogliVisti.length > 0 && (
-        <div className="carta">
+        <div className="carta tratteggiata">
           <h2>Da far firmare</h2>
           <ul className="spunte">
             {fogli.map((f) => (
@@ -238,7 +254,7 @@ export default function Sera() {
                   <span className="dato">Dato, aspetta la firma</span>
                 ) : (
                   <button
-                    className="principale"
+                    className="secondario compatto"
                     onClick={() =>
                       spunta(
                         f.id,
@@ -259,7 +275,7 @@ export default function Sera() {
       )}
 
       {famiglia && (
-        <p className="carta nota">
+        <p className="famiglia nota-famiglia">
           Domani in famiglia: {famiglia.titolo}
           {famiglia.tutto_il_giorno ? '' : ` alle ${C.oraRoma(famiglia.inizio)}`}. Tienilo a mente per la cartella e la sveglia.
         </p>
