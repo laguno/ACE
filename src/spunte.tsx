@@ -17,9 +17,9 @@ export async function passi(tipo: string, id: string): Promise<number> {
   return data?.passi ?? 0;
 }
 
-export function RigaCompito({ c, numero, onSpunta }: { c: Compito; numero?: number; onSpunta: () => void }) {
+export function RigaCompito({ c, numero, onSpunta, onAiuto }: { c: Compito; numero?: number; onSpunta: () => void; onAiuto?: () => void }) {
   return (
-    <li>
+    <li className={onAiuto ? 'con-aiuto' : undefined}>
       <label>
         <input type="checkbox" checked={!!c.fatto_il} disabled={!!c.fatto_il} onChange={onSpunta} />
         <span>
@@ -27,6 +27,11 @@ export function RigaCompito({ c, numero, onSpunta }: { c: Compito; numero?: numb
           <b>{c.materie?.nome ?? 'Compito'}</b>: {c.testo}
         </span>
       </label>
+      {onAiuto && !c.fatto_il && (
+        <button className="lampadina" onClick={onAiuto} aria-label={`Non ho capito: ${c.materie?.nome ?? 'compito'}`}>
+          Non ho capito
+        </button>
+      )}
     </li>
   );
 }

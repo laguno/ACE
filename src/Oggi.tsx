@@ -124,6 +124,7 @@ function Pomeriggio({ chiusura }: { chiusura: string | null }) {
   const domani = R.prossimoGiornoDiScuola(oggi);
   const [compiti, setCompiti] = useState<Compito[]>();
   const [errore, setErrore] = useState('');
+  const [aiuto, setAiuto] = useState<Compito>();
 
   useEffect(() => {
     supabase
@@ -138,6 +139,7 @@ function Pomeriggio({ chiusura }: { chiusura: string | null }) {
   }, []);
 
   if (!compiti) return errore ? <p role="alert">{errore}</p> : null;
+  if (aiuto) return <Aiuto compito={aiuto} chiudi={() => setAiuto(undefined)} />;
   const daFare = compiti.filter((c) => !c.fatto_il);
   const segna = (id: string) => (fatto_il: string | null) =>
     setCompiti((l) => l?.map((x) => (x.id === id ? { ...x, fatto_il } : x)));
@@ -157,7 +159,13 @@ function Pomeriggio({ chiusura }: { chiusura: string | null }) {
             <h2>In quest'ordine</h2>
             <ul className="spunte">
               {compiti.map((c, i) => (
-                <RigaCompito key={c.id} c={c} numero={i + 1} onSpunta={() => spuntaCompito(c.id, segna(c.id), setErrore)} />
+                <RigaCompito
+                  key={c.id}
+                  c={c}
+                  numero={i + 1}
+                  onSpunta={() => spuntaCompito(c.id, segna(c.id), setErrore)}
+                  onAiuto={() => setAiuto(c)}
+                />
               ))}
             </ul>
             {daFare.length > 0 && daFare[0] === compiti[0] && <p className="nota">Inizia dal primo: è il più lungo.</p>}
@@ -165,6 +173,46 @@ function Pomeriggio({ chiusura }: { chiusura: string | null }) {
           </>
         )}
       </div>
+    </section>
+  );
+}
+
+/** Lampadina "Non ho capito": l'argomento con un altro esempio, poi un indizio alla volta. */
+function Aiuto({ compito, chiudi }: { compito: Compito; chiudi: () => void }) {
+  const [r, setR] = useState<{ spiegazione: string; indizi: string[] } | null>();
+  const [visti, setVisti] = useState(0);
+  useEffect(() => {
+    supabase.functions.invoke('spiega', { body: { compito_id: compito.id } }).then(({ data, error }) => {
+      setR(error || !data?.spiegazione ? null : data);
+    });
+  }, [compito.id]);
+
+  return (
+    <section className="sera">
+      <p className="sopratitolo">{compito.materie?.nome ?? 'Compito'}</p>
+      <h1>Non ho capito</h1>
+      <p className="nota">{compito.testo}</p>
+      <div className="carta" aria-live="polite">
+        {r === undefined && <p>Ok, vediamola con un altro esempio…</p>}
+        {r === null && <p>Adesso la lampadina non si accende. Riprova tra poco, oppure chiedi a mamma o papà.</p>}
+        {r && (
+          <>
+            <p>Ok, vediamola con un altro esempio.</p>
+            <p>{r.spiegazione}</p>
+            {r.indizi.slice(0, visti).map((x, n) => (
+              <p key={n} className="indizio">
+                <b>Indizio {n + 1}.</b> {x}
+              </p>
+            ))}
+            {visti < r.indizi.length && (
+              <button className="secondario" onClick={() => setVisti(visti + 1)}>
+                {visti ? 'Un altro indizio' : 'Un indizio'}
+              </button>
+            )}
+          </>
+        )}
+      </div>
+      <button className="principale largo" onClick={chiudi}>Torna ai compiti</button>
     </section>
   );
 }

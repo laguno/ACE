@@ -37,7 +37,9 @@ function unisci(t: Tabelle, nome: string, riga: Record<string, unknown>, select:
   return fuori;
 }
 
-export async function finto(page: Page, t: Tabelle, utente = { id: 'lani', ruolo: 'lani', nome: 'Lani' }) {
+/** funzioni: risposte delle Edge Functions diverse da passi, per nome (es. { spiega: {...} }). */
+export async function finto(page: Page, t: Tabelle, funzioni: Record<string, unknown> = {}) {
+  const utente = { id: 'lani', ruolo: 'lani', nome: 'Lani' };
   t.profili ??= [utente];
   const chiamate: { tipo: string; id: string }[] = [];
 
@@ -67,6 +69,7 @@ export async function finto(page: Page, t: Tabelle, utente = { id: 'lani', ruolo
       chiamate.push(req.postDataJSON());
       return json({ passi: 0 });
     }
+    if (url.pathname.startsWith('/functions/v1/')) return json(funzioni[url.pathname.split('/')[3]] ?? {});
     if (url.pathname.startsWith('/auth/v1/')) return json({ id: utente.id });
 
     const nome = url.pathname.replace('/rest/v1/', '');
