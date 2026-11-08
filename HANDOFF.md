@@ -4,7 +4,7 @@
 
 Sprint 1, **tappa 1 (fondamenta) chiusa** e unita a `main` l'8 novembre 2026: progetto Vite + React + PWA; regole di gioco con test (29 verdi); schema `0001` + `0002` applicati su Supabase; utenti e profili (Lani, Papà, Mamma) con RLS provata; accesso con sessione persistente; area genitori con PIN provata sull'iPad; Vercel collegato a GitHub; Edge Function `passi` pubblicata e provata.
 
-**Tappa 2 (Nuvola)** in corso sul branch `tappa-2-nuvola`: `sync-nuvola` pubblicata e provata dal vivo (14 materie, 28 compiti, 16 verifiche, 24 voti, 12 note; idempotente), cron `0003` attivo e provato via `pg_net`.
+**Tappa 2 (Nuvola)** in corso sul branch `tappa-2-nuvola`: `sync-nuvola` pubblicata e provata dal vivo (14 materie, 28 compiti, 16 verifiche, 24 voti, 12 note; idempotente), cron `0003` attivo e provato via `pg_net`; passi di voti e note (dal 23/11, `periodo.inizio`) con test, 0 movimenti per ora.
 
 ## Ultima sessione (8 novembre 2026)
 
@@ -28,7 +28,7 @@ Prova sull'iPad (tappa 1, guasto di `verifica_pin` corretto con `0002`), merge s
 
 ## Prossimo passo
 
-Chiudere la tappa 2: passi per voti e note dopo ogni sincronizzazione (`passiVoto`, note dal config); poi merge. Più avanti: avviso ai genitori se la sincronizzazione fallisce (con le push, tappa 6); 2 verifiche su 16 senza materia (nome e docente ambigui). Piccolo debito: l'area genitori mostra "PIN non giusto" anche quando l'errore è del server; distinguere i due casi.
+Merge della tappa 2 su `main`, poi tappa 3 (Oggi e Sera). Dal 23/11 controllare in `movimenti_passi` i primi passi di voti e note. Più avanti: avviso ai genitori se la sincronizzazione fallisce (con le push, tappa 6); 2 verifiche su 16 senza materia (nome e docente ambigui). Piccolo debito: l'area genitori mostra "PIN non giusto" anche quando l'errore è del server; distinguere i due casi.
 
 ## In attesa di
 
