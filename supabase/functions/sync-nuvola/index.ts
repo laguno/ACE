@@ -164,7 +164,21 @@ async function sincronizza() {
     note: await scrivi('note', note),
     lezioni: await scrivi('lezioni', N.lezioni(d.giorniLezioni).filter((l) => ids.has(l.materia_id))),
     passi: await passiVotiENote(),
+    studio: preparaStudio(),
   };
+}
+
+/**
+ * Piano di ripasso e carte delle verifiche nuove (genera-studio). L'IA può metterci un minuto:
+ * si lancia in sottofondo (EdgeRuntime.waitUntil) e la sincronizzazione risponde subito.
+ */
+function preparaStudio() {
+  const lavoro = fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/genera-studio`, {
+    method: 'POST',
+    headers: { 'x-cron-segreto': Deno.env.get('CRON_SEGRETO') ?? '' },
+  }).catch((e) => console.error('genera-studio', e));
+  (globalThis as { EdgeRuntime?: { waitUntil(p: Promise<unknown>): void } }).EdgeRuntime?.waitUntil(lavoro);
+  return 'avviato';
 }
 
 // ---------------------------------------------------------------- passi di voti e note
