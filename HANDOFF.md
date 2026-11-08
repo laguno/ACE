@@ -2,13 +2,11 @@
 
 ## Dove siamo
 
-Sprint 1, **tappa 1 (fondamenta)**, sul branch `tappa-1-fondamenta`, non ancora unito a `main`.
-- Fatto: progetto Vite + React + PWA; regole di gioco con test (29 verdi); schema `0001` rivisto, approvato da Jarvis e **applicato** su Supabase; utenti e profili creati (Lani, Papà, Mamma) e provata la RLS con l'utente di Lani sul database vero; accesso con sessione persistente e area genitori con PIN (da provare sul telefono); Vercel collegato a GitHub; Edge Function `passi` pubblicata e provata dal vivo (8 controlli).
-- Manca per chiudere la tappa: prova sul telefono di Lani (accesso, PIN sull'iPad), poi merge su `main`.
+Sprint 1, **tappa 1 (fondamenta) chiusa** e unita a `main` l'8 novembre 2026: progetto Vite + React + PWA; regole di gioco con test (29 verdi); schema `0001` + `0002` applicati su Supabase; utenti e profili (Lani, Papà, Mamma) con RLS provata; accesso con sessione persistente; area genitori con PIN provata sull'iPad; Vercel collegato a GitHub; Edge Function `passi` pubblicata e provata.
 
-## Ultima sessione (7 novembre 2026)
+## Ultima sessione (8 novembre 2026)
 
-Letti i documenti; aggiunte le regole dello storno e del compito rifatto; schema `0001` corretto due volte (revisione di Claude, poi la correzione di Jarvis sulle ore delle spunte) e applicato con `npx supabase db push --remote`; creato il progetto Vercel `ace` (https://ace-passino.vercel.app) e collegato a `laguno/ACE`.
+Prova sull'iPad fatta dal signore (sull'anteprima): sessione di Lani persistente, area genitori con accesso genitore + PIN, richiusura in secondo piano, ritorno ad ACE. Trovato e corretto un guasto: `verifica_pin` falliva con "UPDATE requires a WHERE clause" (migrazione `0002`). Merge su `main`.
 
 ## Decisioni prese
 
@@ -23,15 +21,16 @@ Letti i documenti; aggiunte le regole dello storno e del compito rifatto; schema
 | 7/11 | signore | Vercel: progetto `ace`, indirizzo `ace-passino.vercel.app`, `noindex`, anteprime sui push e produzione dal merge su `main` |
 | 7/11 | signore | Fogli da firmare: Lani segna "L'ho dato" (`dato_il`), i passi arrivano con la conferma del genitore |
 | 7/11 | signore | Config: `video_frazione_minima_vista` 0.95 (regola del 95% di Jarvis) |
+| 8/11 | signore | Lani non prova l'app prima: sorpresa ad app finita. Le prove sui dispositivi le fanno i genitori |
 | 7/11 | Jarvis | Schema `0001` approvato con correzione: ore delle spunte di Lani messe dal server (`timbra_ora`), `flashcard_giri.iniziato_il` |
 
 ## Prossimo passo
 
-Prova sul telefono e sull'iPad di Lani; merge della tappa 1 su `main`; poi tappa 2 (Nuvola, con il signore presente).
+Tappa 2 (Nuvola), con il signore presente. Piccolo debito: l'area genitori mostra "PIN non giusto" anche quando l'errore è del server; distinguere i due casi.
 
 ## In attesa di
 
-- Signore: salvare la password di Lani sul suo telefono e sull'iPad; impostare il PIN dell'area genitori dal proprio telefono.
+- Signore: sull'iPad, dopo il merge, rifare l'accesso su `ace-passino.vercel.app` (l'anteprima ha un'altra origine, quindi un altro salvataggio). Il PIN resta sul server.
 
 ## Attenzione
 
@@ -41,7 +40,10 @@ Prova sul telefono e sull'iPad di Lani; merge della tappa 1 su `main`; poi tappa
 - Edge Function `passi`: l'app la chiama con { tipo, id } dopo ogni spunta; mancano borsa (tappa 3), voti e note (tappa 2), rimonta (tappa 5). Si pubblica con `npx supabase functions deploy passi --use-api`.
 - L'inizio del giro di flash card arriva dal telefono: se serve più rigore, timbrarlo sul server (tappa 4).
 - Python non è installato su questo PC: `npm run simula` non parte.
-- Lo schema `0001` è applicato: le modifiche vanno in `0002` e successive.
+- Schema `0001` e `0002` applicati: le modifiche vanno in `0003` e successive.
+- Supabase rifiuta UPDATE e DELETE senza WHERE anche dentro le funzioni (safeupdate); PGlite no, quindi `prova:schema` non lo scopre.
+- `db push` dal terminale di Claude Code vuole `--yes` (la CLI non può chiedere conferma); il permesso automatico lo blocca: lo lancia il signore con `!`.
+- Le anteprime di Vercel chiedono l'accesso a Vercel; la produzione no.
 
 ## Come verificare
 
