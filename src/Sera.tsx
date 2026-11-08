@@ -43,12 +43,19 @@ export default function Sera() {
     carica();
   }, [carica]);
 
-  async function spunta(azione: () => PromiseLike<{ error: unknown }>, tipo: string, id: string) {
+  // La spunta si vede subito (subito()); se il salvataggio fallisce, carica() la toglie.
+  async function spunta(subito: () => void, azione: () => PromiseLike<{ error: unknown }>, tipo: string, id: string) {
+    subito();
+    setErrore('');
     const { error } = await azione();
-    if (error) return setErrore('Spunta non salvata. Riprova.');
+    if (error) {
+      setErrore('Spunta non salvata. Riprova.');
+      return carica();
+    }
     await passi(tipo, id);
     carica();
   }
+  const adesso = () => new Date().toISOString();
 
   if (!compiti) return errore ? <p role="alert">{errore}</p> : null;
 
@@ -87,7 +94,12 @@ export default function Sera() {
                   checked={!!c.fatto_il}
                   disabled={!!c.fatto_il}
                   onChange={() =>
-                    spunta(() => supabase.from('compiti').update({ fatto_il: new Date().toISOString() }).eq('id', c.id), 'compito', c.id)
+                    spunta(
+                      () => setCompiti((l) => l?.map((x) => (x.id === c.id ? { ...x, fatto_il: adesso() } : x))),
+                      () => supabase.from('compiti').update({ fatto_il: adesso() }).eq('id', c.id),
+                      'compito',
+                      c.id,
+                    )
                   }
                 />
                 <span>
@@ -114,7 +126,8 @@ export default function Sera() {
                   disabled={cartella}
                   onChange={() =>
                     spunta(
-                      () => supabase.from('serate').upsert({ data: R.iso(oggi), cartella_il: new Date().toISOString() }),
+                      () => setCartella(true),
+                      () => supabase.from('serate').upsert({ data: R.iso(oggi), cartella_il: adesso() }),
                       'serata',
                       R.iso(oggi),
                     )
@@ -140,7 +153,12 @@ export default function Sera() {
                   <button
                     className="principale"
                     onClick={() =>
-                      spunta(() => supabase.from('fogli_firma').update({ dato_il: new Date().toISOString() }).eq('id', f.id), 'foglio', f.id)
+                      spunta(
+                        () => setFogli((l) => l.map((x) => (x.id === f.id ? { ...x, dato_il: adesso() } : x))),
+                        () => supabase.from('fogli_firma').update({ dato_il: adesso() }).eq('id', f.id),
+                        'foglio',
+                        f.id,
+                      )
                     }
                   >
                     L'ho dato
