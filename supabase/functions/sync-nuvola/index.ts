@@ -111,15 +111,16 @@ async function scarica(token: string) {
   if (!alunno) throw new Passo(`nessuna scheda attiva tra ${schede.length}`);
   const a = `/alunno/${alunno.id}`;
 
-  // compiti da una settimana fa a quattro settimane avanti, a blocchi di 7 giorni come fa Nuvola
+  // a blocchi di 7 giorni come fa Nuvola: compiti da una settimana fa a quattro avanti; lezioni delle
+  // ultime due settimane e di questa (per l'orario serve ogni giorno della settimana almeno una volta)
   const compiti: any[] = [];
   const lezioni: any[] = [];
   const oggi = oggiRoma();
-  for (let s = -1; s < 4; s++) {
+  for (let s = -2; s < 4; s++) {
     const da = new Date(oggi.getTime() + s * 7 * 864e5);
     const a7 = new Date(da.getTime() + 6 * 864e5);
-    compiti.push(...(await leggi(token, `${a}/compito/elenco/${ggmmaaaa(da)}/${ggmmaaaa(a7)}`, alunno.id)));
-    if (s === -1)
+    if (s >= -1) compiti.push(...(await leggi(token, `${a}/compito/elenco/${ggmmaaaa(da)}/${ggmmaaaa(a7)}`, alunno.id)));
+    if (s <= 0)
       lezioni.push(...(await leggi(token, `${a}/argomento-lezione/elenco/${ggmmaaaa(da)}/${ggmmaaaa(a7)}`, alunno.id)));
   }
   const eventi = await leggi(token, `${a}/eventi-classe?soloVisibiliPlanner=true`, alunno.id);
@@ -127,7 +128,8 @@ async function scarica(token: string) {
   const corrente = quadrimestri.find((q) => q.corrente) ?? quadrimestri.at(-1);
   const voti = corrente ? await leggi(token, `${a}/frazione-temporale/${corrente.id}/voti/materie`, alunno.id) : [];
   const note = await leggi(token, `${a}/note`, alunno.id);
-  return { compiti, lezioni: lezioni.flatMap((v) => v.ore.flatMap((o: any) => o.argomenti)), eventi, voti, note };
+  const argomenti = lezioni.flatMap((v) => v.ore.flatMap((o: any) => o.argomenti));
+  return { compiti, giorniLezioni: lezioni, lezioni: argomenti, eventi, voti, note };
 }
 
 // ---------------------------------------------------------------- scrittura
@@ -160,6 +162,7 @@ async function sincronizza() {
     verifiche: await scrivi('verifiche', verifiche),
     voti: await scrivi('voti', voti),
     note: await scrivi('note', note),
+    lezioni: await scrivi('lezioni', N.lezioni(d.giorniLezioni).filter((l) => ids.has(l.materia_id))),
     passi: await passiVotiENote(),
   };
 }
