@@ -78,7 +78,7 @@ export async function finto(page: Page, t: Tabelle, funzioni: Record<string, unk
     const uno = (req.headers()['accept'] ?? '').includes('vnd.pgrst.object');
 
     if (metodo === 'GET' || metodo === 'HEAD') {
-      const trovate = filtra(righe, url.searchParams).map((r) => unisci(t, nome, r, url.searchParams.get('select')));
+      const trovate = ordina(filtra(righe, url.searchParams), url.searchParams.get('order')).map((r) => unisci(t, nome, r, url.searchParams.get('select')));
       if (uno) return trovate.length ? json(trovate[0]) : json({ code: 'PGRST116', message: 'nessuna riga' }, 406);
       return route.fulfill({
         status: 200,
@@ -115,3 +115,16 @@ export async function finto(page: Page, t: Tabelle, funzioni: Record<string, unk
   return { chiamate, t };
 }
 
+
+/** order=priorita.asc,creato_il.asc */
+function ordina(righe: Record<string, unknown>[], order: string | null) {
+  if (!order) return righe;
+  const chiavi = order.split(',').map((o) => o.split('.'));
+  return [...righe].sort((a, b) => {
+    for (const [k, dir] of chiavi) {
+      const x = String(a[k] ?? ''), y = String(b[k] ?? '');
+      if (x !== y) return (x < y ? -1 : 1) * (dir === 'desc' ? -1 : 1);
+    }
+    return 0;
+  });
+}

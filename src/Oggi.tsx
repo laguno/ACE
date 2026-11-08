@@ -4,6 +4,7 @@ import * as C from './lib/calendario';
 import * as N from './lib/nuvola';
 import * as R from './lib/regole';
 import { GIORNI, MESI, RigaCompito, SELECT_COMPITI, maiuscola, spuntaCompito, type Compito } from './spunte';
+import { attivaNotifiche, notifichePossibili } from './notifiche';
 import { supabase } from './supabase';
 
 // Oggi — design/Oggi.html (mattina) e design/Pomeriggio.html (pomeriggio).
@@ -15,10 +16,11 @@ type Cosa = { titolo: string; sotto: string };
 export default function Oggi() {
   const giornata = useGiornata();
   if (!giornata) return null;
-  return C.momento(oraAdesso(), giornata.chiusura) === 'mattina' ? (
-    <Mattina impegni={giornata.impegni} />
-  ) : (
-    <Pomeriggio chiusura={giornata.chiusura} />
+  return (
+    <>
+      {C.momento(oraAdesso(), giornata.chiusura) === 'mattina' ? <Mattina impegni={giornata.impegni} /> : <Pomeriggio chiusura={giornata.chiusura} />}
+      <AttivaNotifiche />
+    </>
   );
 }
 
@@ -214,5 +216,19 @@ function Aiuto({ compito, chiudi }: { compito: Compito; chiudi: () => void }) {
       </div>
       <button className="principale largo" onClick={chiudi}>Torna ai compiti</button>
     </section>
+  );
+}
+
+/** Invito ad attivare i promemoria, finché il telefono non ha risposto (sì o no). */
+function AttivaNotifiche() {
+  const [vedi, setVedi] = useState(notifichePossibili);
+  if (!vedi) return null;
+  return (
+    <div className="carta promemoria">
+      <p>Vuoi i promemoria di ACE? Al massimo 3 al giorno.</p>
+      <button className="secondario" onClick={() => attivaNotifiche().finally(() => setVedi(false))}>
+        Attiva i promemoria
+      </button>
+    </div>
   );
 }

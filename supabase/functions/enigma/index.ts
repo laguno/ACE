@@ -104,7 +104,7 @@ Deno.serve(async (req) => {
           });
           if (id) {
             passi = R.CONFIG.passi.enigma_risolto;
-            await aggiornaForzieri(db);
+            await aggiornaForzieri(db, passi);
           }
         }
       }

@@ -1,8 +1,10 @@
 // Stato dei forzieri, aggiornato dal server dopo ogni cambio di passi o di chiavi.
 // Solo in avanti: chiuso -> enigma (manca l'ultima tappa) -> aperto (tappa raggiunta e chiavi
 // totali bastano). "consegnato" lo segnano i genitori. Aprendo un forziere si sblocca una figurina rara.
+// Con nuoviPassi (quelli appena dati) accoda anche i popup di tappa, cima, enigma, lucchetto e forziere aperto.
 import type { SupabaseClient } from 'npm:@supabase/supabase-js@2';
 import * as R from '../../../src/lib/regole/index.ts';
+import { accoda } from './popup.ts';
 
 const ORDINE = { chiuso: 0, enigma: 1, aperto: 2, consegnato: 3 } as const;
 type Stato = keyof typeof ORDINE;
@@ -20,11 +22,11 @@ async function figurinaRara(db: SupabaseClient, n: number) {
   return posa;
 }
 
-export async function aggiornaForzieri(db: SupabaseClient): Promise<{ n: number; stato: Stato; figurina?: string | null }[]> {
+export async function aggiornaForzieri(db: SupabaseClient, nuoviPassi?: number): Promise<{ n: number; stato: Stato; figurina?: string | null }[]> {
   const [{ data: s }, { data: c }, { data: forzieri }] = await Promise.all([
     db.from('saldo_passi').select('passi').single(),
     db.from('chiavi_totali').select('chiavi').single(),
-    db.from('forzieri').select('n, stato'),
+    db.from('forzieri').select('n, stato, enigma, premio'),
   ]);
   const passi = s?.passi ?? 0;
   const chiavi = c?.chiavi ?? 0;
@@ -38,6 +40,19 @@ export async function aggiornaForzieri(db: SupabaseClient): Promise<{ n: number;
     const { error } = await db.from('forzieri').update(campi).eq('n', f.n);
     if (error) throw error;
     cambiati.push({ n: f.n, stato: nuovo, figurina: nuovo === 'aperto' ? await figurinaRara(db, f.n) : undefined });
+    if (nuovo === 'aperto') await accoda(db, `forziere:${f.n}:aperto`, 'forziere_aperto', { premio: f.premio ?? 'un premio da scegliere con mamma e papà' });
+    else if (f.enigma) await accoda(db, `forziere:${f.n}:enigma`, 'enigma_comparso', { n: R.CONFIG.enigma.tentativi });
+  }
+
+  if (nuoviPassi) {
+    const prima = R.posizione(passi - nuoviPassi).tappeFatte;
+    const dopo = R.posizione(passi);
+    if (dopo.inCima && prima < dopo.tappeFatte) await accoda(db, 'cima', 'cima');
+    else if (dopo.tappeFatte > prima) {
+      await accoda(db, `tappa:${dopo.tappeFatte}`, 'tappa', { tappa: dopo.tappeFatte, mancano_passi: dopo.mancanoPassi });
+      const conf = R.CONFIG.forzieri.find((x) => x.tappa === dopo.tappeFatte);
+      if (conf && chiavi < conf.chiavi) await accoda(db, `forziere:${conf.n}:lucchetto`, 'forziere_lucchetto', { n: conf.chiavi - chiavi });
+    }
   }
   return cambiati;
 }

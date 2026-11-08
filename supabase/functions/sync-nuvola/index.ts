@@ -9,6 +9,8 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 import * as N from '../../../src/lib/nuvola/index.ts';
 import * as R from '../../../src/lib/regole/index.ts';
 import { aggiornaForzieri } from '../_shared/forzieri.ts';
+import { accoda } from '../_shared/popup.ts';
+import * as K from '../../../src/lib/copione/index.ts';
 
 const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 const NUVOLA = 'https://nuvola.madisoft.it';
@@ -154,7 +156,7 @@ async function sincronizza() {
   const verifiche = N.verifiche(d.eventi, docenti);
   for (const v of verifiche) if (v.materia_id && !ids.has(v.materia_id)) v.materia_id = null;
   const voti = N.voti(d.voti);
-  const note = N.note(d.note);
+  const note = N.note(d.note).map((n) => ({ ...n, materia_id: n.materia_id && ids.has(n.materia_id) ? n.materia_id : null }));
   const compiti = N.compiti(d.compiti);
 
   return {
@@ -164,8 +166,7 @@ async function sincronizza() {
     voti: await scrivi('voti', voti),
     note: await scrivi('note', note),
     lezioni: await scrivi('lezioni', N.lezioni(d.giorniLezioni).filter((l) => ids.has(l.materia_id))),
-    passi: await passiVotiENote(),
-    forzieri: await aggiornaForzieri(db),
+    ...(await passiEForzieri()),
     studio: preparaStudio(),
   };
 }
@@ -198,35 +199,70 @@ async function registra(motivo: string, riferimento: string, passi: number, gior
     p_giorno: giorno,
   });
   if (error) throw new Passo(`registra_passi: ${error.message}`);
-  return data ? 1 : 0;
+  return data ? passi : 0;
 }
+
+async function passiEForzieri() {
+  const passi = await passiVotiENote();
+  return { passi, forzieri: await aggiornaForzieri(db, passi) };
+}
+
+const segno = (n: number) => String(n).replace('-', '−');
 
 async function passiVotiENote() {
   const inizio = R.CONFIG.periodo.inizio;
-  let nuovi = 0;
+  let presi = 0;
+  const { data: materie } = await db.from('materie').select('id, nome');
+  const nome = (id: string | null) => materie?.find((m) => m.id === id)?.nome ?? 'una materia';
 
   const { data: voti, error: e1 } = await db.from('voti').select('id, materia_id, data, voto').order('data').order('nuvola_id');
   if (e1) throw new Passo(`voti: ${e1.message}`);
+  // sessioni di ripasso fatte, per il popup "Le {n} sessioni di ripasso si vedono"
+  const { data: sessioni } = await db.from('sessioni_ripasso').select('verifiche(materia_id, data)').not('fatta_il', 'is', null);
   const perMateria = Map.groupBy(voti ?? [], (v) => v.materia_id);
   for (const lista of perMateria.values()) {
-    const passi = R.passiVotiMateria(lista.map((v) => Number(v.voto)));
-    for (const [i, v] of lista.entries()) if (v.data >= inizio) nuovi += await registra('voto', v.id, passi[i], v.data);
+    const numeri = lista.map((v) => Number(v.voto));
+    const passi = R.passiVotiMateria(numeri);
+    for (const [i, v] of lista.entries()) {
+      if (v.data < inizio) continue;
+      presi += await registra('voto', v.id, passi[i], v.data);
+      // ponytail: conta le sessioni delle verifiche della stessa materia fatte nei 14 giorni prima del voto
+      const da = R.iso(new Date(R.giorno(v.data).getTime() - 14 * 864e5));
+      const fatte = (sessioni ?? []).filter((s) => {
+        const ver = s.verifiche as unknown as { materia_id: string; data: string } | null;
+        return ver?.materia_id === v.materia_id && ver.data <= v.data && ver.data >= da;
+      }).length;
+      const insufficienze = numeri.slice(0, i + 1).filter((x) => x < 6).length;
+      await accoda(db, `voto:${v.id}`, K.popupVoto(numeri[i], i ? numeri[i - 1] : undefined, insufficienze, fatte), {
+        voto: K.votoScritto(numeri[i]),
+        prima: i ? K.votoScritto(numeri[i - 1]) : '',
+        materia: nome(v.materia_id),
+        passi: passi[i],
+        n: fatte,
+      });
+    }
   }
 
   const { data: note, error: e2 } = await db
     .from('note')
-    .select('id, data, tipo')
+    .select('id, data, tipo, materia_id')
     .gte('data', inizio)
     .order('data')
     .order('nuvola_id');
   if (e2) throw new Passo(`note: ${e2.message}`);
-  for (const n of note ?? []) nuovi += await registra('nota', n.id, R.passiNota(n.tipo), n.data);
+  for (const n of note ?? []) {
+    const p = R.passiNota(n.tipo);
+    presi += await registra('nota', n.id, p, n.data);
+    if (n.tipo === 'disciplinare') await accoda(db, `nota:${n.id}`, 'nota_disciplinare', { materia: nome(n.materia_id), passi: segno(p) });
+  }
   const didattiche = (note ?? []).filter((n) => n.tipo === 'didattica');
   for (const id of R.malusDimenticanze(didattiche.map((n) => n.id))) {
     const n = didattiche.find((x) => x.id === id)!;
-    nuovi += await registra('note_dimenticanza', id, R.CONFIG.passi.malus.note_dimenticanza_ogni_3, n.data);
+    const p = R.CONFIG.passi.malus.note_dimenticanza_ogni_3;
+    presi += await registra('note_dimenticanza', id, p, n.data);
+    await accoda(db, `dimenticanze:${id}`, 'nota_terza_dimenticanza', { passi: segno(p) });
   }
-  return nuovi;
+  return presi;
 }
 
 // ---------------------------------------------------------------- ingresso

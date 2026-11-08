@@ -8,6 +8,9 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 import mappa from '../../../data/mappa-libri.json' with { type: 'json' };
 import * as C from '../../../src/lib/calendario/index.ts';
 import * as R from '../../../src/lib/regole/index.ts';
+import { accoda } from '../_shared/popup.ts';
+
+const GIORNI = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'];
 
 const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 const claude = new Anthropic({ apiKey: Deno.env.get('ANTHROPIC_API_KEY') });
@@ -106,7 +109,7 @@ async function prepara() {
   fra14.setDate(fra14.getDate() + 14);
   const { data: verifiche, error } = await db
     .from('verifiche')
-    .select('id, materia_id, data, argomento, tipo, pagine_probabili, quiz(id)')
+    .select('id, materia_id, data, argomento, tipo, pagine_probabili, quiz(id), materie(nome)')
     .gt('data', R.iso(oggi))
     .lte('data', R.iso(fra14))
     .order('data');
@@ -130,6 +133,12 @@ async function prepara() {
       const { error: e } = await db.from('sessioni_ripasso').upsert(piano, { onConflict: 'verifica_id,numero', ignoreDuplicates: true });
       if (e) throw new Error(`sessioni: ${e.message}`);
       sessioni += piano.length;
+      const g = R.giorno(v.data);
+      await accoda(db, `verifica:${v.id}`, piano.length === 1 ? 'verifica_nuova_una' : 'verifica_nuova', {
+        materia: (v.materie as unknown as { nome: string } | null)?.nome ?? 'scuola',
+        giorno: `${GIORNI[g.getDay()]} ${g.getDate()}`,
+        n: piano.length,
+      });
     }
 
     if ((v.quiz as unknown[]).length || generate >= PER_GIRO) continue;
