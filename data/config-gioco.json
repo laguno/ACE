@@ -116,6 +116,10 @@
       "chiavi": 36
     }
   ],
+  "enigma": {
+    "tentativi": 3,
+    "nota": "Tre tentativi per indovinare (docs/02, approvato il 7/11/2026); +20 passi in passi.enigma_risolto."
+  },
   "passi": {
     "obbligatori": {
       "cartella": 5,

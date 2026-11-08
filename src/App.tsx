@@ -5,13 +5,15 @@ import AreaGenitori from './AreaGenitori';
 import Oggi from './Oggi';
 import Sera from './Sera';
 import Studio from './Studio';
+import Astra from './Astra';
+import { Album, Figurina } from './Figurine';
 import { oraAdesso, useGiornata } from './giornata';
 import * as C from './lib/calendario';
 import { supabase, type Profilo } from './supabase';
 
 // R-Evolution resta nascosta nello sprint 1: comparirà con un popup di annuncio.
 const VOCI = ['Oggi', 'Studio', 'Sera', 'Astra'] as const;
-type Voce = (typeof VOCI)[number] | 'Genitori';
+type Voce = (typeof VOCI)[number] | 'Genitori' | 'Figurina' | 'Album';
 
 export default function App() {
   const [sessione, setSessione] = useState<Session | null | undefined>();
@@ -81,11 +83,23 @@ function Lani() {
     <>
       <main>
         <button className="angolo" onClick={() => setVoce('Genitori')}>Genitori</button>
-        {voce === 'Sera' ? <Sera /> : voce === 'Oggi' ? <Oggi /> : voce === 'Studio' ? <Studio /> : <h1>{voce}</h1>}
+        {voce === 'Sera' ? (
+          <Sera />
+        ) : voce === 'Oggi' ? (
+          <Oggi />
+        ) : voce === 'Studio' ? (
+          <Studio />
+        ) : voce === 'Figurina' ? (
+          <Figurina chiudi={() => setVoce('Astra')} />
+        ) : voce === 'Album' ? (
+          <Album chiudi={() => setVoce('Astra')} />
+        ) : (
+          <Astra apri={setVoce} />
+        )}
       </main>
       <nav className="barra" aria-label="Sezioni">
         {VOCI.map((v) => (
-          <button key={v} aria-current={v === voce ? 'page' : undefined} onClick={() => setVoce(v)}>
+          <button key={v} aria-current={v === voce || (v === 'Astra' && (voce === 'Figurina' || voce === 'Album')) ? 'page' : undefined} onClick={() => setVoce(v)}>
             {v}
           </button>
         ))}

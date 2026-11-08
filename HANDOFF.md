@@ -2,13 +2,14 @@
 
 ## Dove siamo
 
-Sprint 1. Tappe **1 (fondamenta)**, **2 (Nuvola)**, **3 (Oggi e Sera)** e **4 (Studio)** chiuse e unite a `main`. Il signore ha chiesto di andare avanti da solo fino a fine sprint (tappe 4-8), un branch e un merge per tappa.
+Sprint 1. Tappe **1 (fondamenta)**, **2 (Nuvola)**, **3 (Oggi e Sera)**, **4 (Studio)** e **5 (Astra)** chiuse e unite a `main`. Il signore ha chiesto di andare avanti da solo fino a fine sprint (tappe 4-8), un branch e un merge per tappa.
 
 - Nuvola: `sync-nuvola` alle 14:30 e 19:30 (cron `0003`): compiti, verifiche, voti, note, lezioni; passi di voti e note dal 23/11.
 - Calendario di famiglia: `sync-calendario` ogni ora (cron `0007`), 14 giorni, ricorrenze espanse, "privato" escluso.
 - Oggi: mattina (tre cose, passi di ieri, In famiglia) e pomeriggio (compiti in ordine, il più lungo prima). Sera: compiti, cartella dall'orario + materiale del giorno, borsa dal calendario, fogli, Domani in famiglia. L'app si apre su Sera da un'ora prima della chiusura.
 - Studio: `genera-studio` (lanciata da sync-nuvola) fa il piano di ripasso e, con Claude, 10-15 flash card e 8-10 domande per verifica (max 3 nuove a giro); Studio con sessioni, carte del giorno, quiz; lampadina "Non ho capito" (`spiega`). Video rimandati (manca l'elenco dei video).
-- Prove: `npm test` (54), `npm run prova:schema` (35), `npm run prova:schermate` (Playwright, 13, Supabase finto).
+- Astra: percorso con Sei qui, forzieri (stato aggiornato dal server dopo ogni passo: `_shared/forzieri.ts`), enigma (`enigma`: genera per i genitori, rispondi per Lani), chiavi della domenica 21:30 (`chiavi`, cron `0010`, con rimonta), Figurina e Album.
+- Prove: `npm test` (56), `npm run prova:schema` (35), `npm run prova:schermate` (Playwright, 17, Supabase finto).
 
 ## Ultima sessione (8 novembre 2026)
 
@@ -41,11 +42,12 @@ Tappa 1 provata sull'iPad e unita; tappa 2 (accesso Keycloak automatico, normali
 - Compiti in ordine di "peso" stimato dal testo (pagine ed esercizi negli intervalli).
 - Spunte di Lani non si tolgono dall'app: la correzione è dei genitori.
 - Piano di ripasso: con 4+ giorni rilettura, flash card e mappa, quiz, quiz sugli errori; con 3 si toglie la mappa, con 2 rilettura e quiz, con 1 solo quiz; niente sessioni nei giorni di partita. Quiz breve della sera prima = domande sbagliate dell'ultimo tentativo (max 5).
+- Astra: mondo dalla tappa (1-7 colline, 8-14 montagne, 15-21 nuvole, 22-27 spazio), non dal mese. Note che tolgono la seconda chiave: disciplinari e didattiche (non merito né altro). Obiettivo liceo 7,35 (`impostazioni.obiettivo_media`). Figurine rare dei forzieri: leo-tennis, leo-copertina, leo-dispiaciuto, leo-partita-persa, lani-detective, lani-sorpresa, leo-gamer, bart-festeggia; la cima dà lani-cima. Serie nera = pose arrabbiate e dispettose. Tentativi dell'enigma (3) aggiunti a `config.enigma`.
 - Flash card: sapevo raddoppia l'intervallo, quasi torna domani, non sapevo riparte da 1; 12 carte del giorno a giro.
 
 ## Prossimo passo
 
-Tappa 5 (Astra): percorso a 27 tappe e 4 mondi, bandierina, chiavi della domenica (cron), forzieri con enigma IA, figurine e album. Dal 23/11 controllare i primi passi di voti e note. Debiti: avviso ai genitori se una sincronizzazione fallisce (push, tappa 6); "PIN non giusto" anche per errori del server; passi della borsa e funzione `spiega` provati solo con le prove (serve un accesso di Lani); video e richieste di foto.
+Tappa 6 (Copione): motore dei popup con coda e priorità, varianti, notifiche push con i limiti. Poi tappa 7 (Genitori: premi e enigmi, settimana, correzioni) e 8 (prima accensione). Dal 23/11: primi passi di voti e note; il 29/11 alle 21:30 le prime chiavi (controllare `sync_log` fonte chiavi). Debiti: avviso ai genitori se una sincronizzazione fallisce; "PIN non giusto" anche per errori del server; `spiega`, borsa ed enigma provati solo con le prove (serve un accesso di Lani); video e richieste di foto.
 
 ## In attesa di
 
@@ -56,7 +58,7 @@ Tappa 5 (Astra): percorso a 27 tappe e 4 mondi, bandierina, chiavi della domenic
 - Iscrizioni chiuse in Supabase Auth: i nuovi utenti si creano dalla dashboard, con "Auto Confirm User" attivo.
 - Gli avvisi di Supabase su `forzieri_lani` (vista security definer) e sulle 5 funzioni RPC sono voluti: vedi i commenti nello schema.
 - `db push` sempre con `--remote --yes`; funzioni con `npx supabase functions deploy <nome> --use-api --yes`. Comandi composti (con `&&` o `|`) passano dal controllo automatico: `git push` e i deploy vanno lanciati da soli.
-- Schema `0001`-`0009` applicati: le modifiche vanno in `0010` e successive. Le migrazioni con "cron" nel nome non girano su PGlite.
+- Schema `0001`-`0011` applicati: le modifiche vanno in `0012` e successive. Le migrazioni con "cron" nel nome non girano su PGlite.
 - Segreti: `NUVOLA_UTENTE`, `NUVOLA_PASSWORD`, `CRON_SEGRETO` (anche nel Vault come `cron_segreto`), `GOOGLE_CALENDAR_ICS_URL`, `ANTHROPIC_API_KEY`, `VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY`/`VAPID_SUBJECT`. La chiave VAPID pubblica serve anche al client.
 - Nuvola: `/alunni` dà più schede; si usa anno più recente e id più alto (10928). Compiti, voti e lezioni non hanno id: chiavi costruite in `src/lib/nuvola`.
 - Supabase rifiuta UPDATE e DELETE senza WHERE anche dentro le funzioni (safeupdate); PGlite no.

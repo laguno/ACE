@@ -145,3 +145,51 @@ main { position: relative; padding: 16px 16px calc(88px + env(safe-area-inset-bo
   background: #ffe27a; color: var(--testo); font: 800 14px Nunito, sans-serif; white-space: nowrap;
 }
 .indizio { padding: 10px 12px; border-radius: 14px; background: var(--lilla); }
+
+/* Astra */
+.astra { display: grid; gap: 16px; }
+.mondo {
+  margin: -16px -16px 0; padding: 56px 16px 20px;
+  background-size: cover; background-position: center;
+  border-radius: 0 0 32px 32px; color: var(--testo);
+}
+.mondo > * { position: relative; }
+.mondo .sopratitolo, .mondo h1, .mondo .mantra, .saldi span {
+  width: fit-content; padding: 2px 10px; border-radius: 12px; background: rgba(255, 246, 250, 0.88);
+}
+.mondo h1 { margin: 6px 0; font-size: 34px; }
+.mantra { margin: 0 0 12px; }
+.saldi { display: flex; gap: 10px; flex-wrap: wrap; }
+.saldi span { display: flex; align-items: center; gap: 6px; font-weight: 800; }
+.chiavi-settimana { display: flex; gap: 4px; margin: 10px 0 0; }
+.collegamenti { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.collegamenti .secondario { margin-top: 0; }
+.percorso { list-style: none; margin: 0; padding: 0 0 0 20px; border-left: 4px dashed var(--lilla); display: grid; gap: 6px; }
+.tappa { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; min-height: 52px; margin-left: -42px; }
+.tappa.fatta .nome-tappa { color: var(--testo-2); }
+.nome-tappa { display: grid; font-weight: 800; }
+.nome-tappa small { font-weight: 600; color: var(--testo-2); }
+.qui { display: flex; align-items: center; gap: 6px; padding: 4px 10px 4px 4px; border-radius: 999px; background: #fff; box-shadow: var(--ombra); font-weight: 800; color: var(--accento-premuto); }
+.bandiera, .traguardo { display: flex; align-items: center; gap: 4px; font-size: 14px; color: var(--testo-2); }
+.traguardo { padding: 2px 10px; border-radius: 999px; background: #ffe27a; color: var(--testo); }
+.forziere { margin-left: auto; display: grid; justify-items: center; min-width: 64px; min-height: 64px; border: 0; background: none; color: var(--testo-2); font: inherit; }
+.forziere.enigma img { filter: drop-shadow(0 0 8px #ffe27a); }
+.scheda-forziere { justify-items: center; text-align: center; }
+.biglietto { white-space: pre-line; padding: 16px; border-radius: 18px; background: #fffbe6; text-align: left; font-style: italic; }
+
+/* Figurina e album */
+.figurina { display: grid; justify-items: center; gap: 8px; text-align: center; background: linear-gradient(#ffe3ef, #fff); }
+.figurina h1 { margin: 0; }
+.numeri { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; margin: 0; }
+.numeri div { padding: 8px; border-radius: 16px; background: #fff; }
+.numeri dt { color: var(--testo-2); font-size: 14px; }
+.numeri dd { margin: 0; font: 800 22px 'Baloo 2', Nunito, sans-serif; }
+.figurina .avanzamento { width: 100%; }
+.medie { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.medie li { display: grid; grid-template-columns: 1fr auto 28px; gap: 8px; align-items: center; min-height: 36px; }
+.tendenza { text-align: center; font-weight: 800; }
+.tsu { color: #2e7d32; }
+.tgiu { color: var(--accento); }
+.album { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
+.album li { display: grid; justify-items: center; gap: 4px; padding: 8px; border-radius: 18px; background: #fff; box-shadow: var(--ombra); text-align: center; font-size: 13px; }
+.album .da-scoprire img { filter: brightness(0) opacity(0.18); }

@@ -430,3 +430,6 @@ verify_jwt = false
 
 [functions.genera-studio]
 verify_jwt = false
+
+[functions.chiavi]
+verify_jwt = false
