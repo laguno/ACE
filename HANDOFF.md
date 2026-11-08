@@ -2,7 +2,7 @@
 
 ## Dove siamo
 
-Sprint 1. Tappe **1 (fondamenta)**, **2 (Nuvola)**, **3 (Oggi e Sera)**, **4 (Studio)**, **5 (Astra)** e **6 (Copione)** chiuse e unite a `main`. Il signore ha chiesto di andare avanti da solo fino a fine sprint (tappe 4-8), un branch e un merge per tappa.
+Sprint 1. Tappe **1 (fondamenta)**, **2 (Nuvola)**, **3 (Oggi e Sera)**, **4 (Studio)**, **5 (Astra)**, **6 (Copione)** e **7 (Genitori)** chiuse e unite a `main`. Il signore ha chiesto di andare avanti da solo fino a fine sprint (tappe 4-8), un branch e un merge per tappa.
 
 - Nuvola: `sync-nuvola` alle 14:30 e 19:30 (cron `0003`): compiti, verifiche, voti, note, lezioni; passi di voti e note dal 23/11.
 - Calendario di famiglia: `sync-calendario` ogni ora (cron `0007`), 14 giorni, ricorrenze espanse, "privato" escluso.
@@ -10,7 +10,8 @@ Sprint 1. Tappe **1 (fondamenta)**, **2 (Nuvola)**, **3 (Oggi e Sera)**, **4 (St
 - Studio: `genera-studio` (lanciata da sync-nuvola) fa il piano di ripasso e, con Claude, 10-15 flash card e 8-10 domande per verifica (max 3 nuove a giro); Studio con sessioni, carte del giorno, quiz; lampadina "Non ho capito" (`spiega`). Video rimandati (manca l'elenco dei video).
 - Astra: percorso con Sei qui, forzieri (stato aggiornato dal server dopo ogni passo: `_shared/forzieri.ts`), enigma (`enigma`: genera per i genitori, rispondi per Lani), chiavi della domenica 21:30 (`chiavi`, cron `0010`, con rimonta), Figurina e Album.
 - Copione: popup accodati dal server (`_shared/popup.ts`, uno per evento) per voti, note, tappe, forzieri, chiavi, verifiche nuove; un popup per apertura; figurine sbloccate dalla prima comparsa; notifiche push ogni 15 minuti (`notifiche`, cron `0014`). Prima del 23/11 niente popup né figurine.
-- Prove: `npm test` (87), `npm run prova:schema` (35), `npm run prova:schermate` (Playwright, 19, Supabase finto).
+- Genitori: settimana, gesti e sgridate (con popup del copione), premi ed enigmi, correzioni delle spunte, fogli, impostazioni e PIN.
+- Prove: `npm test` (95), `npm run prova:schema` (35), `npm run prova:schermate` (Playwright, 22, Supabase finto).
 
 ## Ultima sessione (8 novembre 2026)
 
@@ -49,7 +50,7 @@ Tappa 1 provata sull'iPad e unita; tappa 2 (accesso Keycloak automatico, normali
 
 ## Prossimo passo
 
-Tappa 7 (Genitori): la settimana, premi dei 9 forzieri con l'enigma (`enigma` genera), gesti di casa, sgridate, correzione delle spunte, foglio da firmare (conferma), impostazioni. Poi tappa 8 (prima accensione). Dal 23/11: primi passi, popup e figurine; il 29/11 alle 21:30 le prime chiavi. Debiti: riscatto della serie nera; frasi e citazioni (servono almeno 30 frasi per la regola dei 30 giorni); avviso ai genitori se una sincronizzazione fallisce; "PIN non giusto" anche per errori del server; `spiega`, borsa, enigma e push provati solo con le prove; video e richieste di foto.
+Tappa 8 (prima accensione e installazione): onboarding di Lani e dei genitori, guida all'installazione, prova completa in famiglia. Prima della sorpresa: i genitori scelgono i 9 premi (Genitori, Premi: ogni premio crea l'enigma). Dal 23/11: primi passi, popup e figurine; il 29/11 alle 21:30 le prime chiavi. Debiti: "Da fotografare" (richieste di foto e Storage); riscatto della serie nera; frasi e citazioni (servono almeno 30 frasi); avviso ai genitori se una sincronizzazione fallisce; "PIN non giusto" anche per errori del server; `spiega`, borsa, enigma e push provati solo con le prove; video.
 
 ## In attesa di
 

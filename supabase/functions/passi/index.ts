@@ -12,6 +12,15 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 import * as R from '../../../src/lib/regole/index.ts';
 import * as C from '../../../src/lib/calendario/index.ts';
 import { aggiornaForzieri } from '../_shared/forzieri.ts';
+import { accoda } from '../_shared/popup.ts';
+import * as K from '../../../src/lib/copione/index.ts';
+
+const COSA_GESTO: Record<string, string> = {
+  scrivania: 'scrivania in ordine',
+  lavastoviglie: 'lavastoviglie fatta',
+  letto: 'letto fatto',
+  vestiti: 'vestiti in ordine',
+};
 
 const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 const P = R.CONFIG.passi;
@@ -197,13 +206,30 @@ const gestori: Record<string, (id: string) => Promise<Esito>> = {
       .lt('creato_il', ge.creato_il);
     if (error) throw error;
     const passi = R.passiNuovoGesto((prima ?? []).map((p) => p.voce), ge.voce);
-    return registra('gesto', id, passi, R.giorno(ge.data), ge.dato_da);
+    const esito = await registra('gesto', id, passi, R.giorno(ge.data), ge.dato_da);
+    if (esito.passi) {
+      const chi = await riga('profili', 'id', ge.dato_da, 'nome');
+      await accoda(db, `gesto:${id}`, /mamma/i.test(chi.nome) ? 'gesto_mamma' : 'gesto_papa', { passi: esito.passi, cosa: COSA_GESTO[ge.voce] ?? ge.voce });
+    }
+    return esito;
   },
 
   async sgridata(id) {
     const s = await riga('sgridate', 'id', id);
     if (!['bagno', 'antisportivo', 'balla'].includes(s.tipo)) throw new Richiesta(`sgridata sconosciuta: ${s.tipo}`);
-    return registra('sgridata', id, R.passiSgridata(s.tipo), R.giorno(s.data), s.dato_da);
+    const esito = await registra('sgridata', id, R.passiSgridata(s.tipo), R.giorno(s.data), s.dato_da);
+    if (esito.passi) {
+      const meno = String(esito.passi).replace('-', '−');
+      let chiave: K.ChiavePopup = s.tipo === 'balla' ? 'balla' : 'antisportivo';
+      if (s.tipo === 'bagno') {
+        // la seconda e la terza volta nella settimana parlano Lady e Leo
+        const volte = await conta('sgridate', (q) => q.eq('tipo', 'bagno').gte('data', R.iso(R.lunedi(R.giorno(s.data)))).lte('data', s.data));
+        const chi = await riga('profili', 'id', s.dato_da, 'nome');
+        chiave = volte >= 3 ? 'bagno_3' : volte === 2 ? 'bagno_2' : /mamma/i.test(chi.nome) ? 'bagno_mamma' : 'bagno_papa';
+      }
+      await accoda(db, `sgridata:${id}`, chiave, { passi: meno, cosa: s.nota ?? 'una cosa non vera' });
+    }
+    return esito;
   },
 };
 
