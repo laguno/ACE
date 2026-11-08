@@ -22,6 +22,15 @@ export const POPUP = {
   // note (bastone)
   nota_disciplinare: { priorita: 1, posa: 'mamma-arrabbiata', titolo: 'Nota', testo: 'Nota disciplinare in {materia}. {passi}, e salta la seconda chiave. Stasera ne parliamo.' },
   nota_terza_dimenticanza: { priorita: 1, posa: 'papa-arrabbiato', titolo: 'Terza dimenticanza', testo: 'Terza nota per dimenticanze: {passi}. Da domani doppia spunta sulla cartella.' },
+  // casa: gesti e sgridate segnati dai genitori
+  gesto_papa: { priorita: 4, posa: 'papa-pollice', titolo: 'Passi di casa', testo: 'Papà: +{passi}, {cosa}.' },
+  gesto_mamma: { priorita: 4, posa: 'mamma-pollice', titolo: 'Passi di casa', testo: 'Mamma: +{passi}, {cosa}.' },
+  bagno_papa: { priorita: 1, posa: 'papa-arrabbiato', titolo: 'Bagno da sistemare', testo: 'Bagno da sistemare: {passi}. Asciugamani appesi, tappetino a posto, specchio pulito.' },
+  bagno_mamma: { priorita: 1, posa: 'mamma-arrabbiata', titolo: 'Bagno da sistemare', testo: 'Bagno da sistemare: {passi}. Asciugamani appesi, tappetino a posto, specchio pulito.' },
+  bagno_2: { priorita: 1, posa: 'lady-offesa', titolo: 'Di nuovo il bagno', testo: 'Di nuovo il bagno. Perfino Lady si rifiuta di entrarci. {passi}.' },
+  bagno_3: { priorita: 1, posa: 'leo-sbuffa', titolo: 'Ancora il bagno', testo: 'Leo non entra in bagno dopo di te, puzzolona. {passi}.' },
+  antisportivo: { priorita: 1, posa: 'papa-arrabbiato', titolo: 'In campo', testo: 'In campo non si fa così: {passi}. Il rispetto vale più di un punto.' },
+  balla: { priorita: 1, posa: 'mamma-arrabbiata', titolo: 'Balla scoperta', testo: 'Balla scoperta: {cosa}. {passi}. Con la verità si perde sempre meno.' },
   // Astra
   tappa: { priorita: 3, posa: 'lani-contenta', titolo: 'Tappa raggiunta', testo: 'Tappa {tappa}! Alla prossima: {mancano_passi} passi.' },
   enigma_comparso: { priorita: 3, posa: 'lani-detective', titolo: 'Un biglietto', testo: 'Un biglietto vicino al forziere. Riesci a decifrarlo? Hai {n} tentativi.' },

@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import type { Session, SupabaseClient } from '@supabase/supabase-js';
+import type { Session } from '@supabase/supabase-js';
 import Accesso from './Accesso';
+import Genitori from './Genitori';
 import { supabase, supabaseGenitore } from './supabase';
 
 /**
@@ -9,7 +10,7 @@ import { supabase, supabaseGenitore } from './supabase';
  * va in secondo piano.
  */
 export default function AreaGenitori({ suoDispositivo, chiudi }: { suoDispositivo: boolean; chiudi?: () => void }) {
-  if (suoDispositivo) return <Genitori client={supabase} />;
+  if (suoDispositivo) return <Genitori client={supabase} esci={() => supabase.auth.signOut()} />;
   return <Cancello chiudi={chiudi} />;
 }
 
@@ -62,37 +63,8 @@ function Cancello({ chiudi }: { chiudi?: () => void }) {
     );
   return (
     <>
-      <Genitori client={supabaseGenitore} />
+      <Genitori client={supabaseGenitore} esci={() => supabaseGenitore.auth.signOut()} />
       {torna}
     </>
-  );
-}
-
-// ponytail: segnaposto della tappa 7 (La settimana, gesti, sgridate, premi); per ora solo PIN e uscita.
-function Genitori({ client }: { client: SupabaseClient }) {
-  const [esito, setEsito] = useState('');
-
-  async function impostaPin(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = e.currentTarget;
-    const pin = String(new FormData(form).get('pin'));
-    const { error } = await client.rpc('imposta_pin', { p_pin: pin });
-    setEsito(error ? 'PIN non salvato: servono da 4 a 8 cifre.' : 'PIN salvato.');
-    if (!error) form.reset();
-  }
-
-  return (
-    <section className="carta modulo">
-      <h1>Genitori</h1>
-      <form className="modulo" onSubmit={impostaPin}>
-        <label>
-          Nuovo PIN dell'area genitori (per l'iPad)
-          <input name="pin" type="password" inputMode="numeric" pattern="\d{4,8}" autoComplete="new-password" required />
-        </label>
-        <button className="principale">Salva PIN</button>
-        {esito && <p role="status">{esito}</p>}
-      </form>
-      <button className="secondario" onClick={() => client.auth.signOut()}>Esci</button>
-    </section>
   );
 }
