@@ -58,7 +58,10 @@ function dati(): Tabelle {
       { titolo: 'Leo al torneo di tennis', inizio: '2026-11-14T09:00:00Z', tutto_il_giorno: false },
     ],
     fogli_firma: [{ id: 'g1', titolo: 'Gita del benessere: iscrizioni entro il 3 dicembre', scadenza: '2026-12-03', dato_il: null, consegnato_il: null }],
-    movimenti_passi: [{ giorno: '2026-11-08', passi: 35, moltiplicatore: 1 }],
+    movimenti_passi: [
+      { giorno: '2026-11-08', passi: 35, moltiplicatore: 1 },
+      { giorno: '2026-11-09', passi: 12, moltiplicatore: 1 },
+    ],
     serate: [],
     saldo_passi: [{ passi: 725 }],
     chiavi_totali: [{ chiavi: 3 }],

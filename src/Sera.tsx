@@ -20,8 +20,10 @@ const PRIMA_DI_USCIRE_DA_SCUOLA = '16:00';
 
 /** Lista a voci (cartella, borsa): spuntate una per una sul telefono, con l'ultima è pronta. */
 // ponytail: le voci spuntate si perdono se si chiude l'app prima dell'ultima.
-function Voci({ titolo, voci, pronta, quandoPronta, onAnnulla, colore, children }: {
+function Voci({ titolo, valore, voci, pronta, quandoPronta, onAnnulla, colore, children }: {
   titolo: string;
+  /** passi che vale, preso dal config */
+  valore: number;
   voci: string[];
   pronta: boolean;
   quandoPronta: () => void;
@@ -40,7 +42,10 @@ function Voci({ titolo, voci, pronta, quandoPronta, onAnnulla, colore, children 
   }
   return (
     <div className="carta">
-      <h2>{titolo}</h2>
+      <div className="testa-carta">
+        <h2>{titolo}</h2>
+        <span className="valore">+{valore}</span>
+      </div>
       {children}
       <ul className="pastiglie">
         {voci.map((v) => (
@@ -183,7 +188,10 @@ export default function Sera() {
 
       {!soloBorsa && (
       <div className="carta">
-        <h2>Compiti per domani</h2>
+        <div className="testa-carta">
+          <h2>Compiti per domani</h2>
+          <span className="valore">+{R.CONFIG.passi.obbligatori.compiti} ciascuno</span>
+        </div>
         {compiti.length === 0 && <p>Nessun compito su Nuvola per domani.</p>}
         <ul className="spunte">
           {compiti.map((c) => (
@@ -215,6 +223,7 @@ export default function Sera() {
       {conCartella && (
         <Voci
           titolo="Cartella"
+          valore={R.CONFIG.passi.obbligatori.cartella}
           voci={orario.length ? orario : [`Cartella pronta per ${GIORNI[domani.getDay()]}`]}
           pronta={serata.cartella}
           quandoPronta={() => chiudiSerata('cartella')}
@@ -226,6 +235,7 @@ export default function Sera() {
       {sport && (
         <Voci
           titolo="Borsa"
+          valore={R.CONFIG.passi.obbligatori.borsa}
           voci={VOCI_BORSA}
           pronta={serata.borsa}
           quandoPronta={() => chiudiSerata('borsa')}

@@ -178,13 +178,17 @@ function Mattina({ impegni, apri }: { impegni: Impegno[]; apri: Apri }) {
   );
 }
 
-type Sessione = { id: string; numero: number; tipo: string; verifiche: { data: string; materie: { nome: string } | null } | null };
+type Sessione = { id: string; numero: number; tipo: string; verifica_id: string; verifiche: { data: string; materie: { nome: string } | null } | null };
+type Pallino = { id: string; numero: number; data_prevista: string; fatta_il: string | null };
+const COSA_SESSIONE: Record<string, string> = { rilettura_flashcard: 'rilettura e flash card', flashcard_mappa: 'flash card e mappa', quiz: 'quiz', quiz_errori: 'quiz breve sugli errori' };
+const P = R.CONFIG.passi.obbligatori;
 
 function Pomeriggio({ chiusura, apri }: { chiusura: string | null; apri: Apri }) {
   const oggi = R.giornoRoma(new Date());
   const domani = R.prossimoGiornoDiScuola(oggi);
   const [compiti, setCompiti] = useState<Compito[]>();
   const [ripasso, setRipasso] = useState<Sessione | null>(null);
+  const [pallini, setPallini] = useState<Pallino[]>([]);
   const [carte, setCarte] = useState(0);
   const [errore, setErrore] = useState('');
   const [aiuto, setAiuto] = useState<Compito>();
@@ -195,7 +199,7 @@ function Pomeriggio({ chiusura, apri }: { chiusura: string | null; apri: Apri })
       supabase.from('compiti').select(SELECT_COMPITI).eq('scadenza', R.iso(domani)),
       supabase
         .from('sessioni_ripasso')
-        .select('id, numero, tipo, verifiche(data, materie(nome))')
+        .select('id, numero, tipo, verifica_id, verifiche(data, materie(nome))')
         .eq('data_prevista', R.iso(oggi))
         .is('fatta_il', null)
         .limit(1),
@@ -204,7 +208,15 @@ function Pomeriggio({ chiusura, apri }: { chiusura: string | null; apri: Apri })
       if (c.error) return setErrore('Non riesco a leggere i compiti. Riprova tra poco.');
       const lista = (c.data ?? []) as unknown as Compito[];
       setCompiti(lista.sort((a, b) => N.peso(b.testo) - N.peso(a.testo)));
-      setRipasso(((s.data ?? [])[0] as unknown as Sessione) ?? null);
+      const sessione = ((s.data ?? [])[0] as unknown as Sessione) ?? null;
+      setRipasso(sessione);
+      if (sessione)
+        supabase
+          .from('sessioni_ripasso')
+          .select('id, numero, data_prevista, fatta_il')
+          .eq('verifica_id', sessione.verifica_id)
+          .order('numero')
+          .then(({ data }) => setPallini((data ?? []) as Pallino[]));
       setCarte(k.count ?? 0);
     });
   }, []);
@@ -231,13 +243,17 @@ function Pomeriggio({ chiusura, apri }: { chiusura: string | null; apri: Apri })
           <p>Nessun compito su Nuvola per {GIORNI[domani.getDay()]}.</p>
         ) : (
           <>
-            <h2>In quest'ordine</h2>
+            <div className="testa-carta">
+              <h2>In quest'ordine</h2>
+              <span className="valore">+{P.compiti} ciascuno</span>
+            </div>
             <ul className="spunte ordine">
               {compiti.map((c, i) => (
                 <RigaCompito
                   key={c.id}
                   c={c}
                   numero={i + 1}
+                  nota={i === 0 && !c.fatto_il ? 'Inizia da qui: è il più lungo' : undefined}
                   onSpunta={() => {
                     segna(c.id)(adesso());
                     attesa.avvia(c.id, () => spuntaCompito(c.id, segna(c.id), setErrore));
@@ -247,7 +263,6 @@ function Pomeriggio({ chiusura, apri }: { chiusura: string | null; apri: Apri })
                 />
               ))}
             </ul>
-            {daFare.length > 0 && daFare[0] === compiti[0] && <p className="nota">Inizia dal primo: è il più lungo.</p>}
             {daFare.length === 0 && <p className="lady">Compiti finiti. Il resto del pomeriggio è tuo.</p>}
             {daFare.length > 0 && (
               <p className="nota piccola">
@@ -260,13 +275,27 @@ function Pomeriggio({ chiusura, apri }: { chiusura: string | null; apri: Apri })
 
       {ripasso && ver?.data && (
         <div className="carta">
-          <h2>Ripasso: {ver.materie?.nome?.toLowerCase() ?? 'verifica'}</h2>
+          <div className="testa-carta">
+            <h2>Ripasso: {ver.materie?.nome?.toLowerCase() ?? 'verifica'}</h2>
+            <span className="valore">+{P.ripasso}</span>
+          </div>
           <p>
-            Verifica {GIORNI[R.giorno(ver.data).getDay()]} {R.giorno(ver.data).getDate()}. Oggi la sessione {ripasso.numero}, 15 minuti.
+            Verifica {GIORNI[R.giorno(ver.data).getDay()]} {R.giorno(ver.data).getDate()}. Oggi la sessione {ripasso.numero}
+            {pallini.length ? ` di ${pallini.length}` : ''}: {COSA_SESSIONE[ripasso.tipo] ?? 'ripasso'}, 15 minuti.
           </p>
-          <button className="secondario compatto" onClick={() => apri('Studio')}>
-            <Cards size={20} weight="bold" aria-hidden /> Inizia
-          </button>
+          <div className="riga-pallini">
+            <ol className="pallini" aria-label="Sessioni di ripasso">
+              {pallini.map((s) => (
+                <li key={s.id} className={s.fatta_il ? 'fatta' : s.data_prevista === R.iso(oggi) ? 'oggi' : ''}>
+                  <span aria-hidden />
+                  {s.data_prevista === R.iso(oggi) ? 'oggi' : GIORNI[R.giorno(s.data_prevista).getDay()].slice(0, 3)}
+                </li>
+              ))}
+            </ol>
+            <button className="secondario compatto" onClick={() => apri('Studio')}>
+              <Cards size={20} weight="bold" aria-hidden /> Inizia
+            </button>
+          </div>
         </div>
       )}
 

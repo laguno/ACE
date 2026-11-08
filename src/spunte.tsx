@@ -19,9 +19,11 @@ export async function passi(tipo: string, id: string): Promise<number> {
   return data?.passi ?? 0;
 }
 
-export function RigaCompito({ c, numero, onSpunta, onAiuto, onAnnulla }: {
+export function RigaCompito({ c, numero, nota, onSpunta, onAiuto, onAnnulla }: {
   c: Compito;
   numero?: number;
+  /** riga piccola sotto il testo (es. "Inizia da qui: è il più lungo") */
+  nota?: string;
   onSpunta: () => void;
   onAiuto?: () => void;
   /** presente nei 5 secondi dopo la spunta */
@@ -39,6 +41,7 @@ export function RigaCompito({ c, numero, onSpunta, onAiuto, onAnnulla }: {
         )}
         <span>
           <b>{c.materie?.nome ?? 'Compito'}</b>: {c.testo}
+          {nota && <small className="nota-riga">{nota}</small>}
         </span>
       </label>
       {onAnnulla && (

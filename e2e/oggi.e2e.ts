@@ -60,7 +60,7 @@ test('pomeriggio di lunedì: compiti di martedì, il più lungo prima', async ({
   const righe = page.locator('.spunte li');
   await expect(righe.nth(0)).toContainText('Italiano: pagine 340–352');
   await expect(righe.nth(2)).toContainText('Inglese');
-  await expect(page.getByText('Inizia dal primo: è il più lungo.')).toBeVisible();
+  await expect(righe.nth(0)).toContainText('Inizia da qui: è il più lungo'); // sotto il primo compito, come nella bozza
   for (const c of await page.getByRole('checkbox').all()) await c.check();
   await expect(page.getByText('Compiti finiti. Il resto del pomeriggio è tuo.')).toBeVisible();
   await page.clock.runFor(5100);

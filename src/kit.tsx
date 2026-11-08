@@ -3,7 +3,7 @@ import { useEffect, type ReactNode } from 'react';
 // Kit "zucchero filato" (design/Stile.html): i pezzi che si ripetono in tutte le schermate.
 // Colori e misure stanno in stile.css come variabili; qui solo i pezzi con un po' di struttura.
 
-export type Sfondo = 'mattina' | 'pomeriggio' | 'sera' | 'panna';
+export type Sfondo = 'mattina' | 'pomeriggio' | 'sera' | 'viola' | 'panna';
 
 /** Sfondo della schermata secondo il momento (bozze: mattina azzurro, pomeriggio lilla, sera lilla scuro). */
 export function useSfondo(sfondo: Sfondo) {

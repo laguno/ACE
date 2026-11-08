@@ -22,7 +22,7 @@ const tappaDi = (passi: number) => Math.min(SOGLIE.length, R.posizione(passi).ta
 
 // Mappa del sentiero (bozza Main): 27 tappe dal basso (la terra) all'alto (le stelle), a serpentina.
 // Unico posto con posizioni assolute (indicazioni di Jarvis). x in percentuale, y in px.
-const PASSO = 112;
+const PASSO = 130;
 const MARGINE = 90;
 const ALTEZZA = MARGINE * 2 + (SOGLIE.length - 1) * PASSO;
 const punto = (t: number) => ({ x: 50 + 19 * Math.sin(t * 0.85), y: MARGINE + (SOGLIE.length - t) * PASSO });
@@ -80,6 +80,8 @@ export default function Astra({ apri }: { apri: (pagina: 'Figurina' | 'Album') =
   if (scelto) return <SchedaForziere f={forziere(scelto)} n={scelto} passi={dati.passi} chiavi={dati.chiavi} chiudi={() => (setScelto(undefined), carica())} />;
 
   const punti = SOGLIE.map((_, i) => punto(i + 1));
+  // Lani sta dal lato largo della tappa attuale; la bandierina, se è su un'altra tappa, dal lato opposto
+  const latoLani = punto(qui).x < 50 ? 'destra' : 'sinistra';
   const fatti = punti.slice(0, qui);
 
   return (
@@ -128,6 +130,15 @@ export default function Astra({ apri }: { apri: (pagina: 'Figurina' | 'Album') =
             in tutto
           </p>
         )}
+        {Math.abs(bandierina - qui) >= 2 && (
+          // la bandierina è lontana e fuori dallo schermo: lo dice la testata (revisione di Jarvis)
+          <p className="chip-bandiera">
+            <img src={img('oggetti', 'bandierina')} alt="" width={24} height={24} />
+            {bandierina > qui
+              ? `Bandierina: ${bandierina - qui} tappe avanti`
+              : `Sei avanti di ${qui - bandierina} tappe`}
+          </p>
+        )}
       </header>
 
       <div className="mappa" style={{ height: ALTEZZA }}>
@@ -157,13 +168,13 @@ export default function Astra({ apri }: { apri: (pagina: 'Figurina' | 'Album') =
                 </>
               )}
               {t === bandierina && (
-                <p className="bandiera">
+                <p className={`bandiera ${t === qui ? (t === natale ? 'sopra sopra-2' : 'sopra') : latoLani === 'destra' ? 'a-sinistra' : 'a-destra'}`}>
                   <img src={img('oggetti', 'bandierina')} alt="" width={36} height={36} />
                   <span>Il calendario è qui</span>
                 </p>
               )}
               {t === natale && t !== bandierina && (
-                <p className={`traguardo ${aDestra ? 'destra' : 'sinistra'}`}>
+                <p className={`traguardo ${t === qui ? 'sopra' : aDestra ? 'destra' : 'sinistra'}`}>
                   <b>Vacanze di Natale</b>
                 </p>
               )}

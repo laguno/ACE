@@ -83,3 +83,26 @@ test('figurina e album', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Serie nera' })).toBeVisible();
   await page.screenshot({ path: 'e2e/risultati/album.png' });
 });
+
+// Revisione di Jarvis: Lani non deve mai coprire un'etichetta, in nessuna posizione del percorso.
+for (const passi of [0, 130, 300, 420, 700, 950, 1600, 2300, 3100, 5000, 7000]) {
+  test(`Lani non copre etichette (${passi} passi)`, async ({ page }) => {
+    await page.clock.setFixedTime(LUNEDI);
+    await finto(page, dati(passi, 3));
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Astra' }).click();
+    const lani = page.locator('.lani-sentiero');
+    if ((await lani.count()) === 0) return; // in cima Lani non è sul sentiero
+    const l = (await lani.boundingBox())!;
+    const larghezza = page.viewportSize()!.width;
+    expect(l.x).toBeGreaterThanOrEqual(0);
+    expect(l.x + l.width).toBeLessThanOrEqual(larghezza);
+    const etichette = page.locator('.tappe .forziere, .tappe .qui, .tappe .bandiera, .tappe .traguardo');
+    for (const e of await etichette.all()) {
+      const b = await e.boundingBox();
+      if (!b) continue;
+      const tocca = l.x < b.x + b.width && b.x < l.x + l.width && l.y < b.y + b.height && b.y < l.y + l.height;
+      expect(tocca, `Lani copre: ${await e.textContent()}`).toBe(false);
+    }
+  });
+}

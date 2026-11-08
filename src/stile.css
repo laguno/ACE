@@ -409,3 +409,30 @@ main { position: relative; width: min(100%, 430px); margin: 0 auto; padding: 16p
 .album li small { font-size: 12px; line-height: 1.25; color: var(--testo-2); }
 .album .da-scoprire { background: var(--lilla); border: 3px dashed var(--lilla-medio); box-shadow: none; }
 .album .da-scoprire img { filter: brightness(0) invert(0.55) sepia(0.2) hue-rotate(220deg) opacity(0.35); }
+
+/* ritocchi di Jarvis (1-4) */
+main { padding-bottom: calc(66px + 14px + 24px + env(safe-area-inset-bottom)); }
+.testa-carta { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.testa-carta h2 { margin: 0 0 4px; }
+.valore { flex: none; font: 800 13px Nunito, sans-serif; color: var(--accento); }
+.nota-riga { display: block; margin-top: 2px; font: 800 13px/1.3 Nunito, sans-serif; color: var(--accento); text-decoration: none; }
+.riga-pallini { display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; }
+.riga-pallini .pallini { margin: 4px 0 0; }
+.riga-pallini .secondario.compatto { align-self: auto; }
+body[data-sfondo='viola'] { background: linear-gradient(180deg, #7b6ae0 0, var(--lilla-medio) 260px, var(--rosa) 620px) no-repeat, var(--rosa); }
+/* Astra: Lani accanto alla tappa attuale (lato largo), "Sei qui" sotto, mai sovrapposti */
+.tappe .qui { top: 38px; }
+.tappe .bandiera.sopra { top: -82px; }
+.lani-sentiero { top: -64px; width: 110px; height: 110px; }
+.chip-bandiera { display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; margin: 0 !important; padding: 4px 12px 4px 6px; border-radius: 999px; background: var(--burro-chiaro); font: 800 13px Nunito, sans-serif !important; color: var(--testo); }
+.lani-sentiero { top: -62px; width: 96px; height: 96px; }
+.tappe .bandiera.a-destra, .tappe .bandiera.a-sinistra { top: -22px; translate: none; max-width: 92px; white-space: normal; line-height: 1.15; font-size: 11px; border-radius: 14px; }
+.tappe .bandiera.a-destra { left: 30px; }
+.tappe .bandiera.a-sinistra { right: 30px; left: auto; }
+.tappe .qui, .tappe .bandiera, .tappe .traguardo, .lani-sentiero { pointer-events: none; }
+.tappe .bandiera.sopra { top: -100px; }
+.tappe .bandiera.sopra-2 { top: -150px; }
+.tappe .traguardo.sopra { left: 0; right: auto; top: -104px; translate: -50% 0; }
+.tappe .bandiera.sopra { top: -116px; }
+.tappe .bandiera.sopra-2 { top: -170px; }
+.tappe .traguardo.sopra { top: -120px; }

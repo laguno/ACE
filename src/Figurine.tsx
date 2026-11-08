@@ -28,7 +28,7 @@ const INDIZI: Record<string, string> = {
 };
 
 export function Figurina({ chiudi }: { chiudi: () => void }) {
-  useSfondo('sera');
+  useSfondo('viola');
   const [d, setD] = useState<{ voti: Voto[]; passi: number; chiavi: number; obiettivo: number }>();
   useEffect(() => {
     Promise.all([
