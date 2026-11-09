@@ -7,9 +7,13 @@
   ],
   "ignore": [
     ".claude/**",
-    "public/push-sw.js"
+    "public/push-sw.js",
+    "src/tipi-database.ts"
   ],
   "ignoreDependencies": [
     "npm"
+  ],
+  "ignoreBinaries": [
+    "supabase"
   ]
 }

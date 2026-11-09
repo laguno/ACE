@@ -18,6 +18,7 @@ export async function attivaNotifiche(): Promise<boolean> {
   const reg = await navigator.serviceWorker.ready;
   const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: chiaveBinaria(CHIAVE_PUBBLICA) });
   const j = sub.toJSON();
+  if (!j.endpoint || !j.keys) return false;
   const { error } = await supabase.from('push_iscrizioni').upsert({ endpoint: j.endpoint, chiavi: j.keys }, { onConflict: 'endpoint' });
   return !error;
 }
