@@ -105,7 +105,7 @@ function Coriandoli() {
   return (
     <div className="coriandoli" aria-hidden>
       {Array.from({ length: 18 }, (_, i) => (
-        <span key={i} style={{ left: `${(i * 37) % 100}%`, animationDelay: `${(i % 6) * 0.15}s`, background: ['#E23D8E', '#FFE27A', '#CDB8F5', '#BFE6FF'][i % 4] }} />
+        <span key={i} style={{ left: `${(i * 37) % 100}%`, animationDelay: `${(i % 6) * 0.15}s`, background: ['var(--fucsia)', 'var(--burro)', 'var(--lilla-medio)', 'var(--azzurrino)'][i % 4] }} />
       ))}
     </div>
   );
