@@ -40,6 +40,7 @@ Note sulle misure:
 - **F. Qualità** (ramo `qualita`, unito: `843e595`): ESLint strict e knip a zero; 14 prove a proprietà con fast-check su `src/lib/regole`; tipi del database generati (`npm run tipi:db`, Supabase locale con Docker) e usati dal client dell'app; segreti delle funzioni da `_shared/ambiente.ts`; soglie delle chiavi lette da config.
 - **B. Simulatore** (ramo `simulatore`, unito: `4e859da`; lavoro di un sotto-agente su una copia separata): `npm run simula:anno`, cinque profili sull'anno intero con migrazioni vere e lo stesso codice delle funzioni (passi, chiavi, voti in `_shared/`); dettagli in sezione 4.
 - **C. Casi limite** (ramo `casi-limite`, unito: `ec346e9`): parser del calendario in `src/lib/calendario/ics.ts` con prove (ripetizioni, eccezioni, ora legale, fusi); `src/lib/casi-limite.test.ts` (ora legale, mezzanotte, vacanze, testi di Nuvola); `npm run test:server` (prove in UTC come le funzioni).
+- **D. Foto** (ramo `foto`, non ancora unito): regole pure in `src/lib/foto` (14 prove); `e2e/foto-file.e2e.ts` (12 prove con file generati da sharp: 12 MP, EXIF ruotato, PNG enorme, HEIC, file non immagine, più pagine, interruzione, niente rete, fotocamera negata, genitore che cancella); `scripts/simulatore/foto.test.ts` (funzione passi vera su PGlite: +2 una volta per richiesta). Pesi misurati: pagina 12 MP 812 KB → 164 KB (1600×1200); 12 MP tutta grana, caso peggiore, 8,3 MB → 718 KB; PNG 6000×4000 18,5 MB → 150 KB. HEIC che il browser non apre: si carica l'originale come `image/heic` (il bucket lo accetta; Safari e la fotocamera dell'iPad danno già JPEG). Cancellazione di una foto dai genitori in Correzioni (riga e file).
 - Supabase in locale (Docker): le 24 migrazioni si applicano pulite su un Postgres vero.
 
 ## 3. Bug trovati e corretti
@@ -64,6 +65,8 @@ Gioco e calendario (filoni B, C, F):
 15. **`sposta()`** non girava sulle 24 ore (23:50 + 30 dava "24:20").
 16. **Prova del copione cieca**: la regex del singolare e plurale conteneva due caratteri backspace al posto di `\b` e non poteva fallire. I testi erano giusti.
 17. Soglie delle chiavi (70% e 95%) scritte nel codice invece che lette da `config-gioco.json` (stessi valori).
+18. **Foto senza tipo** (HEIC su Windows): andava come `.jpg` e nel multipart dello Storage sarebbe arrivata come `application/octet-stream`, rifiutata dal bucket con un generico "Riprova". Ora tipo ed estensione giusti.
+19. **Foto a metà**: un file non immagine in mezzo a più pagine faceva caricare le prime e poi fallire. Ora si preparano tutte prima, e un file sbagliato ferma tutto con un messaggio chiaro.
 
 ## 4. Simulatore
 
@@ -86,6 +89,9 @@ Fuori dal simulatore per ora: enigmi (la funzione usa l'IA), pagella, notifiche,
 3. **Lo stesso gesto due volte nello stesso giorno vale due volte** (mamma e papà segnano "letto fatto": +4). Proposta: un gesto per voce al giorno.
 4. **Spunta falsa e studio facoltativo**: una spunta falsa sblocca lo studio, e lo storno del giorno dopo non toglie quei passi. Nel simulatore la "furbetta" (70%) supera la diligente grazie alle flash card (1.780 passi contro 572 della normale). Proposta: con lo storno di un compito si stornano anche i passi di studio di quel giorno; oppure lo studio si conta la sera, a compiti confermati.
 5. **Lo studio facoltativo pesa molto**: 4 giri al giorno, weekend compresi, valgono circa un compito. Da guardare alla taratura di dicembre con i dati veri.
+6. **Testi nuovi delle foto** (li vedono Lani e i genitori, sotto il pulsante come "Foto non caricata. Riprova."): "Questo file non è una foto.", "Foto troppo grande: massimo 10 MB.", "Niente rete. Riprova quando torna.". Genitori: "Foto delle pagine", "Le ultime due settimane. Se una foto è sbagliata, cancellala.", "Cancellare la foto?" / "La foto si cancella per sempre. I passi di Lani restano.", "Foto cancellata.". Proposta: tenerli.
+7. **Foto sbagliata cancellata**: i +2 di Lani restano e la richiesta resta chiusa (i genitori leggono soltanto `richieste_foto` dalla 0024), quindi la pagina non si può rifotografare. Proposta: migrazione 0025 che lascia ai genitori riaprire una richiesta (solo `stato` da fatta ad aperta); rifacendo la foto il +2 non torna (provato).
+8. **Caricamento interrotto**: le foto già salvate restano e la richiesta resta aperta; riprovando con le stesse foto le prime si salvano due volte (innocuo, +2 una volta). Proposta: lasciare così.
 
 ## 6. Rischi aperti prima del 23/11
 
