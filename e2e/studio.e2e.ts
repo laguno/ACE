@@ -41,12 +41,12 @@ test('sessione di flash card: si gira dopo 7 secondi, intervalli e giro salvati'
   await page.goto('/');
   await page.getByRole('button', { name: 'Studio' }).click();
 
-  await expect(page.getByRole('heading', { name: 'Verifica di Matematica' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Matematica' })).toBeVisible();
   await expect(page.getByText('Sessione 2 di 3: flash card e mappa, 15 minuti.')).toBeVisible();
   await expect(page.getByText('Da ripassare: pag. 340-345')).toBeVisible();
   await page.screenshot({ path: 'e2e/risultati/studio.png', fullPage: true });
 
-  await page.locator('.carta', { hasText: 'Verifica di Matematica' }).getByRole('button', { name: 'Inizia' }).click();
+  await page.locator('.carta', { hasText: 'Matematica' }).getByRole('button', { name: 'Inizia' }).click();
   await expect(page.getByText('Il numero sotto la linea si chiama ___.')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Gira' })).toBeDisabled();
   await expect(page.getByText('Leggi bene: si gira tra 7 secondi.')).toBeVisible();
@@ -76,7 +76,7 @@ test('quiz: spiegazione dopo ogni risposta, sbagliate salvate', async ({ page })
   const { chiamate, t } = await finto(page, d);
   await page.goto('/');
   await page.getByRole('button', { name: 'Studio' }).click();
-  await page.getByRole('button', { name: 'Fai il quiz' }).click();
+  await page.getByRole('button', { name: 'Prova il quiz' }).click();
 
   await page.getByRole('button', { name: '2', exact: true }).click();
   await expect(page.getByRole('status')).toHaveText('Non era questa. 10 diviso 2 fa 5.');
@@ -98,5 +98,5 @@ test('carte del giorno e avviso dei compiti', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Studio' }).click();
   await expect(page.getByText('Prima i compiti di oggi: poi flash card e quiz danno passi.')).toBeVisible();
-  await expect(page.getByText('2 carte da ripassare', { exact: false })).toBeVisible();
+  await expect(page.getByText('2 da ripassare oggi', { exact: false })).toBeVisible();
 });

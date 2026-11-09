@@ -93,7 +93,7 @@ const CASI: Record<string, Caso> = {
     quando: LUNEDI_POMERIGGIO,
     vai: async (p) => {
       await p.getByRole('button', { name: 'Studio' }).click();
-      await p.locator('.carta', { hasText: 'Verifica di Tecnologia' }).getByRole('button', { name: 'Inizia' }).click();
+      await p.locator('.carta', { hasText: 'Tecnologia' }).getByRole('button', { name: 'Inizia' }).click();
     },
   },
   Quiz: {
@@ -102,7 +102,7 @@ const CASI: Record<string, Caso> = {
     dati: (d) => (d.sessioni_ripasso = []),
     vai: async (p) => {
       await p.getByRole('button', { name: 'Studio' }).click();
-      await p.getByRole('button', { name: 'Fai il quiz' }).click();
+      await p.getByRole('button', { name: 'Prova il quiz' }).click();
     },
   },
   Astra: { bozza: 'Main', quando: LUNEDI_POMERIGGIO, vai: (p) => p.getByRole('button', { name: 'Astra' }).click() },

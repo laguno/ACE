@@ -464,3 +464,14 @@ body[data-sfondo='viola'] { background: linear-gradient(180deg, #7b6ae0 0, var(-
 @media (prefers-reduced-motion: reduce) { .coriandoli { display: none; } }
 .popup .principale:focus { outline: none; }
 .popup .principale:focus-visible { outline: 3px solid var(--lilla-medio); outline-offset: 3px; }
+
+/* Studio (bozza Studio) */
+.schermo .carta p.data-verifica { font: 800 14px Nunito, sans-serif; color: var(--testo-2); }
+.cose li > span.allarga { flex: 1; }
+.schermo .carta.studio-verifica p { font-size: 14px; line-height: 1.4; }
+/* pallini delle sessioni come le bozze: lilla pieni, oggi bianco con bordo fucsia, fatti fucsia */
+.pallini li { font-size: 11px; font-weight: 800; color: var(--testo-2); }
+.pallini span { width: 20px; height: 20px; border: 0; background: var(--lilla); }
+.pallini .oggi span { background: #fff; border: 4px solid var(--fucsia); }
+.pallini .fatta span { background: var(--fucsia); }
+.pallini .oggi { color: var(--testo-2); }
