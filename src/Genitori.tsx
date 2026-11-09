@@ -7,6 +7,7 @@ import { installata } from './Benvenuta';
 import { GIORNI, MESI } from './spunte';
 import Vetrina from './Vetrina';
 import { Biglietto } from './Biglietto';
+import { ImmaginePremio, immaginiPremi, type Immagine } from './ImmaginePremio';
 import { Fotografa, SELECT_RICHIESTE, descrizione, type RichiestaFoto } from './Foto';
 
 // Area genitori — design/Genitori.html. Tutto passa dal client del genitore (sul suo telefono la
@@ -323,7 +324,11 @@ type Forziere = { n: number; premio: string | null; enigma: string | null; soluz
 function Premi({ client, avvisa }: Props) {
   const [forzieri, setForzieri] = useState<Forziere[]>();
   const [lavoro, setLavoro] = useState<number>();
-  const carica = () => client.from('forzieri').select('n, premio, enigma, soluzione, aiutino, parola, stato').order('n').then(({ data }) => setForzieri(data ?? []));
+  const [immagini, setImmagini] = useState<Immagine[]>([]);
+  const carica = () => {
+    client.from('forzieri').select('n, premio, enigma, soluzione, aiutino, parola, stato').order('n').then(({ data }) => setForzieri(data ?? []));
+    immaginiPremi(undefined, client).then(setImmagini);
+  };
   useEffect(() => {
     carica();
   }, []);
@@ -370,6 +375,14 @@ function Premi({ client, avvisa }: Props) {
             <h2>
               {f.n === 9 ? 'Cima' : `Forziere ${f.n}`} · tappa {conf.tappa}, {conf.chiavi} chiavi
             </h2>
+            {f.premio && (
+              <div className="premio-genitori">
+                <ImmaginePremio img={immagini.find((x) => x.n === f.n) ?? null} misura={96} vera />
+                {immagini.find((x) => x.n === f.n)?.manca !== false && (
+                  <p className="nota">Immagine da rifare: il premio è cambiato. Lani vede il pacco regalo finché non arriva quella nuova.</p>
+                )}
+              </div>
+            )}
             {f.stato === 'chiuso' ? (
               <form className="modulo" onSubmit={(e) => salva(e, f.n)}>
                 <label>

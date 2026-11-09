@@ -13,6 +13,9 @@ await db.exec(`
   create table storage.buckets (id text primary key, name text, public boolean);
   create table storage.objects (id serial, bucket_id text, name text);
   alter table storage.objects enable row level security;
+  -- come su Supabase: i client hanno i diritti sulla tabella dei file, decide la RLS
+  grant all on storage.objects, storage.buckets to anon, authenticated, service_role;
+  grant usage, select on all sequences in schema storage to anon, authenticated, service_role;
   grant usage on schema public, auth, extensions, storage to anon, authenticated, service_role;
   alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
   alter default privileges in schema public grant execute on functions to anon, authenticated, service_role;
@@ -121,6 +124,15 @@ await come(null, `update forzieri set tentativi_enigma = 1 where n = 3`);
 verifica('aiutino visibile dopo il primo tentativo sbagliato', (await val(LANI, 'select aiutino from forzieri_lani where n = 3')) === 'Ha i pedali.');
 await fallisce('premio fermo a enigma comparso (anche per il genitore)', PAPA, `update forzieri set premio = 'Altro' where n = 3`);
 await fallisce('enigma fermo a enigma comparso (anche per il server)', null, `update forzieri set enigma = 'nuovo' where n = 3`);
+
+// immagini dei premi: bucket privato senza regole per i client
+await come(null, `insert into storage.objects (bucket_id, name) values ('premi', '1/premio-1.webp'), ('premi', '1/premio-1-sagoma.webp')`);
+verifica('il bucket premi è privato', (await val(null, `select public from storage.buckets where id = 'premi'`)) === false);
+verifica('Lani non vede nessun file dei premi, neanche la sagoma', (await come(LANI, `select name from storage.objects where bucket_id = 'premi'`)).rows.length === 0);
+verifica('neanche un genitore li legge direttamente (passa dalla funzione)', (await come(PAPA, `select name from storage.objects where bucket_id = 'premi'`)).rows.length === 0);
+verifica('anon non vede i file dei premi', await come(null, `select name from storage.objects where bucket_id = 'premi'`, 'anon').then((r) => r.rows.length === 0, () => true));
+verifica('Lani non legge immagine_per né la tabella forzieri', (await come(LANI, 'select immagine_per from forzieri')).rows.length === 0);
+await fallisce('Lani non carica file nel bucket premi', LANI, `insert into storage.objects (bucket_id, name) values ('premi', 'x.webp')`);
 
 // richieste di foto: una per compito
 await come(null, `insert into richieste_foto (motivo, pagine, compito_id) values ('compito', '40', '${COMPITO}')`);
