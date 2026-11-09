@@ -10,8 +10,10 @@ await db.exec(`
   create role anon nologin; create role authenticated nologin; create role service_role nologin bypassrls;
   create table auth.users (id uuid primary key);
   create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('test.uid', true), '')::uuid $$;
-  create table storage.buckets (id text primary key, name text, public boolean);
-  create table storage.objects (id serial, bucket_id text, name text);
+  create table storage.buckets (id text primary key, name text, public boolean, file_size_limit bigint, allowed_mime_types text[]);
+  -- owner_id lo mette lo Storage dal token di chi carica, come su Supabase
+  create table storage.objects (id serial, bucket_id text, name text, owner_id text default nullif(current_setting('test.uid', true), ''));
+  create function storage.foldername(name text) returns text[] language sql immutable as $f$ select (string_to_array(name, '/'))[1:array_length(string_to_array(name, '/'), 1) - 1] $f$;
   alter table storage.objects enable row level security;
   -- come su Supabase: i client hanno i diritti sulla tabella dei file, decide la RLS
   grant all on storage.objects, storage.buckets to anon, authenticated, service_role;
@@ -116,8 +118,11 @@ await come(null, `delete from frasi where di_famiglia`);
 await come(null, `update frasi set ultima_volta = null, ultimo_momento = null where ultima_volta is not null`);
 
 // enigmi a tipi: aiutino dopo il primo errore, premio fermo quando l'enigma è comparso
-await come(PAPA, `update forzieri set premio = 'Bici', enigma = 'Due ruote', soluzione = 'bici', aiutino = 'Ha i pedali.', parola = 'BICI' where n = 3`);
+// il genitore scrive il premio; enigma, soluzione e aiutino li scrive la funzione enigma (server)
+await come(PAPA, `update forzieri set premio = 'Bici' where n = 3`);
 verifica('premio di un forziere chiuso: si cambia', (await val(null, 'select premio from forzieri where n = 3')) === 'Bici');
+await fallisce('il genitore non scrive l\'enigma a mano', PAPA, `update forzieri set enigma = 'Due ruote' where n = 3`);
+await come(null, `update forzieri set enigma = 'Due ruote', soluzione = 'bici', aiutino = 'Ha i pedali.', parola = 'BICI' where n = 3`);
 await come(null, `update forzieri set stato = 'enigma' where n = 3`);
 verifica('aiutino nascosto prima del primo tentativo', (await val(LANI, 'select aiutino from forzieri_lani where n = 3')) === null);
 await come(null, `update forzieri set tentativi_enigma = 1 where n = 3`);
@@ -138,8 +143,22 @@ await fallisce('Lani non carica file nel bucket premi', LANI, `insert into stora
 await come(null, `insert into richieste_foto (motivo, pagine, compito_id) values ('compito', '40', '${COMPITO}')`);
 await fallisce('una sola richiesta di foto per compito', null, `insert into richieste_foto (motivo, pagine, compito_id) values ('compito', '41', '${COMPITO}')`);
 const RICH = await val(null, 'select id from richieste_foto limit 1');
-await come(LANI, `insert into foto_pagine (richiesta_id, pagine, percorso_storage) values ('${RICH}', '40', 'r/1.jpg')`);
+// attacchi: la riga di una foto senza il file, con il file di un altro, fuori dalla cartella
+await fallisce('Lani non registra una foto senza il file', LANI, `insert into foto_pagine (richiesta_id, pagine, percorso_storage) values ('${RICH}', '40', '${RICH}/finta.jpg')`);
+await come(PAPA, `insert into storage.objects (bucket_id, name) values ('foto-pagine', '${RICH}/papa.jpg')`);
+await fallisce('Lani non registra come sua la foto di un genitore', LANI, `insert into foto_pagine (richiesta_id, pagine, percorso_storage) values ('${RICH}', '40', '${RICH}/papa.jpg')`);
+await fallisce('Lani non carica fuori dalla cartella di una richiesta', LANI, `insert into storage.objects (bucket_id, name) values ('foto-pagine', 'altro/1.jpg')`);
+await fallisce('Lani non carica nella cartella di una richiesta inventata', LANI, `insert into storage.objects (bucket_id, name) values ('foto-pagine', '${COMPITO}/1.jpg')`);
+await fallisce('Lani non mette in conto la foto a un altro', LANI, `insert into foto_pagine (richiesta_id, pagine, percorso_storage, caricata_da) values ('${RICH}', '40', '${RICH}/papa.jpg', '${PAPA}')`);
+verifica('foto-pagine: solo immagini fino a 10 MB', (await val(null, `select file_size_limit = 10485760 and 'image/jpeg' = any(allowed_mime_types) and not 'text/html' = any(allowed_mime_types) from storage.buckets where id = 'foto-pagine'`)) === true);
+// il flusso vero dell'app: prima il file nella cartella della richiesta, poi la riga
+await come(LANI, `insert into storage.objects (bucket_id, name) values ('foto-pagine', '${RICH}/1.jpg')`);
+await come(LANI, `insert into foto_pagine (richiesta_id, pagine, percorso_storage) values ('${RICH}', '40', '${RICH}/1.jpg')`);
 verifica('Lani carica una foto a suo nome', (await val(null, 'select caricata_da from foto_pagine')) === LANI);
+await come(null, `update richieste_foto set stato = 'fatta' where id = '${RICH}'`);
+await fallisce('a richiesta chiusa non si carica più', LANI, `insert into storage.objects (bucket_id, name) values ('foto-pagine', '${RICH}/2.jpg')`);
+await come(null, `update richieste_foto set stato = 'aperta' where id = '${RICH}'`);
+await come(null, `delete from storage.objects where bucket_id = 'foto-pagine'`);
 await come(LANI, `update richieste_foto set stato = 'fatta'`); // la RLS non lo lascia passare: zero righe
 verifica('la richiesta resta aperta finché non la chiude il server', (await val(null, 'select stato from richieste_foto')) === 'aperta');
 await come(null, `delete from foto_pagine`);
@@ -177,6 +196,80 @@ await come(null, `insert into settimane (inizio, chiavi) values ('2026-11-23', 2
 verifica('dopo le chiavi niente storno', (await val(PAPA, `select storna_spunta('cartella', 'serata:2026-11-23')`)) === false);
 await come(null, `select registra_passi('bagno', 'sgridata:1', -20)`);
 verifica('il saldo non scende sotto zero', (await val(null, 'select passi from saldo_passi')) === 0);
+
+// ---------------------------------------------------------------- matrice di attacco (filone A)
+// Per ogni tabella e vista: chi può inserire, chi cancella, cosa vede anon. Una tabella nuova
+// senza regole entra da sola nella prova; un permesso nuovo va aggiunto qui, di proposito.
+const tabelle = (await come(null, `select c.relname from pg_class c join pg_namespace n on n.oid = c.relnamespace where n.nspname = 'public' and c.relkind in ('r', 'v') order by 1`)).rows.map((r) => r.relname);
+// RLS: il controllo della riga viene prima dei vincoli, quindi "insert default values" dice se è permesso (42501 = no)
+const inserisce = async (uid, t, ruolo) => {
+  try {
+    await come(uid, `insert into ${t} default values`, ruolo);
+    return true;
+  } catch (e) {
+    return e.code !== '42501' && !/row-level security|permission denied|cannot insert into view|Lani non/.test(e.message);
+  }
+};
+// foto_pagine e serate: Lani inserisce solo a condizioni (file vero, data vicina), provate sopra e sotto
+const LANI_INSERISCE = ['flashcard_giri', 'push_iscrizioni', 'quiz_tentativi', 'umore', 'video_visti'];
+const GENITORE_INSERISCE = [...LANI_INSERISCE, 'foto_pagine', 'serate', 'compiti', 'fogli_firma', 'forzieri', 'frasi', 'gesti_casa', 'impostazioni', 'sgridate'];
+for (const t of tabelle) {
+  verifica(`anon non inserisce in ${t}`, !(await inserisce(null, t, 'anon')));
+  verifica(`anon non legge ${t}`, await come(null, `select * from ${t}`, 'anon').then((r) => r.rows.length === 0, () => true));
+  const lani = await inserisce(LANI, t);
+  verifica(`Lani ${LANI_INSERISCE.includes(t) ? '' : 'non '}inserisce in ${t}`, lani === LANI_INSERISCE.includes(t));
+  // le tabelle del server si leggono e basta, anche per un genitore
+  if (!GENITORE_INSERISCE.includes(t)) verifica(`un genitore non inserisce in ${t}`, !(await inserisce(PAPA, t)));
+}
+// nessuna regola fa cancellare o aggiornare a tutti: o il genitore, o il proprio (push), o Lani con le colonne contate
+const larghe = (await come(null, `select tablename || ' ' || cmd || ' ' || policyname p from pg_policies where schemaname = 'public' and cmd in ('DELETE', 'ALL') and coalesce(qual, '') not like '%e_genitore()%' and policyname <> 'proprie'`)).rows;
+verifica('nessuna regola di cancellazione oltre ai genitori', larghe.length === 0 || (console.log(larghe), false));
+// funzioni chiamabili da un utente: solo queste (registra_passi, tenta_enigma... solo dal server)
+const FUNZIONI = ['controlla_pin', 'e_famiglia', 'e_genitore', 'frase_del_giorno', 'imposta_pin', 'oggi', 'storna_spunta', 'vedi_saldo', 'verifica_pin'];
+const chiamabili = (await come(null, `select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.prorettype <> 'trigger'::regtype and has_function_privilege('authenticated', p.oid, 'execute') order by 1`)).rows.map((r) => r.proname);
+verifica('funzioni chiamabili da Lani e genitori: solo quelle previste', JSON.stringify(chiamabili) === JSON.stringify(FUNZIONI) || (console.log(chiamabili), false));
+const perAnon = (await come(null, `select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.prorettype <> 'trigger'::regtype and has_function_privilege('anon', p.oid, 'execute')`)).rows;
+verifica('anon non chiama nessuna funzione', perAnon.length === 0 || (console.log(perAnon), false));
+
+// attacchi mirati del piano
+await fallisce('Lani non scrive chiavi', LANI, `insert into settimane (inizio, chiavi) values ('2026-11-30', 3)`);
+await fallisce('Lani non scrive note', LANI, `insert into note (data, tipo, testo) values (now(), 'merito', 'x')`);
+await fallisce('Lani non si regala figurine', LANI, `insert into figurine (posa) values ('lani-cima')`);
+await fallisce('Lani non si mette popup', LANI, `insert into popup_coda (situazione, titolo, testo) values ('x', 'x', 'x')`);
+verifica('Lani non legge le frasi di famiglia', (await come(LANI, 'select * from frasi')).rows.length === 0);
+const colonneLani = (await come(null, `select column_name from information_schema.columns where table_name = 'forzieri_lani'`)).rows.map((r) => r.column_name);
+verifica('la vista di Lani non ha soluzione, parola chiave né immagine', !colonneLani.some((c) => ['soluzione', 'parola', 'immagine_per'].includes(c)));
+await fallisce('Lani non cambia lo stato del forziere da una funzione', LANI, `select tenta_enigma(1, 99)`);
+for (const s of [`insert into fogli_firma (titolo) values ('Gita')`, `insert into popup_coda (situazione, priorita, posa, titolo, testo) values ('prova', 1, 'lani-saluta', 'Ciao', 'Ciao')`, `insert into flashcard (argomento, fronte, retro) values ('Somme', '2+2', '4')`]) await come(null, s);
+await fallisce('Lani non cambia il testo di un compito', LANI, `update compiti set testo = 'niente'`);
+await fallisce('Lani non si segna il foglio consegnato', LANI, `update fogli_firma set consegnato_il = now()`);
+await fallisce('Lani non cambia il testo di un popup', LANI, `update popup_coda set testo = 'x'`);
+await fallisce('Lani non cambia le domande di una flash card', LANI, `update flashcard set fronte = 'x'`);
+await come(LANI, `insert into serate (data) values (oggi() + 5)`).catch(() => {});
+verifica('Lani non apre serate lontane da oggi', (await val(null, `select count(*)::int from serate where data = oggi() + 5`)) === 0);
+await come(LANI, `insert into umore (data, faccia) values (oggi() - 1, 'contenta')`).catch(() => {});
+verifica('Lani non cambia l\'umore di ieri', (await val(null, `select count(*)::int from umore where data = oggi() - 1`)) === 0);
+await fallisce('Lani non si iscrive alle notifiche a nome del papà', LANI, `insert into push_iscrizioni (profilo_id, endpoint, chiavi) values ('${PAPA}', 'x', '{}')`);
+// enigma: il server conta i tentativi in modo atomico; il quarto non passa anche se arriva insieme agli altri
+await come(null, `update forzieri set stato = 'enigma', tentativi_enigma = 0 where n = 4`);
+const tentativi = [];
+for (let i = 0; i < 5; i++) tentativi.push(await val(null, `select tenta_enigma(4, 3)`));
+verifica('enigma: al massimo 3 tentativi, poi niente', JSON.stringify(tentativi) === JSON.stringify([1, 2, 3, null, null]));
+// casella di studio: la stessa casella due volte non dà passi due volte
+await come(null, `select registra_passi('flashcard', 'flashcard:2026-11-24:1', 5)`);
+verifica('una casella di studio vale una volta sola', (await val(null, `select registra_passi('flashcard', 'flashcard:2026-11-24:1', 5)`)) === null);
+await come(null, `delete from movimenti_passi where motivo = 'flashcard'`);
+// genitore: niente movimenti, chiavi, voti a mano; forzieri solo premio e consegna
+await fallisce('un genitore non scrive passi a mano', PAPA, `insert into movimenti_passi (motivo, riferimento, passi) values ('x', 'y', 100)`);
+await fallisce('un genitore non chiama registra_passi', PAPA, `select registra_passi('x', 'y', 100)`);
+await fallisce('un genitore non scrive chiavi a mano', PAPA, `insert into settimane (inizio, chiavi) values ('2026-12-07', 3)`);
+await fallisce('un genitore non scrive voti a mano', PAPA, `insert into voti (data, voto) values (now(), 10)`);
+await fallisce('un genitore non apre un forziere', PAPA, `update forzieri set stato = 'aperto' where n = 2`);
+await fallisce('un genitore non azzera i tentativi dell\'enigma', PAPA, `update forzieri set tentativi_enigma = 0 where n = 3`);
+await come(null, `update forzieri set stato = 'aperto' where n = 2`);
+await come(PAPA, `update forzieri set stato = 'consegnato', consegnato_il = now() where n = 2`);
+verifica('un genitore segna consegnato un forziere aperto', (await val(null, 'select stato from forzieri where n = 2')) === 'consegnato');
+verifica('un genitore non legge l\'hash del PIN', (await come(PAPA, 'select * from pin_genitori')).rows.length === 0);
 
 console.log(`\n${ok} ok, ${ko} no`);
 process.exit(ko ? 1 : 0);
