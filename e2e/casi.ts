@@ -165,7 +165,7 @@ export async function prepara(p: Page, caso: Caso, dataSpostata = false) {
   const d = dati();
   if (caso.genitore) d.profili = [{ id: 'lani', ruolo: 'genitore', nome: 'Mamma' }];
   caso.dati?.(d);
-  await finto(p, d);
+  await finto(p.context(), d); // sul contesto: vede anche le richieste del service worker (build vera)
 }
 
 /** Apre la schermata del caso con i dati finti, all'ora del caso, con immagini e font pronti. */

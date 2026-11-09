@@ -4,10 +4,14 @@
 // di Oggi, clic sulla scheda (timespan) e fotografia (snapshot), senza punteggio di prestazioni.
 // Le pagine arrivano con le intestazioni di sicurezza di vercel.json (CSP compresa, con il Supabase
 // finto al posto di quello vero) e una prova apre ogni schermata: nessuna violazione della CSP.
+// Il server è come Vercel anche nella compressione (gzip; Vercel usa brotli, un po' più piccolo):
+// vite preview mandava i file interi e le prestazioni risultavano peggiori del vero.
 // Gira solo con npm run lighthouse; i rapporti HTML in e2e/risultati/lighthouse/.
 import { chromium, expect, test, type Page } from '@playwright/test';
-import { spawn, type ChildProcess } from 'node:child_process';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { createServer, type Server } from 'node:http';
+import { extname, join, resolve } from 'node:path';
+import { gzipSync } from 'node:zlib';
 import { startFlow } from 'lighthouse';
 import puppeteer from 'puppeteer-core';
 import { apri, CASI, prepara } from './casi';
@@ -31,22 +35,38 @@ const CONFIG = {
 // intestazioni di Vercel, come in produzione; l'indirizzo di Supabase diventa quello finto
 const VERCEL = JSON.parse(readFileSync('vercel.json', 'utf8')) as { headers: { headers: { key: string; value: string }[] }[] };
 const INTESTAZIONI = Object.fromEntries(VERCEL.headers[0].headers.map((h) => [h.key, h.value.replaceAll('qonullxzhqvbfpiibqye.supabase.co', 'finto.supabase.test')]));
+// solo sulle pagine: per i file dell'app si lascia passare la risposta compressa così com'è
 const conIntestazioni = (p: Page) =>
   p.route(`${URL}**`, async (route) => {
+    if (route.request().resourceType() !== 'document') return route.fallback();
     const r = await route.fetch();
-    await route.fulfill({ response: r, headers: { ...r.headers(), ...INTESTAZIONI } });
+    const { 'content-encoding': _, 'content-length': __, ...resto } = r.headers();
+    await route.fulfill({ response: r, headers: { ...resto, ...INTESTAZIONI } });
   });
 
-let server: ChildProcess;
+const RADICE = resolve('dist-lh');
+const TIPI: Record<string, string> = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.webmanifest': 'application/manifest+json', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.webp': 'image/webp', '.woff2': 'font/woff2', '.woff': 'font/woff' };
+const servi = () =>
+  createServer((req, res) => {
+    let file = join(RADICE, decodeURIComponent(new globalThis.URL(req.url ?? '/', URL).pathname));
+    // come la riscrittura delle SPA: tutto quello che non è un file dà index.html
+    if (!file.startsWith(RADICE) || !existsSync(file) || statSync(file).isDirectory()) file = join(RADICE, 'index.html');
+    const tipo = TIPI[extname(file)] ?? 'application/octet-stream';
+    const testo = /text|javascript|json|svg|manifest/.test(tipo) && /gzip/.test(String(req.headers['accept-encoding']));
+    res.writeHead(200, { 'content-type': tipo, ...(testo && { 'content-encoding': 'gzip' }) });
+    res.end(testo ? gzipSync(readFileSync(file)) : readFileSync(file));
+  });
+
+let server: Server;
 test.beforeAll(async () => {
   // un server rimasto acceso (anche da un'altra copia del progetto) farebbe misurare la build sbagliata
   if (await fetch(URL).then(() => true, () => false)) throw new Error(`porta ${PORTA} già occupata: chiudi il server o usa LH_PORTA`);
-  // node diretto, senza shell: su Windows kill() fermerebbe solo la shell e vite resterebbe acceso
-  server = spawn(process.execPath, ['node_modules/vite/bin/vite.js', 'preview', '--outDir', 'dist-lh', '--port', String(PORTA), '--strictPort'], { stdio: 'ignore' });
-  for (let i = 0; i < 60 && !(await fetch(URL).then((r) => r.ok).catch(() => false)); i++) await new Promise((r) => setTimeout(r, 500));
+  server = servi();
+  server.keepAliveTimeout = 120_000; // route.fetch riusa le connessioni: chiuse dopo 5 s davano ECONNRESET
+  await new Promise<void>((ok) => server.listen(PORTA, 'localhost', ok));
 });
 test.afterAll(() => {
-  server?.kill();
+  server?.close();
 });
 
 const CATEGORIE = ['performance', 'accessibility', 'best-practices', 'seo'] as const;
