@@ -12,9 +12,9 @@ const ORIGINI = /^(https:\/\/ace-passino\.vercel\.app|https:\/\/ace-[a-z0-9-]+-l
 export const origineAmmessa = (origine: string | null) => !!origine && ORIGINI.test(origine);
 
 export function cors(req: Request): Record<string, string> {
-  const origine = req.headers.get('Origin');
+  const origine = req.headers.get('Origin') ?? '';
   return {
-    'Access-Control-Allow-Origin': origineAmmessa(origine) ? origine! : PRODUZIONE,
+    'Access-Control-Allow-Origin': origineAmmessa(origine) ? origine : PRODUZIONE,
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
     Vary: 'Origin',
   };

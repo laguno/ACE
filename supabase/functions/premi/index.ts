@@ -5,10 +5,10 @@
 // - Genitori: tutte e due.
 // Se un genitore ha cambiato il premio, l'immagine non vale più (immagine_per diverso dal premio):
 // "manca" true e niente URL, l'app mostra il pacco regalo finché il signore non ne carica una nuova.
-import { createClient } from 'npm:@supabase/supabase-js@2';
+import { dbServizio } from '../_shared/ambiente.ts';
 import { chiChiama, cors, leggiCorpo, risposte } from '../_shared/accesso.ts';
 
-const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+const db = dbServizio();
 const DURATA = 600; // secondi
 
 async function firma(percorso: string) {

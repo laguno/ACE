@@ -2,11 +2,11 @@
 // un esempio diverso da quello del compito e prepara tre indizi graduali; mai la soluzione
 // dell'esercizio. La chiama l'app di Lani (o di un genitore) con { compito_id }.
 import Anthropic from 'npm:@anthropic-ai/sdk';
-import { createClient } from 'npm:@supabase/supabase-js@2';
+import { dbServizio } from '../_shared/ambiente.ts';
 import mappa from '../../../data/mappa-libri.json' with { type: 'json' };
 import { chiChiama, CorpoNonValido, cors, leggiCorpo, risposte } from '../_shared/accesso.ts';
 
-const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+const db = dbServizio();
 const claude = new Anthropic({ apiKey: Deno.env.get('ANTHROPIC_API_KEY') });
 
 const SCHEMA = {

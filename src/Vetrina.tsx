@@ -81,7 +81,7 @@ function fraseEsempio(chiave: K.ChiavePopup) {
   return f ? { testo: f.testo, autore: f.autore } : null;
 }
 
-export function esempio(chiave: K.ChiavePopup): Popup {
+function esempio(chiave: K.ChiavePopup): Popup {
   const c = K.componi(chiave, ESEMPI[chiave]);
   return { id: chiave, situazione: chiave, priorita: c.priorita, posa: c.posa, titolo: c.titolo, testo: c.testo, figurina: FIGURINE[chiave] ?? null, frase: fraseEsempio(chiave) };
 }

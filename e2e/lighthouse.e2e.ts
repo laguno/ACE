@@ -49,6 +49,8 @@ test.afterAll(() => {
 const CATEGORIE = ['performance', 'accessibility', 'best-practices', 'seo'] as const;
 
 for (const nome of ['Oggi', 'Sera', 'Astra', 'Studio']) {
+  // Playwright vuole il primo argomento destrutturato anche quando non serve nessuna fixture
+  // eslint-disable-next-line no-empty-pattern
   test(`lighthouse ${nome}`, async ({}, info) => {
     const caso = CASI[nome];
     const browser = await chromium.launch({ args: [`--remote-debugging-port=${DEBUG}`] });

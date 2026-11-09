@@ -5,7 +5,7 @@
 // Accesso (mappato l'8 novembre 2026): nuvola.madisoft.it rimanda al Keycloak
 // auth.nuvola.madisoft.it/realms/nuvola (da /connect/authentication-service); si invia il modulo (username, password, credentialId), si
 // seguono i rimandi con i cookie fino all'area tutore, poi /api-studente/v1/login-from-web dà il token.
-import { createClient } from 'npm:@supabase/supabase-js@2';
+import { apriRegistro, dbServizio } from '../_shared/ambiente.ts';
 import * as N from '../../../src/lib/nuvola/index.ts';
 import * as R from '../../../src/lib/regole/index.ts';
 import { aggiornaForzieri } from '../_shared/forzieri.ts';
@@ -14,7 +14,7 @@ import { avvisaSeFallita, inviaPush } from '../_shared/push.ts';
 import * as K from '../../../src/lib/copione/index.ts';
 import { chiChiama, cronOGenitore } from '../_shared/accesso.ts';
 
-const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+const db = dbServizio();
 const NUVOLA = 'https://nuvola.madisoft.it';
 const API = `${NUVOLA}/api-studente/v1`;
 
@@ -95,7 +95,11 @@ async function accedi(): Promise<string> {
 
 // ---------------------------------------------------------------- letture
 
-async function leggi<T = any>(token: string, percorso: string, alunno?: number): Promise<T[]> {
+// Le risposte di Nuvola non hanno uno schema: si leggono come JSON libero e si controllano in src/lib/nuvola.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type DaNuvola = any;
+
+async function leggi<T = DaNuvola>(token: string, percorso: string, alunno?: number): Promise<T[]> {
   const url = new URL(`${API}${percorso}`);
   if (alunno) url.searchParams.set('contextAlunno', String(alunno));
   const { r } = await vai(url.href, { headers: { Accept: 'application/json', Authorization: `Bearer ${token}` } });
@@ -118,8 +122,8 @@ async function scarica(token: string) {
 
   // a blocchi di 7 giorni come fa Nuvola: compiti da una settimana fa a quattro avanti; lezioni delle
   // ultime due settimane e di questa (per l'orario serve ogni giorno della settimana almeno una volta)
-  const compiti: any[] = [];
-  const lezioni: any[] = [];
+  const compiti: DaNuvola[] = [];
+  const lezioni: DaNuvola[] = [];
   const oggi = oggiRoma();
   for (let s = -2; s < 4; s++) {
     const da = new Date(oggi.getTime() + s * 7 * 864e5);
@@ -133,7 +137,7 @@ async function scarica(token: string) {
   const corrente = quadrimestri.find((q) => q.corrente) ?? quadrimestri.at(-1);
   const voti = corrente ? await leggi(token, `${a}/frazione-temporale/${corrente.id}/voti/materie`, alunno.id) : [];
   const note = await leggi(token, `${a}/note`, alunno.id);
-  const argomenti = lezioni.flatMap((v) => v.ore.flatMap((o: any) => o.argomenti));
+  const argomenti = lezioni.flatMap((v) => v.ore.flatMap((o: DaNuvola) => o.argomenti));
   return { compiti, giorniLezioni: lezioni, lezioni: argomenti, eventi, voti, note };
 }
 
@@ -312,7 +316,8 @@ async function passiVotiENote() {
   }
   const didattiche = (note ?? []).filter((n) => n.tipo === 'didattica');
   for (const id of R.malusDimenticanze(didattiche.map((n) => n.id))) {
-    const n = didattiche.find((x) => x.id === id)!;
+    const n = didattiche.find((x) => x.id === id);
+    if (!n) continue;
     const p = R.CONFIG.passi.malus.note_dimenticanza_ogni_3;
     presi += await registra('note_dimenticanza', id, p, n.data);
     await accoda(db, `dimenticanze:${id}`, 'nota_terza_dimenticanza', { passi: segno(p) });
@@ -330,7 +335,7 @@ const risposta = (corpo: unknown, stato = 200) =>
 Deno.serve(async (req) => {
   if (!(await autorizzato(req))) return risposta({ errore: 'solo il cron o un genitore' }, 401);
 
-  const { data: log } = await db.from('sync_log').insert({ fonte: 'nuvola' }).select('id').single();
+  const log = { id: await apriRegistro(db, 'nuvola') };
   let esito: 'ok' | 'errore' = 'ok';
   let dettagli: Record<string, unknown>;
   try {
@@ -339,8 +344,8 @@ Deno.serve(async (req) => {
     esito = 'errore';
     dettagli = { errore: e instanceof Passo ? e.message : 'errore imprevisto' };
     if (!(e instanceof Passo)) console.error(e);
-    await avvisaSeFallita(db, 'nuvola', 'Nuvola', log!.id).catch((x) => console.error('avviso', x));
+    await avvisaSeFallita(db, 'nuvola', 'Nuvola', log.id).catch((x) => console.error('avviso', x));
   }
-  await db.from('sync_log').update({ finito_il: new Date().toISOString(), esito, dettagli }).eq('id', log!.id);
+  await db.from('sync_log').update({ finito_il: new Date().toISOString(), esito, dettagli }).eq('id', log.id);
   return risposta({ esito, ...dettagli }, esito === 'ok' ? 200 : 502);
 });

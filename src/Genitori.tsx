@@ -369,7 +369,7 @@ function Premi({ client, avvisa }: Props) {
         {senza ? `${senza} forzieri ancora senza premio.` : 'Tutti i forzieri hanno un premio.'} I primi piccoli, poi sempre più importanti; la cima legata alla pagella di giugno.
       </p>
       {forzieri.map((f) => {
-        const conf = R.CONFIG.forzieri.find((x) => x.n === f.n)!;
+        const conf = R.forziere(f.n);
         return (
           <div className="carta" key={f.n}>
             <h2>

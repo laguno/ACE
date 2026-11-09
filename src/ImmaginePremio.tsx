@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { Gift } from '@phosphor-icons/react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { supabase } from './supabase';
@@ -13,14 +12,6 @@ export type Immagine = { n: number; sbloccato: boolean; manca: boolean; sagoma: 
 export async function immaginiPremi(n?: number, client: SupabaseClient = supabase): Promise<Immagine[]> {
   const { data } = await client.functions.invoke('premi', { body: n ? { n } : {} });
   return (data?.immagini as Immagine[] | undefined) ?? [];
-}
-
-export function useImmaginePremio(n: number) {
-  const [img, setImg] = useState<Immagine | null>();
-  useEffect(() => {
-    immaginiPremi(n).then((l) => setImg(l.find((x) => x.n === n) ?? null));
-  }, [n]);
-  return img;
 }
 
 /** Sagoma, immagine vera o pacco regalo; "vera" la mostra solo se il server l'ha data. */
