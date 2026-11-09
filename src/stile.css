@@ -10,6 +10,7 @@
   --rosa: #ffe3ef;
   --lilla: #f3e6fd;
   --lilla-medio: #cdb8f5; /* strada da fare */
+  --lilla-bordo: #9580cf; /* bordi dei campi e delle opzioni: 3:1 su bianco e panna */
   --azzurrino: #bfe6ff;   /* cielo del mattino */
   --burro: #ffe27a;       /* stelle e oro */
   --burro-chiaro: #fff3c4;
@@ -86,7 +87,7 @@ main { position: relative; width: min(100%, 430px); margin: 0 auto; padding: 16p
 .modulo input {
   min-height: 48px;
   padding: 0 16px;
-  border: 2px solid var(--lilla);
+  border: 2px solid var(--lilla-bordo);
   border-radius: 16px;
   font: inherit;
   color: var(--testo);
@@ -196,7 +197,7 @@ main { position: relative; width: min(100%, 430px); margin: 0 auto; padding: 16p
 .opzione {
   display: flex; justify-content: space-between; align-items: center; gap: 10px;
   min-height: 56px; padding: 8px 18px; text-align: left;
-  border: 3px solid var(--lilla); border-radius: 20px; background: #fff;
+  border: 3px solid var(--lilla-bordo); border-radius: 20px; background: #fff;
   color: var(--testo); font: 700 16px Nunito, sans-serif;
 }
 .opzione svg { flex: none; }
@@ -285,7 +286,7 @@ main { position: relative; width: min(100%, 430px); margin: 0 auto; padding: 16p
 .stretto { width: auto; margin-top: 0; padding: 0 16px; min-height: 44px; flex: none; }
 .giorno { border: 0; padding: 0; margin: 0; display: grid; gap: 6px; }
 .giorno legend { font-weight: 800; text-transform: capitalize; margin-bottom: 4px; }
-.modulo textarea { padding: 10px 14px; border: 2px solid var(--lilla); border-radius: 16px; font: inherit; color: var(--testo); }
+.modulo textarea { padding: 10px 14px; border: 2px solid var(--lilla-bordo); border-radius: 16px; font: inherit; color: var(--testo); }
 .genitori .numeri dt:last-child { font-size: 12px; }
 
 /* Prima accensione */
@@ -487,7 +488,7 @@ body[data-sfondo='viola'] { background: linear-gradient(180deg, #7b6ae0 0, var(-
 @keyframes cade { 0% { opacity: 1; transform: translateY(0) rotate(0); } 100% { opacity: 0; transform: translateY(90vh) rotate(540deg); } }
 @media (prefers-reduced-motion: reduce) { .coriandoli { display: none; } }
 .popup .principale:focus { outline: none; }
-.popup .principale:focus-visible { outline: 3px solid var(--lilla-medio); outline-offset: 3px; }
+.popup .principale:focus-visible { outline: 3px solid var(--accento); outline-offset: 3px; }
 
 /* Studio (bozza Studio) */
 .schermo .carta p.data-verifica { font: 800 14px Nunito, sans-serif; color: var(--testo-2); }
@@ -516,3 +517,11 @@ body:has(.studio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom)
 .vetrina .secondario.compatto { margin: 0; align-self: center; }
 .notifiche-anteprima li > span { padding: 10px 12px; border-radius: 16px; background: var(--lilla); font-size: 14px; }
 .notifiche-anteprima li { border-top: 0; padding: 4px 0; }
+
+/* harden (revisione UI): popup in <dialog>, avviso dei genitori, freccia su viola */
+dialog.velo { width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; border: 0; color: inherit; }
+dialog.velo:not([open]) { display: none; }
+dialog.velo::backdrop { background: transparent; }
+.pillola { margin: 0; padding: 10px 16px; border-radius: 999px; background: var(--rosa); color: var(--testo); font: 800 14px/1.35 Nunito, sans-serif; }
+body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999px; background: #fff; box-shadow: var(--ombra); }
+dialog.velo:focus { outline: none; }

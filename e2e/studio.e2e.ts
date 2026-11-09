@@ -81,9 +81,12 @@ test('quiz: spiegazione dopo ogni risposta, sbagliate salvate', async ({ page })
   await page.goto('/');
   await page.getByRole('button', { name: 'Studio' }).click();
   await page.getByRole('button', { name: 'Prova il quiz' }).click();
+  const barra = page.getByRole('progressbar', { name: 'Domande del quiz' });
+  await expect(barra).toHaveAttribute('aria-valuenow', '0');
 
   await page.getByRole('button', { name: '2', exact: true }).click();
   await expect(page.getByRole('status')).toHaveText('Non era questa. 10 diviso 2 fa 5.');
+  await expect(barra).toHaveAttribute('aria-valuenow', '1');
   await page.getByRole('button', { name: 'Avanti' }).click();
   await page.getByRole('button', { name: 'minore di 1' }).click();
   await expect(page.getByRole('status')).toContainText('Giusto!');

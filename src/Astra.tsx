@@ -179,7 +179,7 @@ export default function Astra({ apri }: { apri: (pagina: 'Figurina' | 'Album') =
                 </p>
               )}
               {conf && (
-                <button className={`forziere ${fz?.stato ?? 'chiuso'} ${aDestra !== (t === qui) ? 'destra' : 'sinistra'}`} onClick={() => setScelto(conf.n)} aria-label={`Forziere ${conf.n}`}>
+                <button className={`forziere ${fz?.stato ?? 'chiuso'} ${aDestra !== (t === qui) ? 'destra' : 'sinistra'}`} onClick={() => setScelto(conf.n)} aria-label={`Forziere ${conf.n}: ${SOGLIE[conf.tappa - 1].toLocaleString('it-IT')} · ${conf.chiavi} chiavi`}>
                   <img
                     src={img('oggetti', conf.n === 9 ? 'forziere-cima' : ['aperto', 'consegnato'].includes(fz?.stato ?? '') ? 'forziere-aperto' : 'forziere-chiuso')}
                     alt=""

@@ -31,3 +31,17 @@ test('dopo le 21 il rimprovero aspetta: si vede la tappa, con la figurina', asyn
   await expect(page.getByRole('dialog')).toContainText('Tappa 3! Alla prossima: 160 passi.');
   await expect(page.getByText('Nuova figurina: Lani contenta. Album 2/64.')).toBeVisible();
 });
+
+test('il popup è un dialog vero: Esc lo chiude e lo segna come visto, la pagina dietro non si tocca', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-11-09T16:00:00+01:00'));
+  const { t } = await finto(page, coda());
+  await page.goto('/');
+  const d = page.getByRole('dialog');
+  await expect(d).toContainText('Nota disciplinare in Storia');
+  await expect(d).toBeFocused();
+  await page.keyboard.press('Tab');
+  expect(await page.evaluate(() => !!document.activeElement?.closest('main, nav'))).toBe(false);
+  await page.keyboard.press('Escape');
+  await expect(d).toHaveCount(0);
+  expect(t.popup_coda.find((p) => p.id === 'p1')?.mostrato_il).toBeTruthy();
+});

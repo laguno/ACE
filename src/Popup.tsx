@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import manifest from '../data/manifest.json' with { type: 'json' };
 import { oraAdesso } from './giornata';
 import * as K from './lib/copione';
@@ -62,8 +62,24 @@ export function PopupVista({ p, chiudi }: { p: Popup; chiudi: () => void }) {
   const src = immagine(p.posa);
   const malus = t === 'bastone' ? p.testo.match(/[−-]\d+/)?.[0] : undefined;
 
+  const ref = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const d = ref.current;
+    if (d && !d.open) d.showModal?.();
+    d?.focus(); // il focus sul dialog: si legge il titolo, Tab porta a Ok, niente anello a chi tocca
+  }, []);
+
   return (
-    <div className="velo" role="dialog" aria-modal="true" aria-labelledby="popup-titolo">
+    <dialog
+      ref={ref}
+      className="velo"
+      aria-labelledby="popup-titolo"
+      tabIndex={-1}
+      onCancel={(e) => {
+        e.preventDefault();
+        chiudi();
+      }}
+    >
       {CON_CORIANDOLI.includes(p.situazione) && <Coriandoli />}
       <div className={`popup popup-${t}`}>
         <div className="popup-avatar" aria-hidden>
@@ -75,12 +91,12 @@ export function PopupVista({ p, chiudi }: { p: Popup; chiudi: () => void }) {
         <h2 id="popup-titolo">{p.titolo}</h2>
         <p>{p.testo}</p>
         {t === 'lucchetto' && <p className="popup-riquadro">I passi ti fanno camminare, le chiavi aprono i forzieri.</p>}
-        <button className="principale largo" onClick={chiudi} autoFocus>
+        <button className="principale largo" onClick={chiudi}>
           Ok
         </button>
         {p.figurina && <p className="riga-figurina">{p.figurina}</p>}
       </div>
-    </div>
+    </dialog>
   );
 }
 

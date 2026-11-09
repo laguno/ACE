@@ -15,7 +15,7 @@ const STUDIO = R.CONFIG.passi.studio_facoltativo;
 const SECONDI = STUDIO.flashcard_secondi_prima_di_girare;
 
 /** Testata di flash card e quiz (bozze): "← Studio", titolo, "n di N" e la barra. */
-function TestaStudio({ titolo, n, di, etichetta, chiudi }: { titolo: string; n: number; di: number; etichetta: string; chiudi: () => void }) {
+function TestaStudio({ titolo, n, fatte, di, etichetta, chiudi }: { titolo: string; n: number; fatte: number; di: number; etichetta: string; chiudi: () => void }) {
   return (
     <>
       <button className="indietro" onClick={chiudi} aria-label="Torna allo Studio">
@@ -28,8 +28,8 @@ function TestaStudio({ titolo, n, di, etichetta, chiudi }: { titolo: string; n: 
             {n} di {di}
           </span>
         </div>
-        <div className="avanzamento" role="progressbar" aria-label={etichetta} aria-valuemin={0} aria-valuemax={di} aria-valuenow={n}>
-          <span style={{ width: `${(n / di) * 100}%` }} />
+        <div className="avanzamento" role="progressbar" aria-label={etichetta} aria-valuemin={0} aria-valuemax={di} aria-valuenow={fatte}>
+          <span style={{ width: `${(fatte / di) * 100}%` }} />
         </div>
       </div>
     </>
@@ -112,7 +112,7 @@ export function Flashcard({ carte, titolo, sessione, chiudi }: { carte: Carta[];
 
   return (
     <section className="studio">
-      <TestaStudio titolo={titolo} n={i + 1} di={carte.length} etichetta="Carte ripassate" chiudi={chiudi} />
+      <TestaStudio titolo={titolo} n={i + 1} fatte={i} di={carte.length} etichetta="Carte ripassate" chiudi={chiudi} />
       <div className="carta flash">
         <div className="testa-carta">
           <p className="etichetta">Domanda</p>
@@ -213,7 +213,7 @@ export function Quiz({ quizId, domande, titolo, sessione, chiudi }: { quizId: st
 
   return (
     <section className="studio">
-      <TestaStudio titolo={titolo} n={i + 1} di={domande.length} etichetta="Domande del quiz" chiudi={chiudi} />
+      <TestaStudio titolo={titolo} n={i + 1} fatte={i + (scelta === undefined ? 0 : 1)} di={domande.length} etichetta="Domande del quiz" chiudi={chiudi} />
       <h2 className="domanda">{d.testo}</h2>
       <div className="opzioni">
         {d.opzioni.map((o, n) => {
