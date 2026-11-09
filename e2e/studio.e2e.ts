@@ -104,6 +104,6 @@ test('carte del giorno e avviso dei compiti', async ({ page }) => {
   await finto(page, d);
   await page.goto('/');
   await page.getByRole('button', { name: 'Studio' }).click();
-  await expect(page.getByText('Prima i compiti di oggi: poi flash card e quiz danno passi.')).toBeVisible();
+  await expect(page.locator('.studio-verifica').first().getByText('Finiti i compiti, flash card e quiz valgono passi')).toBeVisible();
   await expect(page.getByText('2 da ripassare oggi', { exact: false })).toBeVisible();
 });

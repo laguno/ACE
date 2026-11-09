@@ -36,6 +36,8 @@ const COSA: Record<R.TipoSessione, string> = {
   quiz_errori: 'quiz breve sugli errori',
 };
 const CARTE_PER_GIRO = 12;
+// finché i compiti di domani non sono spuntati, dentro la prima carta (decisione del signore, 9/11)
+const AVVISO_COMPITI = 'Finiti i compiti, flash card e quiz valgono passi';
 const SELECT_CARTA = 'id, materia_id, tipo, fronte, retro, intervallo_giorni';
 
 export default function Studio() {
@@ -101,14 +103,14 @@ export default function Studio() {
   return (
     <section className="schermo schermo-studio">
       <Testata sfondo="panna" posa="lani-pensierosa" misura={132} sopra="Studio" titolo="Le tue verifiche" riga={<p>Il ripasso è già organizzato nei pomeriggi liberi.</p>} />
-      {compitiAperti > 0 && <p className="lady">Prima i compiti di oggi: poi flash card e quiz danno passi.</p>}
 
       {verifiche.length === 0 && (
         <div className="carta">
           <p>Nessuna verifica in arrivo su Nuvola.</p>
+          {compitiAperti > 0 && <p className="avviso-compiti">{AVVISO_COMPITI}</p>}
         </div>
       )}
-      {verifiche.map((v) => {
+      {verifiche.map((v, i) => {
         const sessioni = [...v.sessioni_ripasso].sort((a, b) => a.numero - b.numero);
         const daFare = sessioni.find((s) => !s.fatta_il && s.data_prevista <= oggi);
         const prossima = sessioni.find((s) => !s.fatta_il && s.data_prevista > oggi);
@@ -135,6 +137,7 @@ export default function Studio() {
             ) : prossima ? (
               <p className="nota">Prossima sessione: {GIORNI[R.giorno(prossima.data_prevista).getDay()]}.</p>
             ) : null}
+            {i === 0 && compitiAperti > 0 && <p className="avviso-compiti">{AVVISO_COMPITI}</p>}
             {(sessioni.length > 0 || daFare || v.quiz[0]) && (
               <div className="riga-pallini">
                 <ol className="pallini" aria-label="Sessioni di ripasso">

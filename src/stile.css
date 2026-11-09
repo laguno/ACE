@@ -509,3 +509,6 @@ dialog.velo:focus { outline: none; }
 .bollino { width: 44px; height: 44px; margin: 0; }
 .nota-riga { color: var(--testo-2); }
 .ordine label { padding: 0; }
+/* Studio: avviso dei compiti dentro la prima carta, gerarchia nelle carte delle verifiche */
+.avviso-compiti { padding: 8px 12px; border-radius: 16px; background: var(--rosa); font: 800 13px/1.35 Nunito, sans-serif !important; color: var(--testo); }
+.schermo .carta.studio-verifica p.nota { font-size: 13px; }
