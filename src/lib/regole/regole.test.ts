@@ -179,8 +179,14 @@ describe('controlli della funzione dei passi', () => {
   });
 
   it('gesti di casa: il tetto vale anche dato un gesto alla volta', () => {
-    expect(passiNuovoGesto([], 'letto')).toBe(2);
-    expect(passiNuovoGesto(['letto', 'scrivania', 'vestiti'], 'lavastoviglie')).toBe(0);
+    expect(passiNuovoGesto(0, 'letto')).toBe(2);
+    expect(passiNuovoGesto(6, 'lavastoviglie')).toBe(0);
+    expect(passiNuovoGesto(5, 'letto')).toBe(1);
+    expect(passiNuovoGesto(9, 'letto')).toBe(0);
+    // quattro gesti uno dopo l'altro: 2 + 2 + 2 + 0, mai oltre il tetto
+    let dati = 0;
+    for (const v of ['letto', 'scrivania', 'vestiti', 'lavastoviglie'] as const) dati += passiNuovoGesto(dati, v);
+    expect(dati).toBe(6);
   });
 
   it('sgridate', () => {

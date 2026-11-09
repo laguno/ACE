@@ -68,7 +68,8 @@ describe('passi delle azioni', () => {
   it('i gesti di casa di un giorno non dipendono dall\'ordine e non superano il tetto', () => {
     fc.assert(
       fc.property(fc.array(fc.constantFrom(...VOCI), { maxLength: 12 }), fc.integer(), (voci, seme) => {
-        const somma = (l: R.VoceGesto[]) => l.reduce((tot, v, i) => tot + R.passiNuovoGesto(l.slice(0, i), v), 0);
+        // ogni gesto riceve i passi rimasti sotto il tetto, dati quelli già registrati oggi
+        const somma = (l: R.VoceGesto[]) => l.reduce((tot, v) => tot + R.passiNuovoGesto(tot, v), 0);
         const mescolate = fc.sample(fc.shuffledSubarray(voci, { minLength: voci.length, maxLength: voci.length }), { seed: seme, numRuns: 1 })[0];
         expect(somma(mescolate)).toBe(somma(voci));
         expect(somma(voci)).toBe(R.passiGestiCasa(voci));
