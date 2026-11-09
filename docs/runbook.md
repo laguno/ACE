@@ -39,6 +39,10 @@ Stato di ACE → Calendario. Se fallisce: l'indirizzo iCal privato di Google è 
 - **Ripristino** (emergenza, con Claude): su un database con tutte le migrazioni, svuotare le tabelle di `public` e caricare il file in una transazione. Provato su Supabase locale con `npm run ripristina -- <file>` (Docker): i dati tornano identici.
 - Tenere almeno gli ultimi 4 backup.
 
+## Taratura di dicembre
+
+`npm run esporta:passi` (sola lettura) scrive `DocumentiACE-backuppassi-AAAA-MM-GG.csv`: somme per giorno e motivo, saldo e bandierina, nello stesso formato di `docs/simulazione/*.csv`. Da passare a Jarvis per la simulazione in Python.
+
 ## Una funzione dà errore
 
 Stato di ACE → Errori: dove e messaggio. Se si ripete, aprire una sessione con Claude con il messaggio (non le righe di Lani). Le funzioni si pubblicano con `npx supabase functions deploy --use-api --yes`; le migrazioni con `npx supabase db push --remote --yes`, sempre dopo `npm run backup`.

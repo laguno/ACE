@@ -24,7 +24,8 @@
     "test:server": "set TZ=UTC&& vitest run",
     "simula:anno": "set ANNO=1&& vitest run scripts/simulatore",
     "backup": "node scripts/backup.mjs",
-    "ripristina": "node scripts/ripristina.mjs"
+    "ripristina": "node scripts/ripristina.mjs",
+    "esporta:passi": "node scripts/esporta-passi.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
