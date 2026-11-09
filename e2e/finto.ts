@@ -78,10 +78,23 @@ export async function finto(page: Page, t: Tabelle, funzioni: Record<string, unk
       chiamate.push(req.postDataJSON());
       return json(funzioni.passi ?? { passi: 0 });
     }
-    // bucket delle foto: si ricorda solo il percorso
+    // bucket delle foto: percorso, tipo e byte del file caricato (multipart, come supabase-js)
     if (url.pathname.startsWith('/storage/v1/object/')) {
       const percorso = url.pathname.replace('/storage/v1/object/', '');
-      (t.caricate ??= []).push({ percorso, tipo: req.headers()['content-type'] ?? '' });
+      if (percorso.startsWith('sign/') && req.method() === 'GET') return route.fulfill({ status: 404 });
+      if (percorso.startsWith('sign/')) {
+        const bucket = percorso.slice(5);
+        return json((req.postDataJSON().paths as string[]).map((p) => ({ path: p, signedURL: `/object/sign/${bucket}/${p}?token=finto`, error: null })));
+      }
+      if (req.method() === 'DELETE') {
+        const via = (req.postDataJSON().prefixes as string[]).map((p) => `${percorso}/${p}`);
+        (t.cancellate ??= []).push(...via.map((p) => ({ percorso: p })));
+        t.caricate = (t.caricate ?? []).filter((c) => !via.includes(String(c.percorso)));
+        return json(via.map((name) => ({ name })));
+      }
+      const parti = await new Response(req.postDataBuffer(), { headers: { 'content-type': req.headers()['content-type'] ?? '' } }).formData();
+      const file = [...parti.values()].find((v) => typeof v !== 'string') as Blob | undefined;
+      (t.caricate ??= []).push({ percorso, tipo: file?.type ?? '', byte: file ? Buffer.from(await file.arrayBuffer()) : null });
       return json({ Key: percorso, Id: percorso });
     }
     if (url.pathname.startsWith('/functions/v1/')) return json(funzioni[url.pathname.split('/')[3]] ?? {});
