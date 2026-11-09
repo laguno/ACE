@@ -1,0 +1,15 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "supabase/functions/*/index.ts",
+    "scripts/*.mjs",
+    "e2e/*.ts"
+  ],
+  "ignore": [
+    ".claude/**",
+    "public/push-sw.js"
+  ],
+  "ignoreDependencies": [
+    "npm"
+  ]
+}
