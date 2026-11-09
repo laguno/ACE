@@ -12,11 +12,12 @@
 - Copione: popup accodati dal server (`_shared/popup.ts`, uno per evento) per voti, note, tappe, forzieri, chiavi, verifiche nuove; un popup per apertura; figurine sbloccate dalla prima comparsa; notifiche push ogni 15 minuti (`notifiche`, cron `0014`). Prima del 23/11 niente popup né figurine.
 - Prima accensione: benvenuta di Lani (3 schermate, una volta per dispositivo) e avvio dei genitori (4 cose con lo stato vero).
 - Genitori: settimana, gesti e sgridate (con popup del copione), premi ed enigmi, correzioni delle spunte, fogli, impostazioni e PIN.
-- Prove: `npm test` (95), `npm run prova:schema` (35), `npm run prova:schermate` (Playwright, 24, Supabase finto).
+- Grafica come le bozze (`design/*.html`) su Oggi, Pomeriggio, Sera, Astra, Figurina, Album e popup; kit in `src/kit.tsx`. Mancano Studio, Flashcard, Quiz, Benvenuta, Genitori. Foto di confronto con `npm run confronto` (in `docs/confronto/`).
+- Prove: `npm test` (97), `npm run prova:schema` (35), `npm run prova:schermate` (Playwright, 37, Supabase finto).
 
-## Ultima sessione (8 novembre 2026)
+## Ultima sessione (9 novembre 2026)
 
-Tappe 1-8 in una giornata: Nuvola e calendario provati dal vivo, IA provata dal vivo (carte e quiz di grammatica, aritmetica, spagnolo); il resto con le prove automatiche (Playwright a 390 px con Supabase finto).
+Ramo `grafica` (passi 1-5 e ritocchi di Jarvis) unito a `main` con tutte le prove verdi. Si continua sul ramo `grafica-2`: Studio, Flashcard, Quiz, poi Benvenuta e Genitori.
 
 ## Decisioni prese
 
