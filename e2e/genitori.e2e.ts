@@ -59,6 +59,26 @@ test('premi: salva il premio e chiede l’enigma', async ({ page }) => {
   expect(t.forzieri[0].premio).toBe('Una bici nuova');
 });
 
+test('frasi di famiglia: si aggiungono e si tolgono', async ({ page }) => {
+  const { t } = await finto(page, { ...dati(), frasi: [{ id: 'x1', testo: 'Affrettati lentamente.', autore: 'motto latino', di_famiglia: false }] });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Altro' }).click();
+  await page.getByRole('button', { name: /^Impostazioni/ }).click();
+  const carta = page.locator('form', { has: page.getByRole('heading', { name: 'Frasi di famiglia' }) });
+  // quelle della raccolta non compaiono qui
+  await expect(carta).not.toContainText('Affrettati lentamente.');
+  await carta.getByLabel('Frase').fill('Ogni giorno un pezzetto.');
+  await carta.getByLabel('Di chi (facoltativo)').fill('papà');
+  await carta.getByRole('button', { name: 'Aggiungi la frase' }).click();
+  await expect(page.getByRole('status')).toContainText('Frase salvata');
+  expect(t.frasi.find((f) => f.testo === 'Ogni giorno un pezzetto.')).toMatchObject({ autore: 'papà', di_famiglia: true });
+  await expect(carta).toContainText('«Ogni giorno un pezzetto.»');
+  await carta.getByRole('button', { name: 'Togli: Ogni giorno un pezzetto.' }).click();
+  await expect(page.getByRole('status')).toHaveText('Frase tolta.');
+  await expect(carta).not.toContainText('Ogni giorno un pezzetto.');
+  expect(t.frasi).toHaveLength(1);
+});
+
 test('correzioni e fogli', async ({ page }) => {
   const { t, chiamate } = await finto(page, dati());
   await page.goto('/');

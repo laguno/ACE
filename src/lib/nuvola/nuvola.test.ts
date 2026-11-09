@@ -111,3 +111,17 @@ describe('peso dei compiti', () => {
     expect(ordinati.at(-1)).toBe('le battute del dialogo, pagina 16');
   });
 });
+
+describe('pagine da fotografare', () => {
+  it.each([
+    ['pagine 340–352 e la scheda', '340–352'],
+    ['pagina 345 e problemi 380–382', '345'],
+    ['pagine 36-38, esercizi 1–8', '36–38'],
+    ['Studiare pag. 12, 14 e 16', '12, 14, 16'],
+    ['p. 40 es. 3', '40'],
+    ['pagg. 20 - 22 e pag 30', '20–22, 30'],
+    ['le battute del dialogo, pagina 16', '16'],
+    ['ripassare il capitolo sui verbi', null],
+    ['es 1-8 del quaderno', null],
+  ])('%s', (testo, atteso) => expect(N.pagine(testo)).toBe(atteso));
+});

@@ -6,6 +6,7 @@ import { GIORNI, RigaCompito, SELECT_COMPITI, adesso, maiuscola, passi, spuntaCo
 import { supabase } from './supabase';
 import { Check } from '@phosphor-icons/react';
 import { Sticker, Testata } from './kit';
+import { Frase } from './Frase';
 
 // Sera — design/Domani.html. Lani spunta; i passi li decide la funzione "passi" sul server.
 // Cartella dalle lezioni di Nuvola (orario) più il materiale del giorno (impostazioni);
@@ -79,6 +80,7 @@ export default function Sera() {
   const [orario, setOrario] = useState<string[]>([]);
   const [impegni, setImpegni] = useState<Impegno[]>([]);
   const [errore, setErrore] = useState('');
+  const [verificaDomani, setVerificaDomani] = useState(false);
 
   useEffect(() => {
     const da = new Date(oggi);
@@ -93,7 +95,9 @@ export default function Sera() {
         .gte('inizio', domaniCal.toISOString())
         .lt('inizio', dopodomaniCal.toISOString())
         .order('inizio'),
-    ]).then(([l, m, i, imp]) => {
+      supabase.from('verifiche').select('id', { count: 'exact', head: true }).eq('data', R.iso(domaniCal)),
+    ]).then(([l, m, i, imp, vd]) => {
+      setVerificaDomani((vd.count ?? 0) > 0);
       const nomi = new Map((m.data ?? []).map((x) => [x.id, x.nome]));
       const materiale: string[] = i.data?.valore?.[domani.getDay()] ?? [];
       setOrario([...N.materieDelGiorno(l.data ?? [], domani.getDay()).map((id) => nomi.get(id) ?? id), ...materiale]);
@@ -290,6 +294,9 @@ export default function Sera() {
           {famiglia.tutto_il_giorno ? '' : ` alle ${C.oraRoma(famiglia.inizio)}`}. Tienilo a mente per la cartella e la sveglia.
         </p>
       )}
+
+      {/* la sera prima di una verifica; se no a chiusura finita (al massimo una frase al giorno) */}
+      <Frase momento={verificaDomani ? 'verifica' : cose > 0 && fatte === cose ? 'chiusura' : null} />
     </section>
   );
 }

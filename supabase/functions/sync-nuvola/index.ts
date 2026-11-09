@@ -10,7 +10,7 @@ import * as N from '../../../src/lib/nuvola/index.ts';
 import * as R from '../../../src/lib/regole/index.ts';
 import { aggiornaForzieri } from '../_shared/forzieri.ts';
 import { accoda } from '../_shared/popup.ts';
-import { avvisaSeFallita } from '../_shared/push.ts';
+import { avvisaSeFallita, inviaPush } from '../_shared/push.ts';
 import * as K from '../../../src/lib/copione/index.ts';
 
 const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
@@ -168,8 +168,49 @@ async function sincronizza() {
     note: await scrivi('note', note),
     lezioni: await scrivi('lezioni', N.lezioni(d.giorniLezioni).filter((l) => ids.has(l.materia_id))),
     ...(await passiEForzieri()),
+    foto: await richiesteFoto(),
     studio: preparaStudio(),
   };
+}
+
+/**
+ * Da fotografare: per ogni compito o verifica in arrivo con pagine scritte e mai fotografate (stessa
+ * materia, stesse pagine) una richiesta, una sola volta; ai genitori un push per giro.
+ * ponytail: con il solo argomento servirebbero le pagine probabili dalla mappa dei libri.
+ */
+async function richiesteFoto() {
+  const oggi = R.iso(R.giornoRoma(new Date()));
+  const [c, v, r, f, m] = await Promise.all([
+    db.from('compiti').select('id, materia_id, testo').gte('scadenza', oggi),
+    db.from('verifiche').select('id, materia_id, argomento').gte('data', oggi),
+    db.from('richieste_foto').select('compito_id, verifica_id, materia_id, pagine'),
+    db.from('foto_pagine').select('materia_id, pagine'),
+    db.from('materie').select('id, nome'),
+  ]);
+  for (const x of [c, v, r, f]) if (x.error) throw new Passo(`richieste di foto: ${x.error.message}`);
+  const chiave = (materia: string | null, pagine: string | null) => `${materia}|${pagine}`;
+  const gia = new Set([...(r.data ?? []), ...(f.data ?? [])].map((x) => chiave(x.materia_id, x.pagine)));
+  const conRichiesta = new Set((r.data ?? []).flatMap((x) => [x.compito_id, x.verifica_id]).filter(Boolean));
+  const nuove: { motivo: string; materia_id: string | null; pagine: string; compito_id?: string; verifica_id?: string }[] = [];
+  const aggiungi = (motivo: 'compito' | 'verifica', id: string, materia: string | null, testo: string | null) => {
+    const pagine = N.pagine(testo ?? '');
+    if (!pagine || conRichiesta.has(id) || gia.has(chiave(materia, pagine))) return;
+    gia.add(chiave(materia, pagine));
+    nuove.push({ motivo, materia_id: materia, pagine, ...(motivo === 'compito' ? { compito_id: id } : { verifica_id: id }) });
+  };
+  for (const x of v.data ?? []) aggiungi('verifica', x.id, x.materia_id, x.argomento);
+  for (const x of c.data ?? []) aggiungi('compito', x.id, x.materia_id, x.testo);
+  if (!nuove.length) return 0;
+  const { error } = await db.from('richieste_foto').insert(nuove);
+  if (error) throw new Passo(`richieste di foto: ${error.message}`);
+  const prima = nuove[0];
+  const materia = m.data?.find((x) => x.id === prima.materia_id)?.nome ?? 'scuola';
+  const testo =
+    nuove.length === 1
+      ? K.notifica('genitori_foto', { cosa: prima.motivo === 'verifica' ? 'Verifica' : 'Compito', materia, pagine: prima.pagine }).testo
+      : K.notifica('genitori_foto_tante', { n: nuove.length }).testo;
+  await inviaPush(db, 'genitore', { titolo: 'ACE', testo, tipo: 'foto' }).catch((e) => console.error('push foto', e));
+  return nuove.length;
 }
 
 /**

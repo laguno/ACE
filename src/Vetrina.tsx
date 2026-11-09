@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Sticker } from './kit';
 import { Contapassi } from './Contapassi';
+import { MOMENTO_DEL_POPUP } from './Frase';
+import FRASI from '../data/frasi.json' with { type: 'json' };
 import * as K from './lib/copione';
 import * as R from './lib/regole';
 import { PopupVista, type Popup } from './Popup';
@@ -70,9 +72,16 @@ const ELENCATE = new Set(GRUPPI.flatMap(([, c]) => c));
 const ALTRE = (Object.keys(K.POPUP) as K.ChiavePopup[]).filter((c) => !ELENCATE.has(c));
 if (ALTRE.length) GRUPPI.push(['Altri', ALTRE]);
 
+/** Frase di esempio per i popup che la possono portare (dal vero si vede solo se è la prima del giorno). */
+function fraseEsempio(chiave: K.ChiavePopup) {
+  const m = MOMENTO_DEL_POPUP[chiave];
+  const f = m && FRASI.frasi.find((x) => x.momento === m);
+  return f ? { testo: f.testo, autore: f.autore } : null;
+}
+
 export function esempio(chiave: K.ChiavePopup): Popup {
   const c = K.componi(chiave, ESEMPI[chiave]);
-  return { id: chiave, situazione: chiave, priorita: c.priorita, posa: c.posa, titolo: c.titolo, testo: c.testo, figurina: FIGURINE[chiave] ?? null };
+  return { id: chiave, situazione: chiave, priorita: c.priorita, posa: c.posa, titolo: c.titolo, testo: c.testo, figurina: FIGURINE[chiave] ?? null, frase: fraseEsempio(chiave) };
 }
 
 const ANIMAZIONI: [string, K.ChiavePopup][] = [
@@ -92,6 +101,8 @@ const NOTIFICHE: [string, string][] = [
   ['Domenica, chiusura delle 20:00', K.notifica('chiusura_domenica').testo],
   [`Sollecito, ${R.CONFIG.notifiche.sollecito_dopo_minuti} minuti dopo`, K.notifica('sollecito', { n: 2 }).testo],
   ['Domenica 21:45, ai genitori', K.notifica('genitori_riepilogo', { chiavi: 2 }).testo],
+  ['Dopo la sincronizzazione, ai genitori', K.notifica('genitori_foto', { cosa: 'Verifica', materia: 'Scienze', pagine: '120–124' }).testo],
+  ['Più richieste nello stesso giro', K.notifica('genitori_foto_tante', { n: 3 }).testo],
 ];
 
 export default function Vetrina() {

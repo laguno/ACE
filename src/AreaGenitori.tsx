@@ -14,6 +14,14 @@ export default function AreaGenitori({ suoDispositivo, chiudi }: { suoDispositiv
   return <Cancello chiudi={chiudi} />;
 }
 
+const ERRORE_SERVER = 'Non riesco a controllare il PIN adesso. Controlla la connessione e riprova.';
+const MESSAGGI_PIN: Record<string, string> = {
+  sbagliato: 'PIN non giusto. Riprova.',
+  bloccato: 'Troppi tentativi sbagliati: l’area si riapre tra 15 minuti.',
+  manca: 'Il PIN non è ancora impostato: si sceglie dal telefono di un genitore, in Altro, Impostazioni.',
+  no: 'Questo accesso non è di un genitore.',
+};
+
 function Cancello({ chiudi }: { chiudi?: () => void }) {
   const [sessione, setSessione] = useState<Session | null | undefined>();
   const [sbloccata, setSbloccata] = useState(false);
@@ -32,10 +40,13 @@ function Cancello({ chiudi }: { chiudi?: () => void }) {
 
   async function provaPin(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const pin = String(new FormData(e.currentTarget).get('pin'));
-    const { data, error } = await supabaseGenitore.rpc('verifica_pin', { p_pin: pin });
-    if (!error && data === true) return setSbloccata(true);
-    setErrore('PIN non giusto, oppure troppi tentativi: riprova tra qualche minuto.');
+    const form = e.currentTarget;
+    const pin = String(new FormData(form).get('pin'));
+    const { data, error } = await supabaseGenitore.rpc('controlla_pin', { p_pin: pin });
+    if (!error && data === 'ok') return setSbloccata(true);
+    form.reset();
+    // "PIN non giusto" solo quando è sbagliato davvero
+    setErrore(error ? ERRORE_SERVER : (MESSAGGI_PIN[data as string] ?? ERRORE_SERVER));
   }
 
   const torna = chiudi && <button className="secondario" onClick={chiudi}>Torna ad ACE</button>;

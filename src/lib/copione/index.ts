@@ -63,6 +63,8 @@ export const NOTIFICHE = {
   chiusura_domenica: 'Domenica sera: prepariamo la settimana',
   sollecito: '{n:Manca ancora una cosa:Mancano ancora # cose} per chiudere la giornata',
   genitori_riepilogo: 'Riepilogo della settimana di Lani: {chiavi:una chiave:# chiavi}',
+  genitori_foto: '{cosa} {materia}: foto pagine {pagine}',
+  genitori_foto_tante: '{n} richieste di foto nuove: le trovate in ACE',
 } as const;
 
 export type ChiaveNotifica = keyof typeof NOTIFICHE;
