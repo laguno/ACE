@@ -58,9 +58,15 @@ export type StatoForziere = 'lontano' | 'enigma' | 'mancano_chiavi' | 'aperto';
  * - Arrivata alla tappa, si apre se le chiavi totali raccolte bastano; altrimenti aspetta.
  * Le chiavi non si spendono: il numero sul lucchetto è un traguardo di chiavi totali.
  */
-export function statoForziere(n: number, passi: number, chiaviTotali: number): StatoForziere {
+/** Il forziere n di config-gioco.json (tappa, chiavi); errore se non esiste. */
+export function forziere(n: number) {
   const f = CONFIG.forzieri.find((x) => x.n === n);
   if (!f) throw new Error(`Forziere ${n} inesistente`);
+  return f;
+}
+
+export function statoForziere(n: number, passi: number, chiaviTotali: number): StatoForziere {
+  const f = forziere(n);
   const { tappeFatte } = posizione(passi);
   if (tappeFatte >= f.tappa) return chiaviTotali >= f.chiavi ? 'aperto' : 'mancano_chiavi';
   if (tappeFatte === f.tappa - 1) return 'enigma';
@@ -168,9 +174,9 @@ export interface SettimanaObbligatori {
 /** 0..3 chiavi, contate la domenica sera solo sulle cose obbligatorie. */
 export function chiaviSettimana(s: SettimanaObbligatori): number {
   if (s.passiPossibili <= 0) return 0;
-  if (s.passiFatti < 0.7 * s.passiPossibili) return 0;
+  if (s.passiFatti < CONFIG.chiavi_settimana.soglia_passi_prima * s.passiPossibili) return 0;
   if (s.note > 0) return 1;
-  if (s.cosePossibili > 0 && s.coseFatte >= 0.95 * s.cosePossibili) return 3;
+  if (s.cosePossibili > 0 && s.coseFatte >= CONFIG.chiavi_settimana.soglia_cose_terza * s.cosePossibili) return 3;
   return 2;
 }
 
@@ -391,7 +397,7 @@ export function prossimaRevisione(intervallo: number, esito: Esito, oggi: Date):
 // ---------------------------------------------------------------- conteggio della settimana
 
 /** Motivi dei movimenti che contano come cose obbligatorie (docs/02). */
-export const MOTIVI_OBBLIGATORI = ['compito', 'compito_rifatto', 'cartella', 'borsa', 'foglio', 'ripasso'] as const;
+const MOTIVI_OBBLIGATORI = ['compito', 'compito_rifatto', 'cartella', 'borsa', 'foglio', 'ripasso'] as const;
 
 /**
  * Cose obbligatorie possibili e fatte in una settimana, per le chiavi della domenica.

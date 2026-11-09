@@ -203,7 +203,9 @@
     "prima": "almeno 70% dei passi obbligatori possibili",
     "seconda": "in più nessuna nota (qualsiasi nota la toglie)",
     "terza": "in più almeno 95% delle cose obbligatorie fatte",
-    "conteggio": "domenica sera"
+    "conteggio": "domenica sera",
+    "soglia_passi_prima": 0.7,
+    "soglia_cose_terza": 0.95
   },
   "rimonta": {
     "ritardo_tappe": 1.5,
