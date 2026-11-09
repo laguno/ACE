@@ -36,7 +36,11 @@ Note sulle misure:
 
 - **Strumenti e misure** (ramo `misure`): ESLint, knip, copertura, axe e Lighthouse come comandi npm; schermate di prova condivise tra confronto, axe e Lighthouse (`e2e/casi.ts`).
 - **E. Enigmi** (ramo `enigmi-v4`): bozza v4 dopo le segnalazioni del signore (`91b145c`), in attesa del suo ok prima del salvataggio.
-- **A. Sicurezza** (ramo `audit-sicurezza`, `7337269`, `0925d2f`): mappa di tabelle, policy, funzioni e trigger; prova di attacco da Lani, genitore e anon; migrazione `0024`; accesso comune alle Edge Functions (`_shared/accesso.ts`, con prove); CSP e intestazioni su Vercel con prova senza violazioni; `npm run tipi:funzioni` (tsc sulle funzioni, 0 errori). `npm run prova:schema` da 70 a 239 controlli, tra cui una matrice per ogni tabella (chi inserisce, chi cancella, cosa vede anon) e l'elenco esatto delle funzioni chiamabili. `/security-review` sul ramo: nessuna vulnerabilità introdotta. Da applicare in produzione: migrazione, funzioni, merge (vedi 6).
+- **A. Sicurezza** (ramo `audit-sicurezza`, `7337269`, `0925d2f`): mappa di tabelle, policy, funzioni e trigger; prova di attacco da Lani, genitore e anon; migrazione `0024`; accesso comune alle Edge Functions (`_shared/accesso.ts`, con prove); CSP e intestazioni su Vercel con prova senza violazioni; `npm run tipi:funzioni` (tsc sulle funzioni, 0 errori). `npm run prova:schema` da 70 a 239 controlli, tra cui una matrice per ogni tabella (chi inserisce, chi cancella, cosa vede anon) e l'elenco esatto delle funzioni chiamabili. `/security-review` sul ramo: nessuna vulnerabilità introdotta. In produzione dal 9/11 sera.
+- **F. Qualità** (ramo `qualita`, unito: `843e595`): ESLint strict e knip a zero; 14 prove a proprietà con fast-check su `src/lib/regole`; tipi del database generati (`npm run tipi:db`, Supabase locale con Docker) e usati dal client dell'app; segreti delle funzioni da `_shared/ambiente.ts`; soglie delle chiavi lette da config.
+- **B. Simulatore** (ramo `simulatore`, unito: `4e859da`; lavoro di un sotto-agente su una copia separata): `npm run simula:anno`, cinque profili sull'anno intero con migrazioni vere e lo stesso codice delle funzioni (passi, chiavi, voti in `_shared/`); dettagli in sezione 4.
+- **C. Casi limite** (ramo `casi-limite`, unito: `ec346e9`): parser del calendario in `src/lib/calendario/ics.ts` con prove (ripetizioni, eccezioni, ora legale, fusi); `src/lib/casi-limite.test.ts` (ora legale, mezzanotte, vacanze, testi di Nuvola); `npm run test:server` (prove in UTC come le funzioni).
+- Supabase in locale (Docker): le 24 migrazioni si applicano pulite su un Postgres vero.
 
 ## 3. Bug trovati e corretti
 
@@ -53,15 +57,40 @@ Sicurezza (filone A), tutti con una prova in `prova:schema` o in `accesso.test.t
 10. Segreto del cron confrontato con `===`: ora a tempo costante.
 11. Sei errori di tipo nelle funzioni (`sync-nuvola`, `sync-calendario`), nessuno con effetto a runtime.
 
+Gioco e calendario (filoni B, C, F):
+12. **Tetto dei gesti di casa** (simulatore): due gesti nello stesso istante non si vedevano e il tetto di 6 passi al giorno saltava. Ora si conta sui passi già dati quel giorno.
+13. **Occorrenza modificata nel calendario**: un evento ripetuto cambiato per un giorno ("[LANI ASSENTE] …") teneva il titolo dell'evento principale, e la borsa veniva chiesta lo stesso.
+14. **Chiusura della sera con due impegni dopo le 17**: si chiudeva mezz'ora prima del primo in elenco, non del primo in ordine di ora.
+15. **`sposta()`** non girava sulle 24 ore (23:50 + 30 dava "24:20").
+16. **Prova del copione cieca**: la regex del singolare e plurale conteneva due caratteri backspace al posto di `\b` e non poteva fallire. I testi erano giusti.
+17. Soglie delle chiavi (70% e 95%) scritte nel codice invece che lette da `config-gioco.json` (stessi valori).
+
 ## 4. Simulatore
+
+`npm run simula:anno` (un minuto, seme fisso); sintesi in `docs/simulazione/README.md`, un `.md` e un `.csv` per profilo (passi per giorno e per motivo, formato della taratura). Nessun invariante violato in nessun profilo.
+
+| Profilo | Passi a fine anno | Tappa | Cima | Chiavi (media) | Forzieri |
+|---|---|---|---|---|---|
+| diligente 95% | 6444 | 25 | no | 69 (2,56) | 8 |
+| normale 80% | 6210 | 24 | no | 50 (1,85) | 8 |
+| altalenante | 5591 | 22 | no | 37 (1,37) | 7 |
+| crisi a gennaio, poi rimonta | 6080 | 24 | no | 50 (1,85) | 8 |
+| furbetta 70% | 6780 | 25 | no | 51 (1,89) | 8 |
+
+Fuori dal simulatore per ora: enigmi (la funzione usa l'IA), pagella, notifiche, video, dieci minuti, partite, R-Evolution (sprint 2). Il confronto con `scripts/simula_passi.py` lo fa Jarvis (Python non è su questo PC).
 
 ## 5. Da decidere
 
 1. **Quiz, flash card e video si fidano del telefono.** Le risposte giuste di un quiz, l'ora d'inizio di un giro di flash card e i secondi di video visti li manda l'app; il server controlla i tempi minimi e il tetto di 4 caselle al giorno, ma un quiz "tutto giusto" inventato vale i suoi passi. Le soluzioni dei quiz sono leggibili da Lani (servono all'app per correggere). Proposta: lasciare così per lo sprint 1 (serve un'app modificata, non un tocco sbagliato); se serve, correzione sul server (Lani manda le risposte, il server conta le giuste e le soluzioni non arrivano al telefono).
+2. **La cima non si raggiunge con le sole fonti dello sprint 1** (simulatore): all'80% si arriva alla tappa 24, al 95% alla 25. La taratura conta su dieci minuti, partite e R-Evolution (sprint 2). Proposta: tenere i numeri e confermare lo sprint 2 a gennaio; se slitta, alla taratura di dicembre abbassare le tappe rimaste o rallentare la bandierina fino a R-Evolution.
+3. **Lo stesso gesto due volte nello stesso giorno vale due volte** (mamma e papà segnano "letto fatto": +4). Proposta: un gesto per voce al giorno.
+4. **Spunta falsa e studio facoltativo**: una spunta falsa sblocca lo studio, e lo storno del giorno dopo non toglie quei passi. Nel simulatore la "furbetta" (70%) supera la diligente grazie alle flash card (1.780 passi contro 572 della normale). Proposta: con lo storno di un compito si stornano anche i passi di studio di quel giorno; oppure lo studio si conta la sera, a compiti confermati.
+5. **Lo studio facoltativo pesa molto**: 4 giri al giorno, weekend compresi, valgono circa un compito. Da guardare alla taratura di dicembre con i dati veri.
 
 ## 6. Rischi aperti prima del 23/11
 
 1. Filone A in produzione il 9/11 sera: migrazione `0024` e 9 funzioni pubblicate dal signore (il controllo automatico di Claude Code blocca i deploy), merge in `main` (`c4356e7`). Advisors da 79 a 69: in più `rls_enabled_no_policy` su `pin_genitori`, voluto (il PIN passa solo dalle funzioni). CORS e intestazioni verificati dal vivo (pagina di accesso senza violazioni della CSP). Manca la prova dell'app vera da un genitore: Oggi, area Genitori, una foto.
+2. **Funzioni da ripubblicare** dopo i filoni B, C, F (`main` a `4e859da`): `passi`, `chiavi`, `sync-nuvola` (moduli condivisi, tetto dei gesti), `sync-calendario` (parser nuovo), tutte (`_shared/ambiente.ts`). Comando del signore: `npx supabase functions deploy --use-api --yes`. Dopo: guardare `sync_log` del calendario all'ora successiva (conteggio, non righe).
 
 ## 7. Chiamate all'IA e skill
 
