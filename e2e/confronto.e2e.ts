@@ -160,7 +160,8 @@ async function affianca(sinistra: Buffer, destra: Buffer, uscita: string) {
 
 for (const [nome, caso] of Object.entries(CASI)) {
   test(`confronto ${nome}`, async ({ browser }) => {
-    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, locale: 'it-IT', timezoneId: 'Europe/Rome' });
+    // movimento ridotto: niente entrate né coriandoli, così le foto sono uguali a ogni giro (servono per i confronti prima e dopo)
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, locale: 'it-IT', timezoneId: 'Europe/Rome', reducedMotion: 'reduce' });
     // le bozze non hanno il meta viewport: in un contesto "telefono" verrebbero disegnate a 980 px e rimpicciolite
     const ctxBozza = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: false });
     const bozza = await fotoBozza(await ctxBozza.newPage(), caso.bozza);
@@ -178,7 +179,14 @@ for (const [nome, caso] of Object.entries(CASI)) {
       await expect(p.locator('main')).toBeVisible();
       if (caso.vai) await caso.vai(p);
       await p.waitForTimeout(700);
-      const app = await p.screenshot();
+      // immagini tutte caricate (anche quelle lazy dell'album) e font pronti
+      await p.evaluate(async () => {
+        document.querySelectorAll('img').forEach((i) => (i.loading = 'eager'));
+        await Promise.all([...document.images].map((i) => (i.complete ? null : new Promise((ok) => ((i.onload = ok), (i.onerror = ok))))));
+        await document.fonts.ready;
+      });
+      await p.waitForTimeout(300);
+      const app = await p.screenshot({ animations: 'disabled', caret: 'hide' });
       await affianca(bozza, app, `docs/confronto/${nome}-${larghezza}.png`);
       await p.close();
     }
