@@ -56,6 +56,18 @@ export function SenzaRete() {
   );
 }
 
+// Profilo dell'ultima volta (solo chi è: Lani o un genitore): la schermata parte senza aspettare il
+// database, che poi lo conferma. I dati restano protetti dalle regole del database, non da questo.
+const PROFILO = 'ace-profilo';
+function ricordato(uid: string): Profilo | undefined {
+  try {
+    const p = JSON.parse(localStorage.getItem(PROFILO) ?? 'null') as Profilo | null;
+    return p?.id === uid ? p : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export default function App() {
   // senza rete non si aspetta il rinnovo del gettone (Supabase lo riprova per una ventina di secondi)
   const [sessione, setSessione] = useState<Session | null | undefined>(() => (navigator.onLine ? undefined : (salvata() ?? undefined)));
@@ -69,7 +81,7 @@ export default function App() {
 
   const uid = sessione?.user.id;
   useEffect(() => {
-    setProfilo(undefined);
+    setProfilo(uid ? ricordato(uid) : undefined);
     if (!uid) return;
     rinnovaIscrizione().catch(() => {});
     supabase
@@ -78,7 +90,11 @@ export default function App() {
       .eq('id', uid)
       .maybeSingle()
       // senza rete e senza copia salvata non è "profilo da creare": si aspetta (resta la striscia)
-      .then(({ data, error }) => !error && setProfilo(data as Profilo | null));
+      .then(({ data, error }) => {
+        if (error) return;
+        setProfilo(data as Profilo | null);
+        localStorage.setItem(PROFILO, JSON.stringify(data));
+      });
   }, [uid]);
 
   if (sessione === undefined) return null;
