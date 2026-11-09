@@ -215,13 +215,14 @@ export function creaGestori(db: SupabaseClient) {
 
     async gesto(id) {
       const ge = await riga('gesti_casa', 'id', id);
-      const { data: prima, error } = await db
-        .from('gesti_casa')
-        .select('voce')
-        .eq('data', ge.data)
-        .lt('creato_il', ge.creato_il);
+      // tetto giornaliero sui passi dei gesti già dati quel giorno. Prima si contavano i gesti con
+      // creato_il minore: due gesti nello stesso istante (doppio tocco, due genitori insieme) non si
+      // vedevano e il tetto saltava (trovato dal simulatore dell'anno).
+      // ponytail: due chiamate davvero simultanee possono ancora leggere lo stesso totale; serve un
+      // lock per giorno se mai capita.
+      const { data: dati, error } = await db.from('movimenti_passi').select('passi').eq('motivo', 'gesto').eq('giorno', ge.data);
       if (error) throw error;
-      const passi = R.passiNuovoGesto((prima ?? []).map((p) => p.voce), ge.voce);
+      const passi = R.passiNuovoGesto((dati ?? []).reduce((s, m) => s + m.passi, 0), ge.voce);
       const esito = await registra('gesto', id, passi, R.giorno(ge.data), ge.dato_da);
       if (esito.passi) {
         const chi = await riga('profili', 'id', ge.dato_da, 'nome');

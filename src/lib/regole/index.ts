@@ -326,9 +326,13 @@ export function videoValido(completo: boolean, secondiVisti: number | null, dura
 
 export type VoceGesto = keyof typeof P.gesti_casa.voci;
 
-/** Passi di un nuovo gesto di casa, tenendo conto di quelli già dati oggi e del tetto giornaliero. */
-export function passiNuovoGesto(giaOggi: VoceGesto[], voce: VoceGesto): number {
-  return passiGestiCasa([...giaOggi, voce]) - passiGestiCasa(giaOggi);
+/**
+ * Passi di un nuovo gesto di casa dati i passi dei gesti già registrati oggi, entro il tetto
+ * giornaliero. Dai passi già dati, non dall'elenco dei gesti "di prima": due gesti nello stesso
+ * istante non si vedevano e il tetto saltava (simulatore dell'anno, 9/11).
+ */
+export function passiNuovoGesto(passiGiaDatiOggi: number, voce: VoceGesto): number {
+  return Math.min(passiGestiCasa([voce]), Math.max(0, P.gesti_casa.tetto_giornaliero - passiGiaDatiOggi));
 }
 
 export type TipoSgridata = 'bagno' | 'antisportivo' | 'balla';
