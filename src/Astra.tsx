@@ -113,7 +113,7 @@ export default function Astra({ apri }: { apri: (pagina: 'Figurina' | 'Album') =
           {dati.settimana !== null ? (
             <span className="chiavi-settimana">
               <small>Chiavi della settimana</small>
-              <span aria-label={`Chiavi dell'ultima settimana: ${dati.settimana} su 3`}>
+              <span role="img" aria-label={`Chiavi dell'ultima settimana: ${dati.settimana} su 3`}>
                 {[1, 2, 3].map((k) => (
                   <img key={k} src={img('oggetti', k <= (dati.settimana ?? 0) ? 'chiave-piena' : 'chiave-vuota')} alt="" width={30} height={30} />
                 ))}
