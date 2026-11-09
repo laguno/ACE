@@ -24,10 +24,10 @@ export function oraRoma(istante: string): string {
   );
 }
 
-/** "HH:MM" ± minuti. */
+/** "HH:MM" ± minuti, sull'orologio di 24 ore (23:50 + 30 = 00:20). */
 export function sposta(ora: string, minuti: number): string {
   const [h, m] = ora.split(':').map(Number);
-  const t = h * 60 + m + minuti;
+  const t = (((h * 60 + m + minuti) % 1440) + 1440) % 1440;
   return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`;
 }
 
@@ -47,7 +47,8 @@ export function oraChiusura(
   const tardi = impegniDiOggi
     .filter((i) => tipoImpegno(i.titolo) !== 'famiglia')
     .map((i) => oraRoma(i.inizio))
-    .find((o) => o >= '17:00');
+    .sort()
+    .find((o) => o >= '17:00'); // il primo impegno della sera, anche se nel calendario viene dopo
   if (tardi) return sposta(tardi, -30);
   return base;
 }
