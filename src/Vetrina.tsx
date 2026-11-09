@@ -3,6 +3,8 @@ import { Sticker } from './kit';
 import { Contapassi } from './Contapassi';
 import { MOMENTO_DEL_POPUP } from './Frase';
 import FRASI from '../data/frasi.json' with { type: 'json' };
+import TIPI from '../data/enigmi.json' with { type: 'json' };
+import { Biglietto } from './Biglietto';
 import * as K from './lib/copione';
 import * as R from './lib/regole';
 import { PopupVista, type Popup } from './Popup';
@@ -167,6 +169,24 @@ export default function Vetrina() {
           </ul>
         </div>
       ))}
+
+      <div className="carta">
+        <h2>Enigmi dei forzieri</h2>
+        <p className="nota">
+          Un tipo per forziere, sempre più difficili. Esempi con premi inventati; l'aiutino compare a Lani dopo il primo tentativo sbagliato.
+        </p>
+        <div className="vetrina-enigmi">
+          {TIPI.tipi.map((t) => (
+            <details key={t.forziere}>
+              <summary>
+                {t.forziere === 9 ? 'Cima' : `Forziere ${t.forziere}`}: {t.nome}
+              </summary>
+              <Biglietto testo={t.esempio.enigma} aiutino={t.esempio.aiutino} />
+              <p className="nota">Esempio per: {t.esempio.premio}. Risposte accettate: {t.esempio.soluzione}.</p>
+            </details>
+          ))}
+        </div>
+      </div>
 
       <div className="carta">
         <h2>Regole dello studio</h2>

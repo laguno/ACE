@@ -372,7 +372,11 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .forziere.enigma img { filter: drop-shadow(0 0 8px var(--burro)); }
 .album-fluttuante { position: fixed; z-index: 4; right: max(16px, calc((100% - 430px) / 2 + 16px)); bottom: calc(92px + env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 6px; min-height: 48px; padding: 0 16px 0 10px; border-radius: 999px; background: #fff; border: 3px solid var(--rosa-bordo); box-shadow: var(--ombra-alta); color: var(--testo); font: 800 14px Nunito, sans-serif; }
 .scheda-forziere { justify-items: center; text-align: center; }
-.biglietto { white-space: pre-line; padding: 16px; border-radius: 16px; background: var(--carta-gialla); text-align: left; font-style: italic; }
+.biglietto { display: grid; gap: 12px; padding: 16px; border-radius: 16px; background: var(--carta-gialla); text-align: left; }
+.biglietto p { margin: 0; white-space: pre-line; font-style: italic; line-height: 1.45; }
+/* griglie, tabelle e striscia: larghezza fissa, 13 px stanno in 25 colonne anche a 360 px (carta di 296 px) */
+.biglietto-blocco { margin: 0; padding: 8px 10px; border-radius: 12px; background: #fff; border: 2px dashed var(--burro); font: 700 13px/1.5 ui-monospace, 'SF Mono', Menlo, Consolas, 'Roboto Mono', monospace; color: var(--testo); white-space: pre-wrap; overflow-wrap: anywhere; }
+.biglietto-aiutino { padding: 8px 12px; border-radius: 12px; background: var(--rosa); font-style: normal !important; }
 
 /* Figurina e Album (bozze) */
 .figurina-pagina .figurina { display: grid; padding: 0; overflow: hidden; gap: 0; border: 3px solid var(--rosa-bordo); background: #fff; text-align: left; justify-items: stretch; }
@@ -486,6 +490,11 @@ dialog.velo:focus { outline: none; }
 .vetrina .secondario.compatto { margin: 0; align-self: center; }
 .vetrina li > .vetrina-saldo { flex: none; flex-direction: row; align-items: center; gap: 4px; padding: 2px 10px 2px 4px; }
 .vetrina-saldo img { width: 24px; height: 24px; }
+.vetrina-enigmi { display: grid; gap: 8px; }
+.vetrina-enigmi details { border-top: 2px dashed var(--lilla); padding-top: 8px; }
+.vetrina-enigmi details:first-child { border-top: 0; }
+.vetrina-enigmi summary { min-height: 44px; display: flex; align-items: center; font-weight: 800; cursor: pointer; }
+.vetrina-enigmi .nota { margin-top: 8px; }
 .vetrina .vetrina-saldo b { font: 800 18px/1 'Baloo 2', Nunito, sans-serif; color: var(--accento); }
 .notifiche-anteprima li { border-top: 0; padding: 4px 0; }
 .notifiche-anteprima li > span { padding: 12px; border-radius: 16px; background: var(--lilla); font-size: 14px; }

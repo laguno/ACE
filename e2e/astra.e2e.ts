@@ -59,6 +59,27 @@ test('forziere con enigma: risposta giusta, +20', async ({ page }) => {
   await expect(page.getByText('Indovinato! +20 passi.')).toBeVisible();
 });
 
+test('biglietto con griglia: blocco a larghezza fissa dentro i 360 px, aiutino dopo un errore', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 780 });
+  await page.clock.setFixedTime(LUNEDI);
+  const d = dati();
+  d.forzieri_lani[0].enigma = 'Colonna e riga, come a battaglia navale.\n```\n   A B C D E F\n1  H U R N A A\n2  K K F P Q D\n```\nA1 B1\nUltima riga.';
+  await finto(page, d, { enigma: { giusta: false, rimasti: 2, passi: 0, aiutino: 'Li porti in partita.' } });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Astra' }).click();
+  await page.getByRole('button', { name: 'Forziere 1' }).click();
+  const blocco = page.locator('.biglietto-blocco');
+  await expect(blocco).toContainText('1  H U R N A A');
+  expect(await blocco.evaluate((el) => getComputedStyle(el).fontFamily)).toMatch(/mono|Menlo|Consolas/i);
+  expect(await blocco.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
+  await expect(page.locator('.biglietto-aiutino')).toHaveCount(0);
+  await page.getByLabel("Cosa c'è nel forziere?").fill('un pallone');
+  await page.getByRole('button', { name: 'Prova' }).click();
+  await expect(page.getByText('Non è questo. Ti restano 2 tentativi.')).toBeVisible();
+  await expect(page.locator('.biglietto-aiutino')).toHaveText('Aiutino: Li porti in partita.');
+  await page.locator('.biglietto').screenshot({ path: 'e2e/risultati/biglietto-360.png' });
+});
+
 test('arrivata senza chiavi: lucchetto', async ({ page }) => {
   await page.clock.setFixedTime(LUNEDI);
   await finto(page, dati(420, 1));

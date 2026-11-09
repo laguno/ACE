@@ -112,6 +112,16 @@ await fallisce('anon non chiama frase_del_giorno', null, `select * from frase_de
 await come(null, `delete from frasi where di_famiglia`);
 await come(null, `update frasi set ultima_volta = null, ultimo_momento = null where ultima_volta is not null`);
 
+// enigmi a tipi: aiutino dopo il primo errore, premio fermo quando l'enigma è comparso
+await come(PAPA, `update forzieri set premio = 'Bici', enigma = 'Due ruote', soluzione = 'bici', aiutino = 'Ha i pedali.', parola = 'BICI' where n = 3`);
+verifica('premio di un forziere chiuso: si cambia', (await val(null, 'select premio from forzieri where n = 3')) === 'Bici');
+await come(null, `update forzieri set stato = 'enigma' where n = 3`);
+verifica('aiutino nascosto prima del primo tentativo', (await val(LANI, 'select aiutino from forzieri_lani where n = 3')) === null);
+await come(null, `update forzieri set tentativi_enigma = 1 where n = 3`);
+verifica('aiutino visibile dopo il primo tentativo sbagliato', (await val(LANI, 'select aiutino from forzieri_lani where n = 3')) === 'Ha i pedali.');
+await fallisce('premio fermo a enigma comparso (anche per il genitore)', PAPA, `update forzieri set premio = 'Altro' where n = 3`);
+await fallisce('enigma fermo a enigma comparso (anche per il server)', null, `update forzieri set enigma = 'nuovo' where n = 3`);
+
 // richieste di foto: una per compito
 await come(null, `insert into richieste_foto (motivo, pagine, compito_id) values ('compito', '40', '${COMPITO}')`);
 await fallisce('una sola richiesta di foto per compito', null, `insert into richieste_foto (motivo, pagine, compito_id) values ('compito', '41', '${COMPITO}')`);

@@ -6,6 +6,7 @@ import * as R from './lib/regole';
 import { installata } from './Benvenuta';
 import { GIORNI, MESI } from './spunte';
 import Vetrina from './Vetrina';
+import { Biglietto } from './Biglietto';
 import { Fotografa, SELECT_RICHIESTE, descrizione, type RichiestaFoto } from './Foto';
 
 // Area genitori — design/Genitori.html. Tutto passa dal client del genitore (sul suo telefono la
@@ -317,12 +318,12 @@ function Settimana({ client, passi, avvisa }: Props) {
   );
 }
 
-type Forziere = { n: number; premio: string | null; enigma: string | null; soluzione: string | null; stato: string };
+type Forziere = { n: number; premio: string | null; enigma: string | null; soluzione: string | null; aiutino: string | null; parola: string | null; stato: string };
 
 function Premi({ client, avvisa }: Props) {
   const [forzieri, setForzieri] = useState<Forziere[]>();
   const [lavoro, setLavoro] = useState<number>();
-  const carica = () => client.from('forzieri').select('n, premio, enigma, soluzione, stato').order('n').then(({ data }) => setForzieri(data ?? []));
+  const carica = () => client.from('forzieri').select('n, premio, enigma, soluzione, aiutino, parola, stato').order('n').then(({ data }) => setForzieri(data ?? []));
   useEffect(() => {
     carica();
   }, []);
@@ -337,9 +338,16 @@ function Premi({ client, avvisa }: Props) {
       setLavoro(undefined);
       return avvisa('Premio non salvato.');
     }
-    const { data } = await client.functions.invoke('enigma', { body: { azione: 'genera', n } });
+    const { data, error: e2 } = await client.functions.invoke('enigma', { body: { azione: 'genera', n } });
     setLavoro(undefined);
-    avvisa(data?.enigma ? `Forziere ${n}: premio salvato ed enigma pronto.` : `Forziere ${n}: premio salvato; l'enigma non è riuscito, riprova.`);
+    // la funzione spiega perché non è riuscito (per la cima: prima gli enigmi dei forzieri 1-8)
+    const perche = e2 && 'context' in e2 ? ((await (e2.context as Response).json().catch(() => null))?.errore as string | undefined) : undefined;
+    avvisa(data?.enigma ? `Forziere ${n}: premio salvato ed enigma pronto.` : `Forziere ${n}: premio salvato; l'enigma non è riuscito${perche ? ` (${perche})` : ''}, riprova.`);
+    // cambiando un premio cambia la sua parola chiave: la cima va rifatta
+    if (data?.enigma && n < 9) {
+      const cima = forzieri?.find((x) => x.n === 9);
+      if (cima?.enigma && cima.stato === 'chiuso') avvisa(`Forziere ${n}: enigma pronto. Rifate anche l'enigma della cima: usa le parole dei forzieri.`);
+    }
     carica();
   }
 
@@ -380,8 +388,10 @@ function Premi({ client, avvisa }: Props) {
             {f.enigma && (
               <details>
                 <summary>Enigma e soluzione</summary>
-                <p className="biglietto">{f.enigma}</p>
+                <Biglietto testo={f.enigma} />
                 <p className="nota">Soluzione: {f.soluzione}</p>
+                {f.aiutino && <p className="nota">Aiutino (dopo il primo errore): {f.aiutino}</p>}
+                {f.parola && <p className="nota">Parola chiave per la cima: {f.parola}</p>}
               </details>
             )}
             {f.stato === 'aperto' && (

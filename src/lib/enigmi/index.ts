@@ -176,3 +176,82 @@ export function cima(parole: string[], candidate: string[]): { parola: string; m
 /** Righe della tabella della cima, per il biglietto. */
 export const righeCima = (mappa: { forziere: number; posizione: number }[]) =>
   mappa.map((m, i) => `${String(i + 1).padStart(2)}ª lettera: forziere ${m.forziere}, la ${m.posizione}ª`);
+
+// ---------------------------------------------------------------- composizione del biglietto
+
+export type TipoEnigma = 'indovinello' | 'codice' | 'acrostico' | 'matematico' | 'anagramma' | 'griglia' | 'logica' | 'rebus' | 'cima';
+/** Il tipo di ogni forziere, in ordine (data/enigmi.json). */
+export const TIPO_DEL_FORZIERE: TipoEnigma[] = ['indovinello', 'codice', 'acrostico', 'matematico', 'anagramma', 'griglia', 'logica', 'rebus', 'cima'];
+
+/** Quello che scrive l'IA, secondo il tipo; sempre con soluzione, aiutino e parola chiave. */
+export type Uscita = { soluzione: string; aiutino: string; parola: string } & Partial<{
+  enigma: string; // indovinello, logica, rebus
+  presentazione: string; messaggio: string; domanda: string; // codice
+  nascosta: string; righe: string[]; // acrostico
+  parole: string[]; finale: string; // matematico, griglia (finale), cima (finale)
+  voci: { parola: string; indizio: string }[]; // anagramma
+  candidate: string[]; // cima
+}>;
+
+export type Biglietto = { enigma: string; soluzione: string; aiutino: string; parola: string };
+const B = '```';
+const blocco = (testo: string) => `${B}\n${testo}\n${B}`;
+
+/**
+ * Compone il biglietto dal testo dell'IA: le parti meccaniche le fa il codice e le ricontrolla.
+ * Lancia un errore se l'uscita non va (acrostico che non torna, cima impossibile...): si rigenera.
+ * paroleForzieri serve solo alla cima (parole chiave dei forzieri 1-8).
+ */
+export function componi(tipo: TipoEnigma, u: Uscita, rng: Rng, paroleForzieri: string[] = []): Biglietto {
+  const parola = soloLettere(u.parola);
+  const fine = (enigma: string, aiutino = u.aiutino): Biglietto => ({ enigma: enigma.trim(), soluzione: u.soluzione.trim(), aiutino: aiutino.trim(), parola });
+  if (!parola) throw new Error('manca la parola chiave');
+  switch (tipo) {
+    case 'indovinello':
+    case 'logica':
+    case 'rebus':
+      if (!u.enigma?.trim()) throw new Error('manca il testo');
+      return fine(u.enigma);
+    case 'codice': {
+      const msg = pulisci(u.messaggio ?? '').trim();
+      if (soloLettere(msg).length < 15) throw new Error('messaggio troppo corto');
+      return fine(`${u.presentazione}\n${blocco(cifra(msg))}\n${blocco(striscia())}\n${u.domanda}`);
+    }
+    case 'acrostico': {
+      const righe = (u.righe ?? []).map((r) => r.trim()).filter(Boolean);
+      if (iniziali(righe) !== soloLettere(u.nascosta ?? '')) throw new Error(`le iniziali fanno ${iniziali(righe)}, non ${u.nascosta}`);
+      return fine(righe.join('\n'));
+    }
+    case 'matematico': {
+      const parole = (u.parole ?? []).map(soloLettere).filter(Boolean);
+      if (!parole.length || parole.length > 2) throw new Error('servono una o due parole');
+      let i = 0;
+      const pezzi = parole.map((p, k) => {
+        const righe = calcoli(p, rng).map((c) => `${++i}) ${c}`);
+        return (parole.length > 1 ? [k ? 'Seconda parola' : 'Prima parola', ...righe] : righe).join('\n');
+      });
+      const intro = `A=1, B=2, C=3 ... Z=26. Risolvi ogni calcolo e cambia il risultato in una lettera${parole.length > 1 ? ': escono due parole' : ''}.`;
+      return fine(`${intro}\n${blocco(pezzi.join('\n\n'))}\n${u.finale}`);
+    }
+    case 'anagramma': {
+      const voci = u.voci ?? [];
+      if (voci.length < 2 || voci.length > 4) throw new Error('servono da 2 a 4 parole');
+      const mescolate = voci.map((v, k) => `${k + 1}) ${anagramma(v.parola, rng)}`);
+      const indizi = voci.map((v, k) => `${k + 1}) ${v.indizio.trim()}`);
+      return fine(`Rimetti in ordine le lettere: ${['', '', 'due', 'tre', 'quattro'][voci.length]} parole.\n${blocco(mescolate.join('\n'))}\n${indizi.join('\n')}${u.finale ? `\n${u.finale}` : ''}`);
+    }
+    case 'griglia': {
+      const g = griglia(u.messaggio ?? '', rng, 6);
+      if (leggiGriglia(g.griglia, g.coordinate) !== pulisci(u.messaggio ?? '').split(/[^A-Z]+/).filter(Boolean).join(' ')) throw new Error('griglia che non torna');
+      const coord = g.coordinate.map((p) => p.join(' ')).join(' / ');
+      return fine(`Colonna e riga, come a battaglia navale: B5 è la lettera nella colonna B, riga 5.\n${blocco(g.griglia)}\n${coord}\n${u.finale}`);
+    }
+    case 'cima': {
+      if (paroleForzieri.length !== 8 || paroleForzieri.some((p) => !soloLettere(p))) throw new Error('servono le parole chiave dei forzieri 1-8');
+      const c = cima(paroleForzieri, u.candidate ?? []);
+      if (!c) throw new Error('nessuna parola candidata si compone con le lettere dei forzieri');
+      const intro = `Prendi la parola chiave del premio di ogni forziere (la cosa principale: per il forziere 1, ${soloLettere(paroleForzieri[0])}). Da ognuna una lettera, e trovi la parola della cima.`;
+      return fine(`${intro}\n${blocco(righeCima(c.mappa).join('\n'))}\n${u.finale}`, `Le parole chiave sono: ${paroleForzieri.map(soloLettere).join(', ')}.`);
+    }
+  }
+}

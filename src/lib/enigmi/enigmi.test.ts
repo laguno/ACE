@@ -96,3 +96,45 @@ describe('data/enigmi.json: gli esempi tornano', () => {
     expect(lettere.join('')).toBe(e.parola);
   });
 });
+
+describe('componi: il biglietto dal testo dell’IA', () => {
+  const base = { soluzione: 'x / y', aiutino: 'Un aiuto.', parola: 'Cinema' };
+  const rng = () => E.casuale(5);
+  it('codice: cifra il messaggio e aggiunge la striscia', () => {
+    const b = E.componi('codice', { ...base, presentazione: 'Un messaggio.', messaggio: 'Luci spente e schermo gigante', domanda: 'Cosa c’è?' }, rng());
+    expect(b.enigma).toContain('MVDJ TQFOUF F TDIFSNP HJHBOUF');
+    expect(b.enigma).toContain(E.striscia());
+    expect(b.parola).toBe('CINEMA');
+  });
+  it('acrostico: rifiuta le iniziali sbagliate', () => {
+    expect(() => E.componi('acrostico', { ...base, nascosta: 'ONDE', righe: ['Ogni', 'Nel', 'Di', 'Alla'] }, rng())).toThrow();
+    expect(E.componi('acrostico', { ...base, nascosta: 'ONDE', righe: ['Ogni', 'Nel', 'Di', 'E'] }, rng()).enigma.split('\n')).toHaveLength(4);
+  });
+  it('matematico: due parole, calcoli numerati che tornano', () => {
+    const b = E.componi('matematico', { ...base, parole: ['crema', 'viso'], finale: 'Fine.' }, rng());
+    const calcoli = b.enigma.split('\n').filter((r) => /^\d+\) /.test(r)).map((r) => r.replace(/^\d+\) /, ''));
+    expect(calcoli.map((c) => String.fromCharCode(64 + E.risolviCalcolo(c))).join('')).toBe('CREMAVISO');
+    expect(b.enigma).toContain('Seconda parola');
+  });
+  it('anagramma: lettere mescolate e indizi numerati', () => {
+    const b = E.componi('anagramma', { ...base, voci: [{ parola: 'tasca', indizio: 'Mani.' }, { parola: 'felpa', indizio: 'Calda.' }] }, rng());
+    expect(b.enigma).toContain('due parole');
+    expect(b.enigma).toContain('2) Calda.');
+  });
+  it('griglia: coordinate che rileggono il messaggio', () => {
+    const b = E.componi('griglia', { ...base, messaggio: 'Corti per il muro', finale: 'Fine.' }, rng());
+    const [, g, resto] = b.enigma.split('```');
+    const coordinate = resto.trim().split('\n')[0].split(' / ').map((p) => p.split(' '));
+    expect(E.leggiGriglia(g.trim(), coordinate)).toBe('CORTI PER IL MURO');
+  });
+  it('cima: tabella e aiutino con le parole dei forzieri; senza parole si ferma', () => {
+    const parole = ['PIGIAMA', 'CINEMA', 'PANTALONCINI', 'SKINCARE', 'FELPA', 'PALLAVOLO', 'PARTITA', 'LIBRERIA'];
+    const b = E.componi('cima', { ...base, parola: 'Gardaland', candidate: ['LUNAPARK', 'MONTAGNE'], finale: 'Russe.' }, rng(), parole);
+    expect(b.enigma).toContain('1ª lettera: forziere');
+    expect(b.aiutino).toContain('PIGIAMA, CINEMA');
+    expect(() => E.componi('cima', { ...base, candidate: ['MONTAGNE'] }, rng(), [])).toThrow();
+  });
+  it('indovinello senza testo: errore', () => {
+    expect(() => E.componi('indovinello', { ...base }, rng())).toThrow();
+  });
+});
