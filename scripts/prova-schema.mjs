@@ -96,7 +96,16 @@ await come(null, `delete from movimenti_passi where motivo = 'prova_saldo'`);
 await fallisce('anon non legge i forzieri', null, 'select * from forzieri_lani', 'anon');
 
 // Genitori, PIN
+verifica('controlla_pin: nessun PIN impostato', (await val(PAPA, `select controlla_pin('2468')`)) === 'manca');
 await come(PAPA, `select imposta_pin('2468')`);
+verifica('controlla_pin: giusto', (await val(PAPA, `select controlla_pin('2468')`)) === 'ok');
+verifica('controlla_pin: sbagliato', (await val(PAPA, `select controlla_pin('1111')`)) === 'sbagliato');
+for (let i = 0; i < 3; i++) await come(PAPA, `select controlla_pin('0000')`);
+verifica('controlla_pin: al quinto errore bloccato', (await val(PAPA, `select controlla_pin('0000')`)) === 'bloccato');
+verifica('controlla_pin: bloccato anche col PIN giusto', (await val(PAPA, `select controlla_pin('2468')`)) === 'bloccato');
+verifica('controlla_pin: Lani no', (await val(LANI, `select controlla_pin('2468')`)) === 'no');
+await fallisce('anon non chiama controlla_pin', null, `select controlla_pin('2468')`, 'anon');
+await come(null, `update pin_genitori set errori = 0, bloccato_fino = null where id`);
 verifica('PIN giusto', (await val(PAPA, `select verifica_pin('2468')`)) === true);
 verifica('PIN sbagliato', (await val(PAPA, `select verifica_pin('1111')`)) === false);
 verifica('solo hash salvato', !(await val(null, 'select hash from pin_genitori')).includes('2468'));
