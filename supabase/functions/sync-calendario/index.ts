@@ -6,54 +6,10 @@ import { apriRegistro, dbServizio } from '../_shared/ambiente.ts';
 import ICAL from 'npm:ical.js@2.1.0';
 import { avvisaSeFallita } from '../_shared/push.ts';
 import { chiChiama, cronOGenitore } from '../_shared/accesso.ts';
+import { impegni } from '../../../src/lib/calendario/ics.ts';
 
 const db = dbServizio();
 const GIORNO = 864e5;
-
-// ponytail: un impegno di un giorno intero si salva a mezzanotte UTC con tutto_il_giorno = true.
-type Impegno = { id: string; inizio: string; fine: string | null; titolo: string; tutto_il_giorno: boolean; aggiornato_il: string };
-
-function impegni(testo: string, da: Date, a: Date): Impegno[] {
-  const cal = new ICAL.Component(ICAL.parse(testo));
-  for (const tz of cal.getAllSubcomponents('vtimezone')) ICAL.TimezoneService.register(tz);
-
-  // le eccezioni (un'occorrenza spostata) hanno lo stesso UID e RECURRENCE-ID
-  const eventi = cal.getAllSubcomponents('vevent').map((v: ICAL.Component) => new ICAL.Event(v));
-  const principali = eventi.filter((e: ICAL.Event) => !e.isRecurrenceException());
-  for (const ecc of eventi.filter((e: ICAL.Event) => e.isRecurrenceException()))
-    principali.find((p: ICAL.Event) => p.uid === ecc.uid)?.relateException(ecc);
-
-  const ora = new Date().toISOString();
-  const fuori: Impegno[] = [];
-  for (const e of principali) {
-    const titolo = (e.summary ?? '').trim();
-    if (!titolo || /privat/i.test(titolo)) continue;
-    const aggiungi = (inizio: ICAL.Time, fine: ICAL.Time | null, chiave: string) => {
-      const i = inizio.toJSDate();
-      if (i < da || i > a) return;
-      fuori.push({
-        id: chiave,
-        inizio: i.toISOString(),
-        fine: fine?.toJSDate().toISOString() ?? null,
-        titolo,
-        tutto_il_giorno: inizio.isDate,
-        aggiornato_il: ora,
-      });
-    };
-    if (!e.isRecurring()) {
-      aggiungi(e.startDate, e.endDate, e.uid);
-      continue;
-    }
-    const it = e.iterator();
-    for (let t = it.next(), n = 0; t && n < 500; t = it.next(), n++) {
-      if (t.toJSDate() > a) break;
-      const d = e.getOccurrenceDetails(t);
-      if (d.item.summary && /privat/i.test(d.item.summary)) continue;
-      aggiungi(d.startDate, d.endDate, `${e.uid}:${t.toString()}`);
-    }
-  }
-  return fuori;
-}
 
 const autorizzato = async (req: Request) => cronOGenitore(await chiChiama(db, req, Deno.env.get('CRON_SEGRETO')));
 
@@ -69,7 +25,7 @@ Deno.serve(async (req) => {
     const r = await fetch(Deno.env.get('GOOGLE_CALENDAR_ICS_URL') ?? '');
     if (!r.ok) throw new Error(`calendario: ${r.status}`);
     const da = new Date(Date.now() - GIORNO);
-    const righe = impegni(await r.text(), da, new Date(Date.now() + 14 * GIORNO));
+    const righe = impegni(ICAL, await r.text(), da, new Date(Date.now() + 14 * GIORNO));
     if (righe.length) {
       const { error } = await db.from('impegni_famiglia').upsert(righe);
       if (error) throw new Error(`impegni_famiglia: ${error.message}`);
