@@ -2,12 +2,13 @@
 // Le iscrizioni scadute (404/410) si cancellano.
 import type { SupabaseClient } from 'npm:@supabase/supabase-js@2';
 import webpush from 'npm:web-push@3.6.7';
+import { ambiente } from './ambiente.ts';
 
 let pronto = false;
 
 export async function inviaPush(db: SupabaseClient, ruolo: 'lani' | 'genitore', messaggio: { titolo: string; testo: string; tipo: string }) {
   if (!pronto) {
-    webpush.setVapidDetails(Deno.env.get('VAPID_SUBJECT')!, Deno.env.get('VAPID_PUBLIC_KEY')!, Deno.env.get('VAPID_PRIVATE_KEY')!);
+    webpush.setVapidDetails(ambiente('VAPID_SUBJECT'), ambiente('VAPID_PUBLIC_KEY'), ambiente('VAPID_PRIVATE_KEY'));
     pronto = true;
   }
   const { data: profili } = await db.from('profili').select('id').eq('ruolo', ruolo);

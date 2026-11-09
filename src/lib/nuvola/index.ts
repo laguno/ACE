@@ -1,8 +1,6 @@
 // Normalizzazione dei dati di Nuvola (api-studente/v1), funzioni pure: le usa sync-nuvola.
 // Forme delle risposte mappate l'8 novembre 2026 dal pannello di rete.
 
-export type Riga = Record<string, unknown>;
-
 /** 'ARTE E IMMAGINE' -> 'arte_e_immagine', "ATTIVITA' PERSONALIZZATA" -> 'attivita_personalizzata'. */
 export function materiaId(nome: string): string {
   return nome
@@ -30,7 +28,7 @@ export function materia(nome: string) {
 }
 
 /** '2026-11-10T00:00:00+01:00' -> '2026-11-10' (la data è già quella italiana). */
-export const giorno = (s: string) => s.slice(0, 10);
+const giorno = (s: string) => s.slice(0, 10);
 
 /** '7½' -> 7.5, '6+' -> 6.25, '7-' -> 6.75, '8' -> 8; giudizi ('Buono') -> null. */
 export function votoNumero(s: string): number | null {
@@ -83,8 +81,9 @@ export function mappaDocenti(righe: { docente?: string; materia?: string }[]): M
   const m = new Map<string, Set<string>>();
   for (const r of righe) {
     if (!r.docente || !r.materia) continue;
-    if (!m.has(r.docente)) m.set(r.docente, new Set());
-    m.get(r.docente)!.add(materiaId(r.materia));
+    const materie = m.get(r.docente) ?? new Set<string>();
+    materie.add(materiaId(r.materia));
+    m.set(r.docente, materie);
   }
   return m;
 }
@@ -192,9 +191,9 @@ export function materieDelGiorno<T extends { data: string; ora: number; materia_
   if (!date.length) return [];
   const ultima = date.reduce((a, b) => (a > b ? a : b));
   const ids = righe
-    .filter((r) => r.data === ultima && r.materia_id)
+    .filter((r): r is typeof r & { materia_id: string } => r.data === ultima && !!r.materia_id)
     .sort((a, b) => a.ora - b.ora)
-    .map((r) => r.materia_id!);
+    .map((r) => r.materia_id);
   return [...new Set(ids)];
 }
 

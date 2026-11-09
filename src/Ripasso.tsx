@@ -37,7 +37,7 @@ function TestaStudio({ titolo, n, fatte, di, etichetta, chiudi }: { titolo: stri
 }
 
 /** Sessione di ripasso fatta: segna l'ora (la timbra il server) e chiede i passi. */
-export async function sessioneFatta(id: string): Promise<number> {
+async function sessioneFatta(id: string): Promise<number> {
   const { error } = await supabase.from('sessioni_ripasso').update({ fatta_il: adesso() }).eq('id', id);
   return error ? 0 : passi('ripasso', id);
 }

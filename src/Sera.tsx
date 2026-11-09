@@ -99,7 +99,7 @@ export default function Sera() {
     ]).then(([l, m, i, imp, vd]) => {
       setVerificaDomani((vd.count ?? 0) > 0);
       const nomi = new Map((m.data ?? []).map((x) => [x.id, x.nome]));
-      const materiale: string[] = i.data?.valore?.[domani.getDay()] ?? [];
+      const materiale = (i.data?.valore as string[][] | undefined)?.[domani.getDay()] ?? [];
       setOrario([...N.materieDelGiorno(l.data ?? [], domani.getDay()).map((id) => nomi.get(id) ?? id), ...materiale]);
       setImpegni(imp.data ?? []);
     });
@@ -144,7 +144,7 @@ export default function Sera() {
     spunta(
       campo,
       () => setSerata((s) => ({ ...s, [campo]: true })),
-      () => supabase.from('serate').upsert({ data: R.iso(oggi), [`${campo}_il`]: adesso() }),
+      () => supabase.from('serate').upsert({ data: R.iso(oggi), ...(campo === 'cartella' ? { cartella_il: adesso() } : { borsa_il: adesso() }) }),
       'serata',
       R.iso(oggi),
     );

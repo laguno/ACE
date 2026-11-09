@@ -29,8 +29,8 @@ export function useGiornata() {
       supabase.from('impostazioni').select('chiave, valore').in('chiave', ['ora_chiusura', 'ora_chiusura_breve']),
     ]).then(([impegni, domani, i]) => {
       const imp = Object.fromEntries((i.data ?? []).map((r) => [r.chiave, r.valore]));
-      const base: string | null = imp.ora_chiusura?.[oggi.getDay()] ?? null;
-      const breve = C.partitaTra(domani) ? (imp.ora_chiusura_breve ?? null) : null;
+      const base = (imp.ora_chiusura as (string | null)[] | undefined)?.[oggi.getDay()] ?? null;
+      const breve = C.partitaTra(domani) ? ((imp.ora_chiusura_breve as string | null | undefined) ?? null) : null;
       setG({ impegni, chiusura: C.oraChiusura(base, impegni, breve) });
     });
   }, []);

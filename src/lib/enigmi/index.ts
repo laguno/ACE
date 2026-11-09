@@ -19,10 +19,10 @@ const scegli = <T>(rng: Rng, lista: T[]) => lista[Math.floor(rng() * lista.lengt
 const ALFABETO = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
 /** Maiuscole senza accenti ("Perché" -> "PERCHE"): le lettere del biglietto sono solo A-Z. */
-export function pulisci(testo: string): string {
+function pulisci(testo: string): string {
   return testo.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[’']/g, "'").toUpperCase();
 }
-export const soloLettere = (testo: string) => pulisci(testo).replace(/[^A-Z]/g, '');
+const soloLettere = (testo: string) => pulisci(testo).replace(/[^A-Z]/g, '');
 
 /** Codice segreto: ogni lettera spostata avanti di k (Z torna ad A); il resto resta com'è. */
 export function cifra(testo: string, k = 1): string {
@@ -41,7 +41,7 @@ export function striscia(k = 1): string {
 }
 
 /** Valore di una lettera: A=1 ... Z=26. */
-export const valore = (c: string) => ALFABETO.indexOf(c) + 1;
+const valore = (c: string) => ALFABETO.indexOf(c) + 1;
 const APICI: Record<string, string> = { 2: '²', 3: '³' };
 const mcd = (a: number, b: number): number => (b ? mcd(b, a % b) : a);
 
@@ -132,7 +132,12 @@ export function griglia(messaggio: string, rng: Rng, lato = 6): { griglia: strin
   for (let i = 0; i < celle.length; i++) if (!celle[i]) celle[i] = scegli(rng, riempitivi);
   const colonne = ALFABETO.slice(0, lato).split('');
   const testo = ['   ' + colonne.join(' '), ...Array.from({ length: lato }, (_, r) => `${r + 1}  ${celle.slice(r * lato, r * lato + lato).join(' ')}`)].join('\n');
-  const coordinate = parole.map((p) => p.split('').map((c) => `${colonne[dove.get(c)! % lato]}${Math.floor(dove.get(c)! / lato) + 1}`));
+  const casella = (c: string) => {
+    const i = dove.get(c);
+    if (i === undefined) throw new Error(`lettera ${c} fuori griglia`);
+    return `${colonne[i % lato]}${Math.floor(i / lato) + 1}`;
+  };
+  const coordinate = parole.map((p) => p.split('').map(casella));
   return { griglia: testo, coordinate };
 }
 
@@ -174,7 +179,7 @@ export function cima(parole: string[], candidate: string[]): { parola: string; m
 }
 
 /** Righe della tabella della cima, per il biglietto. */
-export const righeCima = (mappa: { forziere: number; posizione: number }[]) =>
+const righeCima = (mappa: { forziere: number; posizione: number }[]) =>
   mappa.map((m, i) => `${String(i + 1).padStart(2)}ª lettera: forziere ${m.forziere}, la ${m.posizione}ª`);
 
 // ---------------------------------------------------------------- composizione del biglietto

@@ -4,7 +4,7 @@
 // del libro (data/mappa-libri.json: titoli e pagine, mai il testo dei libri).
 // La chiamano sync-nuvola dopo ogni sincronizzazione (segreto del cron) o un genitore.
 import Anthropic from 'npm:@anthropic-ai/sdk';
-import { createClient } from 'npm:@supabase/supabase-js@2';
+import { dbServizio } from '../_shared/ambiente.ts';
 import mappa from '../../../data/mappa-libri.json' with { type: 'json' };
 import * as C from '../../../src/lib/calendario/index.ts';
 import * as R from '../../../src/lib/regole/index.ts';
@@ -13,7 +13,7 @@ import { chiChiama, cronOGenitore } from '../_shared/accesso.ts';
 
 const GIORNI = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'];
 
-const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+const db = dbServizio();
 const claude = new Anthropic({ apiKey: Deno.env.get('ANTHROPIC_API_KEY') });
 const PER_GIRO = 3; // ponytail: al massimo 3 verifiche nuove per chiamata, per tempi e costi contenuti
 

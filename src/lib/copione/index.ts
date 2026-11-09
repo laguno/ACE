@@ -3,7 +3,7 @@
 // sono controllate dai test su tutte le righe.
 import config from '../../../data/config-gioco.json' with { type: 'json' };
 
-export type Priorita = 1 | 2 | 3 | 4; // 1 bastone, 2 voto, 3 forziere/tappa, 4 altro
+type Priorita = 1 | 2 | 3 | 4; // 1 bastone, 2 voto, 3 forziere/tappa, 4 altro
 
 type Riga = { priorita: Priorita; posa: string; titolo: string; testo: string };
 
@@ -78,9 +78,6 @@ export const riempi = (t: string, v: Record<string, string | number>) => {
   return s.charAt(0).toUpperCase() + s.slice(1);
 };
 
-/** "1 tentativo", "2 tentativi": per i testi dell'app fuori dal copione. */
-export const conta = (n: number, uno: string, altri: string) => `${n} ${Math.abs(n) === 1 ? uno : altri}`;
-
 export function componi(chiave: ChiavePopup, v: Record<string, string | number> = {}) {
   const r: Riga = POPUP[chiave];
   return { priorita: r.priorita, posa: r.posa, titolo: r.titolo, testo: riempi(r.testo, v) };
@@ -91,7 +88,7 @@ export function notifica(chiave: ChiaveNotifica, v: Record<string, string | numb
 }
 
 /** Le pose arrabbiate e dispettose (serie nera) e quelle dei genitori arrabbiati. */
-export const posaGenitoreArrabbiato = (posa: string) => /^(papa|mamma)-arrabbiat/.test(posa);
+const posaGenitoreArrabbiato = (posa: string) => /^(papa|mamma)-arrabbiat/.test(posa);
 
 /** Dopo le 21:00 niente rimproveri di mamma e papà: aspettano la mattina dopo. */
 export function popupMostrabile(p: { priorita: number; posa: string }, ora: string): boolean {

@@ -85,7 +85,7 @@ function Mattina({ impegni, apri }: { impegni: Impegno[]; apri: Apri }) {
           icona: 'sport',
         });
       }
-      const materiale: string[] = m.data?.valore?.[oggi.getDay()] ?? [];
+      const materiale = (m.data?.valore as string[][] | undefined)?.[oggi.getDay()] ?? [];
       if (materiale[0]) lista.push({ titolo: materiale[0], sotto: 'Controlla che ci sia nello zaino', icona: 'promemoria' });
       else if (f.data?.[0]) lista.push({ titolo: f.data[0].titolo, sotto: 'Da far firmare: portalo a mamma o papà', icona: 'promemoria' });
       setCose(lista.slice(0, 3));

@@ -2,12 +2,12 @@
 // segreto GOOGLE_CALENDAR_ICS_URL), espande gli eventi ripetuti e copia in impegni_famiglia quelli
 // da ieri a 14 giorni avanti. Sola lettura: gli impegni si cambiano in Google, non nell'app.
 // Eventi con "privato" nel titolo esclusi. La chiamano il cron (ogni ora) o un genitore.
-import { createClient } from 'npm:@supabase/supabase-js@2';
+import { apriRegistro, dbServizio } from '../_shared/ambiente.ts';
 import ICAL from 'npm:ical.js@2.1.0';
 import { avvisaSeFallita } from '../_shared/push.ts';
 import { chiChiama, cronOGenitore } from '../_shared/accesso.ts';
 
-const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+const db = dbServizio();
 const GIORNO = 864e5;
 
 // ponytail: un impegno di un giorno intero si salva a mezzanotte UTC con tutto_il_giorno = true.
@@ -62,7 +62,7 @@ const risposta = (corpo: unknown, stato = 200) =>
 
 Deno.serve(async (req) => {
   if (!(await autorizzato(req))) return risposta({ errore: 'solo il cron o un genitore' }, 401);
-  const { data: log } = await db.from('sync_log').insert({ fonte: 'calendario' }).select('id').single();
+  const log = { id: await apriRegistro(db, 'calendario') };
   let esito: 'ok' | 'errore' = 'ok';
   let dettagli: Record<string, unknown>;
   try {
@@ -85,8 +85,8 @@ Deno.serve(async (req) => {
   } catch (e) {
     esito = 'errore';
     dettagli = { errore: e instanceof Error ? e.message.replace(/https?:\/\/\S+/g, '[indirizzo]') : 'errore imprevisto' };
-    await avvisaSeFallita(db, 'calendario', 'Il calendario', log!.id).catch((x) => console.error('avviso', x));
+    await avvisaSeFallita(db, 'calendario', 'Il calendario', log.id).catch((x) => console.error('avviso', x));
   }
-  await db.from('sync_log').update({ finito_il: new Date().toISOString(), esito, dettagli }).eq('id', log!.id);
+  await db.from('sync_log').update({ finito_il: new Date().toISOString(), esito, dettagli }).eq('id', log.id);
   return risposta({ esito, ...dettagli }, esito === 'ok' ? 200 : 502);
 });

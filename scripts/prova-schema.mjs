@@ -42,7 +42,11 @@ const come = async (uid, sql, ruolo = 'authenticated') => {
   if (uid || ruolo === 'anon') await db.exec(`set role ${ruolo}`);
   try { return await db.query(sql); } finally { await db.exec('reset role'); }
 };
-const verifica = (nome, cond) => { cond ? ok++ : ko++; console.log(cond ? 'ok ' : 'NO ', nome); };
+const verifica = (nome, cond) => {
+  if (cond) ok++;
+  else ko++;
+  console.log(cond ? 'ok ' : 'NO ', nome);
+};
 const fallisce = async (nome, uid, sql, ruolo) => {
   try { await come(uid, sql, ruolo); verifica(nome, false); } catch { verifica(nome, true); }
 };

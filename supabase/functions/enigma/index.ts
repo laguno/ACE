@@ -7,7 +7,7 @@
 //   accettando sinonimi; +20 passi se indovinato prima di arrivare al forziere.
 // Il premio e la soluzione non escono mai da qui verso Lani: lei riceve solo giusto/sbagliato.
 import Anthropic from 'npm:@anthropic-ai/sdk';
-import { createClient } from 'npm:@supabase/supabase-js@2';
+import { dbServizio } from '../_shared/ambiente.ts';
 import * as R from '../../../src/lib/regole/index.ts';
 import { aggiornaForzieri } from '../_shared/forzieri.ts';
 import { inviaPush } from '../_shared/push.ts';
@@ -15,7 +15,7 @@ import * as E from '../../../src/lib/enigmi/index.ts';
 import TIPI from '../../../data/enigmi.json' with { type: 'json' };
 import { chiChiama, CorpoNonValido, cors, leggiCorpo, risposte } from '../_shared/accesso.ts';
 
-const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+const db = dbServizio();
 const claude = new Anthropic({ apiKey: Deno.env.get('ANTHROPIC_API_KEY') });
 
 async function chiedi<T>(sistema: string, contenuto: unknown, schema: object, effort: 'low' | 'medium'): Promise<T> {
@@ -97,7 +97,8 @@ Deno.serve(async (req) => {
       if (!f.premio) return risposta({ errore: 'manca il premio' }, 400);
       if (f.stato !== 'chiuso') return risposta({ errore: "l'enigma è già comparso: non si cambia più" }, 409);
       const tipo = E.TIPO_DEL_FORZIERE[n - 1];
-      const t = TIPI.tipi.find((x) => x.forziere === n)!;
+      const t = TIPI.tipi.find((x) => x.forziere === n);
+      if (!t) return risposta({ errore: 'forziere inesistente' }, 404);
       // la cima usa le parole chiave dei forzieri 1-8: prima servono i loro enigmi
       let parole: string[] = [];
       if (tipo === 'cima') {
@@ -159,7 +160,7 @@ Deno.serve(async (req) => {
       // +20 solo se indovinato prima di arrivare al forziere
       if (giusta && f.stato === 'enigma') {
         const { data: s } = await db.from('saldo_passi').select('passi').single();
-        const tappa = R.CONFIG.forzieri.find((x) => x.n === n)!.tappa;
+        const tappa = R.forziere(n).tappa;
         if (R.posizione(s?.passi ?? 0).tappeFatte < tappa) {
           const { data: id } = await db.rpc('registra_passi', {
             p_motivo: 'enigma',

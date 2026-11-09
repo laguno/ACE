@@ -19,3 +19,4 @@ test-results/
 .claude/skills/
 .claude/agents/
 .agents/
+.claude/worktrees/

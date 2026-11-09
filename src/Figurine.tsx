@@ -100,7 +100,7 @@ export function Figurina({ chiudi }: { chiudi: () => void }) {
         {perMateria.length === 0 && <p>Ancora nessun voto su Nuvola.</p>}
         <ul className="medie">
           {perMateria.map((m) => {
-            const ultimo = m.voti.at(-1)!;
+            const ultimo = m.voti.at(-1) ?? 0; // per materia c'è sempre almeno un voto
             const prima = media(m.voti.slice(0, -1));
             const tendenza = prima === null || Math.abs(ultimo - prima) < 0.25 ? '=' : ultimo > prima ? '↑' : '↓';
             return (

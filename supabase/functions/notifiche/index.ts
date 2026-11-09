@@ -2,14 +2,14 @@
 // (docs/05, Notifiche): a Lani al massimo 3 al giorno (7:00, compiti nuovi del pomeriggio,
 // chiusura della sera) più un sollecito 45 minuti dopo la chiusura; ai genitori il riepilogo della
 // domenica. Mai rimproveri. Una per tipo al giorno: la chiave di notifiche_inviate lo garantisce.
-import { createClient } from 'npm:@supabase/supabase-js@2';
+import { dbServizio } from '../_shared/ambiente.ts';
 import * as C from '../../../src/lib/calendario/index.ts';
 import * as K from '../../../src/lib/copione/index.ts';
 import * as R from '../../../src/lib/regole/index.ts';
 import { inviaPush } from '../_shared/push.ts';
 import { stessoSegreto } from '../_shared/accesso.ts';
 
-const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+const db = dbServizio();
 
 const piu = (d: Date, n: number) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
 const finestra = (ora: string, da: string) => ora >= da && ora < C.sposta(da, 15);

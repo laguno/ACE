@@ -78,7 +78,7 @@ export async function spuntaCompito(
  * spunta si vede subito, l'invio parte allo scadere; dopo, la correzione resta dei genitori.
  * Se si cambia schermata prima dei 5 secondi, l'invio parte lo stesso.
  */
-export const SECONDI_ANNULLA = 5;
+const SECONDI_ANNULLA = 5;
 export function useAnnulla() {
   const [attesa, setAttesa] = useState<Record<string, number>>({});
   const togli = (id: string) => setAttesa(({ [id]: _, ...resto }) => resto);

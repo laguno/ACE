@@ -19,7 +19,9 @@ async function rimpicciolisci(file: File): Promise<Blob> {
     const tela = document.createElement('canvas');
     tela.width = Math.round(img.width * k);
     tela.height = Math.round(img.height * k);
-    tela.getContext('2d')!.drawImage(img, 0, 0, tela.width, tela.height);
+    const ctx = tela.getContext('2d');
+    if (!ctx) return file;
+    ctx.drawImage(img, 0, 0, tela.width, tela.height);
     const blob = await new Promise<Blob | null>((ok) => tela.toBlob(ok, 'image/jpeg', 0.85));
     return blob ?? file;
   } catch {
@@ -28,7 +30,7 @@ async function rimpicciolisci(file: File): Promise<Blob> {
 }
 
 /** Carica le foto di una richiesta e chiede i passi. Restituisce i passi presi (0 per i genitori). */
-export async function caricaFoto(client: SupabaseClient, r: RichiestaFoto, file: File[]): Promise<number> {
+async function caricaFoto(client: SupabaseClient, r: RichiestaFoto, file: File[]): Promise<number> {
   for (const [i, f] of file.entries()) {
     const blob = await rimpicciolisci(f);
     const percorso = `${r.id}/${Date.now()}-${i}.jpg`;

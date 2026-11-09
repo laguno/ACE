@@ -115,7 +115,7 @@ export default function Astra({ apri }: { apri: (pagina: 'Figurina' | 'Album') =
               <small>Chiavi della settimana</small>
               <span aria-label={`Chiavi dell'ultima settimana: ${dati.settimana} su 3`}>
                 {[1, 2, 3].map((k) => (
-                  <img key={k} src={img('oggetti', k <= dati.settimana! ? 'chiave-piena' : 'chiave-vuota')} alt="" width={30} height={30} />
+                  <img key={k} src={img('oggetti', k <= (dati.settimana ?? 0) ? 'chiave-piena' : 'chiave-vuota')} alt="" width={30} height={30} />
                 ))}
               </span>
             </span>
@@ -215,7 +215,7 @@ export default function Astra({ apri }: { apri: (pagina: 'Figurina' | 'Album') =
 }
 
 function SchedaForziere({ f, n, passi, chiavi, chiudi }: { f?: Forziere; n: number; passi: number; chiavi: number; chiudi: () => void }) {
-  const conf = R.CONFIG.forzieri.find((x) => x.n === n)!;
+  const conf = R.forziere(n);
   const arrivata = R.posizione(passi).tappeFatte >= conf.tappa;
   const [risposta, setRisposta] = useState('');
   const [esito, setEsito] = useState<string>();

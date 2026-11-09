@@ -11,7 +11,9 @@ import '@fontsource/nunito/600-italic.css';
 import '@fontsource/nunito/800-italic.css';
 import './stile.css';
 
-createRoot(document.getElementById('root')!).render(
+const radice = document.getElementById('root');
+if (!radice) throw new Error('manca #root in index.html');
+createRoot(radice).render(
   <StrictMode>
     <App />
   </StrictMode>,
