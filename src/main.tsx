@@ -6,6 +6,9 @@ import '@fontsource/baloo-2/800.css';
 import '@fontsource/nunito/600.css';
 import '@fontsource/nunito/700.css';
 import '@fontsource/nunito/800.css';
+// corsivo vero per il motto di Astra e il biglietto dell'enigma (prima il browser lo inclinava da solo)
+import '@fontsource/nunito/600-italic.css';
+import '@fontsource/nunito/800-italic.css';
 import './stile.css';
 
 createRoot(document.getElementById('root')!).render(

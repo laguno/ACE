@@ -418,7 +418,7 @@ dialog.velo:focus { outline: none; }
 .riga-figurina { width: 100%; margin: 0; padding: 8px 0 0; border-top: 2px dashed var(--lilla); font: 800 13px Nunito, sans-serif !important; color: var(--testo-2); }
 .bollino-malus { position: absolute; right: 18px; top: 18px; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--testo); color: #fff; font: 800 17px 'Baloo 2', Nunito, sans-serif; }
 @media (prefers-reduced-motion: no-preference) {
-  .popup { animation: entra 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+  .popup { animation: entra 0.35s cubic-bezier(0.22, 1, 0.36, 1) both; }
   @keyframes entra { from { opacity: 0; transform: translateY(24px) scale(0.94); } to { opacity: 1; transform: none; } }
   .coriandoli span { animation: cade 1.6s ease-in both; }
 }
