@@ -13,7 +13,11 @@ test('Lani: benvenuta in tre passi, poi Oggi; la seconda volta non torna', async
   await page.screenshot({ path: 'e2e/risultati/benvenuta.png' });
   await page.getByRole('button', { name: 'Avanti' }).click();
   await expect(page.getByText('I passi ti fanno camminare, le chiavi aprono i forzieri.')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Passi e chiavi' })).toBeFocused();
+  await expect(page.getByRole('img', { name: 'Passo 2 di 3' })).toBeVisible();
+  await page.screenshot({ path: 'e2e/risultati/benvenuta-2.png' });
   await page.getByRole('button', { name: 'Avanti' }).click();
+  await page.screenshot({ path: 'e2e/risultati/benvenuta-3.png' });
   await page.getByRole('button', { name: 'Inizia' }).click();
   await expect(page.getByRole('heading', { name: 'Buongiorno, Lani' })).toBeVisible();
   await page.reload();
@@ -29,7 +33,9 @@ test('genitori: le quattro cose con lo stato vero', async ({ page }) => {
   });
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Prepariamo ACE' })).toBeVisible();
-  await expect(page.locator('.avvio li').nth(0)).toHaveClass('fatto');
+  await expect(page.locator('.avvio li').nth(0)).toHaveClass(/\bfatto\b/);
+  await expect(page.locator('.avvio li').nth(1)).not.toHaveClass(/\bfatto\b/);
+  await page.screenshot({ path: 'e2e/risultati/avvio-genitori.png' });
   await expect(page.getByText('(ne mancano 8)', { exact: false })).toBeVisible();
   await page.getByRole('button', { name: 'Scegli i premi' }).click();
   await expect(page.getByText('8 forzieri ancora senza premio.', { exact: false })).toBeVisible();

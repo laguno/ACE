@@ -39,6 +39,7 @@ body {
 body[data-sfondo='mattina'] { background: linear-gradient(180deg, var(--azzurrino) 0, var(--cielo-chiaro) 220px, var(--panna) 390px) no-repeat, var(--panna); }
 body[data-sfondo='pomeriggio'] { background: linear-gradient(180deg, var(--lilla) 0, var(--panna) 253px) no-repeat, var(--panna); }
 body[data-sfondo='sera'] { background: linear-gradient(180deg, var(--lilla-medio) 0, var(--lilla) 169px, var(--panna) 320px) no-repeat, var(--panna); }
+body[data-sfondo='rosa'] { background: linear-gradient(180deg, var(--rosa) 0, var(--lilla) 380px, var(--panna) 844px) no-repeat, var(--panna); }
 body[data-sfondo='viola'] { background: linear-gradient(180deg, var(--viola) 0, var(--lilla-medio) 260px, var(--rosa) 620px) no-repeat, var(--rosa); }
 h1, h2 { font-family: 'Baloo 2', Nunito, sans-serif; font-weight: 800; }
 b, strong { font-weight: 800; }
@@ -452,17 +453,39 @@ dialog.velo:focus { outline: none; }
 .notifiche-anteprima li > span { padding: 12px; border-radius: 16px; background: var(--lilla); font-size: 14px; }
 
 /* Prima accensione */
-.benvenuta { min-height: 100dvh; display: grid; align-content: center; }
-.benvenuta .carta { justify-items: center; text-align: center; }
-.benvenuta h1 { margin: 0; font-size: 32px; }
-.sezioni { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; text-align: left; }
-.sezioni li { display: flex; align-items: center; gap: 12px; }
-.frase { margin: 0; font: 800 22px/1.3 'Baloo 2', Nunito, sans-serif; color: var(--accento-premuto); }
+/* Benvenuta (bozza Benvenuta): Lani grande in alto, testo al centro, pallini e bottone in fondo; niente barra */
+.benvenuta { min-height: 100dvh; display: flex; flex-direction: column; gap: 16px; padding: 32px 24px calc(32px + env(safe-area-inset-bottom)); }
+.benvenuta-eroe { align-self: center; }
+.benvenuta-testo { display: flex; flex-direction: column; gap: 8px; text-align: center; }
+.benvenuta h1 { margin: 0; font-size: 30px; line-height: 1.05; }
+.benvenuta h1:focus { outline: none; }
+.benvenuta-testo p { margin: 0; line-height: 1.45; }
+.benvenuta .mantra { margin: 0; text-align: center; font: italic 800 15px Nunito, sans-serif; color: var(--accento); }
+.benvenuta-piede { margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.pallini-passi { display: flex; gap: 8px; }
+.pallini-passi span { width: 10px; height: 10px; border-radius: 999px; background: var(--lilla-medio); }
+.pallini-passi .attivo { width: 26px; background: var(--fucsia); }
+.sezioni { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.sezioni li { display: flex; align-items: center; gap: 12px; padding: 8px 16px 8px 12px; border-radius: 24px; background: #fff; font-size: 15px; line-height: 1.35; }
+.sezioni .sticker { flex: none; }
+.frase { margin: 0; font: 800 20px/1.3 'Baloo 2', Nunito, sans-serif; color: var(--accento-premuto); }
+/* Avvio dei genitori (bozza Genitori-avvio): mamma e papà in testata, una carta per cosa, bottoni in fondo */
+body:has(.avvio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+.avvio { min-height: calc(100dvh - 40px - env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 16px; }
+.avvio-testa { display: flex; align-items: center; gap: 12px; }
+.avvio-testa .coppia { display: flex; flex: none; }
+.avvio-testa .coppia .sticker + .sticker { margin-left: -18px; }
+.avvio-testa .sopratitolo { min-height: 0; font: 800 14px Nunito, sans-serif; }
+.avvio-testa h1 { margin: 0; font-size: 26px; line-height: 1.05; }
+.avvio > p { margin: 0; line-height: 1.45; }
 .avvio ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; }
-.avvio li { display: grid; grid-template-columns: 36px 1fr; gap: 12px; align-items: start; }
-.avvio .segno { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--lilla); font-weight: 800; }
-.avvio .fatto .segno { background: var(--verde); color: #fff; }
-.avvio small { display: block; color: var(--testo-2); }
+.avvio li { display: flex; align-items: center; gap: 12px; padding: 12px 16px; }
+.avvio li b { display: block; font-size: 15px; }
+.avvio .segno { flex: none; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--rosa); color: var(--accento); font: 800 17px 'Baloo 2', Nunito, sans-serif; }
+.avvio .fatto .segno { background: var(--accento); color: #fff; }
+.avvio small { display: block; font: 700 13px/1.35 Nunito, sans-serif; color: var(--testo-2); }
+.avvio-piede { margin-top: auto; display: flex; flex-direction: column; gap: 8px; }
+.avvio-piede .link { color: var(--testo-2); font: 800 14px Nunito, sans-serif; }
 
 /* revisione UI, regola 2: il testo fuori dalle carte parte a 20 px (16 di main + 4) */
 .sera > h1, .album-pagina > h1, .album-pagina > h2, .sera > .sopratitolo, .sera > p { padding-left: 4px; }

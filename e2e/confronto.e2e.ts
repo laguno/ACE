@@ -135,6 +135,16 @@ const CASI: Record<string, Caso> = {
   'Popup-bastone': { bozza: 'Popup-bastone', quando: LUNEDI_POMERIGGIO, dati: (d) => (d.popup_coda = [popup('bagno_mamma', 1, 'mamma-arrabbiata', 'Bagno da sistemare', 'Bagno da sistemare: −1. Asciugamani appesi, tappetino a posto, specchio pulito.')]) },
   'Popup-enigma': { bozza: 'Popup-enigma', quando: LUNEDI_POMERIGGIO, dati: (d) => (d.popup_coda = [popup('enigma_comparso', 3, 'lani-detective', 'Un biglietto', 'Un biglietto vicino al forziere. Riesci a decifrarlo? Hai 3 tentativi.')]) },
   Benvenuta: { bozza: 'Benvenuta', quando: LUNEDI_MATTINA, prima: true },
+  'Genitori-avvio': {
+    bozza: 'Genitori-avvio',
+    quando: LUNEDI_POMERIGGIO,
+    prima: true,
+    genitore: true,
+    dati: (d) => {
+      d.sync_log = [{ fonte: 'nuvola', esito: 'ok', iniziato_il: '2026-11-09T13:30:00Z' }];
+      d.forzieri = Array.from({ length: 9 }, (_, i) => ({ n: i + 1, premio: null }));
+    },
+  },
   Genitori: { bozza: 'Genitori', quando: LUNEDI_POMERIGGIO, genitore: true },
 };
 
