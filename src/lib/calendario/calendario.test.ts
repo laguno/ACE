@@ -38,6 +38,8 @@ describe('chiusura e momento della giornata', async () => {
     expect(oraChiusura(null, [], '20:30')).toBe('20:30');
     // venerdì con allenamento alle 18:30 e partita sabato: mezz'ora prima dell'allenamento
     expect(oraChiusura(null, [allenamento('2026-11-13T17:30:00Z')], '20:30')).toBe('18:00');
+    // venerdì con allenamento alle 18:30 ma senza partita sabato: niente chiusura
+    expect(oraChiusura(null, [allenamento('2026-11-13T17:30:00Z')])).toBeNull();
   });
   it('momento: mattina, pomeriggio, sera da un’ora prima', () => {
     expect(momento('07:10', '20:30')).toBe('mattina');

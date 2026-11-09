@@ -36,6 +36,11 @@ Ramo `grafica` (passi 1-5 e ritocchi di Jarvis) e poi `grafica-2` uniti a `main`
 | 8/11 | signore | Lani non prova l'app prima: sorpresa ad app finita. Le prove sui dispositivi le fanno i genitori |
 | 8/11 | signore | Il lunedì Lani va a scuola con la borsa di pallavolo (pulmino Revolution da scuola) e la cartellina di tecnologia; niente "diario e astuccio" fisso |
 | 8/11 | signore | Claude lavora da solo con prove automatiche; può pubblicare funzioni e applicare migrazioni (permesso aggiunto) |
+| 9/11 | Jarvis + signore | Riservatezza di `popup_coda` e figurine: va bene così |
+| 9/11 | Jarvis + signore | Confermate (già fatte e ricontrollate nel codice il 9/11): studio facoltativo a caselle `tipo:AAAA-MM-GG:1..4` per flash card, video e quiz; enigma con tentativo atomico (`tenta_enigma`, 0016); `voto_corretto` con la sola differenza; "Annulla" per 5 secondi; figurine dei forzieri (prima le 4 di Leo, poi le altre non prese, senza serie nera; la cima dà lani-cima); nota di merito nel copione (con test); obiettivo 7,35; pg_net in extensions (0015); Sonnet 5.5 per genera-studio ed enigma, Opus 5.5 per spiega; push ai genitori alla prima sincronizzazione fallita di fila |
+| 9/11 | Jarvis + signore | Venerdì e sabato: chiusura solo se il giorno dopo c'è una partita (breve, solo borsa, 20:30 o mezz'ora prima dello sport). Corretto il caso dello sport senza partita il giorno dopo: niente chiusura |
+| 9/11 | signore | In questo repository i commit sono di `Alessandro Messori <shin.sekai3@gmail.com>` (config locale, dai prossimi commit; la storia non si riscrive) |
+| 9/11 | signore | Protezione delle password trapelate: la accende il signore dal pannello, se il piano la prevede |
 
 ## Scelte di Claude approvate (revisione di Jarvis, 8/11, approvata dal signore)
 

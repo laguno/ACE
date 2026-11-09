@@ -43,6 +43,7 @@ export function oraChiusura(
   breve: string | null = null,
 ): string | null {
   base ??= breve;
+  if (!base) return null; // venerdì e sabato senza partita il giorno dopo: niente chiusura, neanche con lo sport
   const tardi = impegniDiOggi
     .filter((i) => tipoImpegno(i.titolo) !== 'famiglia')
     .map((i) => oraRoma(i.inizio))

@@ -34,6 +34,11 @@ describe('copione', () => {
     expect(popupMostrabile(componi('tappa', ESEMPIO), '22:00')).toBe(true);
   });
 
+  it('nota di merito: mamma-festeggia, +50 dal config, va sul frigo', () => {
+    const p = componi('nota_merito', { materia: 'Arte', passi: config.passi.nota_merito });
+    expect(p).toMatchObject({ posa: 'mamma-festeggia', titolo: 'Nota di merito', testo: 'Nota di merito in Arte: +50. Questa va sul frigo.' });
+  });
+
   it('popup del voto: recupero, migliorato, fascia', () => {
     expect(popupVoto(6.5, 5)).toBe('voto_recupero');
     expect(popupVoto(8, 7)).toBe('voto_migliorato');
