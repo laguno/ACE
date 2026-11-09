@@ -12,12 +12,14 @@
 - Copione: popup accodati dal server (`_shared/popup.ts`, uno per evento) per voti, note, tappe, forzieri, chiavi, verifiche nuove; un popup per apertura; figurine sbloccate dalla prima comparsa; notifiche push ogni 15 minuti (`notifiche`, cron `0014`). Prima del 23/11 niente popup né figurine.
 - Prima accensione: benvenuta di Lani (3 schermate, una volta per dispositivo) e avvio dei genitori (4 cose con lo stato vero).
 - Genitori: settimana, gesti e sgridate (con popup del copione), premi ed enigmi, correzioni delle spunte, fogli, impostazioni e PIN.
-- Grafica come le bozze (`design/*.html`) su Oggi, Pomeriggio, Sera, Astra, Figurina, Album, popup, Studio, Flash card e Quiz (Grafica 1-7b, tutto in `main`; flash card e quiz a tutto schermo, senza barra né "Genitori"). Kit in `src/kit.tsx`. Mancano Benvenuta, Genitori, Genitori-avvio. Foto di confronto con `npm run confronto` (in `docs/confronto/`). Niente config di Prettier: se serve, `--single-quote --print-width 180`.
-- Prove: `npm test` (97), `npm run prova:schema` (35), `npm run prova:schermate` (Playwright, 37, Supabase finto).
+- Grafica come le bozze (`design/*.html`) su Oggi, Pomeriggio, Sera, Astra, Figurina, Album, popup, Studio, Flash card e Quiz (Grafica 1-7b, tutto in `main`; flash card e quiz a tutto schermo, senza barra né "Genitori"). Kit in `src/kit.tsx`. Revisione UI applicata a tutte le schermate (anche Genitori): scala degli spazi 4/8/12/16/24/32, bordi 20/16/32, titoli 30/26/20/17, raggi 16/24/32/999, ombre `--ombra`, `--ombra-alta`, `--ombra-etichetta`. Mancano Benvenuta e Genitori-avvio. Foto di confronto con `npm run confronto` (in `docs/confronto/`). Niente config di Prettier: se serve, `--single-quote --print-width 180`.
+- Prove: `npm test` (129), `npm run prova:schema` (35), `npm run prova:schermate` (Playwright, 40, Supabase finto). Le foto di `npm run confronto` sono stabili (movimento ridotto): servono per i confronti prima e dopo; la Sera alterna due foto anche senza cambiamenti.
 
 ## Ultima sessione (9 novembre 2026)
 
 Ramo `grafica` (passi 1-5 e ritocchi di Jarvis) e poi `grafica-2` uniti a `main` con tutte le prove verdi. In `grafica-2`: Studio (Lani pensierosa, carte delle verifiche con "fra N giorni", pallini e pulsante, Le tue carte; "Materiali" della bozza rimandato), Flash card e Quiz (testata "← Studio" con barra, esiti affiancati, regole dei passi dal config, "Giusto!"). Pallini delle sessioni come le bozze anche nel Pomeriggio. Correzioni di Jarvis (7b): esiti visibili e disattivati finché la carta non si gira, tutto schermo, regola del quiz in percentuale. Lista dei controlli della prova in famiglia in `docs/07-installazione.md`.
+
+Poi la revisione UI approvata (ramo `revisione-ui-2`, 17 commit): harden (popup in `<dialog>`, contrasti, focus, nome del forziere, barra del quiz), CSS pulito con le foto identiche pixel per pixel, regole 1-4, note di ogni schermata (Sera con la firma in alto, Genitori con 4 schede più Altro e foglio dell'app al posto di prompt/confirm, Oggi con la pillola di Bart, Astra con la testata che si compatta, Album con le figurine da prendere raccolte per momento, Figurina "come prima"), copione aggiornato (il testo non ripete il titolo, singolare e plurale con `{n:una:# più}`, "Evviva!" su forziere e cima, regola corta del quiz per Lani e completa nella Vetrina).
 
 ## Decisioni prese
 
@@ -41,6 +43,7 @@ Ramo `grafica` (passi 1-5 e ritocchi di Jarvis) e poi `grafica-2` uniti a `main`
 | 9/11 | Jarvis + signore | Venerdì e sabato: chiusura solo se il giorno dopo c'è una partita (breve, solo borsa, 20:30 o mezz'ora prima dello sport). Corretto il caso dello sport senza partita il giorno dopo: niente chiusura |
 | 9/11 | signore | In questo repository i commit sono di `Alessandro Messori <shin.sekai3@gmail.com>` (config locale, dai prossimi commit; la storia non si riscrive) |
 | 9/11 | signore | Protezione delle password trapelate: la accende il signore dal pannello, se il piano la prevede |
+| 9/11 | signore + Jarvis | Revisione UI approvata tutta (harden, CSS pulito, regole 1-4, note di ogni schermata). Testi: il popup non ripete il titolo; "Evviva!" su forziere e cima; Sera "Chiudi tutto e Bart va a dormire."; Studio "Finiti i compiti, flash card e quiz valgono passi" nella prima carta; quiz per Lani "Quasi tutte giuste al primo colpo: 10 passi."; "C'è un errore in questa carta"; Figurina "come prima"; Album "In arrivo con… (n)"; singolare e plurale giusti. Il popup del voto insufficiente resta com'è |
 
 ## Scelte di Claude approvate (revisione di Jarvis, 8/11, approvata dal signore)
 
@@ -61,8 +64,8 @@ Ramo `grafica` (passi 1-5 e ritocchi di Jarvis) e poi `grafica-2` uniti a `main`
 Ordine dei lavori fino al 23/11 (Jarvis, 9/11, approvato dal signore):
 
 1. ~~Vetrina~~ fatta (9/11): scheda Vetrina nell'area genitori (`src/Vetrina.tsx`, popup da `PopupVista`), foto di ogni popup in `docs/confronto/vetrina/`. "Passi che salgono" non esiste nell'app: da decidere se farla.
-2. ~~Revisione con Impeccable~~ fatta (9/11): rapporto in `docs/revisione-ui.md` (critique 27/40, audit 14/20), contesto in `PRODUCT.md`. Impeccable installato nel progetto (`.claude/skills/`, `.claude/agents/`, fuori dal repo), telemetria spenta, hook tolti da `.claude/settings.local.json`. **In attesa della scelta** del signore e di Jarvis; poi una schermata per commit, con le foto prima e dopo.
-3. **Grafica**: Benvenuta, Genitori-avvio, area Genitori (stesso kit, prima la chiarezza e poi l'aspetto).
+2. ~~Revisione con Impeccable~~ fatta (9/11): rapporto in `docs/revisione-ui.md` (critique 27/40, audit 14/20), contesto in `PRODUCT.md`. Impeccable installato nel progetto (`.claude/skills/`, `.claude/agents/`, fuori dal repo), telemetria spenta, hook tolti da `.claude/settings.local.json`. Approvata e applicata il 9/11 (vedi Ultima sessione).
+3. **Grafica**: Benvenuta e Genitori-avvio (stesso kit, prima la chiarezza e poi l'aspetto).
 4. **Debiti prima dell'avvio**: "Da fotografare" (richieste di foto ai genitori, caricamento nel bucket `foto-pagine`, +2 passi a Lani per pagina richiesta, regola già nel config); frasi nei momenti (apertura, tappa, verifica, chiusura; una al giorno, mai la stessa prima di 30 giorni, mai nei rimproveri; 32 nella tabella `frasi`, fonte `data/frasi.json`); "PIN non giusto" solo se il PIN è sbagliato, un altro messaggio per gli errori del server.
 5. Genitori: scegliere i 9 premi (area Genitori, Premi: ogni premio crea l'enigma), controllare orari e materiale nelle Impostazioni.
 6. **Prova in famiglia**, prima su Android Chrome (il telefono di Lani è un Motorola: Home, push, tema scuro di sistema acceso, scorrimento fino in fondo su ogni schermata), poi l'iPad. Lista dei controlli in `docs/07-installazione.md`.
@@ -74,7 +77,6 @@ Altri debiti: `spiega`, borsa, enigma e push provati solo con le prove (serve un
 
 ## In attesa di
 
-- Signore e Jarvis: scelta di cosa adottare da `docs/revisione-ui.md` (le 4 regole, i difetti da correggere, i testi da decidere nel copione).
 - Signore: sull'iPad rifare l'accesso su `ace-passino.vercel.app` quando vorrà provare (le anteprime hanno un'altra origine).
 
 ## Attenzione

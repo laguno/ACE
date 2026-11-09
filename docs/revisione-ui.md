@@ -1,5 +1,7 @@
 # Revisione UI con Impeccable (9 novembre 2026)
 
+> **Stato:** approvata dal signore e da Jarvis il 9/11 e applicata tutta sul ramo `revisione-ui-2` (harden, CSS pulito con foto identiche, regole 1-4, note di ogni schermata, testi nel copione). Il rilevatore di Impeccable non trova più niente.
+
 Revisione di Oggi, Pomeriggio, Sera, Studio, Flash card, Quiz, Astra, Figurina, Album e Genitori, a 390 e 360 px, con Impeccable (`critique` e `audit`). **Il codice non è stato toccato.** Il signore e Jarvis scelgono cosa adottare; poi si applica con i comandi mirati (`layout`, `typeset`, `polish`, `harden`, `clarify`), una schermata per commit, con le foto prima e dopo.
 
 **Come è stata fatta.** Contesto in `PRODUCT.md`: app per una ragazza di 12 anni, 390 px, `design/*.html` e `design/Stile.html` fonte autorevole; sticker che sbordano, riquadri con le icone, pillole e sfondo per momento sono voluti. Due valutazioni separate:
