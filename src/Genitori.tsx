@@ -394,9 +394,13 @@ function Premi({ client, avvisa }: Props) {
                 </button>
               </form>
             ) : (
-              <p>
-                <b>{f.premio ?? 'senza premio'}</b> · {f.stato}
-              </p>
+              <>
+                <p>
+                  <b>{f.premio ?? 'senza premio'}</b> · {f.stato}
+                </p>
+                <button className="principale" disabled>Cambia e rifai l’enigma</button>
+                <p className="nota">L’enigma è già comparso a Lani: premio ed enigma non si cambiano più.</p>
+              </>
             )}
             {f.enigma && (
               <details>
