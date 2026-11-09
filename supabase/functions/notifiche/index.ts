@@ -2,7 +2,7 @@
 // (docs/05, Notifiche): a Lani al massimo 3 al giorno (7:00, compiti nuovi del pomeriggio,
 // chiusura della sera) più un sollecito 45 minuti dopo la chiusura; ai genitori il riepilogo della
 // domenica. Mai rimproveri. Una per tipo al giorno: la chiave di notifiche_inviate lo garantisce.
-import { dbServizio } from '../_shared/ambiente.ts';
+import { dbServizio, registraErroreServer } from '../_shared/ambiente.ts';
 import * as C from '../../../src/lib/calendario/index.ts';
 import * as K from '../../../src/lib/copione/index.ts';
 import * as R from '../../../src/lib/regole/index.ts';
@@ -97,7 +97,7 @@ Deno.serve(async (req) => {
   try {
     return new Response(JSON.stringify(await turno()), { headers: { 'Content-Type': 'application/json' } });
   } catch (e) {
-    console.error(e);
+    await registraErroreServer(db, 'notifiche', e);
     return new Response(JSON.stringify({ errore: e instanceof Error ? e.message : 'errore' }), { status: 500 });
   }
 });

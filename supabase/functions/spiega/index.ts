@@ -2,7 +2,7 @@
 // un esempio diverso da quello del compito e prepara tre indizi graduali; mai la soluzione
 // dell'esercizio. La chiama l'app di Lani (o di un genitore) con { compito_id }.
 import Anthropic from 'npm:@anthropic-ai/sdk';
-import { dbServizio } from '../_shared/ambiente.ts';
+import { dbServizio, registraErroreServer } from '../_shared/ambiente.ts';
 import mappa from '../../../data/mappa-libri.json' with { type: 'json' };
 import { chiChiama, CorpoNonValido, cors, leggiCorpo, risposte } from '../_shared/accesso.ts';
 
@@ -72,7 +72,7 @@ Deno.serve(async (req) => {
     return risposta(uscita);
   } catch (e) {
     if (e instanceof CorpoNonValido) return risposta({ errore: e.message }, 400);
-    console.error(e);
+    await registraErroreServer(db, 'spiega', e);
     return risposta({ errore: 'errore del server' }, 500);
   }
 });

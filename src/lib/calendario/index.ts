@@ -62,3 +62,11 @@ export function momento(ora: string, chiusura: string | null): 'mattina' | 'pome
 
 /** C'è una partita di Lani tra questi impegni (per la chiusura breve del venerdì e del sabato). */
 export const partitaTra = (impegni: { titolo: string }[]) => impegni.some((i) => tipoImpegno(i.titolo) === 'partita');
+
+/** Il prossimo orario della lista dopo "adesso" (ora di Roma), o il primo di domani: "oggi alle 19:30". */
+export function prossimo(orari: string[], adesso = new Date()): string {
+  const ora = oraRoma(adesso.toISOString());
+  const ordinati = [...orari].sort();
+  const dopo = ordinati.find((o) => o > ora);
+  return dopo ? `oggi alle ${dopo}` : `domani alle ${ordinati[0]}`;
+}

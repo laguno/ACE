@@ -5,7 +5,7 @@
 // - Genitori: tutte e due.
 // Se un genitore ha cambiato il premio, l'immagine non vale più (immagine_per diverso dal premio):
 // "manca" true e niente URL, l'app mostra il pacco regalo finché il signore non ne carica una nuova.
-import { dbServizio } from '../_shared/ambiente.ts';
+import { dbServizio, registraErroreServer } from '../_shared/ambiente.ts';
 import { chiChiama, cors, leggiCorpo, risposte } from '../_shared/accesso.ts';
 
 const db = dbServizio();
@@ -46,7 +46,7 @@ Deno.serve(async (req) => {
     );
     return risposta({ immagini });
   } catch (e) {
-    console.error(e);
+    await registraErroreServer(db, 'premi', e);
     return risposta({ errore: 'errore del server' }, 500);
   }
 });

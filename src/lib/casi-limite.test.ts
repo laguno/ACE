@@ -89,6 +89,15 @@ describe('orari della sera', () => {
   });
 });
 
+describe('scheda Stato: il prossimo giro dei cron', () => {
+  it('il prossimo orario di oggi, o il primo di domani', () => {
+    expect(C.prossimo(['14:30', '19:30'], new Date('2026-11-24T12:00:00Z'))).toBe('oggi alle 14:30'); // 13:00 a Roma
+    expect(C.prossimo(['19:30', '14:30'], new Date('2026-11-24T14:00:00Z'))).toBe('oggi alle 19:30');
+    expect(C.prossimo(['14:30', '19:30'], new Date('2026-11-24T19:00:00Z'))).toBe('domani alle 14:30'); // 20:00 a Roma
+    expect(C.prossimo(['14:30', '19:30'], new Date('2027-06-01T12:00:00Z'))).toBe('oggi alle 14:30'); // 14:00 d'estate
+  });
+});
+
 describe('testi strani da Nuvola', () => {
   it('pagine scritte in tanti modi', () => {
     expect(N.pagine('Studiare pagine 340-352')).toBe('340–352');

@@ -49,6 +49,26 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"errori_client": {
+                  Row: {
+                    "creato_il": string,"dettagli": string | null,"dove": string | null,"id": number,"messaggio": string,"origine": string,"profilo_id": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "creato_il"?: string,"dettagli"?: string | null,"dove"?: string | null,"id"?: never,"messaggio": string,"origine"?: string,"profilo_id"?: string | null
+                  }
+                  Update: {
+                    "creato_il"?: string,"dettagli"?: string | null,"dove"?: string | null,"id"?: never,"messaggio"?: string,"origine"?: string,"profilo_id"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "errori_client_profilo_id_fkey"
+      columns: ["profilo_id"]
+isOneToOne: false
+      referencedRelation: "profili"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"figurine": {
                   Row: {
                     "in_attesa_di_riscatto_dal": string | null,"pagina": string,"posa": string,"sbloccata_il": string | null,"serie_nera": boolean

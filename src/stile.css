@@ -566,6 +566,15 @@ body:has(.avvio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom))
 .riga-elenco > span { flex: 1; display: flex; flex-direction: column; }
 .riga-elenco b { font-size: 16px; }
 .riga-elenco small { font-size: 13px; color: var(--testo-2); }
+/* schermata rotta (Errore.tsx) */
+.errore-app { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; min-height: 100dvh; padding: 24px 16px; text-align: center; }
+/* Stato di ACE (area genitori) */
+.stato-elenco { display: flex; flex-direction: column; gap: 12px; margin: 8px 0 0; padding: 0; list-style: none; }
+.stato-elenco li { display: flex; flex-direction: column; gap: 2px; padding-top: 12px; border-top: 2px dashed var(--lilla); }
+.stato-elenco li:first-child { padding-top: 0; border-top: 0; }
+.stato-elenco small { font-size: 13px; color: var(--testo-2); }
+.stato-ok { color: var(--verde); font-weight: 700; }
+.stato-ko { color: var(--accento); font-weight: 700; }
 .esci { align-self: center; justify-self: center; padding: 0 16px; color: var(--testo-2); font: 700 14px Nunito, sans-serif; }
 .foglio-app { align-items: end; padding: 24px 16px calc(24px + env(safe-area-inset-bottom)); }
 .foglio-app .carta { width: min(100%, 398px); margin: 0 auto; border-radius: 24px; box-shadow: var(--ombra-alta); }

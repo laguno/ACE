@@ -4,7 +4,7 @@
 // del libro (data/mappa-libri.json: titoli e pagine, mai il testo dei libri).
 // La chiamano sync-nuvola dopo ogni sincronizzazione (segreto del cron) o un genitore.
 import Anthropic from 'npm:@anthropic-ai/sdk';
-import { dbServizio } from '../_shared/ambiente.ts';
+import { dbServizio, registraErroreServer } from '../_shared/ambiente.ts';
 import mappa from '../../../data/mappa-libri.json' with { type: 'json' };
 import * as C from '../../../src/lib/calendario/index.ts';
 import * as R from '../../../src/lib/regole/index.ts';
@@ -181,7 +181,7 @@ Deno.serve(async (req) => {
   try {
     return risposta(await prepara());
   } catch (e) {
-    console.error(e);
+    await registraErroreServer(db, 'genera-studio', e);
     return risposta({ errore: e instanceof Error ? e.message : 'errore imprevisto' }, 500);
   }
 });

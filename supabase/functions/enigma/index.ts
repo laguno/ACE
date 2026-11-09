@@ -7,7 +7,7 @@
 //   accettando sinonimi; +20 passi se indovinato prima di arrivare al forziere.
 // Il premio e la soluzione non escono mai da qui verso Lani: lei riceve solo giusto/sbagliato.
 import Anthropic from 'npm:@anthropic-ai/sdk';
-import { dbServizio } from '../_shared/ambiente.ts';
+import { dbServizio, registraErroreServer } from '../_shared/ambiente.ts';
 import * as R from '../../../src/lib/regole/index.ts';
 import { aggiornaForzieri } from '../_shared/forzieri.ts';
 import { inviaPush } from '../_shared/push.ts';
@@ -180,7 +180,7 @@ Deno.serve(async (req) => {
     return risposta({ errore: 'azione sconosciuta' }, 400);
   } catch (e) {
     if (e instanceof CorpoNonValido) return risposta({ errore: e.message }, 400);
-    console.error(e);
+    await registraErroreServer(db, 'enigma', e);
     return risposta({ errore: 'errore del server' }, 500);
   }
 });
