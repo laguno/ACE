@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import config from '../../../data/config-gioco.json';
-import { NOTIFICHE, POPUP, componi, notifica, popupMostrabile, popupVoto, votoScritto, type ChiavePopup, type ChiaveNotifica } from './index';
+import { NOTIFICHE, POPUP, componi, notifica, popupMostrabile, popupVoto, riempi, votoScritto, type ChiavePopup, type ChiaveNotifica } from './index';
 
 // Valori di prova lunghi, per stare larghi con i limiti.
 const ESEMPIO = {
@@ -36,7 +36,24 @@ describe('copione', () => {
 
   it('nota di merito: mamma-festeggia, +50 dal config, va sul frigo', () => {
     const p = componi('nota_merito', { materia: 'Arte', passi: config.passi.nota_merito });
-    expect(p).toMatchObject({ posa: 'mamma-festeggia', titolo: 'Nota di merito', testo: 'Nota di merito in Arte: +50. Questa va sul frigo.' });
+    expect(p).toMatchObject({ posa: 'mamma-festeggia', titolo: 'Nota di merito', testo: 'In Arte: +50. Questa va sul frigo.' });
+  });
+
+  it.each(Object.keys(POPUP) as ChiavePopup[])('popup %s: il testo non ripete il titolo', (k) => {
+    const p = componi(k, ESEMPIO);
+    const inizio = (s: string) => s.toLowerCase().replace(/[^a-zàèéìòù ]/g, '').split(' ').slice(0, 2).join(' ');
+    expect(inizio(p.testo)).not.toBe(inizio(p.titolo));
+  });
+
+  it('singolare e plurale giusti con 1 (chiave, passo, tentativo, sessione, compito, cosa)', () => {
+    const uno = { ...ESEMPIO, n: 1, mancano_passi: 1, chiavi: 1 };
+    const testi = [...(Object.keys(POPUP) as ChiavePopup[]).map((k) => componi(k, uno).testo), ...(Object.keys(NOTIFICHE) as ChiaveNotifica[]).map((k) => notifica(k, uno).testo)];
+    for (const s of testi) expect(s).not.toMatch(/1 (chiavi|passi|tappe|tentativi|sessioni|compiti|cose)|servono 1|[Mm]ancano ancora 1/);
+    expect(componi('forziere_lucchetto', uno).testo).toBe('Sei arrivata al forziere, ma serve una chiave in più. Si apre appena ce l’hai.');
+    expect(componi('forziere_lucchetto', { n: 2 }).testo).toBe('Sei arrivata al forziere, ma servono 2 chiavi in più. Si apre appena le hai.');
+    expect(componi('tappa', { tappa: 4, mancano_passi: 1 }).testo).toBe('Tappa 4! Alla prossima: un passo.');
+    expect(notifica('sollecito', { n: 1 }).testo).toBe('Manca ancora una cosa per chiudere la giornata');
+    expect(notifica('genitori_riepilogo', { chiavi: 0 }).testo).toBe('Riepilogo della settimana di Lani: 0 chiavi');
   });
 
   it('popup del voto: recupero, migliorato, fascia', () => {
@@ -54,5 +71,5 @@ describe('copione', () => {
 
 function riempita(k: ChiaveNotifica) {
   // senza troncare: il testo pieno deve già stare nei 60 caratteri
-  return NOTIFICHE[k].replace(/\{(\w+)\}/g, (_, v) => String((ESEMPIO as Record<string, unknown>)[v] ?? '')).replace('Educazione civica', 'Ed. civica').length;
+  return riempi(NOTIFICHE[k], ESEMPIO).replace('Educazione civica', 'Ed. civica').length;
 }

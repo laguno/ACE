@@ -28,6 +28,9 @@ Ogni messaggio dice a Lani cosa è successo e cosa fare adesso, in due righe al 
 **Quanti e quando**
 
 - Massimo 3 notifiche al giorno, come deciso: 7:00, pomeriggio solo con compiti nuovi, chiusura della sera, più un solo sollecito.
+- Il testo di un popup non ripete il titolo (decisione del 9/11): il titolo dice cos'è, il testo aggiunge.
+- Singolare e plurale sempre giusti nei segnaposti numerici (una chiave / 2 chiavi, un passo, un tentativo, una sessione, un compito, una cosa); nel codice la forma è {n:singolare:plurale}.
+- Forziere aperto e cima si chiudono con "Evviva!", gli altri popup con "Ok".
 - Massimo un popup per ogni apertura dell'app. Se ce ne sono di più in coda, aspettano la volta dopo, partendo dal più importante.
 - Lo stesso testo non torna prima di 7 giorni: per i messaggi frequenti ci sono più varianti, a rotazione.
   - Se nello stesso momento scattano più situazioni, vince quella con priorità più alta: bastone del giorno, poi voto, poi forziere e tappa, poi il resto. Per i voti un solo popup: recupero dopo insufficienza, poi voto migliorato, poi fascia del voto; i passi si sommano comunque.
@@ -90,7 +93,7 @@ Nello studio il personaggio parla poco: commenta il risultato con un numero prec
 
 | Situazione | Posa | Testo | Verso |
 |---|---|---|---|
-| Nuova verifica trovata su Nuvola | lani-pensierosa | "Verifica di {materia}: {giorno}. Il piano è pronto: {n} sessioni da 15 minuti." Pulsante: "Vedi il piano" | — |
+| Nuova verifica trovata su Nuvola | lani-pensierosa | "{materia}, {giorno}. Il piano è pronto: {n} sessioni da 15 minuti." (con una sola sessione: "una sessione") Pulsante: "Vedi il piano" | — |
 | Inizio sessione di ripasso | lady-compiti | "Lady si è già seduta sul libro di {materia}. Tocca a te." | fusa |
 | Sessione finita | lady-fusa | "Sessione fatta: +10. Lady fa le fusa sul libro chiuso. Prossima: {giorno}." | spunta |
 | Flash card, giro finito | bart-contento | "{sapevo} su {totale} al primo colpo. Le {quasi} incerte tornano domani." | abbaio |
@@ -102,7 +105,7 @@ Nello studio il personaggio parla poco: commenta il risultato con un numero prec
 | "Non ho capito" premuto | lani-pensierosa | "Ok, vediamola con un altro esempio." | — |
 | Sera prima della verifica | bart-sonnecchia | "Ultimo quiz breve sugli errori, poi a letto: domani {materia}." | sbadiglio |
 | Voto 9 o 10 | nonno-pollice | "{voto} in {materia}. Il nonno ha alzato il pollice. Succede di rado." | borbottio |
-| Voto 7 o 8 | mamma-applaude | "{voto} in {materia}: +{passi}. Le {n} sessioni di ripasso si vedono." | applauso |
+| Voto 7 o 8 | mamma-applaude | "{voto} in {materia}: +{passi}. Le {n} sessioni di ripasso si vedono." (con una: "La sessione di ripasso si vede") | applauso |
 | Voto migliore del precedente | papa-pollice | "Da {prima} a {voto} in {materia}: +{passi}." | fischio |
 | Sufficienza dopo un'insufficienza | papa-applaude | "Recuperata {materia}: +20. Questa è una rimonta." | applauso |
 | Voto insufficiente | lani-partita-persa | "{voto} in {materia}. Il piano per la prossima è già pronto." Pulsante: "Vedi il piano" | — |
@@ -153,11 +156,12 @@ Linea dura, come deciso: il rimprovero arriva subito, dice quanto è costato e c
 
 | Situazione | Posa | Testo | Verso | Passi |
 |---|---|---|---|---|
+| Nota di merito (titolo "Nota di merito") | mamma-festeggia | "In {materia}: +50. Questa va sul frigo." | applauso | +50 |
 | Nota disciplinare | mamma-arrabbiata | "Nota disciplinare in {materia}. −20, e salta la seconda chiave. Stasera ne parliamo." | sospiro | −20 |
 | Nota per dimenticanza (prima e seconda) | papa-arrabbiato | "Nota per dimenticanza: {motivo}. Salta la seconda chiave; alla terza nota anche −10." | "ehm" | 0 |
 | Terza nota per dimenticanza | papa-arrabbiato | "Terza nota per dimenticanze: −10. Da domani doppia spunta sulla cartella." Poi il contatore riparte da zero. | "ehm" | −10 |
-| Bagno lasciato in disordine dopo la doccia | mamma-arrabbiata o papa-arrabbiato (chi lo segna) | "Bagno da sistemare: −1. Asciugamani appesi, tappetino a posto, specchio pulito." | borbottio | −1 |
-| Bagno, seconda volta nella settimana | lady-offesa | "Di nuovo il bagno. Perfino Lady si rifiuta di entrarci. −1." | miagolio offeso | −1 |
+| Bagno lasciato in disordine dopo la doccia | mamma-arrabbiata o papa-arrabbiato (chi lo segna) | "Asciugamani appesi, tappetino a posto, specchio pulito: −1." | borbottio | −1 |
+| Bagno, seconda volta nella settimana | lady-offesa | "Perfino Lady si rifiuta di entrarci. −1." | miagolio offeso | −1 |
 | Compiti non spuntati alla chiusura | lady-dispettosa | "Lady si è sdraiata sul quaderno di {materia}. Si sposta solo se lo apri." | miagolio | 0 |
 | Chiusura non fatta dopo il sollecito, la sera | bart-triste | "Bart è andato a dormire da solo. La sera è rimasta aperta." | guaito | 0 |
 | La mattina dopo una sera non chiusa | papa-arrabbiato | Un solo popup che sostituisce il buongiorno: "Ieri sera niente chiusura. Prima di uscire: cartella e {cosa}." | "ehm" | 0 |
@@ -171,8 +175,8 @@ Linea dura, come deciso: il rimprovero arriva subito, dice quanto è costato e c
 
 | Situazione | Posa | Testo | Verso | Passi |
 |---|---|---|---|---|
-| Comportamento antisportivo in campo (con R-Evolution) | papa-arrabbiato | "In campo non si fa così: −7. Il rispetto vale più di un punto." | "ehm" | −7 |
-| Balla o imbroglio scoperto, nell'app o fuori | mamma-arrabbiata | "Balla scoperta: {cosa}. −10. Con la verità si perde sempre meno." | sospiro | −10 |
+| Comportamento antisportivo in campo (con R-Evolution) | papa-arrabbiato | "Così non si gioca: −7. Il rispetto vale più di un punto." | "ehm" | −7 |
+| Balla o imbroglio scoperto, nell'app o fuori | mamma-arrabbiata | "{Cosa}. −10. Con la verità si perde sempre meno." | sospiro | −10 |
 | Compiti spuntati ma non fatti (è un imbroglio) | mamma-arrabbiata | "Avevi spuntato {materia}, ma non era fatto. −10, e stasera si rifà." | sospiro | −10 |
 
 **Regole del bastone**
@@ -189,20 +193,20 @@ Sul percorso la famiglia fa il tifo dal bordo. Ogni messaggio dice dove si trova
 | Situazione | Posa | Testo | Verso |
 |---|---|---|---|
 | Passi di casa dati da un genitore | papa-pollice / mamma-pollice | "Papà: +2, camera in ordine." | — |
-| Tappa raggiunta | lani-contenta | "Tappa {tappa}! Alla prossima: {mancano_passi} passi." | "sì!" |
+| Tappa raggiunta | lani-contenta | "Tappa {tappa}! Alla prossima: {mancano_passi} passi." (con 1: "un passo") | "sì!" |
 | Davanti alla bandierina | leo-cinque | "Sei {n} tappe davanti alla bandierina. Leo vuole il cinque." | risatina |
 | In pari con la bandierina | lani-determinata | "In pari con la bandierina: {chiavi} chiavi finora." | — |
 | Indietro: parte la rimonta | lani-determinata (oggetto: razzo) | "Sei indietro di {n} tappe. Se questa settimana prendi almeno una chiave, i passi valgono ×1,25." | razzo |
-| Settimana chiusa: 1 chiave | lani-saluta | "Una chiave. Per la seconda mancava: {cosa}." | — |
-| Settimana chiusa: 2 chiavi | mamma-applaude | "Due chiavi: quota fatta e nessuna nota. Per la terza: {cosa}." | applauso |
-| Settimana chiusa: 3 chiavi | leo-festeggia | "Tre chiavi: tutto fatto. Leo non trova niente da prenderti in giro." | esultanza |
-| Settimana senza chiavi | mamma-dispiaciuta | "Settimana storta: nessuna chiave. Lunedì si riparte da zero, non da sotto zero. Ogni giorno, passino passino." | — |
-| Enigma comparso (a una tappa dal forziere) | lani-detective | "Un biglietto vicino al forziere. Riesci a decifrarlo? Hai 3 tentativi." | fusa |
+| Settimana chiusa: 1 chiave | lani-saluta | "Per la seconda mancava: {cosa}." | — |
+| Settimana chiusa: 2 chiavi | mamma-applaude | "Quota fatta e nessuna nota. Per la terza: {cosa}." | applauso |
+| Settimana chiusa: 3 chiavi | leo-festeggia | "Tutto fatto. Leo non trova niente da prenderti in giro." | esultanza |
+| Settimana senza chiavi | mamma-dispiaciuta | "Nessuna chiave. Lunedì si riparte da zero, non da sotto zero. Ogni giorno, passino passino." | — |
+| Enigma comparso (a una tappa dal forziere) | lani-detective | "Vicino al forziere c'è un biglietto. Riesci a decifrarlo? Hai 3 tentativi." | fusa |
 | Enigma risolto | lani-festeggia | "Indovinato! +20. Ora arriva fino al forziere." | esultanza |
 | Enigma sbagliato | lady-snob | "No. Lady ti guarda con sufficienza. Restano {n} tentativi." | miagolio |
-| Forziere raggiunto ma mancano chiavi | lucchetto (oggetto) + papa-dispiaciuto | "Sei arrivata al forziere, ma servono {n} chiavi in più. Si apre appena le hai." | — |
-| Forziere aperto | forziere-aperto + lani-sorpresa | "Forziere aperto! Dentro c'è: {premio}. E una figurina che non trovi altrove." | festa |
-| Cima | lani-cima + tutta la famiglia | "In cima! Per aspera ad astra. Tutta la famiglia è qui." | festa grande |
+| Forziere raggiunto ma mancano chiavi | lucchetto (oggetto) + papa-dispiaciuto | "Sei arrivata al forziere, ma servono {n} chiavi in più. Si apre appena le hai." (con 1: "serve una chiave in più. Si apre appena ce l'hai.") | — |
+| Forziere aperto | forziere-aperto + lani-sorpresa | "Dentro c'è: {premio}. E una figurina che non trovi altrove." Pulsante: "Evviva!" | festa |
+| Cima | lani-cima + tutta la famiglia | "Per aspera ad astra. Tutta la famiglia è qui." Pulsante: "Evviva!" | festa grande |
 | Nuova figurina comune | (la posa sbloccata) | Riga in fondo al popup: "Nuova figurina: {nome}. Album {n}/64." | clic |
 | Figurina della serie nera | (la posa sbloccata) | "Sette giorni fatti bene: figurina nera sbloccata, {nome}." | — |
 | Album completo | tutte | "Album completo: 64 su 64." | festa grande |
@@ -255,11 +259,11 @@ Le notifiche sono al massimo tre al giorno più un sollecito, sotto i 60 caratte
 | 7:00, giorno normale | Lani | "Oggi verifica di {materia}, allenamento {ora}" (materia abbreviata) |
 | 7:00, giorno di partita | Lani in divisa | "Partita alle {ora} a {luogo}. Borsa pronta?" |
 | 7:00, niente in programma | Lani | "Giornata tranquilla. Apri per la cosa da ricordare" |
-| Pomeriggio, compiti nuovi | Lani | "{n} compiti nuovi. Primo: {materia}, è per domani" |
+| Pomeriggio, compiti nuovi | Lani | "{n} compiti nuovi. Primo: {materia}, è per domani" (con 1: "Un compito nuovo") |
 | Ora della chiusura | Bart | "Bart ti aspetta: chiusura della sera, 10 minuti" |
-| Sollecito, 45 minuti dopo | Bart triste | "Mancano ancora {n} cose per chiudere la giornata" |
+| Sollecito, 45 minuti dopo | Bart triste | "Mancano ancora {n} cose per chiudere la giornata" (con 1: "Manca ancora una cosa") |
 | Domenica, chiusura lunga | Papà | "Domenica sera: prepariamo la settimana" |
-| Ai genitori, domenica | — | "Riepilogo della settimana di Lani: {chiavi} chiavi" |
+| Ai genitori, domenica | — | "Riepilogo della settimana di Lani: {chiavi} chiavi" (con 1: "una chiave") |
 | Ai genitori, foglio da firmare in scadenza | — | "Foglio da firmare per Lani entro {giorno}" |
 | Ai genitori, pagine da fotografare | — | "Verifica {materia}: foto pagine {pagine}" |
 

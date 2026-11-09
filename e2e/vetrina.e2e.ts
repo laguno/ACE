@@ -31,7 +31,7 @@ test('vetrina: tutti i popup del copione e le notifiche, senza scrivere niente',
   await expect(popup).toContainText('una serata al cinema');
   await expect(popup).toContainText('Album 13/64');
   await expect(page.locator('.coriandoli')).toBeAttached();
-  await popup.getByRole('button', { name: 'Ok' }).click();
+  await popup.getByRole('button', { name: 'Evviva!' }).click();
   await expect(popup).toHaveCount(0);
 
   await page.getByRole('button', { name: /\(nota_disciplinare\)$/ }).click();
@@ -54,6 +54,6 @@ test('vetrina: foto di ogni popup', async ({ page }) => {
     await page.getByRole('dialog').waitFor();
     await page.waitForTimeout(150);
     await page.screenshot({ path: `docs/confronto/vetrina/${chiave}.png` });
-    await page.getByRole('button', { name: 'Ok' }).click();
+    await page.getByRole('dialog').getByRole('button').click();
   }
 });

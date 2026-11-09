@@ -92,7 +92,7 @@ export function PopupVista({ p, chiudi }: { p: Popup; chiudi: () => void }) {
         <p>{p.testo}</p>
         {t === 'lucchetto' && <p className="popup-riquadro">I passi ti fanno camminare, le chiavi aprono i forzieri.</p>}
         <button className="principale largo" onClick={chiudi}>
-          Ok
+          {CON_CORIANDOLI.includes(p.situazione) ? 'Evviva!' : 'Ok'}
         </button>
         {p.figurina && <p className="riga-figurina">{p.figurina}</p>}
       </div>

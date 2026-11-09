@@ -219,7 +219,7 @@ function SchedaForziere({ f, n, passi, chiavi, chiudi }: { f?: Forziere; n: numb
     setAttesa(false);
     if (!data || data.errore) return setEsito('Adesso non riesco a controllare. Riprova tra poco.');
     setRimasti(data.rimasti);
-    setEsito(data.giusta ? `Indovinato!${data.passi ? ` +${data.passi} passi.` : ''}` : data.rimasti ? `Non è questo. Ti restano ${data.rimasti} tentativi.` : 'Tentativi finiti: il forziere si aprirà quando ci arrivi.');
+    setEsito(data.giusta ? `Indovinato!${data.passi ? ` +${data.passi} passi.` : ''}` : data.rimasti ? `Non è questo. Ti ${data.rimasti === 1 ? 'resta un tentativo' : `restano ${data.rimasti} tentativi`}.` : 'Tentativi finiti: il forziere si aprirà quando ci arrivi.');
   }
 
   let corpo;

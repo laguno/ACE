@@ -7,13 +7,17 @@ export type Priorita = 1 | 2 | 3 | 4; // 1 bastone, 2 voto, 3 forziere/tappa, 4 
 
 type Riga = { priorita: Priorita; posa: string; titolo: string; testo: string };
 
-/** Popup del copione. {variabili} riempite da componi(). */
+/**
+ * Popup del copione. {variabili} riempite da componi(). Singolare e plurale: {n:una chiave:# chiavi}
+ * sceglie la prima forma se n vale 1, la seconda altrimenti; # diventa il numero.
+ * Il testo non ripete il titolo (decisione del signore, 9/11).
+ */
 export const POPUP = {
   // voti (un solo popup per voto, in quest'ordine: recupero, migliorato, fascia)
   voto_recupero: { priorita: 2, posa: 'papa-applaude', titolo: 'Materia recuperata', testo: 'Recuperata {materia}: +{passi}. Questa è una rimonta.' },
   voto_migliorato: { priorita: 2, posa: 'papa-pollice', titolo: 'Voto migliorato', testo: 'Da {prima} a {voto} in {materia}: +{passi}.' },
   voto_9: { priorita: 2, posa: 'nonno-pollice', titolo: 'Voto alto', testo: '{voto} in {materia}. Il nonno ha alzato il pollice. Succede di rado.' },
-  voto_7: { priorita: 2, posa: 'mamma-applaude', titolo: 'Bel voto', testo: '{voto} in {materia}: +{passi}. Le {n} sessioni di ripasso si vedono.' },
+  voto_7: { priorita: 2, posa: 'mamma-applaude', titolo: 'Bel voto', testo: '{voto} in {materia}: +{passi}. {n:La sessione di ripasso si vede:Le # sessioni di ripasso si vedono}.' },
   // ponytail: variante senza sessioni (il copione dà solo quella con {n}): il testo si ferma ai passi
   voto_7_senza_ripasso: { priorita: 2, posa: 'mamma-applaude', titolo: 'Bel voto', testo: '{voto} in {materia}: +{passi}.' },
   voto_6: { priorita: 2, posa: 'lani-saluta', titolo: 'Sufficienza', testo: '{voto} in {materia}: sufficienza. Per il 7 il piano è pronto.' },
@@ -22,29 +26,29 @@ export const POPUP = {
   // note (bastone)
   nota_disciplinare: { priorita: 1, posa: 'mamma-arrabbiata', titolo: 'Nota', testo: 'Nota disciplinare in {materia}. {passi}, e salta la seconda chiave. Stasera ne parliamo.' },
   nota_terza_dimenticanza: { priorita: 1, posa: 'papa-arrabbiato', titolo: 'Terza dimenticanza', testo: 'Terza nota per dimenticanze: {passi}. Da domani doppia spunta sulla cartella.' },
-  nota_merito: { priorita: 2, posa: 'mamma-festeggia', titolo: 'Nota di merito', testo: 'Nota di merito in {materia}: +{passi}. Questa va sul frigo.' },
+  nota_merito: { priorita: 2, posa: 'mamma-festeggia', titolo: 'Nota di merito', testo: 'In {materia}: +{passi}. Questa va sul frigo.' },
   // casa: gesti e sgridate segnati dai genitori
   gesto_papa: { priorita: 4, posa: 'papa-pollice', titolo: 'Passi di casa', testo: 'Papà: +{passi}, {cosa}.' },
   gesto_mamma: { priorita: 4, posa: 'mamma-pollice', titolo: 'Passi di casa', testo: 'Mamma: +{passi}, {cosa}.' },
-  bagno_papa: { priorita: 1, posa: 'papa-arrabbiato', titolo: 'Bagno da sistemare', testo: 'Bagno da sistemare: {passi}. Asciugamani appesi, tappetino a posto, specchio pulito.' },
-  bagno_mamma: { priorita: 1, posa: 'mamma-arrabbiata', titolo: 'Bagno da sistemare', testo: 'Bagno da sistemare: {passi}. Asciugamani appesi, tappetino a posto, specchio pulito.' },
-  bagno_2: { priorita: 1, posa: 'lady-offesa', titolo: 'Di nuovo il bagno', testo: 'Di nuovo il bagno. Perfino Lady si rifiuta di entrarci. {passi}.' },
+  bagno_papa: { priorita: 1, posa: 'papa-arrabbiato', titolo: 'Bagno da sistemare', testo: 'Asciugamani appesi, tappetino a posto, specchio pulito: {passi}.' },
+  bagno_mamma: { priorita: 1, posa: 'mamma-arrabbiata', titolo: 'Bagno da sistemare', testo: 'Asciugamani appesi, tappetino a posto, specchio pulito: {passi}.' },
+  bagno_2: { priorita: 1, posa: 'lady-offesa', titolo: 'Di nuovo il bagno', testo: 'Perfino Lady si rifiuta di entrarci. {passi}.' },
   bagno_3: { priorita: 1, posa: 'leo-sbuffa', titolo: 'Ancora il bagno', testo: 'Leo non entra in bagno dopo di te, puzzolona. {passi}.' },
-  antisportivo: { priorita: 1, posa: 'papa-arrabbiato', titolo: 'In campo', testo: 'In campo non si fa così: {passi}. Il rispetto vale più di un punto.' },
-  balla: { priorita: 1, posa: 'mamma-arrabbiata', titolo: 'Balla scoperta', testo: 'Balla scoperta: {cosa}. {passi}. Con la verità si perde sempre meno.' },
+  antisportivo: { priorita: 1, posa: 'papa-arrabbiato', titolo: 'In campo', testo: 'Così non si gioca: {passi}. Il rispetto vale più di un punto.' },
+  balla: { priorita: 1, posa: 'mamma-arrabbiata', titolo: 'Balla scoperta', testo: '{cosa}. {passi}. Con la verità si perde sempre meno.' },
   // Astra
-  tappa: { priorita: 3, posa: 'lani-contenta', titolo: 'Tappa raggiunta', testo: 'Tappa {tappa}! Alla prossima: {mancano_passi} passi.' },
-  enigma_comparso: { priorita: 3, posa: 'lani-detective', titolo: 'Un biglietto', testo: 'Un biglietto vicino al forziere. Riesci a decifrarlo? Hai {n} tentativi.' },
-  forziere_lucchetto: { priorita: 3, posa: 'papa-dispiaciuto', titolo: 'Servono chiavi', testo: 'Sei arrivata al forziere, ma servono {n} chiavi in più. Si apre appena le hai.' },
-  forziere_aperto: { priorita: 3, posa: 'lani-sorpresa', titolo: 'Forziere aperto', testo: 'Forziere aperto! Dentro c’è: {premio}. E una figurina che non trovi altrove.' },
-  cima: { priorita: 3, posa: 'lani-cima', titolo: 'In cima', testo: 'In cima! Per aspera ad astra. Tutta la famiglia è qui.' },
-  chiavi_0: { priorita: 4, posa: 'mamma-dispiaciuta', titolo: 'Settimana storta', testo: 'Settimana storta: nessuna chiave. Lunedì si riparte da zero, non da sotto zero. Ogni giorno, passino passino.' },
-  chiavi_1: { priorita: 4, posa: 'lani-saluta', titolo: 'Una chiave', testo: 'Una chiave. Per la seconda mancava: {cosa}.' },
-  chiavi_2: { priorita: 4, posa: 'mamma-applaude', titolo: 'Due chiavi', testo: 'Due chiavi: quota fatta e nessuna nota. Per la terza: {cosa}.' },
-  chiavi_3: { priorita: 4, posa: 'leo-festeggia', titolo: 'Tre chiavi', testo: 'Tre chiavi: tutto fatto. Leo non trova niente da prenderti in giro.' },
+  tappa: { priorita: 3, posa: 'lani-contenta', titolo: 'Tappa raggiunta', testo: 'Tappa {tappa}! Alla prossima: {mancano_passi:un passo:# passi}.' },
+  enigma_comparso: { priorita: 3, posa: 'lani-detective', titolo: 'Un biglietto', testo: 'Vicino al forziere c’è un biglietto. Riesci a decifrarlo? Hai {n:un tentativo:# tentativi}.' },
+  forziere_lucchetto: { priorita: 3, posa: 'papa-dispiaciuto', titolo: 'Servono chiavi', testo: 'Sei arrivata al forziere, ma {n:serve una chiave:servono # chiavi} in più. Si apre appena {n:ce l’hai:le hai}.' },
+  forziere_aperto: { priorita: 3, posa: 'lani-sorpresa', titolo: 'Forziere aperto', testo: 'Dentro c’è: {premio}. E una figurina che non trovi altrove.' },
+  cima: { priorita: 3, posa: 'lani-cima', titolo: 'In cima', testo: 'Per aspera ad astra. Tutta la famiglia è qui.' },
+  chiavi_0: { priorita: 4, posa: 'mamma-dispiaciuta', titolo: 'Settimana storta', testo: 'Nessuna chiave. Lunedì si riparte da zero, non da sotto zero. Ogni giorno, passino passino.' },
+  chiavi_1: { priorita: 4, posa: 'lani-saluta', titolo: 'Una chiave', testo: 'Per la seconda mancava: {cosa}.' },
+  chiavi_2: { priorita: 4, posa: 'mamma-applaude', titolo: 'Due chiavi', testo: 'Quota fatta e nessuna nota. Per la terza: {cosa}.' },
+  chiavi_3: { priorita: 4, posa: 'leo-festeggia', titolo: 'Tre chiavi', testo: 'Tutto fatto. Leo non trova niente da prenderti in giro.' },
   // studio
-  verifica_nuova: { priorita: 4, posa: 'lani-pensierosa', titolo: 'Verifica in arrivo', testo: 'Verifica di {materia}: {giorno}. Il piano è pronto: {n} sessioni da 15 minuti.' },
-  verifica_nuova_una: { priorita: 4, posa: 'lani-pensierosa', titolo: 'Verifica in arrivo', testo: 'Verifica di {materia}: {giorno}. Il piano è pronto: una sessione da 15 minuti.' },
+  verifica_nuova: { priorita: 4, posa: 'lani-pensierosa', titolo: 'Verifica in arrivo', testo: '{materia}, {giorno}. Il piano è pronto: {n:una sessione:# sessioni} da 15 minuti.' },
+  verifica_nuova_una: { priorita: 4, posa: 'lani-pensierosa', titolo: 'Verifica in arrivo', testo: '{materia}, {giorno}. Il piano è pronto: una sessione da 15 minuti.' },
 } satisfies Record<string, Riga>;
 
 export type ChiavePopup = keyof typeof POPUP;
@@ -54,17 +58,26 @@ export const NOTIFICHE = {
   mattina: 'Oggi {cose}',
   mattina_partita: 'Partita alle {ora}. Borsa pronta?',
   mattina_tranquilla: 'Giornata tranquilla. Apri per la cosa da ricordare',
-  compiti_nuovi: '{n} compiti nuovi. Primo: {materia}, è per domani',
+  compiti_nuovi: '{n:Un compito nuovo:# compiti nuovi}. Primo: {materia}, è per domani',
   chiusura: 'Bart ti aspetta: chiusura della sera, 10 minuti',
   chiusura_domenica: 'Domenica sera: prepariamo la settimana',
-  sollecito: 'Mancano ancora {n} cose per chiudere la giornata',
-  genitori_riepilogo: 'Riepilogo della settimana di Lani: {chiavi} chiavi',
+  sollecito: '{n:Manca ancora una cosa:Mancano ancora # cose} per chiudere la giornata',
+  genitori_riepilogo: 'Riepilogo della settimana di Lani: {chiavi:una chiave:# chiavi}',
 } as const;
 
 export type ChiaveNotifica = keyof typeof NOTIFICHE;
 
-export const riempi = (t: string, v: Record<string, string | number>) =>
-  t.replace(/\{(\w+)\}/g, (_, k) => (v[k] === undefined ? `{${k}}` : String(v[k])));
+export const riempi = (t: string, v: Record<string, string | number>) => {
+  const s = t
+    .replace(/\{(\w+):([^:{}]*):([^{}]*)\}/g, (tutto, k, uno, altri) =>
+      v[k] === undefined ? tutto : (Math.abs(Number(String(v[k]).replace('−', '-'))) === 1 ? uno : altri).replace(/#/g, String(v[k])),
+    )
+    .replace(/\{(\w+)\}/g, (_, k) => (v[k] === undefined ? `{${k}}` : String(v[k])));
+  return s.charAt(0).toUpperCase() + s.slice(1);
+};
+
+/** "1 tentativo", "2 tentativi": per i testi dell'app fuori dal copione. */
+export const conta = (n: number, uno: string, altri: string) => `${n} ${Math.abs(n) === 1 ? uno : altri}`;
 
 export function componi(chiave: ChiavePopup, v: Record<string, string | number> = {}) {
   const r: Riga = POPUP[chiave];
