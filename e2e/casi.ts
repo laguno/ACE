@@ -169,7 +169,7 @@ export async function prepara(p: Page, caso: Caso, dataSpostata = false) {
 }
 
 /** Apre la schermata del caso con i dati finti, all'ora del caso, con immagini e font pronti. */
-export async function apri(p: Page, caso: Caso, indirizzo = 'http://localhost:5179/') {
+export async function apri(p: Page, caso: Caso, indirizzo = `http://localhost:${process.env.PORTA_PROVE ?? 5179}/`) {
   await prepara(p, caso);
   await p.goto(indirizzo);
   await expect(p.locator('main')).toBeVisible();

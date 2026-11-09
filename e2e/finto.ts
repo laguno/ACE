@@ -42,7 +42,7 @@ function unisci(t: Tabelle, nome: string, riga: Record<string, unknown>, select:
 }
 
 /** funzioni: risposte delle Edge Functions diverse da passi, per nome (es. { spiega: {...} }). */
-export async function finto(page: Page, t: Tabelle, funzioni: Record<string, unknown> = {}) {
+export async function finto(page: Pick<Page, 'addInitScript' | 'route'>, t: Tabelle, funzioni: Record<string, unknown> = {}) {
   const utente = { id: 'lani', ruolo: 'lani', nome: 'Lani' };
   t.profili ??= [utente];
   const chiamate: { tipo: string; id: string }[] = [];
