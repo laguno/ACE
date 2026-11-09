@@ -86,6 +86,16 @@ export async function finto(page: Page, t: Tabelle, funzioni: Record<string, unk
     const metodo = req.method();
     const uno = (req.headers()['accept'] ?? '').includes('vnd.pgrst.object');
 
+    // come la funzione vera: la prima richiesta del giorno sceglie frase e momento, gli altri momenti niente
+    if (nome === 'rpc/frase_del_giorno') {
+      const momento = req.postDataJSON()?.p_momento;
+      const usata = t.frase_usata?.[0];
+      if (usata) return json(usata.momento === momento ? [usata.frase] : []);
+      const f = t.frasi?.find((x) => x.momento === momento);
+      if (!f) return json([]);
+      t.frase_usata = [{ momento, frase: { testo: f.testo, autore: f.autore ?? null } }];
+      return json([t.frase_usata[0].frase]);
+    }
     // come la funzione vera: saldo visto prima (o quello attuale, la prima volta), poi lo aggiorna
     if (nome === 'rpc/vedi_saldo') {
       const adesso = Number(t.saldo_passi?.[0]?.passi ?? 0);
@@ -125,6 +135,11 @@ export async function finto(page: Page, t: Tabelle, funzioni: Record<string, unk
         return riga;
       });
       return json(uno ? salvate[0] : salvate, 201);
+    }
+    if (metodo === 'DELETE') {
+      const via = filtra(righe, url.searchParams);
+      t[nome] = righe.filter((r) => !via.includes(r));
+      return json(via);
     }
     return json({ message: `non previsto: ${metodo} ${nome}` }, 400);
   });

@@ -94,6 +94,23 @@ verifica('il papà non vede il saldo visto di Lani', (await come(PAPA, 'select *
 await fallisce('anon non chiama vedi_saldo', null, 'select * from vedi_saldo()', 'anon');
 await come(null, `delete from movimenti_passi where motivo = 'prova_saldo'`);
 await fallisce('anon non legge i forzieri', null, 'select * from forzieri_lani', 'anon');
+// frase del giorno: una al giorno, stessa frase per lo stesso momento, niente per un altro
+const frase = async (m) => (await come(LANI, `select testo, autore from frase_del_giorno('${m}')`)).rows;
+const f1 = await frase('apertura');
+verifica('frase del giorno: una per l\'apertura', f1.length === 1 && f1[0].testo.length > 0);
+verifica('frase del giorno: stessa frase se si riapre', (await frase('apertura'))[0]?.testo === f1[0].testo);
+verifica('frase del giorno: niente in un altro momento dello stesso giorno', (await frase('chiusura')).length === 0);
+await come(null, `update frasi set ultima_volta = oggi() - 1, ultimo_momento = 'apertura' where ultima_volta = oggi()`);
+verifica('frase del giorno: il giorno dopo un\'altra frase', (await frase('apertura'))[0]?.testo !== f1[0].testo);
+await come(null, `update frasi set ultima_volta = oggi() - 10 where ultima_volta = oggi()`);
+await come(null, `update frasi set ultima_volta = oggi() - 5 where momento = 'apertura' and ultima_volta is null`);
+verifica('frase del giorno: mai la stessa prima di 30 giorni', (await frase('apertura')).length === 0);
+await come(PAPA, `insert into frasi (testo, autore, di_famiglia) values ('Ogni giorno un pezzetto.', 'papà', true)`);
+await come(null, `update frasi set ultima_volta = oggi() - 1 where ultima_volta = oggi()`);
+verifica('frase del giorno: quelle di famiglia prima', (await frase('chiusura'))[0]?.testo === 'Ogni giorno un pezzetto.');
+await fallisce('anon non chiama frase_del_giorno', null, `select * from frase_del_giorno('apertura')`, 'anon');
+await come(null, `delete from frasi where di_famiglia`);
+await come(null, `update frasi set ultima_volta = null, ultimo_momento = null where ultima_volta is not null`);
 
 // Genitori, PIN
 verifica('controlla_pin: nessun PIN impostato', (await val(PAPA, `select controlla_pin('2468')`)) === 'manca');

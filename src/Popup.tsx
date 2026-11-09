@@ -4,6 +4,7 @@ import { oraAdesso } from './giornata';
 import * as K from './lib/copione';
 import { adesso } from './spunte';
 import { supabase } from './supabase';
+import { MOMENTO_DEL_POPUP, VistaFrase, fraseDelGiorno, type FraseDelGiorno } from './Frase';
 
 // Un popup per apertura dell'app (docs/05): il più importante in coda (bastone, voto, forziere e
 // tappa, altro), poi il più vecchio. Dopo le 21 i rimproveri di mamma e papà aspettano il mattino.
@@ -11,7 +12,7 @@ import { supabase } from './supabase';
 // Aspetto: lo stampo delle bozze Popup-forziere, -lucchetto, -bastone, -enigma (anello colorato,
 // avatar che sborda, titolo grande, riga della figurina in fondo).
 
-export type Popup = { id: string; priorita: number; situazione: string; posa: string; titolo: string; testo: string; figurina: string | null };
+export type Popup = { id: string; priorita: number; situazione: string; posa: string; titolo: string; testo: string; figurina: string | null; frase?: FraseDelGiorno | null };
 const GIORNI_VALIDO = 3;
 const immagine = (posa: string) => manifest.avatar.find((a) => a.id === posa)?.webp ?? manifest.oggetti.find((o) => o.id === posa)?.webp;
 
@@ -40,7 +41,10 @@ export default function CodaPopup() {
         .order('creato_il')
         .limit(10);
       const ora = oraAdesso();
-      setP((data ?? []).find((x) => K.popupMostrabile(x, ora)));
+      const scelto = (data ?? []).find((x) => K.popupMostrabile(x, ora));
+      // tappa, lucchetto e cima possono portare la frase del giorno (i rimproveri mai)
+      const momento = scelto && MOMENTO_DEL_POPUP[scelto.situazione];
+      setP(scelto && momento ? { ...scelto, frase: await fraseDelGiorno(momento) } : scelto);
     }
     apri();
     const tornata = () => document.visibilityState === 'visible' && apri();
@@ -91,6 +95,7 @@ export function PopupVista({ p, chiudi }: { p: Popup; chiudi: () => void }) {
         <h2 id="popup-titolo">{p.titolo}</h2>
         <p>{p.testo}</p>
         {t === 'lucchetto' && <p className="popup-riquadro">I passi ti fanno camminare, le chiavi aprono i forzieri.</p>}
+        {p.frase && <VistaFrase frase={p.frase} className="frase-popup" />}
         <button className="principale largo" onClick={chiudi}>
           {CON_CORIANDOLI.includes(p.situazione) ? 'Evviva!' : 'Ok'}
         </button>

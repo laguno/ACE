@@ -559,6 +559,7 @@ function Impostazioni({ client, avvisa }: Props) {
         </label>
         <button className="principale">Salva</button>
       </form>
+      <FrasiDiFamiglia client={client} avvisa={avvisa} />
       <form className="carta modulo" onSubmit={pin}>
         <h2>PIN dell’area genitori (iPad)</h2>
         <label>
@@ -568,6 +569,76 @@ function Impostazioni({ client, avvisa }: Props) {
         <button className="principale">Salva PIN</button>
       </form>
     </>
+  );
+}
+
+/** Frasi di famiglia (docs/05): le aggiungono i genitori e passano davanti alle altre, in qualsiasi momento. */
+function FrasiDiFamiglia({ client, avvisa }: Pick<Props, 'client' | 'avvisa'>) {
+  const [frasi, setFrasi] = useState<{ id: string; testo: string; autore: string | null }[]>([]);
+  const carica = () =>
+    client
+      .from('frasi')
+      .select('id, testo, autore')
+      .eq('di_famiglia', true)
+      .order('testo')
+      .then(({ data }) => setFrasi(data ?? []));
+  useEffect(() => {
+    carica();
+  }, []);
+
+  async function aggiungi(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const f = new FormData(form);
+    const testo = String(f.get('testo')).trim();
+    const autore = String(f.get('autore')).trim() || null;
+    const { error } = await client.from('frasi').insert({ testo, autore, di_famiglia: true });
+    avvisa(error ? 'Frase non salvata: forse c’è già.' : 'Frase salvata: Lani la vedrà in uno dei prossimi giorni.');
+    if (!error) {
+      form.reset();
+      carica();
+    }
+  }
+  async function togli(id: string) {
+    const { error } = await client.from('frasi').delete().eq('id', id);
+    avvisa(error ? 'Frase non tolta.' : 'Frase tolta.');
+    carica();
+  }
+
+  return (
+    <form className="carta modulo" onSubmit={aggiungi}>
+      <h2>Frasi di famiglia</h2>
+      <p className="nota">Una frase al giorno al massimo, mai nei rimproveri. Le vostre passano davanti alle altre.</p>
+      {frasi.length > 0 && (
+        <ul className="spunte">
+          {frasi.map((x) => (
+            <li key={x.id} className="foglio">
+              <span>
+                «{x.testo}»
+                {x.autore && (
+                  <>
+                    <br />
+                    <small>{x.autore}</small>
+                  </>
+                )}
+              </span>
+              <button type="button" className="secondario stretto" onClick={() => togli(x.id)} aria-label={`Togli: ${x.testo}`}>
+                Togli
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      <label>
+        Frase
+        <textarea name="testo" rows={2} maxLength={140} required />
+      </label>
+      <label>
+        Di chi (facoltativo)
+        <input name="autore" maxLength={40} placeholder="papà, nonna, un proverbio…" />
+      </label>
+      <button className="principale">Aggiungi la frase</button>
+    </form>
   );
 }
 

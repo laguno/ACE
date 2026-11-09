@@ -3,6 +3,7 @@ import { Bell, CaretRight, Cards, ClipboardText, Lightbulb, Volleyball } from '@
 import { impegniTra, piuGiorni, oraAdesso, useGiornata, type Impegno } from './giornata';
 import { Riquadro, Sticker, Testata } from './kit';
 import { PillolaSaldo } from './Contapassi';
+import { Frase, type Momento } from './Frase';
 import * as C from './lib/calendario';
 import * as N from './lib/nuvola';
 import * as R from './lib/regole';
@@ -55,6 +56,7 @@ function Mattina({ impegni, apri }: { impegni: Impegno[]; apri: Apri }) {
   const [ieriChiusa, setIeriChiusa] = useState(false);
   const [famiglia, setFamiglia] = useState<Impegno[]>([]);
   const [chiavi, setChiavi] = useState<number | null>(null);
+  const [momento, setMomento] = useState<Momento | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -65,7 +67,10 @@ function Mattina({ impegni, apri }: { impegni: Impegno[]; apri: Apri }) {
       impegniTra(new Date(), piuGiorni(oggi, 8)),
       supabase.from('settimane').select('chiavi').not('chiavi', 'is', null).order('inizio', { ascending: false }).limit(1),
       supabase.from('serate').select('cartella_il').eq('data', R.iso(piuGiorni(oggi, -1))).not('cartella_il', 'is', null).limit(1),
-    ]).then(([v, m, f, mov, prossimi, w, sera]) => {
+      supabase.from('verifiche').select('id', { count: 'exact', head: true }).eq('data', R.iso(piuGiorni(oggi, 1))),
+    ]).then(([v, m, f, mov, prossimi, w, sera, vd]) => {
+      // la frase di oggi è una sola: con una verifica domani si tiene per la sera
+      setMomento((vd.count ?? 0) > 0 ? null : oggi.getDay() === 1 ? 'inizio_settimana' : 'apertura');
       const lista: Cosa[] = [];
       for (const x of (v.data ?? []) as unknown as { tipo: string; materie: { nome: string } | null }[])
         lista.push({ titolo: `${maiuscola(x.tipo)} di ${x.materie?.nome ?? 'oggi'}`, sotto: 'Oggi, in classe', icona: 'verifica' });
@@ -186,6 +191,8 @@ function Mattina({ impegni, apri }: { impegni: Impegno[]; apri: Apri }) {
           </button>
         </div>
       )}
+
+      <Frase momento={momento} />
     </section>
   );
 }
