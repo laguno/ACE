@@ -45,6 +45,8 @@ h1, h2 { font-family: 'Baloo 2', Nunito, sans-serif; font-weight: 800; }
 b, strong { font-weight: 800; }
 /* colonna fluida da 360 a 430 px, centrata sull'iPad; in fondo: barra (66) + distacco (14) + 24 */
 main { position: relative; width: min(100%, 430px); margin: 0 auto; padding: 16px 16px calc(104px + env(safe-area-inset-bottom)); }
+/* striscia "senza rete" (App.tsx): sopra la schermata, nella stessa colonna */
+.senza-rete { width: min(100% - 32px, 398px); margin: 12px auto 0; padding: 10px 16px; border-radius: 16px; background: var(--burro-chiaro); color: var(--testo); font-weight: 800; font-size: 15px; text-align: center; }
 .solo-lettori { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 /* Barra di navigazione flottante a pillola, con icone Phosphor */
