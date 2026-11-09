@@ -52,7 +52,7 @@ Fino a **4 al giorno per tipo**, sulle materie della settimana. Danno passi **so
 | Quiz, 3° tentativo | 3 o 2 | |
 | Quiz, dal 4° | 1 | |
 | Carte del giorno (ripasso a intervalli) | 3 a giro | ogni giorno, weekend compresi; salta nei giorni di partita |
-| Foto di un compito richiesta da ACE | 2 | una volta per pagina, solo pagine chieste da Nuvola/Classroom |
+| Foto di un compito richiesta da ACE | 2 | una volta per richiesta, qualunque sia il numero di pagine (deciso dal signore il 9/11); solo se la foto la carica Lani, solo richieste nate da Nuvola/Classroom |
 
 ## Passi: gesti di casa (li danno i genitori)
 
