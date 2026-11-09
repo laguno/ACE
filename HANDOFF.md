@@ -56,7 +56,7 @@ Ramo `grafica` (passi 1-5 e ritocchi di Jarvis) e poi `grafica-2` uniti a `main`
 Ordine dei lavori fino al 23/11 (Jarvis, 9/11, approvato dal signore):
 
 1. ~~Vetrina~~ fatta (9/11): scheda Vetrina nell'area genitori (`src/Vetrina.tsx`, popup da `PopupVista`), foto di ogni popup in `docs/confronto/vetrina/`. "Passi che salgono" non esiste nell'app: da decidere se farla.
-2. **Revisione con Impeccable** (impeccable.style, Apache 2.0): `npx impeccable install`, subito `npx impeccable telemetry off`; niente modalità live né hook. `/impeccable init` con il contesto (ragazza di 12 anni, 390 px, `design/*.html` e `design/Stile.html` fonte autorevole; sticker che sbordano, riquadri con icone, pillole e sfondo per momento voluti). `critique` e `audit` su Oggi, Pomeriggio, Sera, Studio, Flash card, Quiz, Astra, Figurina, Album, Genitori: rapporti in `docs/revisione-ui.md`, **senza toccare il codice** (scala delle spaziature 4/8/12/16/24/32, allineamenti a sinistra, gerarchia dei titoli, raggi e ombre). Il signore e Jarvis scelgono cosa adottare; poi una schermata per commit, con le immagini prima e dopo.
+2. ~~Revisione con Impeccable~~ fatta (9/11): rapporto in `docs/revisione-ui.md` (critique 27/40, audit 14/20), contesto in `PRODUCT.md`. Impeccable installato nel progetto (`.claude/skills/`, `.claude/agents/`, fuori dal repo), telemetria spenta, hook tolti da `.claude/settings.local.json`. **In attesa della scelta** del signore e di Jarvis; poi una schermata per commit, con le foto prima e dopo.
 3. **Grafica**: Benvenuta, Genitori-avvio, area Genitori (stesso kit, prima la chiarezza e poi l'aspetto).
 4. **Debiti prima dell'avvio**: "Da fotografare" (richieste di foto ai genitori, caricamento nel bucket `foto-pagine`, +2 passi a Lani per pagina richiesta, regola già nel config); frasi nei momenti (apertura, tappa, verifica, chiusura; una al giorno, mai la stessa prima di 30 giorni, mai nei rimproveri; 32 nella tabella `frasi`, fonte `data/frasi.json`); "PIN non giusto" solo se il PIN è sbagliato, un altro messaggio per gli errori del server.
 5. Genitori: scegliere i 9 premi (area Genitori, Premi: ogni premio crea l'enigma), controllare orari e materiale nelle Impostazioni.
@@ -69,7 +69,7 @@ Altri debiti: `spiega`, borsa, enigma e push provati solo con le prove (serve un
 
 ## In attesa di
 
-- Signore e Jarvis: scelta di cosa adottare dalla revisione Impeccable (`docs/revisione-ui.md`, quando c'è).
+- Signore e Jarvis: scelta di cosa adottare da `docs/revisione-ui.md` (le 4 regole, i difetti da correggere, i testi da decidere nel copione).
 - Signore: sull'iPad rifare l'accesso su `ace-passino.vercel.app` quando vorrà provare (le anteprime hanno un'altra origine).
 
 ## Attenzione
