@@ -24,7 +24,7 @@ Rami `grafica-3` (Benvenuta, Genitori-avvio, passi che salgono), `debiti` (PIN, 
 
 ## Settimana del piano (9-13/11)
 
-- 9/11 sera: strumenti installati e misure "Prima" in `docs/rapporto-venerdi.md` (ramo `misure`, unito a `main`). Comandi nuovi: `npm run lint`, `knip`, `copertura`, `axe`, `lighthouse` (gli ultimi due fuori dalle prove normali finché non sono a zero). Skill di Supabase e gitleaks installati dal signore (storia pulita); in sospeso le skill Anthropic (`/plugin`).
+- 9/11 sera: strumenti installati e misure "Prima" in `docs/rapporto-venerdi.md` (ramo `misure`, unito a `main`). Comandi nuovi: `npm run lint`, `knip`, `copertura`, `axe`, `lighthouse` (gli ultimi due fuori dalle prove normali finché non sono a zero). Skill di Supabase e gitleaks installati dal signore (storia pulita), skill Anthropic (`example-skills`): strumenti tutti installati.
 - Prossimo: filone A (sicurezza, Lani "attaccante").
 
 ## Decisioni prese

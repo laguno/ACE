@@ -51,4 +51,4 @@ Note sulle misure:
 - Installati come dipendenze di sviluppo: `@axe-core/playwright`, `fast-check`, `lighthouse` (al posto di `@lhci/cli`), `puppeteer-core`, `knip`, `eslint`, `@eslint/js`, `typescript-eslint`, `@vitest/coverage-v8`. Nessuno manda dati fuori; Lighthouse senza invio dei rapporti.
 - Skill di Supabase (`supabase`, `supabase-postgres-best-practices`) installate dal signore il 9/11 con `npx skills add supabase/agent-skills`: solo testi Markdown, nessuno script; versione fissata in `skills-lock.json`, file in `.agents/` (fuori dal repository, come Impeccable).
 - gitleaks 8.30.1 installato dal signore il 9/11 (`winget install gitleaks`).
-- In sospeso, da lanciare dal signore: skill ufficiali Anthropic (`/plugin`).
+- Skill ufficiali Anthropic: plugin `example-skills` (catalogo `anthropics/skills`), con `webapp-testing` e `frontend-design`, installato dal signore il 9/11. Strumenti del piano tutti installati.
