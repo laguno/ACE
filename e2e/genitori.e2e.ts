@@ -25,18 +25,23 @@ function dati() {
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(new Date('2026-11-10T18:00:00+01:00'));
-  page.on('dialog', (d) => d.accept(d.type() === 'prompt' ? 'ha detto di aver studiato' : undefined));
 });
 
 test('settimana: gesti di casa e sgridate chiamano i passi', async ({ page }) => {
   const { t, chiamate } = await finto(page, dati());
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Genitori' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'La settimana di Lani' })).toBeVisible();
   await expect(page.locator('.numeri')).toContainText('6,75');
   await page.getByRole('button', { name: 'Scrivania in ordine +2' }).click();
   await expect(page.getByRole('status')).toContainText('Scrivania in ordine');
   expect(t.gesti_casa[0]).toMatchObject({ voce: 'scrivania' });
   await page.getByRole('button', { name: 'Balla −10' }).click();
+  // foglio dell'app al posto del prompt del browser: Segna resta spento finché il campo è vuoto
+  const foglio = page.getByRole('dialog');
+  await expect(foglio.getByRole('button', { name: 'Segna' })).toBeDisabled();
+  await foglio.getByLabel('Che cosa non era vero').fill('ha detto di aver studiato');
+  await foglio.getByRole('button', { name: 'Segna' }).click();
+  await expect(foglio).toHaveCount(0);
   await expect.poll(() => t.sgridate[0]).toMatchObject({ tipo: 'balla', nota: 'ha detto di aver studiato' });
   await expect.poll(() => chiamate.map((c) => c.tipo)).toEqual(['gesto', 'sgridata']);
   await page.screenshot({ path: 'e2e/risultati/genitori.png', fullPage: true });
@@ -59,6 +64,7 @@ test('correzioni e fogli', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Correzioni' }).click();
   await page.getByRole('button', { name: 'Togli' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Togli' }).click();
   await expect(page.getByRole('status')).toContainText('Spunta tolta');
   expect(t.compiti[0].fatto_il).toBeNull();
   await page.getByRole('button', { name: 'Fogli' }).click();

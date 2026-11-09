@@ -468,3 +468,35 @@ dialog.velo:focus { outline: none; }
 
 /* Sera: "L'ho dato" su una riga */
 .foglio .secondario.compatto { flex: none; white-space: nowrap; margin-top: 0; align-self: center; }
+
+/* Genitori (bozza Genitori): testata, gesti rosa pieni, sgridate contornate, foglio dell'app */
+.testa-genitori { display: flex; align-items: center; gap: 12px; padding-left: 4px; }
+.testa-genitori > div { display: flex; flex-direction: column; }
+.testa-genitori .sopratitolo { min-height: 0; display: block; font: 800 14px Nunito, sans-serif; }
+.genitori .testa-genitori h1 { margin: 0; font-size: 26px; line-height: 1.1; }
+.gesto { min-height: 48px; padding: 8px 12px; border: 0; border-radius: 18px; background: var(--rosa); color: var(--testo); font: 800 14px/1.25 Nunito, sans-serif; text-align: left; box-shadow: inset 0 -4px 0 var(--rosa-bordo); }
+.gesto span { color: var(--accento); white-space: nowrap; }
+.gesto:disabled { background: var(--lilla); box-shadow: none; color: var(--testo-2); }
+.gesto:disabled span { color: var(--testo-2); }
+.griglia.tre { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.sgridata { min-height: 48px; padding: 4px 8px; border: 2px solid var(--lilla-medio); border-radius: 16px; background: #fff; color: var(--testo); font: 800 14px/1.2 Nunito, sans-serif; }
+.elenco { display: flex; flex-direction: column; padding: 8px 16px; }
+.riga-elenco { display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 8px 0; border: 0; border-top: 2px dashed var(--lilla); background: none; color: var(--testo); text-align: left; font: inherit; }
+.riga-elenco:first-child { border-top: 0; }
+.riga-elenco > span { flex: 1; display: flex; flex-direction: column; }
+.riga-elenco b { font-size: 16px; }
+.riga-elenco small { font-size: 13px; color: var(--testo-2); }
+.esci { align-self: center; justify-self: center; padding: 0 16px; color: var(--testo-2); font: 700 14px Nunito, sans-serif; }
+.foglio-app { align-items: end; padding: 24px 16px calc(24px + env(safe-area-inset-bottom)); }
+.foglio-app .carta { width: min(100%, 398px); margin: 0 auto; border-radius: 26px; box-shadow: var(--ombra-popup); }
+.foglio-app h2 { margin: 0; font-size: 20px; }
+.foglio-app p { margin: 0; color: var(--testo-2); }
+.genitori .schede { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; overflow: visible; padding-bottom: 0; }
+.genitori .schede button { padding: 0 2px; font: 800 12px Nunito, sans-serif; }
+.genitori .numeri div { display: flex; flex-direction: column; gap: 0; padding: 8px 12px; border-radius: 20px; box-shadow: var(--ombra); }
+.genitori .numeri dt { font: 800 12px Nunito, sans-serif; color: var(--testo-2); }
+.genitori .numeri dd { font: 800 26px/1.1 'Baloo 2', Nunito, sans-serif; }
+.genitori .numeri dt:last-child { font: 700 12px Nunito, sans-serif; }
+.genitori .gesto { font-size: 13px; }
+.genitori .sgridata { font-size: 12px; }
+.genitori .carta .nota.piccola { margin: 8px 0 0; }

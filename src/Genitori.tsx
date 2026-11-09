@@ -1,4 +1,6 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { CaretRight, Eye, GearSix } from '@phosphor-icons/react';
+import { Riquadro, Sticker } from './kit';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import * as R from './lib/regole';
 import { installata } from './Benvenuta';
@@ -10,7 +12,24 @@ import Vetrina from './Vetrina';
 // come genitore e la funzione "passi" decide i passi come per Lani.
 // ponytail: "Da fotografare" (richieste di foto e Storage) è ancora da fare.
 
-type Pagina = 'settimana' | 'premi' | 'correzioni' | 'fogli' | 'impostazioni' | 'vetrina';
+type Pagina = 'settimana' | 'premi' | 'correzioni' | 'fogli' | 'altro' | 'impostazioni' | 'vetrina';
+/** Quattro schede più "Altro" (Impostazioni e Vetrina stanno lì dentro). */
+const SCHEDE: [Pagina, string][] = [
+  ['settimana', 'Settimana'],
+  ['premi', 'Premi'],
+  ['correzioni', 'Correzioni'],
+  ['fogli', 'Fogli'],
+  ['altro', 'Altro'],
+];
+const TITOLI: Record<Pagina, string> = {
+  settimana: 'La settimana di Lani',
+  premi: 'Premi dei forzieri',
+  correzioni: 'Correzioni',
+  fogli: 'Fogli da firmare',
+  altro: 'Altro',
+  impostazioni: 'Impostazioni',
+  vetrina: 'Vetrina',
+};
 const VOCI_GESTI = [
   ['scrivania', 'Scrivania in ordine'],
   ['lavastoviglie', 'Lavastoviglie fatta'],
@@ -54,13 +73,26 @@ export default function Genitori({ client, esci }: { client: SupabaseClient; esc
       />
     );
 
+  const oggi = R.giornoRoma(new Date());
+  const lun = R.lunedi(oggi);
+  const dom = new Date(lun.getFullYear(), lun.getMonth(), lun.getDate() + 6);
+  const vai = (p: Pagina) => (setPagina(p), setAvviso(''));
+  const scheda = pagina === 'impostazioni' || pagina === 'vetrina' ? 'altro' : pagina;
   return (
     <section className="sera genitori">
-      <h1>Genitori</h1>
+      <header className="testa-genitori">
+        <Sticker posa="lani-contenta" misura={72} />
+        <div>
+          <p className="sopratitolo">
+            Dal {lun.getDate()} al {dom.getDate()} {MESI[dom.getMonth()]}
+          </p>
+          <h1>{TITOLI[pagina]}</h1>
+        </div>
+      </header>
       <nav className="schede" aria-label="Sezioni genitori">
-        {(['settimana', 'premi', 'correzioni', 'fogli', 'impostazioni', 'vetrina'] as Pagina[]).map((p) => (
-          <button key={p} aria-current={p === pagina ? 'page' : undefined} onClick={() => (setPagina(p), setAvviso(''))}>
-            {p.replace(/^./, (c) => c.toUpperCase())}
+        {SCHEDE.map(([p, nome]) => (
+          <button key={p} aria-current={p === scheda ? 'page' : undefined} onClick={() => vai(p)}>
+            {nome}
           </button>
         ))}
       </nav>
@@ -69,14 +101,85 @@ export default function Genitori({ client, esci }: { client: SupabaseClient; esc
       {pagina === 'premi' && <Premi {...props} />}
       {pagina === 'correzioni' && <Correzioni {...props} />}
       {pagina === 'fogli' && <Fogli {...props} />}
+      {pagina === 'altro' && <Altro vai={vai} />}
       {pagina === 'impostazioni' && <Impostazioni {...props} />}
       {pagina === 'vetrina' && <Vetrina />}
-      <button className="secondario" onClick={esci}>Esci</button>
+      <button className="link esci" onClick={esci}>
+        Esci dall'area genitori
+      </button>
     </section>
   );
 }
 
 type Props = { client: SupabaseClient; passi: (tipo: string, id: string) => Promise<number>; avvisa: (s: string) => void };
+
+/** "Altro": Impostazioni e Vetrina, come le righe della bozza. */
+function Altro({ vai }: { vai: (p: Pagina) => void }) {
+  const righe: [Pagina, string, string, typeof GearSix][] = [
+    ['impostazioni', 'Impostazioni', 'Orari, materiale, PIN', GearSix],
+    ['vetrina', 'Vetrina', 'Popup, animazioni e notifiche, come li vede Lani', Eye],
+  ];
+  return (
+    <div className="carta elenco">
+      {righe.map(([p, nome, testo, Icona]) => (
+        <button key={p} className="riga-elenco" onClick={() => vai(p)}>
+          <Riquadro colore="lilla">
+            <Icona size={24} weight="bold" aria-hidden />
+          </Riquadro>
+          <span>
+            <b>{nome}</b>
+            <small>{testo}</small>
+          </span>
+          <CaretRight size={20} weight="bold" aria-hidden />
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** Foglio dell'app al posto di confirm/prompt del browser: conferma, con un campo di testo se serve. */
+function FoglioApp({ titolo, testo, campo, azione = 'Segna', conferma, chiudi }: { titolo: string; testo: string; campo?: string; azione?: string; conferma: (nota: string | null) => void; chiudi: () => void }) {
+  const ref = useRef<HTMLDialogElement>(null);
+  const [nota, setNota] = useState('');
+  useEffect(() => {
+    if (ref.current && !ref.current.open) ref.current.showModal?.();
+  }, []);
+  return (
+    <dialog
+      ref={ref}
+      className="velo foglio-app"
+      aria-labelledby="foglio-titolo"
+      onCancel={(e) => {
+        e.preventDefault();
+        chiudi();
+      }}
+    >
+      <form
+        className="carta modulo"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (campo && !nota.trim()) return;
+          conferma(campo ? nota.trim() : null);
+        }}
+      >
+        <h2 id="foglio-titolo">{titolo}</h2>
+        <p>{testo}</p>
+        {campo && (
+          <label>
+            {campo}
+            <textarea rows={3} value={nota} onChange={(e) => setNota(e.target.value)} autoFocus />
+          </label>
+        )}
+        <button className="principale" disabled={!!campo && !nota.trim()}>
+          {azione}
+        </button>
+        <button type="button" className="link" onClick={chiudi}>
+          Annulla
+        </button>
+      </form>
+    </dialog>
+  );
+}
 
 function Settimana({ client, passi, avvisa }: Props) {
   const oggi = R.giornoRoma(new Date());
@@ -113,12 +216,9 @@ function Settimana({ client, passi, avvisa }: Props) {
     carica();
   }
 
-  async function sgrida(tipo: string, nome: string) {
-    let nota: string | null = null;
-    if (tipo === 'balla') {
-      nota = window.prompt('Che cosa ha detto di non vero? (lo legge Lani)');
-      if (!nota) return;
-    } else if (!window.confirm(`Segnare "${nome}"? Lani perde passi e vede il popup.`)) return;
+  const [chiede, setChiede] = useState<{ tipo: R.TipoSgridata; nome: string }>();
+  async function sgrida(tipo: string, nome: string, nota: string | null) {
+    setChiede(undefined);
     const { data, error } = await client.from('sgridate').insert({ tipo, nota }).select('id').single();
     if (error || !data) return avvisa('Non salvato. Riprova.');
     const p = await passi('sgridata', data.id);
@@ -130,9 +230,6 @@ function Settimana({ client, passi, avvisa }: Props) {
   const tetto = R.CONFIG.passi.gesti_casa.tetto_giornaliero;
   return (
     <>
-      <p className="nota">
-        Dal {lun.getDate()} al {dom.getDate()} {MESI[dom.getMonth()]}
-      </p>
       <dl className="numeri">
         <div>
           <dt>Media</dt>
@@ -145,35 +242,47 @@ function Settimana({ client, passi, avvisa }: Props) {
           <dt>questa settimana</dt>
         </div>
         <div>
-          <dt>Cartelle</dt>
+          <dt>Serate chiuse</dt>
           <dd>{d.serate}</dd>
-          <dt>sere chiuse</dt>
+          <dt>cartella e compiti</dt>
         </div>
       </dl>
       <div className="carta">
-        <h2>Dai qualche passo</h2>
-        <p className="nota">
-          Oggi {d.gestiOggi} su {tetto}
-        </p>
+        <div className="testa-carta">
+          <h2>Dai qualche passo</h2>
+          <span className="valore">
+            oggi {d.gestiOggi} su {tetto}
+          </span>
+        </div>
         <div className="griglia">
           {VOCI_GESTI.map(([v, nome]) => (
-            <button key={v} className="secondario" disabled={d.gestiOggi >= tetto} onClick={() => gesto(v, nome)}>
-              {nome} +{R.CONFIG.passi.gesti_casa.voci[v]}
+            <button key={v} className="gesto" disabled={d.gestiOggi >= tetto} onClick={() => gesto(v, nome)}>
+              {nome} <span>+{R.CONFIG.passi.gesti_casa.voci[v]}</span>
             </button>
           ))}
         </div>
+        <p className="nota piccola">Lani vedrà la tua faccia col pollice.</p>
       </div>
       <div className="carta">
         <h2>Da segnare, se serve</h2>
-        <div className="griglia">
+        <div className="griglia tre">
           {SGRIDATE.map(([t, nome]) => (
-            <button key={t} className="secondario" onClick={() => sgrida(t, nome)}>
+            <button key={t} className="sgridata" onClick={() => setChiede({ tipo: t, nome })}>
               {nome} {String(R.passiSgridata(t)).replace('-', '−')}
             </button>
           ))}
         </div>
-        <p className="nota">Dopo le 21 il popup aspetta la mattina.</p>
+        <p className="nota piccola">Dopo le 21 il popup aspetta la mattina.</p>
       </div>
+      {chiede && (
+        <FoglioApp
+          titolo={`${chiede.nome} ${String(R.passiSgridata(chiede.tipo)).replace('-', '−')}`}
+          testo={chiede.tipo === 'balla' ? 'Scrivi che cosa ha detto di non vero: Lani lo leggerà nel popup.' : 'Lani perde i passi e vede il popup.'}
+          campo={chiede.tipo === 'balla' ? 'Che cosa non era vero' : undefined}
+          conferma={(nota) => sgrida(chiede.tipo, chiede.nome, nota)}
+          chiudi={() => setChiede(undefined)}
+        />
+      )}
     </>
   );
 }
@@ -273,8 +382,9 @@ function Correzioni({ client, avvisa }: Props) {
     carica();
   }, []);
 
+  const [chiede, setChiede] = useState<Spuntato>();
   async function togli(c: Spuntato) {
-    if (!window.confirm('Togliere la spunta? Lani perde i passi di questo compito e vede chi l’ha corretta.')) return;
+    setChiede(undefined);
     const { data: stornato, error } = await client.rpc('storna_spunta', { p_motivo: 'compito', p_riferimento: c.id });
     if (error) return avvisa('Correzione non riuscita.');
     const { data: u } = await client.auth.getUser();
@@ -299,11 +409,20 @@ function Correzioni({ client, avvisa }: Props) {
                 <br />
                 <small>{GIORNI[g.getDay()]}</small>
               </span>
-              <button className="secondario stretto" onClick={() => togli(c)}>Togli</button>
+              <button className="secondario stretto" onClick={() => setChiede(c)}>Togli</button>
             </li>
           );
         })}
       </ul>
+      {chiede && (
+        <FoglioApp
+          titolo="Togliere la spunta?"
+          azione="Togli"
+          testo="Lani perde i passi di questo compito e vede chi l’ha corretta."
+          conferma={() => togli(chiede)}
+          chiudi={() => setChiede(undefined)}
+        />
+      )}
     </div>
   );
 }
