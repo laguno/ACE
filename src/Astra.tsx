@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { ImageSquare } from '@phosphor-icons/react';
 import { useSfondo } from './kit';
 import { Contapassi, vediSaldo } from './Contapassi';
+import { Biglietto } from './Biglietto';
+import { ImmaginePremio, immaginiPremi, type Immagine } from './ImmaginePremio';
 import * as R from './lib/regole';
 import { supabase } from './supabase';
 
@@ -9,7 +11,7 @@ import { supabase } from './supabase';
 // forzieri ogni 3 tappe con passi e chiavi, bandierina del calendario, traguardo di Natale.
 // Il premio di un forziere arriva solo dalla vista forzieri_lani, e solo quando è aperto.
 
-type Forziere = { n: number; stato: 'chiuso' | 'enigma' | 'aperto' | 'consegnato'; enigma: string | null; premio: string | null; tentativi_enigma: number; enigma_risolto_il: string | null };
+type Forziere = { n: number; stato: 'chiuso' | 'enigma' | 'aperto' | 'consegnato'; enigma: string | null; premio: string | null; tentativi_enigma: number; enigma_risolto_il: string | null; aiutino?: string | null };
 
 const MONDI = [
   { nome: 'Colline di caramelle', sfondo: 'sfondo-1-colline' },
@@ -49,7 +51,7 @@ export default function Astra({ apri }: { apri: (pagina: 'Figurina' | 'Album') =
       vediSaldo(),
       supabase.from('chiavi_totali').select('chiavi').maybeSingle(),
       supabase.from('settimane').select('chiavi').not('chiavi', 'is', null).order('inizio', { ascending: false }).limit(1),
-      supabase.from('forzieri_lani').select('n, stato, enigma, premio, tentativi_enigma, enigma_risolto_il').order('n'),
+      supabase.from('forzieri_lani').select('n, stato, enigma, premio, tentativi_enigma, enigma_risolto_il, aiutino').order('n'),
       supabase.from('figurine').select('posa', { count: 'exact', head: true }).not('sbloccata_il', 'is', null),
     ]);
     setDati({
@@ -219,6 +221,13 @@ function SchedaForziere({ f, n, passi, chiavi, chiudi }: { f?: Forziere; n: numb
   const [esito, setEsito] = useState<string>();
   const [rimasti, setRimasti] = useState(R.CONFIG.enigma.tentativi - (f?.tentativi_enigma ?? 0));
   const [attesa, setAttesa] = useState(false);
+  const [aiutino, setAiutino] = useState<string | null>(null);
+  // immagine del premio dal server: sagoma finché è nascosto, vera con l'enigma risolto o il forziere aperto
+  const [img, setImg] = useState<Immagine | null>();
+  const caricaImg = () => immaginiPremi(n).then((l) => setImg(l.find((x) => x.n === n) ?? null));
+  useEffect(() => {
+    caricaImg();
+  }, [n]);
 
   async function prova(e: React.FormEvent) {
     e.preventDefault();
@@ -227,14 +236,23 @@ function SchedaForziere({ f, n, passi, chiavi, chiudi }: { f?: Forziere; n: numb
     setAttesa(false);
     if (!data || data.errore) return setEsito('Adesso non riesco a controllare. Riprova tra poco.');
     setRimasti(data.rimasti);
+    if (data.aiutino) setAiutino(data.aiutino);
+    if (data.giusta) caricaImg();
     setEsito(data.giusta ? `Indovinato!${data.passi ? ` +${data.passi} passi.` : ''}` : data.rimasti ? `Non è questo. Ti ${data.rimasti === 1 ? 'resta un tentativo' : `restano ${data.rimasti} tentativi`}.` : 'Tentativi finiti: il forziere si aprirà quando ci arrivi.');
   }
 
+  const apertoGia = !!f && ['aperto', 'consegnato'].includes(f.stato);
+  const figura = (
+    <figure className="premio-figura">
+      <ImmaginePremio img={img} vera={!!img?.sbloccato} />
+      {!apertoGia && img !== undefined && <figcaption>{img?.sbloccato ? 'Hai indovinato!' : 'Indovini cos’è?'}</figcaption>}
+    </figure>
+  );
   let corpo;
-  if (f && ['aperto', 'consegnato'].includes(f.stato)) {
+  if (apertoGia) {
     corpo = (
       <>
-        <img src={`/assets/avatar/lani/lani-sorpresa.webp`} alt="" width={140} height={140} />
+        {figura}
         <p>Dentro c'era: <b>{f.premio ?? 'un premio da scegliere con mamma e papà'}</b></p>
         {f.stato === 'consegnato' && <p className="nota">Già consegnato.</p>}
       </>
@@ -242,7 +260,8 @@ function SchedaForziere({ f, n, passi, chiavi, chiudi }: { f?: Forziere; n: numb
   } else if (arrivata) {
     corpo = (
       <>
-        <img src="/assets/oggetti/lucchetto.webp" alt="" width={120} height={120} />
+        {figura}
+        <img src="/assets/oggetti/lucchetto.webp" alt="" width={72} height={72} />
         <p>
           Servono {conf.chiavi} chiavi: ne hai {chiavi}.
         </p>
@@ -252,8 +271,8 @@ function SchedaForziere({ f, n, passi, chiavi, chiudi }: { f?: Forziere; n: numb
   } else if (f?.stato === 'enigma' && f.enigma) {
     corpo = (
       <>
-        <img src="/assets/avatar/lani/lani-detective.webp" alt="" width={120} height={120} />
-        <p className="biglietto">{f.enigma}</p>
+        {figura}
+        <Biglietto testo={f.enigma} aiutino={f.enigma_risolto_il || esito?.startsWith('Indovinato') ? null : (aiutino ?? f.aiutino)} />
         {f.enigma_risolto_il || esito?.startsWith('Indovinato') ? (
           <p>{esito ?? 'Enigma risolto: ora arriva fino al forziere.'}</p>
         ) : rimasti > 0 ? (
@@ -276,7 +295,7 @@ function SchedaForziere({ f, n, passi, chiavi, chiudi }: { f?: Forziere; n: numb
   } else {
     corpo = (
       <>
-        <img src={`/assets/oggetti/${n === 9 ? 'forziere-cima' : 'forziere-chiuso'}.webp`} alt="" width={120} height={120} />
+        {figura}
         <p>
           Alla tappa {conf.tappa} ({SOGLIE[conf.tappa - 1].toLocaleString('it-IT')} passi), con {conf.chiavi} chiavi.
         </p>

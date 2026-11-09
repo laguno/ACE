@@ -5,6 +5,7 @@ import * as K from './lib/copione';
 import { adesso } from './spunte';
 import { supabase } from './supabase';
 import { MOMENTO_DEL_POPUP, VistaFrase, fraseDelGiorno, type FraseDelGiorno } from './Frase';
+import { immaginiPremi } from './ImmaginePremio';
 
 // Un popup per apertura dell'app (docs/05): il più importante in coda (bastone, voto, forziere e
 // tappa, altro), poi il più vecchio. Dopo le 21 i rimproveri di mamma e papà aspettano il mattino.
@@ -12,7 +13,7 @@ import { MOMENTO_DEL_POPUP, VistaFrase, fraseDelGiorno, type FraseDelGiorno } fr
 // Aspetto: lo stampo delle bozze Popup-forziere, -lucchetto, -bastone, -enigma (anello colorato,
 // avatar che sborda, titolo grande, riga della figurina in fondo).
 
-export type Popup = { id: string; priorita: number; situazione: string; posa: string; titolo: string; testo: string; figurina: string | null; frase?: FraseDelGiorno | null };
+export type Popup = { id: string; priorita: number; situazione: string; posa: string; titolo: string; testo: string; figurina: string | null; frase?: FraseDelGiorno | null; chiave?: string | null; immagine?: string | null };
 const GIORNI_VALIDO = 3;
 const immagine = (posa: string) => manifest.avatar.find((a) => a.id === posa)?.webp ?? manifest.oggetti.find((o) => o.id === posa)?.webp;
 
@@ -34,7 +35,7 @@ export default function CodaPopup() {
       const da = new Date(Date.now() - GIORNI_VALIDO * 864e5).toISOString();
       const { data } = await supabase
         .from('popup_coda')
-        .select('id, priorita, situazione, posa, titolo, testo, figurina')
+        .select('id, priorita, situazione, posa, titolo, testo, figurina, chiave')
         .is('mostrato_il', null)
         .gte('creato_il', da)
         .order('priorita')
@@ -44,7 +45,10 @@ export default function CodaPopup() {
       const scelto = (data ?? []).find((x) => K.popupMostrabile(x, ora));
       // tappa, lucchetto e cima possono portare la frase del giorno (i rimproveri mai)
       const momento = scelto && MOMENTO_DEL_POPUP[scelto.situazione];
-      setP(scelto && momento ? { ...scelto, frase: await fraseDelGiorno(momento) } : scelto);
+      // forziere aperto: l'immagine vera del premio (la dà il server solo a forziere aperto)
+      const n = scelto?.situazione === 'forziere_aperto' ? Number(String(scelto.chiave ?? '').split(':')[1]) : NaN;
+      const premio = n ? (await immaginiPremi(n)).find((x) => x.n === n && x.vera) : undefined;
+      setP(scelto && { ...scelto, frase: momento ? await fraseDelGiorno(momento) : null, immagine: premio?.vera ?? null });
     }
     apri();
     const tornata = () => document.visibilityState === 'visible' && apri();
@@ -89,10 +93,11 @@ export function PopupVista({ p, chiudi }: { p: Popup; chiudi: () => void }) {
         <div className="popup-avatar" aria-hidden>
           {p.situazione === 'forziere_lucchetto' && <img src="/assets/oggetti/lucchetto.webp" alt="" width={110} height={110} />}
           {src && <img src={`/${src}`} alt="" width={t === 'lucchetto' ? 120 : 200} height={t === 'lucchetto' ? 120 : 200} />}
-          {p.situazione === 'forziere_aperto' && <img className="popup-oggetto" src="/assets/oggetti/forziere-aperto.webp" alt="" width={110} height={110} />}
+          {p.situazione === 'forziere_aperto' && !p.immagine && <img className="popup-oggetto" src="/assets/oggetti/forziere-aperto.webp" alt="" width={110} height={110} />}
         </div>
         {malus && <span className="bollino-malus">{malus}</span>}
         <h2 id="popup-titolo">{p.titolo}</h2>
+        {p.immagine && <img className="popup-premio" src={p.immagine} alt="Il premio del forziere" width={160} height={160} />}
         <p>{p.testo}</p>
         {t === 'lucchetto' && <p className="popup-riquadro">I passi ti fanno camminare, le chiavi aprono i forzieri.</p>}
         {p.frase && <VistaFrase frase={p.frase} className="frase-popup" />}

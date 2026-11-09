@@ -1,0 +1,228 @@
+{
+  "_nota": "Enigmi dei forzieri (approvato dal signore il 9/11): ogni forziere ha un tipo diverso, difficoltà in salita. La funzione enigma usa il tipo del forziere e il suo esempio. Le parti meccaniche (cifrare, calcoli, mescolare, griglia, lettere della cima) le fa il codice in src/lib/enigmi: l'IA scrive solo i testi. Gli esempi hanno premi inventati, diversi da quelli veri. Formato del biglietto: testo semplice; i blocchi a larghezza fissa (griglie, tabelle, striscia dell'alfabeto, messaggi in codice) stanno tra due righe ``` e l'app li mostra con un carattere a larghezza fissa.",
+  "regole_comuni": [
+    "Italiano di casa per una ragazza di 12 anni: frasi corte, parole sue, mai da adulti.",
+    "Risolvibile con carta e penna in 10-20 minuti, da sola.",
+    "Una sola soluzione: il premio. Niente risposte alternative plausibili.",
+    "Niente conoscenze esterne (date, capitali, nomi famosi) né marchi o mascotte riconoscibili alla prima riga.",
+    "Nessuna parola del premio nel testo del biglietto.",
+    "2-3 risposte accettate nella soluzione, separate da \" / \".",
+    "Un aiutino di una frase, che compare dopo il primo tentativo sbagliato: avvicina senza dire la risposta.",
+    "Si possono usare i simboli di casa; mai nomi delle compagne di squadra."
+  ],
+  "simboli_di_casa": [
+    "Bart, il cane",
+    "Lady, la gatta",
+    "Leo, il fratello",
+    "il nonno",
+    "il numero 9 della maglia",
+    "lo chignon in campo",
+    "Tahiti",
+    "\"passino passino\""
+  ],
+  "formato_blocchi": "```",
+  "tipi": [
+    {
+      "forziere": 1,
+      "tipo": "indovinello",
+      "nome": "Indovinello in rima",
+      "difficolta": 1,
+      "regole": [
+        "4 righe in rima baciata (AABB), rime vere, non assonanze.",
+        "Si parte dal vago e solo l'ultima riga stringe il campo.",
+        "Almeno un'immagine con un doppio senso o un gioco di parole."
+      ],
+      "ia_scrive": "tutto il biglietto",
+      "codice_fa": "niente: lo controlla solo il risolutore",
+      "formato": "4 righe di testo",
+      "esempio": {
+        "premio": "Una torta al cioccolato fatta insieme",
+        "parola": "TORTA",
+        "enigma": "Prima si mescola piano, poi si aspetta davanti al forno,\ne il profumo arriva in camera prima ancora di mezzogiorno.\nÈ scura come il muso di Bart e si divide a fette:\nla prepariamo insieme, e alla fine si leccano le forchette.",
+        "soluzione": "torta al cioccolato fatta insieme / torta al cioccolato / dolce al cioccolato",
+        "aiutino": "È un dolce, e il suo ingrediente principale è marrone."
+      }
+    },
+    {
+      "forziere": 2,
+      "tipo": "codice",
+      "nome": "Codice segreto",
+      "difficolta": 2,
+      "regole": [
+        "Un messaggio di 6-12 parole che descrive il premio senza nominarlo.",
+        "Ogni lettera spostata avanti di una (A diventa B, Z diventa A); nel biglietto la striscia dell'alfabeto per decifrare.",
+        "Una riga di presentazione prima del messaggio e la domanda alla fine."
+      ],
+      "ia_scrive": "il messaggio in chiaro (senza accenti), la riga di presentazione, la domanda finale",
+      "codice_fa": "cifra il messaggio e aggiunge la striscia (cifra, striscia)",
+      "formato": "testo; poi un blocco con il messaggio cifrato; poi un blocco con la striscia (due righe da 13 lettere: sopra la lettera del biglietto, sotto quella vera)",
+      "esempio": {
+        "premio": "Una bicicletta nuova",
+        "parola": "BICICLETTA",
+        "enigma": "Vicino al forziere c'è un messaggio in codice. Ogni lettera è spostata avanti di una: per leggerlo usa la striscia (sopra la lettera del biglietto, sotto quella vera).\n```\nEVF SVPUF OVPWF F VO DBNQBOFMMP\n```\n```\nB C D E F G H I J K L M N\n| | | | | | | | | | | | |\nA B C D E F G H I J K L M\n\nO P Q R S T U V W X Y Z A\n| | | | | | | | | | | | |\nN O P Q R S T U V W X Y Z\n```\nChe cosa c'è nel forziere?",
+        "soluzione": "bicicletta nuova / bici nuova / bicicletta",
+        "aiutino": "La prima parola è DUE."
+      }
+    },
+    {
+      "forziere": 3,
+      "tipo": "acrostico",
+      "nome": "Acrostico",
+      "difficolta": 3,
+      "regole": [
+        "Tante righe quante le lettere della parola nascosta (5-8).",
+        "Le iniziali delle righe, lette dall'alto, formano una parola che aiuta a capire il premio (non il premio stesso).",
+        "Le righe, da sole, descrivono il premio un pezzo alla volta; l'ultima invita a leggere le iniziali.",
+        "Nel risultato: \"nascosta\" è la parola delle iniziali."
+      ],
+      "ia_scrive": "la parola nascosta e le righe",
+      "codice_fa": "controlla che le iniziali formino la parola (iniziali)",
+      "formato": "una riga per lettera",
+      "esempio": {
+        "premio": "Una gita al mare",
+        "parola": "MARE",
+        "enigma": "Ogni estate lo guardi dal finestrino, azzurro fino in fondo.\nNel secchiello ci metti conchiglie e un granchio che scappa.\nDi sale sa la pelle, di crema solare lo zaino.\nE ora le prime lettere: ti dicono cosa arriva sulla riva.",
+        "soluzione": "gita al mare / giornata al mare / andare al mare",
+        "aiutino": "Leggi solo la prima lettera di ogni riga, dall'alto in basso.",
+        "nascosta": "ONDE"
+      }
+    },
+    {
+      "forziere": 4,
+      "tipo": "matematico",
+      "nome": "Codice matematico",
+      "difficolta": 4,
+      "regole": [
+        "A=1, B=2 ... Z=26 (alfabeto di 26 lettere, scritto nel biglietto).",
+        "Un calcolo da seconda media per lettera, a tipi alterni: potenze, frazioni di un numero, percentuali, radici quadrate.",
+        "Una o due parole da trovare (6-10 lettere in tutto) e una riga finale che lega le parole al premio senza nominarlo."
+      ],
+      "ia_scrive": "le parole da trovare e la riga finale",
+      "codice_fa": "scrive i calcoli e li controlla (calcoli, risolviCalcolo)",
+      "formato": "testo; poi un blocco con i calcoli numerati; poi la riga finale",
+      "esempio": {
+        "premio": "Uno zaino nuovo",
+        "parola": "ZAINO",
+        "enigma": "A=1, B=2, C=3 ... Z=26. Risolvi ogni calcolo e cambia il risultato in una lettera.\n```\n1) il 25% di 104\n2) √1\n3) 4² − 7\n4) 2/5 di 35\n5) il 75% di 20\n```\nNuovo nuovo, con le tasche giuste per settembre: è lui che ti aspetta.",
+        "soluzione": "zaino nuovo / zaino / zaino per la scuola",
+        "aiutino": "Il primo calcolo fa 26: è l'ultima lettera dell'alfabeto."
+      }
+    },
+    {
+      "forziere": 5,
+      "tipo": "anagramma",
+      "nome": "Anagramma con indizio",
+      "difficolta": 5,
+      "regole": [
+        "2-4 parole con le lettere mescolate, ognuna con un indizio di una riga.",
+        "Le prime parole sono pezzi o caratteristiche del premio; l'ultima porta al premio.",
+        "Una riga finale che collega le parole."
+      ],
+      "ia_scrive": "le parole in chiaro con il loro indizio e la riga finale",
+      "codice_fa": "mescola le lettere e controlla che siano le stesse (anagramma, stesseLettere)",
+      "formato": "testo; poi un blocco con le parole mescolate, una per riga, con il numero; poi gli indizi numerati",
+      "esempio": {
+        "premio": "Un braccialetto",
+        "parola": "BRACCIALETTO",
+        "enigma": "Rimetti in ordine le lettere: due parole.\n```\n1) L O S P O\n2) T R L C T A C B I A O E\n```\n1) Lì senti il cuore se ci appoggi due dita, e lì si porta l'orologio.\n2) Sta intorno al numero 1, e a volte ha un ciondolo a forma di 9.",
+        "soluzione": "braccialetto / braccialetto con ciondolo / bracciale",
+        "aiutino": "Comincia con B e finisce con O."
+      }
+    },
+    {
+      "forziere": 6,
+      "tipo": "griglia",
+      "nome": "Griglia con coordinate",
+      "difficolta": 6,
+      "regole": [
+        "Una griglia di lettere 6×6 (colonne A-F, righe 1-6), come a battaglia navale.",
+        "Un messaggio di 3-7 parole da comporre con le coordinate, parola per parola.",
+        "Il messaggio descrive il premio senza nominarlo; una riga finale aiuta a chiudere."
+      ],
+      "ia_scrive": "il messaggio (senza accenti) e la riga finale",
+      "codice_fa": "costruisce la griglia e le coordinate e le rilegge (griglia, leggiGriglia)",
+      "formato": "testo; poi un blocco con la griglia; poi le coordinate, parole separate da \" / \"; poi la riga finale",
+      "esempio": {
+        "premio": "Un pallone nuovo",
+        "parola": "PALLONE",
+        "enigma": "Colonna e riga, come a battaglia navale: B4 è la lettera nella colonna B, riga 4.\n```\n   A B C D E\n1  C E K O H\n2  V D A N X\n3  R F A P K\n4  K T S U F\n5  Q K L F F\n```\nA3 D1 B4 D1 D2 B2 D1 / B1 / D2 D4 D1 A2 D1\nRimbalza, ed è tutto tuo.",
+        "soluzione": "pallone nuovo / pallone / palla nuova",
+        "aiutino": "La prima parola dice la sua forma."
+      }
+    },
+    {
+      "forziere": 7,
+      "tipo": "logica",
+      "nome": "Logica a indizi",
+      "difficolta": 7,
+      "regole": [
+        "3-4 personaggi di casa, ognuno abbinato a una o due cose (attività, cena, oggetto).",
+        "4-6 indizi numerati, alcuni simpatici (Lady ama il pesce, Bart scivola sul ghiaccio).",
+        "Una sola soluzione possibile; la domanda finale chiede la cosa abbinata a un personaggio, ed è il premio.",
+        "Le opzioni descrivono senza nominare il premio."
+      ],
+      "ia_scrive": "tutto il biglietto, con la tabella da riempire",
+      "codice_fa": "niente: lo controlla il risolutore",
+      "formato": "testo con le opzioni; un blocco con la tabella vuota; gli indizi numerati; la domanda",
+      "esempio": {
+        "premio": "Un concerto con papà",
+        "parola": "CONCERTO",
+        "enigma": "Leo, il nonno e Lady scelgono una serata a testa: musica dal vivo, museo, bowling.\n```\n        musica  museo  bowling\nLeo\nnonno\nLady\n```\n1. Leo sceglie il bowling: gli piace far cadere le cose.\n2. Lady non sopporta il rumore.\nNel forziere c'è la serata del nonno, e la passi con papà. Qual è?",
+        "soluzione": "concerto con papà / concerto / musica dal vivo con papà",
+        "aiutino": "Lady va dove c'è silenzio."
+      }
+    },
+    {
+      "forziere": 8,
+      "tipo": "rebus",
+      "nome": "Rebus a parole",
+      "difficolta": 8,
+      "regole": [
+        "Sciarada: \"il mio primo... il mio secondo... (il mio terzo...) il mio intero...\".",
+        "Ogni pezzo è una parola vera con un indizio a doppio senso; il mio intero è una parola composta che porta al premio.",
+        "L'intero si descrive per ultimo, con un dettaglio che fa capire il premio."
+      ],
+      "ia_scrive": "tutto il biglietto",
+      "codice_fa": "niente: lo controlla il risolutore",
+      "formato": "una riga per pezzo, poi una riga per l'intero",
+      "esempio": {
+        "premio": "Un girasole da piantare insieme",
+        "parola": "GIRASOLE",
+        "enigma": "Il mio primo lo fa la trottola, e anche la testa dopo le capriole.\nIl mio secondo scalda Tahiti tutto l'anno.\nIl mio intero è un fiore che tiene il naso sempre all'insù, e lo piantiamo insieme in giardino.",
+        "soluzione": "girasole da piantare insieme / girasole / piantare un girasole",
+        "aiutino": "Il primo è un verbo: gira."
+      }
+    },
+    {
+      "forziere": 9,
+      "tipo": "cima",
+      "nome": "La cima: le lettere dei forzieri",
+      "difficolta": 9,
+      "regole": [
+        "Una lettera presa dalla parola chiave del premio di ciascun forziere da 1 a 8 forma la parola finale.",
+        "Per ogni lettera della parola finale il biglietto dice il forziere e la posizione.",
+        "Una riga finale lega la parola finale al premio della cima senza nominarlo."
+      ],
+      "ia_scrive": "5-10 parole candidate lunghe quanto i forzieri (8 lettere) legate al premio, e la riga finale",
+      "codice_fa": "cerca una candidata che si può comporre e scrive la tabella (cima, righeCima)",
+      "formato": "testo; poi un blocco con la tabella; poi la riga finale",
+      "esempio": {
+        "premio": "Un weekend in montagna",
+        "parola": "MONTAGNA",
+        "parole_dei_forzieri": [
+          "TORTA",
+          "BICICLETTA",
+          "MARE",
+          "ZAINO",
+          "BRACCIALETTO",
+          "PALLONE",
+          "CONCERTO",
+          "GIRASOLE"
+        ],
+        "enigma": "Prendi la parola chiave del premio di ogni forziere (la cosa principale: per una torta, TORTA). Da ognuna una lettera, e trovi la parola della cima.\n```\n 1ª lettera: forziere 3, la 1ª\n 2ª lettera: forziere 1, la 2ª\n 3ª lettera: forziere 4, la 4ª\n 4ª lettera: forziere 2, la 8ª\n 5ª lettera: forziere 5, la 3ª\n 6ª lettera: forziere 8, la 1ª\n 7ª lettera: forziere 7, la 3ª\n 8ª lettera: forziere 6, la 2ª\n```\nLa parola che trovi è dove andiamo, tutti insieme, per un fine settimana.",
+        "soluzione": "weekend in montagna / fine settimana in montagna / montagna",
+        "aiutino": "Le parole chiave sono: TORTA, BICICLETTA, MARE, ZAINO, BRACCIALETTO, PALLONE, CONCERTO, GIRASOLE."
+      }
+    }
+  ]
+}
