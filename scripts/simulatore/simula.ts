@@ -4,6 +4,7 @@
 // controllano gli invarianti; al primo che non regge il simulatore si ferma con giorno e dettaglio.
 // L'ora la decide l'orologio dato (Date finto): segue anche il database, perché PGlite legge
 // l'ora da Date.now.
+import type { PGlite } from '@electric-sql/pglite';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import manifest from '../../data/manifest.json' with { type: 'json' };
 import * as C from '../../src/lib/calendario/index.ts';
@@ -76,7 +77,7 @@ export async function simula(profilo: Profilo, orologio: (t: Date) => void, da =
   const rng = casuale(profilo.seme);
   const caso = (p: number) => rng() < p;
   orologio(alle(piu(R.giorno(da), -3), '12:00'));
-  const { db: pg, come } = await creaDatabase();
+  const { db: pg, come } = (await creaDatabase()) as { db: PGlite; come: (uid: string | null, sql: string) => Promise<{ rows: unknown[] }> };
   await pg.exec(`set timezone = 'UTC'`);
   const db = client(pg) as unknown as SupabaseClient;
   const gestori = creaGestori(db);
@@ -204,7 +205,9 @@ export async function simula(profilo: Profilo, orologio: (t: Date) => void, da =
 
     // ---- sera: gesti, qualche sgridata, cartella e borsa
     orologio(alle(d, '19:00'));
-    const voci = profilo.furbetta ? [...VOCI, ...VOCI] : VOCI.filter(() => caso(imp * 0.5));
+    // i gesti li notano i genitori; con la furbetta ogni gesto arriva due volte (doppio tocco)
+    const notati = VOCI.filter(() => caso(imp * 0.5));
+    const voci = profilo.furbetta ? notati.flatMap((v) => [v, v]) : notati;
     for (const voce of voci) {
       const id = await una<string>(`insert into gesti_casa (data, voce, dato_da) values ('${oggi}', '${voce}', '${PAPA}') returning id as v`);
       await passi('gesto', id);
@@ -249,7 +252,7 @@ export async function simula(profilo: Profilo, orologio: (t: Date) => void, da =
     const pos = R.posizione(saldo);
     const chiaviTot = await una<number>(`select chiavi::int as v from chiavi_totali`);
     for (const f of (await pg.query<{ n: number; stato: string }>(`select n, stato::text from forzieri`)).rows) {
-      const conf = R.CONFIG.forzieri.find((x) => x.n === f.n)!;
+      const conf = R.CONFIG.forzieri[f.n - 1];
       if (f.stato === 'aperto' && !aperti.has(f.n)) {
         aperti.add(f.n);
         if (pos.tappeFatte < conf.tappa || chiaviTot < conf.chiavi) ferma(d, `forziere ${f.n} aperto con tappa ${pos.tappeFatte}/${conf.tappa} e chiavi ${chiaviTot}/${conf.chiavi}`);
@@ -283,7 +286,7 @@ export async function simula(profilo: Profilo, orologio: (t: Date) => void, da =
   }));
   const forzieri = (await pg.query<{ n: number; aperto: string | null }>(`select n, (aperto_il at time zone 'Europe/Rome')::date::text aperto from forzieri order by n`)).rows.map((f) => ({
     n: f.n,
-    enigma: giorni.find((g) => g.tappa >= R.CONFIG.forzieri.find((x) => x.n === f.n)!.tappa - 1)?.giorno ?? null,
+    enigma: giorni.find((g) => g.tappa >= R.CONFIG.forzieri[f.n - 1].tappa - 1)?.giorno ?? null,
     aperto: f.aperto,
   }));
   const cima = giorni.find((g) => R.posizione(g.saldo).inCima)?.giorno ?? null;
@@ -309,7 +312,7 @@ export function csv(r: Risultato): string {
 export function rapporto(r: Risultato): string {
   const ch = r.settimane.map((s) => s.chiavi);
   const media = ch.length ? (ch.reduce((a, b) => a + b, 0) / ch.length).toFixed(2) : '0';
-  const fine = r.giorni.at(-1)!;
+  const fine = r.giorni[r.giorni.length - 1];
   // un punto ogni lunedì: passi e bandierina
   const lunedi = r.giorni.filter((g) => R.giorno(g.giorno).getDay() === 1);
   const grafico = [
@@ -338,11 +341,20 @@ Profilo: ${r.profilo.descrizione} (seme ${r.profilo.seme}). Dal ${r.giorni[0].gi
 
 ${grafico}
 
+## Passi per motivo
+
+| Motivo | Passi |
+|---|---|
+${Object.entries(r.giorni.reduce<Record<string, number>>((t, g) => { for (const [m, p] of Object.entries(g.motivi)) t[m] = (t[m] ?? 0) + p; return t; }, {}))
+  .sort((x, y) => y[1] - x[1])
+  .map(([m, p]) => `| ${m} | ${p} |`)
+  .join('\n')}
+
 ## Forzieri
 
 | Forziere | Tappa | Chiavi | Enigma visibile dal | Aperto il |
 |---|---|---|---|---|
-${r.forzieri.map((f) => { const c = R.CONFIG.forzieri.find((x) => x.n === f.n)!; return `| ${f.n} | ${c.tappa} | ${c.chiavi} | ${f.enigma ?? '-'} | ${f.aperto ?? '-'} |`; }).join('\n')}
+${r.forzieri.map((f) => { const c = R.CONFIG.forzieri[f.n - 1]; return `| ${f.n} | ${c.tappa} | ${c.chiavi} | ${f.enigma ?? '-'} | ${f.aperto ?? '-'} |`; }).join('\n')}
 
 ## Chiavi per settimana
 

@@ -20,7 +20,7 @@ class Catalogo {
       const r = await this.db.query<{ c: string; t: string }>(`select column_name c, data_type t from information_schema.columns where table_schema = 'public' and table_name = $1`, [t]);
       this.colonne.set(t, new Map(r.rows.map((x) => [x.c, x.t])));
     }
-    return this.colonne.get(t)!;
+    return this.colonne.get(t) ?? new Map<string, string>();
   }
 
   async primaria(t: string) {
@@ -31,7 +31,7 @@ class Catalogo {
       );
       this.chiavi.set(t, r.rows.map((x) => x.c));
     }
-    return this.chiavi.get(t)!;
+    return this.chiavi.get(t) ?? [];
   }
 
   /** Legame per l'embed di PostgREST: da t a x (colonna di t verso x, o figli di x che puntano a t). */
@@ -44,7 +44,7 @@ class Catalogo {
       const giu = su.rows[0] ? null : (await this.db.query<{ col: string }>(fk, [x, t])).rows[0];
       this.legami.set(k, su.rows[0] ? { col: su.rows[0].col, verso: 'genitore', destinazione: x } : giu ? { col: giu.col, verso: 'figli', destinazione: x } : null);
     }
-    return this.legami.get(k)!;
+    return this.legami.get(k) ?? null;
   }
 }
 
