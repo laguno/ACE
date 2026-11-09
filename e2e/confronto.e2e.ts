@@ -94,6 +94,7 @@ const CASI: Record<string, Caso> = {
     vai: async (p) => {
       await p.getByRole('button', { name: 'Studio' }).click();
       await p.locator('.carta', { hasText: 'Tecnologia' }).getByRole('button', { name: 'Inizia' }).click();
+      await p.getByRole('button', { name: 'Gira' }).click({ timeout: 10000 }); // si gira dopo 7 secondi
     },
   },
   Quiz: {

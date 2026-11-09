@@ -82,7 +82,7 @@ test('quiz: spiegazione dopo ogni risposta, sbagliate salvate', async ({ page })
   await expect(page.getByRole('status')).toHaveText('Non era questa. 10 diviso 2 fa 5.');
   await page.getByRole('button', { name: 'Avanti' }).click();
   await page.getByRole('button', { name: 'minore di 1' }).click();
-  await expect(page.getByRole('status')).toContainText('Giusto.');
+  await expect(page.getByRole('status')).toContainText('Giusto!');
   await page.getByRole('button', { name: 'Fine' }).click();
 
   await expect(page.getByText('1 su 2. Ora sai cosa ripassare: domani si riprova.')).toBeVisible();

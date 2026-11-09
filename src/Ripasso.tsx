@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { ArrowLeft, CheckCircle, XCircle } from '@phosphor-icons/react';
+import { useSfondo } from './kit';
 import * as R from './lib/regole';
 import { adesso, passi } from './spunte';
 import { supabase } from './supabase';
@@ -9,7 +11,30 @@ import { supabase } from './supabase';
 export type Carta = { id: string; materia_id: string | null; tipo: string; fronte: string; retro: string; intervallo_giorni: number };
 export type Domanda = { testo: string; opzioni: string[]; giusta: number; spiegazione: string };
 
-const SECONDI = R.CONFIG.passi.studio_facoltativo.flashcard_secondi_prima_di_girare;
+const STUDIO = R.CONFIG.passi.studio_facoltativo;
+const SECONDI = STUDIO.flashcard_secondi_prima_di_girare;
+
+/** Testata di flash card e quiz (bozze): "← Studio", titolo, "n di N" e la barra. */
+function TestaStudio({ titolo, n, di, etichetta, chiudi }: { titolo: string; n: number; di: number; etichetta: string; chiudi: () => void }) {
+  return (
+    <>
+      <button className="indietro" onClick={chiudi} aria-label="Torna allo Studio">
+        <ArrowLeft size={20} weight="bold" aria-hidden /> Studio
+      </button>
+      <div className="testa-studio">
+        <div className="testa-carta">
+          <h1>{titolo}</h1>
+          <span>
+            {n} di {di}
+          </span>
+        </div>
+        <div className="avanzamento" role="progressbar" aria-label={etichetta} aria-valuemin={0} aria-valuemax={di} aria-valuenow={n}>
+          <span style={{ width: `${(n / di) * 100}%` }} />
+        </div>
+      </div>
+    </>
+  );
+}
 
 /** Sessione di ripasso fatta: segna l'ora (la timbra il server) e chiede i passi. */
 export async function sessioneFatta(id: string): Promise<number> {
@@ -17,7 +42,8 @@ export async function sessioneFatta(id: string): Promise<number> {
   return error ? 0 : passi('ripasso', id);
 }
 
-export function Flashcard({ carte, sessione, chiudi }: { carte: Carta[]; sessione?: string; chiudi: () => void }) {
+export function Flashcard({ carte, titolo, sessione, chiudi }: { carte: Carta[]; titolo: string; sessione?: string; chiudi: () => void }) {
+  useSfondo('pomeriggio');
   const [inizio] = useState(adesso);
   const [i, setI] = useState(0);
   const [girata, setGirata] = useState(false);
@@ -78,41 +104,70 @@ export function Flashcard({ carte, sessione, chiudi }: { carte: Carta[]; session
       <section className="carta modulo studio">
         <h1>Giro finito</h1>
         <p>{fine}</p>
-        <button className="principale" onClick={chiudi}>Torna allo studio</button>
+        <button className="principale" onClick={chiudi}>
+          Torna allo studio
+        </button>
       </section>
     );
 
   return (
     <section className="studio">
-      <p className="sopratitolo">
-        Carta {i + 1} di {carte.length}
-      </p>
-      <div className="carta grande">
+      <TestaStudio titolo={titolo} n={i + 1} di={carte.length} etichetta="Carte ripassate" chiudi={chiudi} />
+      <div className="carta flash">
+        <div className="testa-carta">
+          <p className="etichetta">Domanda</p>
+          {!girata && <p className="chip">{restano > 0 ? `si gira tra ${restano} secondi` : 'pronta da girare'}</p>}
+        </div>
         <p className="fronte">{carta.fronte}</p>
         {girata ? (
-          <p className="retro">{carta.retro}</p>
+          <>
+            <hr />
+            <p className="etichetta accento">Risposta</p>
+            <p className="retro">{carta.retro}</p>
+          </>
         ) : (
           <p className="nota">{restano > 0 ? `Leggi bene: si gira tra ${restano} secondi.` : 'Pronta? Gira la carta.'}</p>
         )}
       </div>
       {girata ? (
-        <div className="esiti">
-          <button className="principale" onClick={() => rispondi('sapevo')}>Sapevo</button>
-          <button className="secondario" onClick={() => rispondi('quasi')}>Quasi</button>
-          <button className="secondario" onClick={() => rispondi('non_sapevo')}>Non sapevo</button>
-        </div>
+        <>
+          <p className="come">Com'è andata?</p>
+          <div className="esiti">
+            <button className="esito-no" onClick={() => rispondi('non_sapevo')}>
+              Non sapevo
+            </button>
+            <button className="esito-quasi" onClick={() => rispondi('quasi')}>
+              Quasi
+            </button>
+            <button className="esito-si" onClick={() => rispondi('sapevo')}>
+              Sapevo
+            </button>
+          </div>
+        </>
       ) : (
         <button className="principale largo" disabled={restano > 0} onClick={() => setGirata(true)}>
           Gira
         </button>
       )}
-      <button className="link" onClick={sbagliata}>Questa carta è sbagliata</button>
-      <button className="link" onClick={chiudi}>Esci</button>
+      <button className="link" onClick={sbagliata}>
+        Questa carta è sbagliata
+      </button>
+      <p className="regola">
+        Giro finito: +{STUDIO.flashcard_giro} passi. Fino a {STUDIO.max_al_giorno_per_tipo} giri al giorno.
+      </p>
     </section>
   );
 }
 
-export function Quiz({ quizId, domande, sessione, chiudi }: { quizId: string; domande: Domanda[]; sessione?: string; chiudi: () => void }) {
+/** "Primo tentativo: 10 passi con almeno 9 su 10, 6 sotto. Poi 6, 3 e dal quarto 1." dal config. */
+function regolaQuiz(totale: number) {
+  const q = STUDIO.quiz;
+  const t = q.tentativi as Record<string, number[]>;
+  return `Primo tentativo: ${t['1'][0]} passi con almeno ${Math.ceil(q.soglia_giuste * totale)} su ${totale}, ${t['1'][1]} sotto. Poi ${t['2'][0]}, ${t['3'][0]} e dal quarto ${t['4+'][0]}.`;
+}
+
+export function Quiz({ quizId, domande, titolo, sessione, chiudi }: { quizId: string; domande: Domanda[]; titolo: string; sessione?: string; chiudi: () => void }) {
+  useSfondo('panna');
   const [i, setI] = useState(0);
   const [scelta, setScelta] = useState<number>();
   const [sbagliate, setSbagliate] = useState<number[]>([]);
@@ -133,11 +188,7 @@ export function Quiz({ quizId, domande, sessione, chiudi }: { quizId: string; do
     }
     const totale = domande.length;
     const giuste = totale - sbagliate.length;
-    const { data } = await supabase
-      .from('quiz_tentativi')
-      .insert({ quiz_id: quizId, numero: 0, giuste, totale, sbagliate })
-      .select('id, numero')
-      .single();
+    const { data } = await supabase.from('quiz_tentativi').insert({ quiz_id: quizId, numero: 0, giuste, totale, sbagliate }).select('id, numero').single();
     let presi = data ? await passi('quiz', data.id) : 0;
     if (sessione) presi += await sessioneFatta(sessione);
     const voto = Math.round((giuste / totale) * 10);
@@ -155,42 +206,39 @@ export function Quiz({ quizId, domande, sessione, chiudi }: { quizId: string; do
       <section className="carta modulo studio">
         <h1>Quiz finito</h1>
         <p>{fine}</p>
-        <button className="principale" onClick={chiudi}>Torna allo studio</button>
+        <button className="principale" onClick={chiudi}>
+          Torna allo studio
+        </button>
       </section>
     );
 
   return (
     <section className="studio">
-      <p className="sopratitolo">
-        Domanda {i + 1} di {domande.length}
-      </p>
-      <div className="carta">
-        <h2>{d.testo}</h2>
-        <div className="opzioni">
-          {d.opzioni.map((o, n) => (
-            <button
-              key={n}
-              className={`opzione ${scelta === undefined ? '' : n === d.giusta ? 'giusta' : n === scelta ? 'sbagliata' : ''}`}
-              aria-pressed={scelta === n}
-              onClick={() => scegli(n)}
-            >
+      <TestaStudio titolo={titolo} n={i + 1} di={domande.length} etichetta="Domande del quiz" chiudi={chiudi} />
+      <h2 className="domanda">{d.testo}</h2>
+      <div className="opzioni">
+        {d.opzioni.map((o, n) => {
+          const esito = scelta === undefined ? '' : n === d.giusta ? 'giusta' : n === scelta ? 'sbagliata' : '';
+          return (
+            <button key={n} className={`opzione ${esito}`} aria-pressed={scelta === n} onClick={() => scegli(n)}>
               {o}
+              {esito === 'giusta' && <CheckCircle size={24} weight="fill" aria-hidden />}
+              {esito === 'sbagliata' && <XCircle size={24} weight="fill" aria-hidden />}
             </button>
-          ))}
-        </div>
-        {scelta !== undefined && (
-          <p className="spiegazione" role="status">
-            {scelta === d.giusta ? 'Giusto. ' : 'Non era questa. '}
-            {d.spiegazione}
-          </p>
-        )}
+          );
+        })}
       </div>
+      {scelta !== undefined && (
+        <div className="spiegazione" role="status">
+          <b>{scelta === d.giusta ? 'Giusto!' : 'Non era questa.'}</b> <span>{d.spiegazione}</span>
+        </div>
+      )}
       {scelta !== undefined && (
         <button className="principale largo" onClick={avanti}>
           {i + 1 < domande.length ? 'Avanti' : 'Fine'}
         </button>
       )}
-      <button className="link" onClick={chiudi}>Esci</button>
+      <p className="regola">{regolaQuiz(domande.length)}</p>
     </section>
   );
 }
