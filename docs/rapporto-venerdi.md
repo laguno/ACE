@@ -49,4 +49,5 @@ Note sulle misure:
 
 - Chiamate vere all'IA: 0 su 40.
 - Installati come dipendenze di sviluppo: `@axe-core/playwright`, `fast-check`, `lighthouse` (al posto di `@lhci/cli`), `puppeteer-core`, `knip`, `eslint`, `@eslint/js`, `typescript-eslint`, `@vitest/coverage-v8`. Nessuno manda dati fuori; Lighthouse senza invio dei rapporti.
-- In sospeso, da lanciare dal signore: skill di Supabase (`npx skills add supabase/agent-skills`, bloccata dal controllo automatico perché scarica ed esegue codice), skill ufficiali Anthropic (`/plugin`), gitleaks (`winget install gitleaks`).
+- Skill di Supabase (`supabase`, `supabase-postgres-best-practices`) installate dal signore il 9/11 con `npx skills add supabase/agent-skills`: solo testi Markdown, nessuno script; versione fissata in `skills-lock.json`, file in `.agents/` (fuori dal repository, come Impeccable).
+- In sospeso, da lanciare dal signore: skill ufficiali Anthropic (`/plugin`), gitleaks (`winget install gitleaks`).

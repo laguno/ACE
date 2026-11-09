@@ -18,3 +18,4 @@ test-results/
 # Impeccable: strumento locale di revisione, non va nel repository
 .claude/skills/
 .claude/agents/
+.agents/
