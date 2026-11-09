@@ -9,6 +9,7 @@ import mappa from '../../../data/mappa-libri.json' with { type: 'json' };
 import * as C from '../../../src/lib/calendario/index.ts';
 import * as R from '../../../src/lib/regole/index.ts';
 import { accoda } from '../_shared/popup.ts';
+import { chiChiama, cronOGenitore } from '../_shared/accesso.ts';
 
 const GIORNI = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'];
 
@@ -170,15 +171,7 @@ async function prepara() {
   return { verifiche: verifiche?.length ?? 0, sessioni, generate, errori };
 }
 
-async function autorizzato(req: Request): Promise<boolean> {
-  const segreto = Deno.env.get('CRON_SEGRETO');
-  if (segreto && req.headers.get('x-cron-segreto') === segreto) return true;
-  const token = (req.headers.get('Authorization') ?? '').replace(/^Bearer /, '');
-  const { data } = await db.auth.getUser(token);
-  if (!data.user) return false;
-  const { count } = await db.from('profili').select('id', { count: 'exact', head: true }).eq('id', data.user.id).eq('ruolo', 'genitore');
-  return !!count;
-}
+const autorizzato = async (req: Request) => cronOGenitore(await chiChiama(db, req, Deno.env.get('CRON_SEGRETO')));
 
 const risposta = (corpo: unknown, stato = 200) =>
   new Response(JSON.stringify(corpo), { status: stato, headers: { 'Content-Type': 'application/json' } });

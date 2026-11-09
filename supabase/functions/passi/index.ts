@@ -13,6 +13,7 @@ import * as R from '../../../src/lib/regole/index.ts';
 import * as C from '../../../src/lib/calendario/index.ts';
 import { aggiornaForzieri } from '../_shared/forzieri.ts';
 import { accoda } from '../_shared/popup.ts';
+import { chiChiama, CorpoNonValido, cors, leggiCorpo, risposte } from '../_shared/accesso.ts';
 import * as K from '../../../src/lib/copione/index.ts';
 
 const COSA_GESTO: Record<string, string> = {
@@ -24,11 +25,6 @@ const COSA_GESTO: Record<string, string> = {
 
 const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 const P = R.CONFIG.passi;
-
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
 
 type Esito = { passi: number; motivo?: string; perche?: string };
 const niente = (perche: string): Esito => ({ passi: 0, perche });
@@ -254,27 +250,21 @@ const gestori: Record<string, (id: string) => Promise<Esito>> = {
 
 // ---------------------------------------------------------------- ingresso
 
-const risposta = (corpo: unknown, stato = 200) =>
-  new Response(JSON.stringify(corpo), { status: stato, headers: { ...CORS, 'Content-Type': 'application/json' } });
-
 Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
+  const risposta = risposte(req);
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: cors(req) });
   try {
-    const token = (req.headers.get('Authorization') ?? '').replace(/^Bearer /, '');
-    const { data: utente } = await db.auth.getUser(token);
-    if (!utente.user) return risposta({ errore: 'accesso richiesto' }, 401);
-    const { count } = await db.from('profili').select('id', { count: 'exact', head: true }).eq('id', utente.user.id);
-    if (!count) return risposta({ errore: 'profilo mancante' }, 403);
-
-    const { tipo, id } = await req.json();
-    const gestore = gestori[tipo];
-    if (!gestore || typeof id !== 'string') return risposta({ errore: 'tipo o id non validi' }, 400);
+    if (!(await chiChiama(db, req, undefined))) return risposta({ errore: 'accesso richiesto' }, 401);
+    const { tipo, id } = await leggiCorpo<{ tipo: string; id: string }>(req);
+    // solo i gestori veri: niente "constructor" o "toString" ereditati dagli oggetti
+    const gestore = typeof tipo === 'string' && Object.hasOwn(gestori, tipo) ? gestori[tipo] : undefined;
+    if (!gestore || typeof id !== 'string' || id.length > 100) return risposta({ errore: 'tipo o id non validi' }, 400);
     const esito = await gestore(id);
     // passi nuovi: forse si è arrivati a una tappa con forziere
     const forzieri = esito.passi ? await aggiornaForzieri(db, esito.passi) : [];
     return risposta({ ...esito, forzieri });
   } catch (e) {
-    if (e instanceof Richiesta) return risposta({ errore: e.message }, 400);
+    if (e instanceof Richiesta || e instanceof CorpoNonValido) return risposta({ errore: e.message }, 400);
     console.error(e);
     return risposta({ errore: 'errore del server' }, 500);
   }

@@ -4,14 +4,10 @@
 import Anthropic from 'npm:@anthropic-ai/sdk';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import mappa from '../../../data/mappa-libri.json' with { type: 'json' };
+import { chiChiama, CorpoNonValido, cors, leggiCorpo, risposte } from '../_shared/accesso.ts';
 
 const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 const claude = new Anthropic({ apiKey: Deno.env.get('ANTHROPIC_API_KEY') });
-
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
 
 const SCHEMA = {
   type: 'object',
@@ -30,21 +26,19 @@ Regola più importante: non risolvere mai l'esercizio del compito e non dare il 
 - "indizi": esattamente 3 indizi sul compito vero, dal più leggero al più concreto; anche il terzo lascia a lei l'ultimo passo.
 Se il compito è solo "leggere" o "studiare", gli indizi sono su come studiarlo (cosa sottolineare, quali domande farsi).`;
 
-const risposta = (corpo: unknown, stato = 200) =>
-  new Response(JSON.stringify(corpo), { status: stato, headers: { ...CORS, 'Content-Type': 'application/json' } });
-
 Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
-  const token = (req.headers.get('Authorization') ?? '').replace(/^Bearer /, '');
-  const { data: utente } = await db.auth.getUser(token);
-  if (!utente.user) return risposta({ errore: 'accesso richiesto' }, 401);
-  const { count } = await db.from('profili').select('id', { count: 'exact', head: true }).eq('id', utente.user.id);
-  if (!count) return risposta({ errore: 'profilo mancante' }, 403);
+  const risposta = risposte(req);
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: cors(req) });
+  if ((await chiChiama(db, req, undefined))?.tipo !== 'utente') return risposta({ errore: 'accesso richiesto' }, 401);
 
   try {
-    const { compito_id } = await req.json();
-    const { data: c } = await db.from('compiti').select('testo, materia_id, materie(nome)').eq('id', compito_id).maybeSingle();
+    const { compito_id } = await leggiCorpo<{ compito_id: string }>(req);
+    if (typeof compito_id !== 'string') return risposta({ errore: 'compito non trovato' }, 404);
+    const { data: c } = await db.from('compiti').select('testo, materia_id, materie(nome), spiegazione').eq('id', compito_id).maybeSingle();
     if (!c) return risposta({ errore: 'compito non trovato' }, 404);
+    // una chiamata all'IA per compito: la spiegazione resta finché il testo del compito non cambia
+    const salvata = c.spiegazione as { testo?: string; spiegazione?: string; indizi?: string[] } | null;
+    if (salvata && salvata.testo === c.testo) return risposta({ spiegazione: salvata.spiegazione, indizi: salvata.indizi });
     const da = new Date(Date.now() - 14 * 864e5).toISOString().slice(0, 10);
     const { data: lezioni } = await db.from('lezioni').select('argomento').eq('materia_id', c.materia_id ?? '').gte('data', da);
     const chiave = c.materia_id === 'arte_e_immagine' ? 'arte' : (c.materia_id ?? '');
@@ -73,8 +67,11 @@ Deno.serve(async (req) => {
     } as never);
     if (r.stop_reason === 'refusal') return risposta({ errore: 'non disponibile' }, 502);
     const testo = r.content.find((b: { type: string }) => b.type === 'text') as { text: string } | undefined;
-    return risposta(JSON.parse(testo?.text ?? '{}'));
+    const uscita = JSON.parse(testo?.text ?? '{}');
+    await db.from('compiti').update({ spiegazione: { testo: c.testo, ...uscita } }).eq('id', compito_id);
+    return risposta(uscita);
   } catch (e) {
+    if (e instanceof CorpoNonValido) return risposta({ errore: e.message }, 400);
     console.error(e);
     return risposta({ errore: 'errore del server' }, 500);
   }

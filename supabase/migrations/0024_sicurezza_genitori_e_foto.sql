@@ -1,4 +1,4 @@
--- Filone A del piano (sicurezza, 10/11): quattro buchi trovati con la prova di attacco.
+-- Filone A del piano (sicurezza, 10/11): cinque punti trovati con la prova di attacco.
 --
 -- 1. I genitori potevano scrivere a mano nelle tabelle del server (movimenti_passi, voti, note,
 --    settimane, figurine...): passi e chiavi arbitrari fuori dalle funzioni previste. Ora le
@@ -12,6 +12,7 @@
 --    richiesta; e nello storage si carica solo nella cartella di una richiesta aperta, solo
 --    immagini, al massimo 10 MB.
 -- 4. Lani leggeva le frasi di famiglia non ancora uscite.
+-- 5. La spiegazione "Non ho capito" chiamava l'IA a ogni tocco: ora si salva sul compito.
 
 -- ------------------------------------------------------------------ 1. genitori: solo lettura
 
@@ -83,3 +84,9 @@ where id = 'foto-pagine';
 -- Lani leggeva tutte le frasi, anche quelle di famiglia non ancora uscite. La sua app le prende
 -- solo da frase_del_giorno() (una al giorno); la tabella la leggono i genitori.
 drop policy famiglia_legge on frasi;
+
+-- ------------------------------------------------------------------ 5. spiegazioni salvate
+
+-- La lampadina "Non ho capito" chiamava l'IA a ogni tocco, senza limite. La funzione spiega salva
+-- la risposta sul compito (con il testo del compito: se cambia, si rifà): una chiamata per compito.
+alter table compiti add column spiegazione jsonb;

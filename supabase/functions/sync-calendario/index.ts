@@ -5,6 +5,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import ICAL from 'npm:ical.js@2.1.0';
 import { avvisaSeFallita } from '../_shared/push.ts';
+import { chiChiama, cronOGenitore } from '../_shared/accesso.ts';
 
 const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 const GIORNO = 864e5;
@@ -17,10 +18,10 @@ function impegni(testo: string, da: Date, a: Date): Impegno[] {
   for (const tz of cal.getAllSubcomponents('vtimezone')) ICAL.TimezoneService.register(tz);
 
   // le eccezioni (un'occorrenza spostata) hanno lo stesso UID e RECURRENCE-ID
-  const eventi = cal.getAllSubcomponents('vevent').map((v) => new ICAL.Event(v));
-  const principali = eventi.filter((e) => !e.isRecurrenceException());
-  for (const ecc of eventi.filter((e) => e.isRecurrenceException()))
-    principali.find((p) => p.uid === ecc.uid)?.relateException(ecc);
+  const eventi = cal.getAllSubcomponents('vevent').map((v: ICAL.Component) => new ICAL.Event(v));
+  const principali = eventi.filter((e: ICAL.Event) => !e.isRecurrenceException());
+  for (const ecc of eventi.filter((e: ICAL.Event) => e.isRecurrenceException()))
+    principali.find((p: ICAL.Event) => p.uid === ecc.uid)?.relateException(ecc);
 
   const ora = new Date().toISOString();
   const fuori: Impegno[] = [];
@@ -54,15 +55,7 @@ function impegni(testo: string, da: Date, a: Date): Impegno[] {
   return fuori;
 }
 
-async function autorizzato(req: Request): Promise<boolean> {
-  const segreto = Deno.env.get('CRON_SEGRETO');
-  if (segreto && req.headers.get('x-cron-segreto') === segreto) return true;
-  const token = (req.headers.get('Authorization') ?? '').replace(/^Bearer /, '');
-  const { data } = await db.auth.getUser(token);
-  if (!data.user) return false;
-  const { count } = await db.from('profili').select('id', { count: 'exact', head: true }).eq('id', data.user.id).eq('ruolo', 'genitore');
-  return !!count;
-}
+const autorizzato = async (req: Request) => cronOGenitore(await chiChiama(db, req, Deno.env.get('CRON_SEGRETO')));
 
 const risposta = (corpo: unknown, stato = 200) =>
   new Response(JSON.stringify(corpo), { status: stato, headers: { 'Content-Type': 'application/json' } });
