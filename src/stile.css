@@ -528,3 +528,9 @@ dialog.velo:focus { outline: none; }
 .astra-scesa .astra-figurina img { width: 42px; height: 42px; margin-top: 6px; }
 .astra-scesa .astra-saldi { padding-top: 4px; }
 @media (prefers-reduced-motion: no-preference) { .astra-testata { transition: padding 0.2s ease-out; } }
+/* Figurina: tendenza a parole o con le frecce */
+.medie li { grid-template-columns: 1fr auto 76px; }
+.tendenza { display: flex; justify-content: flex-end; font: 800 12px Nunito, sans-serif; color: var(--testo-2); }
+.tendenza svg { color: inherit; }
+.tendenza.tsu { color: var(--verde); }
+.tendenza.tgiu { color: var(--accento); }

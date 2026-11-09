@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import manifest from '../data/manifest.json' with { type: 'json' };
 import { supabase } from './supabase';
-import { ArrowLeft } from '@phosphor-icons/react';
+import { ArrowDown, ArrowLeft, ArrowUp } from '@phosphor-icons/react';
 import { useSfondo } from './kit';
 import { nomeFigurina } from './lib/copione';
 
@@ -106,7 +106,7 @@ export function Figurina({ chiudi }: { chiudi: () => void }) {
                 <span>{m.nome}</span>
                 <b>{fmt(media(m.voti))}</b>
                 <span className={`tendenza t${tendenza === '↑' ? 'su' : tendenza === '↓' ? 'giu' : 'pari'}`} aria-label={tendenza === '↑' ? 'in salita' : tendenza === '↓' ? 'in discesa' : 'stabile'}>
-                  {tendenza}
+                  {tendenza === '↑' ? <ArrowUp size={18} weight="bold" aria-hidden /> : tendenza === '↓' ? <ArrowDown size={18} weight="bold" aria-hidden /> : 'come prima'}
                 </span>
               </li>
             );
