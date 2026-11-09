@@ -11,7 +11,7 @@ import { supabase } from './supabase';
 // Aspetto: lo stampo delle bozze Popup-forziere, -lucchetto, -bastone, -enigma (anello colorato,
 // avatar che sborda, titolo grande, riga della figurina in fondo).
 
-type Popup = { id: string; priorita: number; situazione: string; posa: string; titolo: string; testo: string; figurina: string | null };
+export type Popup = { id: string; priorita: number; situazione: string; posa: string; titolo: string; testo: string; figurina: string | null };
 const GIORNI_VALIDO = 3;
 const immagine = (posa: string) => manifest.avatar.find((a) => a.id === posa)?.webp ?? manifest.oggetti.find((o) => o.id === posa)?.webp;
 
@@ -53,6 +53,11 @@ export default function CodaPopup() {
     supabase.from('popup_coda').update({ mostrato_il: adesso() }).eq('id', p.id).then();
     setP(undefined);
   };
+  return <PopupVista p={p} chiudi={chiudi} />;
+}
+
+/** Il popup com'è davvero: lo usano la coda di Lani e la Vetrina dei genitori (che non scrive niente). */
+export function PopupVista({ p, chiudi }: { p: Popup; chiudi: () => void }) {
   const t = tono(p);
   const src = immagine(p.posa);
   const malus = t === 'bastone' ? p.testo.match(/[−-]\d+/)?.[0] : undefined;

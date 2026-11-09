@@ -3,13 +3,14 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import * as R from './lib/regole';
 import { installata } from './Benvenuta';
 import { GIORNI, MESI } from './spunte';
+import Vetrina from './Vetrina';
 
 // Area genitori — design/Genitori.html. Tutto passa dal client del genitore (sul suo telefono la
 // sessione normale, sull'iPad di Lani quella a parte sbloccata con il PIN): la RLS lo riconosce
 // come genitore e la funzione "passi" decide i passi come per Lani.
 // ponytail: "Da fotografare" (richieste di foto e Storage) è ancora da fare.
 
-type Pagina = 'settimana' | 'premi' | 'correzioni' | 'fogli' | 'impostazioni';
+type Pagina = 'settimana' | 'premi' | 'correzioni' | 'fogli' | 'impostazioni' | 'vetrina';
 const VOCI_GESTI = [
   ['scrivania', 'Scrivania in ordine'],
   ['lavastoviglie', 'Lavastoviglie fatta'],
@@ -57,7 +58,7 @@ export default function Genitori({ client, esci }: { client: SupabaseClient; esc
     <section className="sera genitori">
       <h1>Genitori</h1>
       <nav className="schede" aria-label="Sezioni genitori">
-        {(['settimana', 'premi', 'correzioni', 'fogli', 'impostazioni'] as Pagina[]).map((p) => (
+        {(['settimana', 'premi', 'correzioni', 'fogli', 'impostazioni', 'vetrina'] as Pagina[]).map((p) => (
           <button key={p} aria-current={p === pagina ? 'page' : undefined} onClick={() => (setPagina(p), setAvviso(''))}>
             {p.replace(/^./, (c) => c.toUpperCase())}
           </button>
@@ -69,6 +70,7 @@ export default function Genitori({ client, esci }: { client: SupabaseClient; esc
       {pagina === 'correzioni' && <Correzioni {...props} />}
       {pagina === 'fogli' && <Fogli {...props} />}
       {pagina === 'impostazioni' && <Impostazioni {...props} />}
+      {pagina === 'vetrina' && <Vetrina />}
       <button className="secondario" onClick={esci}>Esci</button>
     </section>
   );

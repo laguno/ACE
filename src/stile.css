@@ -505,3 +505,14 @@ body:has(.studio) .barra, body:has(.studio, .schermo-studio) .link-genitori { di
 body:has(.studio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
 .da-girare { display: flex; flex-direction: column; gap: 12px; margin-top: auto; }
 .esiti button:disabled { opacity: 0.45; box-shadow: none; }
+
+/* Vetrina dei genitori: popup e notifiche con dati di esempio */
+.vetrina { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; }
+.vetrina li { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-top: 2px dashed var(--lilla); }
+.vetrina li:first-child { border-top: 0; }
+.vetrina li > span { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.vetrina b { font: 800 16px/1.2 'Baloo 2', Nunito, sans-serif; }
+.vetrina small { font-size: 13px; line-height: 1.35; color: var(--testo-2); }
+.vetrina .secondario.compatto { margin: 0; align-self: center; }
+.notifiche-anteprima li > span { padding: 10px 12px; border-radius: 16px; background: var(--lilla); font-size: 14px; }
+.notifiche-anteprima li { border-top: 0; padding: 4px 0; }
