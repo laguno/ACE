@@ -99,7 +99,7 @@ export default function Studio() {
   if (!verifiche) return null;
 
   return (
-    <section className="schermo">
+    <section className="schermo schermo-studio">
       <Testata sfondo="panna" posa="lani-pensierosa" misura={132} sopra="Studio" titolo="Le tue verifiche" riga={<p>Il ripasso è già organizzato nei pomeriggi liberi.</p>} />
       {compitiAperti > 0 && <p className="lady">Prima i compiti di oggi: poi flash card e quiz danno passi.</p>}
 

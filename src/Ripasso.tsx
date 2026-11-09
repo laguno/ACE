@@ -126,29 +126,28 @@ export function Flashcard({ carte, titolo, sessione, chiudi }: { carte: Carta[];
             <p className="retro">{carta.retro}</p>
           </>
         ) : (
-          <p className="nota">{restano > 0 ? `Leggi bene: si gira tra ${restano} secondi.` : 'Pronta? Gira la carta.'}</p>
-        )}
-      </div>
-      {girata ? (
-        <>
-          <p className="come">Com'è andata?</p>
-          <div className="esiti">
-            <button className="esito-no" onClick={() => rispondi('non_sapevo')}>
-              Non sapevo
-            </button>
-            <button className="esito-quasi" onClick={() => rispondi('quasi')}>
-              Quasi
-            </button>
-            <button className="esito-si" onClick={() => rispondi('sapevo')}>
-              Sapevo
+          <div className="da-girare">
+            <p className="nota" aria-live="polite">
+              {restano > 0 ? `Leggi bene: si gira tra ${restano} secondi.` : 'Pronta? Gira la carta.'}
+            </p>
+            <button className="principale largo" disabled={restano > 0} onClick={() => setGirata(true)}>
+              Gira
             </button>
           </div>
-        </>
-      ) : (
-        <button className="principale largo" disabled={restano > 0} onClick={() => setGirata(true)}>
-          Gira
+        )}
+      </div>
+      <p className="come">Com'è andata?</p>
+      <div className="esiti">
+        <button className="esito-no" disabled={!girata} onClick={() => rispondi('non_sapevo')}>
+          Non sapevo
         </button>
-      )}
+        <button className="esito-quasi" disabled={!girata} onClick={() => rispondi('quasi')}>
+          Quasi
+        </button>
+        <button className="esito-si" disabled={!girata} onClick={() => rispondi('sapevo')}>
+          Sapevo
+        </button>
+      </div>
       <button className="link" onClick={sbagliata}>
         Questa carta è sbagliata
       </button>
@@ -159,11 +158,11 @@ export function Flashcard({ carte, titolo, sessione, chiudi }: { carte: Carta[];
   );
 }
 
-/** "Primo tentativo: 10 passi con almeno 9 su 10, 6 sotto. Poi 6, 3 e dal quarto 1." dal config. */
-function regolaQuiz(totale: number) {
+/** "Primo tentativo: 10 passi con almeno il 90% giusto, 6 sotto. Poi 6, 3 e dal quarto 1." dal config. */
+function regolaQuiz() {
   const q = STUDIO.quiz;
   const t = q.tentativi as Record<string, number[]>;
-  return `Primo tentativo: ${t['1'][0]} passi con almeno ${Math.ceil(q.soglia_giuste * totale)} su ${totale}, ${t['1'][1]} sotto. Poi ${t['2'][0]}, ${t['3'][0]} e dal quarto ${t['4+'][0]}.`;
+  return `Primo tentativo: ${t['1'][0]} passi con almeno il ${Math.round(q.soglia_giuste * 100)}% giusto, ${t['1'][1]} sotto. Poi ${t['2'][0]}, ${t['3'][0]} e dal quarto ${t['4+'][0]}.`;
 }
 
 export function Quiz({ quizId, domande, titolo, sessione, chiudi }: { quizId: string; domande: Domanda[]; titolo: string; sessione?: string; chiudi: () => void }) {
@@ -238,7 +237,7 @@ export function Quiz({ quizId, domande, titolo, sessione, chiudi }: { quizId: st
           {i + 1 < domande.length ? 'Avanti' : 'Fine'}
         </button>
       )}
-      <p className="regola">{regolaQuiz(domande.length)}</p>
+      <p className="regola">{regolaQuiz()}</p>
     </section>
   );
 }

@@ -50,6 +50,10 @@ test('sessione di flash card: si gira dopo 7 secondi, intervalli e giro salvati'
   await expect(page.getByText('Il numero sotto la linea si chiama ___.')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Gira' })).toBeDisabled();
   await expect(page.getByText('Leggi bene: si gira tra 7 secondi.')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Sapevo', exact: true })).toBeDisabled();
+  await expect(page.getByText('denominatore')).toHaveCount(0);
+  await expect(page.getByRole('navigation', { name: 'Sezioni' })).toBeHidden();
+  await expect(page.getByRole('button', { name: 'Genitori' })).toBeHidden();
   await page.clock.runFor(7500);
   await page.getByRole('button', { name: 'Gira' }).click();
   await expect(page.getByText('denominatore')).toBeVisible();
