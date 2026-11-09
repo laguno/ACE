@@ -12,6 +12,7 @@ import { aggiornaForzieri } from '../_shared/forzieri.ts';
 import { accoda } from '../_shared/popup.ts';
 import { avvisaSeFallita, inviaPush } from '../_shared/push.ts';
 import * as K from '../../../src/lib/copione/index.ts';
+import { chiChiama, cronOGenitore } from '../_shared/accesso.ts';
 
 const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 const NUVOLA = 'https://nuvola.madisoft.it';
@@ -283,7 +284,7 @@ async function passiVotiENote() {
       const da = R.iso(new Date(R.giorno(v.data).getTime() - 14 * 864e5));
       const fatte = (sessioni ?? []).filter((s) => {
         const ver = s.verifiche as unknown as { materia_id: string; data: string } | null;
-        return ver?.materia_id === v.materia_id && ver.data <= v.data && ver.data >= da;
+        return !!ver && ver.materia_id === v.materia_id && ver.data <= v.data && ver.data >= da;
       }).length;
       const insufficienze = numeri.slice(0, i + 1).filter((x) => x < 6).length;
       await accoda(db, `voto:${v.id}`, K.popupVoto(numeri[i], i ? numeri[i - 1] : undefined, insufficienze, fatte), {
@@ -321,19 +322,7 @@ async function passiVotiENote() {
 
 // ---------------------------------------------------------------- ingresso
 
-async function autorizzato(req: Request): Promise<boolean> {
-  const segreto = Deno.env.get('CRON_SEGRETO');
-  if (segreto && req.headers.get('x-cron-segreto') === segreto) return true;
-  const token = (req.headers.get('Authorization') ?? '').replace(/^Bearer /, '');
-  const { data } = await db.auth.getUser(token);
-  if (!data.user) return false;
-  const { count } = await db
-    .from('profili')
-    .select('id', { count: 'exact', head: true })
-    .eq('id', data.user.id)
-    .eq('ruolo', 'genitore');
-  return !!count;
-}
+const autorizzato = async (req: Request) => cronOGenitore(await chiChiama(db, req, Deno.env.get('CRON_SEGRETO')));
 
 const risposta = (corpo: unknown, stato = 200) =>
   new Response(JSON.stringify(corpo), { status: stato, headers: { 'Content-Type': 'application/json' } });

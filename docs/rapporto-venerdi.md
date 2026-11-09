@@ -36,14 +36,32 @@ Note sulle misure:
 
 - **Strumenti e misure** (ramo `misure`): ESLint, knip, copertura, axe e Lighthouse come comandi npm; schermate di prova condivise tra confronto, axe e Lighthouse (`e2e/casi.ts`).
 - **E. Enigmi** (ramo `enigmi-v4`): bozza v4 dopo le segnalazioni del signore (`91b145c`), in attesa del suo ok prima del salvataggio.
+- **A. Sicurezza** (ramo `audit-sicurezza`, `7337269`, `0925d2f`): mappa di tabelle, policy, funzioni e trigger; prova di attacco da Lani, genitore e anon; migrazione `0024`; accesso comune alle Edge Functions (`_shared/accesso.ts`, con prove); CSP e intestazioni su Vercel con prova senza violazioni; `npm run tipi:funzioni` (tsc sulle funzioni, 0 errori). `npm run prova:schema` da 70 a 239 controlli, tra cui una matrice per ogni tabella (chi inserisce, chi cancella, cosa vede anon) e l'elenco esatto delle funzioni chiamabili. `/security-review` sul ramo: nessuna vulnerabilità introdotta. Da applicare in produzione: migrazione, funzioni, merge (vedi 6).
 
 ## 3. Bug trovati e corretti
+
+Sicurezza (filone A), tutti con una prova in `prova:schema` o in `accesso.test.ts`:
+1. **Foto senza file** (il più grave): Lani poteva inserire la riga di una foto senza caricare niente e prendere i +2 della richiesta. Ora la riga vale solo con il file vero, suo, nella cartella della richiesta; lo storage accetta solo immagini fino a 10 MB nella cartella di una richiesta aperta.
+2. **Genitori con scrittura libera** su passi, voti, note, settimane, figurine, popup e altre tabelle del server: un genitore poteva scrivere passi e chiavi a mano. Ora le leggono soltanto.
+3. **Forzieri**: un genitore poteva aprire un forziere o azzerare i tentativi dell'enigma. Ora cambia solo il premio e segna la consegna.
+4. **Frasi di famiglia** leggibili da Lani prima della loro uscita.
+5. **Hash del PIN** leggibile dai genitori: ora passa solo dalle funzioni.
+6. **CORS `*`** sulle quattro funzioni chiamate dall'app: ora solo le origini di ACE.
+7. **Corpo delle richieste senza limite**: ora 4 KB, JSON rotto = 400.
+8. **`passi` accettava `tipo: "constructor"`** (metodi ereditati): ora solo i gestori veri.
+9. **`spiega` chiamava Opus a ogni tocco**: ora la spiegazione si salva sul compito, una chiamata per compito.
+10. Segreto del cron confrontato con `===`: ora a tempo costante.
+11. Sei errori di tipo nelle funzioni (`sync-nuvola`, `sync-calendario`), nessuno con effetto a runtime.
 
 ## 4. Simulatore
 
 ## 5. Da decidere
 
+1. **Quiz, flash card e video si fidano del telefono.** Le risposte giuste di un quiz, l'ora d'inizio di un giro di flash card e i secondi di video visti li manda l'app; il server controlla i tempi minimi e il tetto di 4 caselle al giorno, ma un quiz "tutto giusto" inventato vale i suoi passi. Le soluzioni dei quiz sono leggibili da Lani (servono all'app per correggere). Proposta: lasciare così per lo sprint 1 (serve un'app modificata, non un tocco sbagliato); se serve, correzione sul server (Lani manda le risposte, il server conta le giuste e le soluzioni non arrivano al telefono).
+
 ## 6. Rischi aperti prima del 23/11
+
+1. **Filone A non ancora in produzione.** Il controllo automatico di Claude Code ha bloccato `db push` come deploy in produzione. Da lanciare dal signore, in quest'ordine: `npx supabase db push --remote --yes`, poi `npx supabase functions deploy --use-api --yes` (tutte le funzioni), poi il merge di `audit-sicurezza` in `main` (porta la CSP su Vercel). Dopo: advisors e una prova dell'app vera da un genitore (Oggi, Genitori, una foto).
 
 ## 7. Chiamate all'IA e skill
 

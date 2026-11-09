@@ -7,6 +7,7 @@ import * as C from '../../../src/lib/calendario/index.ts';
 import * as K from '../../../src/lib/copione/index.ts';
 import * as R from '../../../src/lib/regole/index.ts';
 import { inviaPush } from '../_shared/push.ts';
+import { stessoSegreto } from '../_shared/accesso.ts';
 
 const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 
@@ -92,8 +93,7 @@ async function turno() {
 }
 
 Deno.serve(async (req) => {
-  const segreto = Deno.env.get('CRON_SEGRETO');
-  if (!segreto || req.headers.get('x-cron-segreto') !== segreto) return new Response('{"errore":"solo il cron"}', { status: 401 });
+  if (!stessoSegreto(req.headers.get('x-cron-segreto'), Deno.env.get('CRON_SEGRETO'))) return new Response('{"errore":"solo il cron"}', { status: 401 });
   try {
     return new Response(JSON.stringify(await turno()), { headers: { 'Content-Type': 'application/json' } });
   } catch (e) {

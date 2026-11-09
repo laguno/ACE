@@ -6,14 +6,9 @@
 // Se un genitore ha cambiato il premio, l'immagine non vale più (immagine_per diverso dal premio):
 // "manca" true e niente URL, l'app mostra il pacco regalo finché il signore non ne carica una nuova.
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { chiChiama, cors, leggiCorpo, risposte } from '../_shared/accesso.ts';
 
 const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
-const risposta = (corpo: unknown, stato = 200) =>
-  new Response(JSON.stringify(corpo), { status: stato, headers: { ...CORS, 'Content-Type': 'application/json' } });
 const DURATA = 600; // secondi
 
 async function firma(percorso: string) {
@@ -22,15 +17,14 @@ async function firma(percorso: string) {
 }
 
 Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
-  const token = (req.headers.get('Authorization') ?? '').replace(/^Bearer /, '');
-  const { data: u } = await db.auth.getUser(token);
-  if (!u.user) return risposta({ errore: 'accesso richiesto' }, 401);
-  const { data: profilo } = await db.from('profili').select('ruolo').eq('id', u.user.id).maybeSingle();
-  if (!profilo) return risposta({ errore: 'profilo mancante' }, 403);
+  const risposta = risposte(req);
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: cors(req) });
+  const chi = await chiChiama(db, req, undefined);
+  if (chi?.tipo !== 'utente') return risposta({ errore: 'accesso richiesto' }, 401);
+  const profilo = { ruolo: chi.ruolo };
 
   try {
-    const { n } = await req.json().catch(() => ({}));
+    const { n } = await leggiCorpo<{ n: number }>(req).catch(() => ({ n: undefined }));
     let q = db.from('forzieri').select('n, stato, premio, immagine_per, enigma_risolto_il').order('n');
     if (typeof n === 'number') q = q.eq('n', n);
     const { data: forzieri, error } = await q;

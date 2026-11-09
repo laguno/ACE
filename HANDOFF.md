@@ -25,7 +25,7 @@ Rami `grafica-3` (Benvenuta, Genitori-avvio, passi che salgono), `debiti` (PIN, 
 ## Settimana del piano (9-13/11)
 
 - 9/11 sera: strumenti installati e misure "Prima" in `docs/rapporto-venerdi.md` (ramo `misure`, unito a `main`). Comandi nuovi: `npm run lint`, `knip`, `copertura`, `axe`, `lighthouse` (gli ultimi due fuori dalle prove normali finché non sono a zero). Skill di Supabase e gitleaks installati dal signore (storia pulita), skill Anthropic (`example-skills`): strumenti tutti installati.
-- Prossimo: filone A (sicurezza, Lani "attaccante").
+- 9/11 sera, filone A sul ramo `audit-sicurezza` (pubblicato, non unito): migrazione `0024`, accesso comune alle funzioni, CSP. Prove verdi (schema 239). Da applicare in produzione dal signore: `db push`, deploy delle funzioni, merge (dettagli in `docs/rapporto-venerdi.md`, rischi). Poi filone B (simulatore).
 
 ## Decisioni prese
 
@@ -93,7 +93,7 @@ Altri debiti: `spiega`, borsa, enigma, foto e push provati solo con le prove (se
 - Iscrizioni chiuse in Supabase Auth: i nuovi utenti si creano dalla dashboard, con "Auto Confirm User" attivo.
 - Gli avvisi di Supabase su `forzieri_lani` (vista security definer) e sulle 8 funzioni RPC (con `vedi_saldo`, `controlla_pin`, `frase_del_giorno`) sono voluti: vedi i commenti nello schema.
 - `db push` sempre con `--remote --yes`; funzioni con `npx supabase functions deploy <nome> --use-api --yes`. Comandi composti (con `&&` o `|`) passano dal controllo automatico: `git push` e i deploy vanno lanciati da soli.
-- Schema `0001`-`0023` applicati: le modifiche vanno in `0024` e successive. Cron attivi: sync-nuvola, sync-calendario, chiavi, notifiche. Le migrazioni con "cron" nel nome non girano su PGlite.
+- Schema `0001`-`0023` applicati (`0024` sul ramo `audit-sicurezza`, da applicare): le modifiche vanno in `0025` e successive. Cron attivi: sync-nuvola, sync-calendario, chiavi, notifiche. Le migrazioni con "cron" nel nome non girano su PGlite.
 - Segreti: `NUVOLA_UTENTE`, `NUVOLA_PASSWORD`, `CRON_SEGRETO` (anche nel Vault come `cron_segreto`), `GOOGLE_CALENDAR_ICS_URL`, `ANTHROPIC_API_KEY`, `VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY`/`VAPID_SUBJECT`. La chiave VAPID pubblica serve anche al client.
 - Nuvola: `/alunni` dà più schede; si usa anno più recente e id più alto (10928). Compiti, voti e lezioni non hanno id: chiavi costruite in `src/lib/nuvola`.
 - Supabase rifiuta UPDATE e DELETE senza WHERE anche dentro le funzioni (safeupdate); PGlite no.
