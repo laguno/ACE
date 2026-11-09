@@ -265,7 +265,7 @@ Le notifiche sono al massimo tre al giorno più un sollecito, sotto i 60 caratte
 | Domenica, chiusura lunga | Papà | "Domenica sera: prepariamo la settimana" |
 | Ai genitori, domenica | — | "Riepilogo della settimana di Lani: {chiavi} chiavi" (con 1: "una chiave") |
 | Ai genitori, foglio da firmare in scadenza | — | "Foglio da firmare per Lani entro {giorno}" |
-| Ai genitori, pagine da fotografare | — | "Verifica {materia}: foto pagine {pagine}" |
+| Ai genitori, pagine da fotografare | — | "{Verifica o Compito} {materia}: foto pagine {pagine}"; più richieste nello stesso giro: "{n} richieste di foto nuove: le trovate in ACE" |
 
 Le notifiche non portano mai il bastone: il rimprovero si vede solo aprendo l'app, così il telefono non diventa una sirena di brutte notizie. Le figurine sbloccate da una notifica compaiono all'apertura successiva.
 

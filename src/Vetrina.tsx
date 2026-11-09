@@ -101,6 +101,8 @@ const NOTIFICHE: [string, string][] = [
   ['Domenica, chiusura delle 20:00', K.notifica('chiusura_domenica').testo],
   [`Sollecito, ${R.CONFIG.notifiche.sollecito_dopo_minuti} minuti dopo`, K.notifica('sollecito', { n: 2 }).testo],
   ['Domenica 21:45, ai genitori', K.notifica('genitori_riepilogo', { chiavi: 2 }).testo],
+  ['Dopo la sincronizzazione, ai genitori', K.notifica('genitori_foto', { cosa: 'Verifica', materia: 'Scienze', pagine: '120–124' }).testo],
+  ['Più richieste nello stesso giro', K.notifica('genitori_foto_tante', { n: 3 }).testo],
 ];
 
 export default function Vetrina() {

@@ -112,6 +112,17 @@ await fallisce('anon non chiama frase_del_giorno', null, `select * from frase_de
 await come(null, `delete from frasi where di_famiglia`);
 await come(null, `update frasi set ultima_volta = null, ultimo_momento = null where ultima_volta is not null`);
 
+// richieste di foto: una per compito
+await come(null, `insert into richieste_foto (motivo, pagine, compito_id) values ('compito', '40', '${COMPITO}')`);
+await fallisce('una sola richiesta di foto per compito', null, `insert into richieste_foto (motivo, pagine, compito_id) values ('compito', '41', '${COMPITO}')`);
+const RICH = await val(null, 'select id from richieste_foto limit 1');
+await come(LANI, `insert into foto_pagine (richiesta_id, pagine, percorso_storage) values ('${RICH}', '40', 'r/1.jpg')`);
+verifica('Lani carica una foto a suo nome', (await val(null, 'select caricata_da from foto_pagine')) === LANI);
+await come(LANI, `update richieste_foto set stato = 'fatta'`); // la RLS non lo lascia passare: zero righe
+verifica('la richiesta resta aperta finché non la chiude il server', (await val(null, 'select stato from richieste_foto')) === 'aperta');
+await come(null, `delete from foto_pagine`);
+await come(null, `delete from richieste_foto where id = '${RICH}'`);
+
 // Genitori, PIN
 verifica('controlla_pin: nessun PIN impostato', (await val(PAPA, `select controlla_pin('2468')`)) === 'manca');
 await come(PAPA, `select imposta_pin('2468')`);

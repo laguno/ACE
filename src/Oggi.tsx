@@ -4,6 +4,7 @@ import { impegniTra, piuGiorni, oraAdesso, useGiornata, type Impegno } from './g
 import { Riquadro, Sticker, Testata } from './kit';
 import { PillolaSaldo } from './Contapassi';
 import { Frase, type Momento } from './Frase';
+import { Fotografa, SELECT_RICHIESTE, descrizione, type RichiestaFoto } from './Foto';
 import * as C from './lib/calendario';
 import * as N from './lib/nuvola';
 import * as R from './lib/regole';
@@ -211,6 +212,8 @@ function Pomeriggio({ chiusura, apri }: { chiusura: string | null; apri: Apri })
   const [carte, setCarte] = useState(0);
   const [errore, setErrore] = useState('');
   const [aiuto, setAiuto] = useState<Compito>();
+  const [foto, setFoto] = useState<RichiestaFoto[]>([]);
+  const [fotoFatta, setFotoFatta] = useState('');
   const attesa = useAnnulla();
 
   useEffect(() => {
@@ -223,7 +226,9 @@ function Pomeriggio({ chiusura, apri }: { chiusura: string | null; apri: Apri })
         .is('fatta_il', null)
         .limit(1),
       supabase.from('flashcard').select('id', { count: 'exact', head: true }).lte('prossima_revisione', R.iso(oggi)).eq('segnalata_sbagliata', false),
-    ]).then(([c, s, k]) => {
+      supabase.from('richieste_foto').select(SELECT_RICHIESTE).eq('stato', 'aperta').order('creato_il').limit(3),
+    ]).then(([c, s, k, rf]) => {
+      setFoto((rf.data ?? []) as unknown as RichiestaFoto[]);
       if (c.error) return setErrore('Non riesco a leggere i compiti. Riprova tra poco.');
       const lista = (c.data ?? []) as unknown as Compito[];
       setCompiti(lista.sort((a, b) => N.peso(b.testo) - N.peso(a.testo)));
@@ -331,6 +336,32 @@ function Pomeriggio({ chiusura, apri }: { chiusura: string | null; apri: Apri })
             Carte del giorno: {carte} carte, circa {Math.max(2, Math.round((Math.min(carte, 12) * 25) / 60))} minuti
           </span>
         </button>
+      )}
+
+      {(foto.length > 0 || fotoFatta) && (
+        <div className="carta">
+          <div className="testa-carta">
+            <h2>Da fotografare</h2>
+            <span className="valore">+{R.CONFIG.passi.foto_compito} ciascuna</span>
+          </div>
+          {foto.length > 0 && <p className="nota">Le pagine del libro di carta che ACE ti chiede, mentre fai i compiti.</p>}
+          <ul className="lista-foto">
+            {foto.map((r) => (
+              <li key={r.id}>
+                <span>{descrizione(r)}</span>
+                <Fotografa
+                  client={supabase}
+                  richiesta={r}
+                  fatto={(p) => {
+                    setFoto((l) => l.filter((x) => x.id !== r.id));
+                    setFotoFatta(p > 0 ? `Foto salvata: +${p}.` : 'Foto salvata.');
+                  }}
+                />
+              </li>
+            ))}
+          </ul>
+          {fotoFatta && <p className="nota accento" role="status">{fotoFatta}</p>}
+        </div>
       )}
     </section>
   );

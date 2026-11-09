@@ -199,6 +199,20 @@ export function materieDelGiorno<T extends { data: string; ora: number; materia_
 }
 
 /**
+ * Pagine del libro scritte in un compito o in una verifica ("pagine 340–352", "pag. 12, 14 e 16",
+ * "p. 40"), in forma pulita ("340–352", "12, 14, 16"); null se non ce ne sono. Gli esercizi no.
+ * ponytail: con il solo argomento (niente pagine) servirebbe la mappa dei libri: non ancora.
+ */
+export function pagine(testo: string): string | null {
+  const trovate: string[] = [];
+  const numero = String.raw`\d+(?:\s*[-–]\s*\d+)?`;
+  const re = new RegExp(String.raw`\b(?:pagin[ae]|pagg?|pp?)\.?\s*(${numero}(?:\s*(?:,|e)\s*${numero})*)`, 'gi');
+  for (const [, gruppo] of testo.matchAll(re))
+    for (const pezzo of gruppo.split(/\s*(?:,|\be\b)\s*/)) if (pezzo) trovate.push(pezzo.replace(/\s*[-–]\s*/, '–'));
+  return trovate.length ? [...new Set(trovate)].join(', ') : null;
+}
+
+/**
  * Quanto è lungo un compito, a occhio: pagine e esercizi negli intervalli ("pag 340-352",
  * "es 1-8") più i numeri singoli. Serve solo a mettere il più lungo per primo.
  * ponytail: stima grezza sul testo; se sbaglia spesso, chiedere a Lani una stima di minuti.

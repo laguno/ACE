@@ -76,7 +76,13 @@ export async function finto(page: Page, t: Tabelle, funzioni: Record<string, unk
 
     if (url.pathname.startsWith('/functions/v1/passi')) {
       chiamate.push(req.postDataJSON());
-      return json({ passi: 0 });
+      return json(funzioni.passi ?? { passi: 0 });
+    }
+    // bucket delle foto: si ricorda solo il percorso
+    if (url.pathname.startsWith('/storage/v1/object/')) {
+      const percorso = url.pathname.replace('/storage/v1/object/', '');
+      (t.caricate ??= []).push({ percorso, tipo: req.headers()['content-type'] ?? '' });
+      return json({ Key: percorso, Id: percorso });
     }
     if (url.pathname.startsWith('/functions/v1/')) return json(funzioni[url.pathname.split('/')[3]] ?? {});
     if (url.pathname.startsWith('/auth/v1/')) return json({ id: utente.id });

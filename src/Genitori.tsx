@@ -6,6 +6,7 @@ import * as R from './lib/regole';
 import { installata } from './Benvenuta';
 import { GIORNI, MESI } from './spunte';
 import Vetrina from './Vetrina';
+import { Fotografa, SELECT_RICHIESTE, descrizione, type RichiestaFoto } from './Foto';
 
 // Area genitori — design/Genitori.html. Tutto passa dal client del genitore (sul suo telefono la
 // sessione normale, sull'iPad di Lani quella a parte sbloccata con il PIN): la RLS lo riconosce
@@ -185,15 +186,16 @@ function Settimana({ client, passi, avvisa }: Props) {
   const oggi = R.giornoRoma(new Date());
   const lun = R.lunedi(oggi);
   const dom = new Date(lun.getFullYear(), lun.getMonth(), lun.getDate() + 6);
-  const [d, setD] = useState<{ media: number | null; obiettivo: number; note: number; serate: number; gestiOggi: number }>();
+  const [d, setD] = useState<{ media: number | null; obiettivo: number; note: number; serate: number; gestiOggi: number; foto: RichiestaFoto[] }>();
 
   async function carica() {
-    const [v, o, n, s, g] = await Promise.all([
+    const [v, o, n, s, g, rf] = await Promise.all([
       client.from('voti').select('voto'),
       client.from('impostazioni').select('valore').eq('chiave', 'obiettivo_media').maybeSingle(),
       client.from('note').select('id', { count: 'exact', head: true }).gte('data', R.iso(lun)).lte('data', R.iso(dom)),
       client.from('serate').select('data').gte('data', R.iso(lun)).lte('data', R.iso(dom)).not('cartella_il', 'is', null),
       client.from('movimenti_passi').select('passi').eq('motivo', 'gesto').eq('giorno', R.iso(oggi)),
+      client.from('richieste_foto').select(SELECT_RICHIESTE).eq('stato', 'aperta').order('creato_il'),
     ]);
     const voti = (v.data ?? []).map((x) => Number(x.voto));
     setD({
@@ -202,6 +204,7 @@ function Settimana({ client, passi, avvisa }: Props) {
       note: n.count ?? 0,
       serate: (s.data ?? []).length,
       gestiOggi: (g.data ?? []).reduce((a, x) => a + x.passi, 0),
+      foto: (rf.data ?? []) as unknown as RichiestaFoto[],
     });
   }
   useEffect(() => {
@@ -247,6 +250,33 @@ function Settimana({ client, passi, avvisa }: Props) {
           <dt>cartella e compiti</dt>
         </div>
       </dl>
+      {d.foto.length > 0 && (
+        <div className="carta">
+          <div className="testa-carta">
+            <h2>Da fotografare</h2>
+            <span className="valore">{d.foto.length}</span>
+          </div>
+          <p className="nota">Pagine del libro di carta per lo studio di Lani. Se le fotografa lei durante i compiti, prende +{R.CONFIG.passi.foto_compito}.</p>
+          <ul className="lista-foto">
+            {d.foto.map((r) => (
+              <li key={r.id}>
+                <span>
+                  {descrizione(r)}
+                  <small>{r.motivo === 'verifica' ? 'Per una verifica' : 'Per un compito'}</small>
+                </span>
+                <Fotografa
+                  client={client}
+                  richiesta={r}
+                  fatto={() => {
+                    avvisa(`Foto salvata: ${descrizione(r)}.`);
+                    carica();
+                  }}
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <div className="carta">
         <div className="testa-carta">
           <h2>Dai qualche passo</h2>

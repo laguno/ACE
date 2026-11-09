@@ -200,6 +200,22 @@ const gestori: Record<string, (id: string) => Promise<Esito>> = {
     return registraStudio('video', g, P.studio_facoltativo.video_completo);
   },
 
+  // id = richiesta di foto: con almeno una foto caricata la richiesta è fatta; i passi vanno a Lani
+  // solo se una foto è sua (una volta per richiesta)
+  async foto(id) {
+    const r = await riga('richieste_foto', 'id', id);
+    const { data: foto, error } = await db.from('foto_pagine').select('caricata_da, caricata_il, profili(ruolo)').eq('richiesta_id', id).order('caricata_il');
+    if (error) throw error;
+    if (!foto?.length) return niente('nessuna foto caricata');
+    if (r.stato !== 'fatta') {
+      const { error: e } = await db.from('richieste_foto').update({ stato: 'fatta' }).eq('id', id);
+      if (e) throw e;
+    }
+    const diLani = foto.find((x) => (x.profili as unknown as { ruolo: string } | null)?.ruolo === 'lani');
+    const passi = R.passiFoto({ richiestaDaAce: true, caricataDaLani: !!diLani });
+    return diLani ? registra('foto', id, passi, R.giornoRoma(diLani.caricata_il)) : niente('foto dei genitori: richiesta chiusa');
+  },
+
   async gesto(id) {
     const ge = await riga('gesti_casa', 'id', id);
     const { data: prima, error } = await db

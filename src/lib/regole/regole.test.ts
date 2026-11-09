@@ -23,6 +23,7 @@ import {
   passiQuiz,
   passiVoto,
   passiVotiMateria,
+  passiFoto,
   passiNota,
   malusDimenticanze,
   posizione,
@@ -276,5 +277,13 @@ describe('caselle dello studio facoltativo', async () => {
       'flashcard:2026-11-24:3',
       'flashcard:2026-11-24:4',
     ]);
+  });
+});
+
+describe('foto di un compito richiesta da ACE', () => {
+  it('passi a Lani solo se l’ha caricata lei e la richiesta era di ACE', () => {
+    expect(passiFoto({ richiestaDaAce: true, caricataDaLani: true })).toBe(CONFIG.passi.foto_compito);
+    expect(passiFoto({ richiestaDaAce: true, caricataDaLani: false })).toBe(0);
+    expect(passiFoto({ richiestaDaAce: false, caricataDaLani: true })).toBe(0);
   });
 });

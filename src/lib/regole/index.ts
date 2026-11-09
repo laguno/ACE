@@ -133,6 +133,14 @@ export function passiVotiMateria(voti: number[]): number[] {
 }
 
 /** Nota di merito +50, disciplinare −20; le didattiche contano a gruppi di tre (malusDimenticanze). */
+/**
+ * Foto di un compito richiesta da ACE (docs/02): passi a Lani se la foto l'ha caricata lei, una volta
+ * per richiesta (riferimento = id della richiesta). Le foto dei genitori chiudono la richiesta e basta.
+ */
+export function passiFoto(f: { richiestaDaAce: boolean; caricataDaLani: boolean }): number {
+  return f.richiestaDaAce && f.caricataDaLani ? P.foto_compito : 0;
+}
+
 export function passiNota(tipo: 'disciplinare' | 'didattica' | 'merito' | 'altro'): number {
   if (tipo === 'merito') return P.nota_merito;
   if (tipo === 'disciplinare') return P.malus.nota_disciplinare;
