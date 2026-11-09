@@ -86,6 +86,7 @@ export default function Astra({ apri }: { apri: (pagina: 'Figurina' | 'Album') =
 
   return (
     <section className="astra">
+      <Compatta />
       <div className="astra-sfondo" style={{ backgroundImage: `url(${img('sfondi', mondo.sfondo)})` }} aria-hidden />
       <header className="carta astra-testata">
         <div className="astra-titolo">
@@ -95,7 +96,7 @@ export default function Astra({ apri }: { apri: (pagina: 'Figurina' | 'Album') =
             <p className="mantra">Ogni giorno, passino passino.</p>
           </span>
           <button className="astra-figurina" onClick={() => apri('Figurina')} aria-label="La tua figurina">
-            <img src={img('avatar/lani', 'lani-saluta')} alt="" width={64} height={64} />
+            <img src={img('avatar/lani', 'lani-contenta')} alt="" width={50} height={50} />
           </button>
         </div>
         <div className="astra-saldi">
@@ -284,4 +285,18 @@ function SchedaForziere({ f, n, passi, chiavi, chiudi }: { f?: Forziere; n: numb
       <button className="secondario" onClick={chiudi}>Torna al percorso</button>
     </section>
   );
+}
+
+/** Scendendo nella mappa la testata fissa si compatta (a 360 px prendeva più di un quarto dello schermo). */
+function Compatta() {
+  useEffect(() => {
+    const segna = () => document.body.classList.toggle('astra-scesa', window.scrollY > 48);
+    segna();
+    window.addEventListener('scroll', segna, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', segna);
+      document.body.classList.remove('astra-scesa');
+    };
+  }, []);
+  return null;
 }

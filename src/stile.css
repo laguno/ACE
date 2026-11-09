@@ -516,3 +516,15 @@ dialog.velo:focus { outline: none; }
 /* Flash card: carta più bassa con risposte corte, chip dei secondi col suo stile (prima prendeva quello delle pastiglie) */
 .carta.flash { min-height: 320px; }
 .carta.flash .chip { min-height: 0; padding: 4px 12px; font: 800 12px Nunito, sans-serif; color: var(--testo-2); cursor: default; }
+
+/* Astra: figurina come ritratto nel cerchio (bozza Main), testata che si compatta scendendo */
+.astra-figurina { width: 52px; height: 52px; border-radius: 50%; background: var(--lilla); border: 3px solid var(--rosa-bordo); overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.astra-figurina img { width: 50px; height: 50px; margin-top: 8px; }
+.astra-chiavi-totali { font-size: 13px !important; }
+.astra-scesa .astra-testata { padding: 8px 16px; gap: 4px; }
+.astra-scesa .astra-testata .mantra, .astra-scesa .astra-testata .sopratitolo, .astra-scesa .astra-chiavi-totali, .astra-scesa .chip-bandiera { display: none; }
+.astra-scesa .astra-titolo h1 { font-size: 20px; }
+.astra-scesa .astra-figurina { width: 44px; height: 44px; }
+.astra-scesa .astra-figurina img { width: 42px; height: 42px; margin-top: 6px; }
+.astra-scesa .astra-saldi { padding-top: 4px; }
+@media (prefers-reduced-motion: no-preference) { .astra-testata { transition: padding 0.2s ease-out; } }

@@ -33,6 +33,8 @@ test('percorso: sei qui, forzieri, bandierina, chiavi della settimana', async ({
   await page.goto('/');
   await page.getByRole('button', { name: 'Astra' }).click();
   await expect(page.getByText('Colline di caramelle')).toBeVisible();
+  // Astra scende da sola fino a "Sei qui" e la testata si compatta: in cima il motto c'è
+  await page.evaluate(() => window.scrollTo(0, 0));
   await expect(page.getByText('Ogni giorno, passino passino.')).toBeVisible();
   await expect(page.getByText('300 passi')).toBeAttached();
   await expect(page.getByText('1 chiave', { exact: true })).toBeAttached();
@@ -106,3 +108,19 @@ for (const passi of [0, 130, 300, 420, 700, 950, 1600, 2300, 3100, 5000, 7000]) 
     }
   });
 }
+
+test('a 360 px la testata si compatta quando si scende', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 740 });
+  await page.clock.setFixedTime(new Date('2026-11-10T16:00:00+01:00'));
+  await finto(page, dati(1600));
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Astra' }).click();
+  await page.waitForTimeout(500); // Astra scende da sola fino a Sei qui
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await expect(page.locator('body')).not.toHaveClass(/astra-scesa/);
+  const alta = (await page.locator('.astra-testata').boundingBox())!.height;
+  await page.evaluate(() => window.scrollTo(0, 600));
+  await expect(page.locator('body')).toHaveClass(/astra-scesa/);
+  const bassa = (await page.locator('.astra-testata').boundingBox())!.height;
+  expect(bassa).toBeLessThan(alta - 40);
+});
