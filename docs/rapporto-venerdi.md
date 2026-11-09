@@ -24,7 +24,7 @@ Piano: `docs/piano-fino-a-venerdi.md`. Ogni numero si ricontrolla con il comando
 | Impeccable (critique / audit) | skill `impeccable` | 27/40, 14/20 (9/11) | | ≥ 34/40, ≥ 18/20 |
 | Peso della build | `npm run build` | JS 624 KB (181 KB gzip), un solo pezzo; precache 145 file, 4,48 MB | | |
 | Advisors di Supabase | `npx supabase db advisors --remote --type all` | 79: sicurezza 1 errore (vista `forzieri_lani`, voluta) + 8 funzioni security definer (volute) + protezione delle password trapelate (la accende il signore); prestazioni 45 `multiple_permissive_policies`, 20 `unindexed_foreign_keys`, 3 `auth_rls_initplan`, 1 `unused_index` | | solo i voluti, spiegati |
-| gitleaks | `gitleaks git` | da misurare: non installato (vedi 7) | | 0 |
+| gitleaks | `gitleaks git --redact` | 0 su 105 commit. Nei file locali (`gitleaks dir`) 2 in `.env.local`, escluso dal repository e mai committato: atteso | | 0 |
 | `npm audit` | `npm audit --omit=dev` | 0 nelle dipendenze dell'app; 15 negli strumenti di sviluppo (13 moderate, 2 low) | | 0 nell'app |
 
 Note sulle misure:
@@ -50,4 +50,5 @@ Note sulle misure:
 - Chiamate vere all'IA: 0 su 40.
 - Installati come dipendenze di sviluppo: `@axe-core/playwright`, `fast-check`, `lighthouse` (al posto di `@lhci/cli`), `puppeteer-core`, `knip`, `eslint`, `@eslint/js`, `typescript-eslint`, `@vitest/coverage-v8`. Nessuno manda dati fuori; Lighthouse senza invio dei rapporti.
 - Skill di Supabase (`supabase`, `supabase-postgres-best-practices`) installate dal signore il 9/11 con `npx skills add supabase/agent-skills`: solo testi Markdown, nessuno script; versione fissata in `skills-lock.json`, file in `.agents/` (fuori dal repository, come Impeccable).
-- In sospeso, da lanciare dal signore: skill ufficiali Anthropic (`/plugin`), gitleaks (`winget install gitleaks`).
+- gitleaks 8.30.1 installato dal signore il 9/11 (`winget install gitleaks`).
+- In sospeso, da lanciare dal signore: skill ufficiali Anthropic (`/plugin`).
