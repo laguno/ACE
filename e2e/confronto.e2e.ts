@@ -128,7 +128,7 @@ const CASI: Record<string, Caso> = {
     quando: LUNEDI_POMERIGGIO,
     dati: (d) =>
       (d.popup_coda = [
-        { id: 'p1', priorita: 3, situazione: 'forziere_aperto', posa: 'lani-sorpresa', titolo: 'Forziere aperto', testo: 'Forziere aperto! Dentro c’è: Pizza con le amiche. E una figurina che non trovi altrove.', figurina: 'Nuova figurina: Leo tennis. Album 6/64.', mostrato_il: null, creato_il: '2026-11-09T15:00:00Z' },
+        { id: 'p1', priorita: 3, situazione: 'forziere_aperto', posa: 'lani-sorpresa', titolo: 'Forziere aperto', testo: 'Dentro c’è: Pizza con le amiche. E una figurina che non trovi altrove.', figurina: 'Nuova figurina: Leo tennis. Album 6/64.', mostrato_il: null, creato_il: '2026-11-09T15:00:00Z' },
       ]),
   },
   'Popup-lucchetto': { bozza: 'Popup-lucchetto', quando: LUNEDI_POMERIGGIO, dati: (d) => (d.popup_coda = [popup('forziere_lucchetto', 3, 'papa-dispiaciuto', 'Servono chiavi', 'Sei arrivata al forziere, ma servono 2 chiavi in più. Si apre appena le hai.')]) },
