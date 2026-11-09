@@ -22,6 +22,11 @@
 
 Rami `grafica-3` (Benvenuta, Genitori-avvio, passi che salgono), `debiti` (PIN, frasi nei momenti, Da fotografare) ed `enigmi` (enigmi a tipi, immagini dei premi) uniti a `main` con tutte le prove verdi e le foto di confronto rigenerate. Migrazioni 0018-0023 applicate; funzioni `passi`, `sync-nuvola`, `enigma` e `premi` pubblicate; 18 immagini nel bucket `premi`. I 9 premi inseriti (il 7 cambiato in "Biglietti per una partita di pallavolo femminile di Serie A"). Prova sul database vero con l'identità di Lani: non vede file del bucket `premi`, righe di `forzieri` né premi. Nessuna chiamata vera all'IA.
 
+## Settimana del piano (9-13/11)
+
+- 9/11 sera: strumenti installati e misure "Prima" in `docs/rapporto-venerdi.md` (ramo `misure`, unito a `main`). Comandi nuovi: `npm run lint`, `knip`, `copertura`, `axe`, `lighthouse` (gli ultimi due fuori dalle prove normali finché non sono a zero). In sospeso, li lancia il signore: skill di Supabase, skill Anthropic (`/plugin`), gitleaks (`winget install gitleaks`).
+- Prossimo: filone A (sicurezza, Lani "attaccante").
+
 ## Decisioni prese
 
 | Data | Chi | Decisione |
@@ -68,7 +73,7 @@ Rami `grafica-3` (Benvenuta, Genitori-avvio, passi che salgono), `debiti` (PIN, 
 
 Il piano della settimana è `docs/piano-fino-a-venerdi.md` (filoni A-J, rapporto di venerdì). In più, fino al 23/11:
 
-1. **Enigmi**: la bozza dei 9 in `docs/enigmi-bozza.md` la controllano il signore e Jarvis (3 domande in fondo: parole chiave della cima nel biglietto o nell'aiutino; gatta senza bocca del 3 e "baffo" del 6; cima da rifare se cambia un premio). Dopo l'ok si salvano nel database (enigma, soluzione, aiutino, parola). Fino ad allora nel database c'è la prima versione e il 7 è vuoto.
+1. **Enigmi**: bozza v4 sul ramo `enigmi-v4` (`docs/enigmi-bozza.md`), dopo le segnalazioni del signore del 9/11: indovinelli in rima (1, 3, 8), il 3 più corto, il 7 più semplice, cima con le parole chiave nel biglietto, premio 1 "Pigiama party con le amiche", premio 9 "Una giornata al parco divertimenti". Aspetta l'ok del signore; poi si salvano nel database (enigmi e titoli dei premi 1 e 9) e si aggiornano `data/enigmi.json` e `src/lib/enigmi` (cima, regole dei tipi). Fino ad allora nel database c'è la prima versione e il 7 è vuoto.
 2. Genitori: controllare orari e materiale nelle Impostazioni.
 3. **Prova in famiglia**, prima su Android Chrome (Motorola di Lani: Home, push, tema scuro, scorrimento fino in fondo), poi l'iPad. Lista in `docs/07-installazione.md`.
 4. Dal 23/11: primi passi, popup e figurine; il 29/11 alle 21:30 le prime chiavi (`sync_log` fonte chiavi). Primo giro di `sync-nuvola` con le richieste di foto: controllare `sync_log` e `richieste_foto` (solo conteggi).
@@ -83,7 +88,7 @@ Altri debiti: `spiega`, borsa, enigma, foto e push provati solo con le prove (se
 
 ## Attenzione
 
-- **Account**: ACE si apre con l'account personale, `claude-personal` (`C:\Users\messori\.local\bin\claude-personal.cmd`, accanto a `claude.exe`, imposta `CLAUDE_CONFIG_DIR=%USERPROFILE%\.claude-personal`). `~/.claude` resta all'account aziendale. In `.claude-personal` sono stati copiati `settings.json` e la cartella del progetto (`projects/C--progetti-ace-app`, memoria compresa); niente è stato cancellato da `~/.claude`: lo fa il signore dopo aver verificato. L'hook SessionStart del progetto (`.claude/settings.json` → `.claude/hooks/controlla-account.mjs`) avvisa, solo su Windows e senza bloccare, se ACE è aperta senza `.claude-personal`. Al primo avvio con `claude-personal` serve un nuovo accesso.
+- **Account**: dal 9 al 13/11 si lavora con l'account aziendale, per decisione del signore (piano di Jarvis). Fuori da quella settimana ACE si apre con l'account personale, `claude-personal` (`C:\Users\messori\.local\bin\claude-personal.cmd`, accanto a `claude.exe`, imposta `CLAUDE_CONFIG_DIR=%USERPROFILE%\.claude-personal`). `~/.claude` resta all'account aziendale. In `.claude-personal` sono stati copiati `settings.json` e la cartella del progetto (`projects/C--progetti-ace-app`, memoria compresa); niente è stato cancellato da `~/.claude`: lo fa il signore dopo aver verificato. L'hook SessionStart del progetto (`.claude/settings.json` → `.claude/hooks/controlla-account.mjs`) avvisa, solo su Windows e senza bloccare, se ACE è aperta senza `.claude-personal`. Al primo avvio con `claude-personal` serve un nuovo accesso.
 - Storage: `npx supabase storage cp --workdir C:\progetti\ace\app --remote --experimental --yes <file> ss:///<bucket>/<nome>` lanciato dalla cartella del file (con un percorso `C:\...` la CLI risponde "Unsupported operation"). Immagini dei premi: `premio-N.webp` e `premio-N-sagoma.webp` nella radice del bucket `premi`; dopo un'immagine nuova, `immagine_per = premio` per quel forziere.
 - Iscrizioni chiuse in Supabase Auth: i nuovi utenti si creano dalla dashboard, con "Auto Confirm User" attivo.
 - Gli avvisi di Supabase su `forzieri_lani` (vista security definer) e sulle 8 funzioni RPC (con `vedi_saldo`, `controlla_pin`, `frase_del_giorno`) sono voluti: vedi i commenti nello schema.
