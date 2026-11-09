@@ -61,7 +61,7 @@ Sicurezza (filone A), tutti con una prova in `prova:schema` o in `accesso.test.t
 
 ## 6. Rischi aperti prima del 23/11
 
-1. **Filone A non ancora in produzione.** Il controllo automatico di Claude Code ha bloccato `db push` come deploy in produzione. Da lanciare dal signore, in quest'ordine: `npx supabase db push --remote --yes`, poi `npx supabase functions deploy --use-api --yes` (tutte le funzioni), poi il merge di `audit-sicurezza` in `main` (porta la CSP su Vercel). Dopo: advisors e una prova dell'app vera da un genitore (Oggi, Genitori, una foto).
+1. Filone A in produzione il 9/11 sera: migrazione `0024` e 9 funzioni pubblicate dal signore (il controllo automatico di Claude Code blocca i deploy), merge in `main` (`c4356e7`). Advisors da 79 a 69: in più `rls_enabled_no_policy` su `pin_genitori`, voluto (il PIN passa solo dalle funzioni). CORS e intestazioni verificati dal vivo (pagina di accesso senza violazioni della CSP). Manca la prova dell'app vera da un genitore: Oggi, area Genitori, una foto.
 
 ## 7. Chiamate all'IA e skill
 
