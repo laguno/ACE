@@ -1,5 +1,7 @@
 # HANDOFF
 
+> **Dal 9 al 13 novembre 2026 si lavora con l'account Claude aziendale.** Prima di tutto leggi `docs/piano-fino-a-venerdi.md` (piano di Jarvis approvato dal signore): paletti su dati, Lani, regole e costi, strumenti da installare, filoni A-J e rapporto di venerdì in `docs/rapporto-venerdi.md`. L'avviso dell'hook sull'account aziendale è atteso questa settimana: non toglierlo.
+
 ## Dove siamo
 
 **Sprint 1 costruito**: tutte le 8 tappe unite a `main` (produzione su `ace-passino.vercel.app`). Manca solo la prova completa in famiglia sui dispositivi veri. Il gioco parte il 23/11/2026 (`periodo.inizio`): prima di allora niente passi di voti e note, popup, figurine né chiavi.
