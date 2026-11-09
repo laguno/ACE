@@ -12,12 +12,12 @@
 - Copione: popup accodati dal server (`_shared/popup.ts`, uno per evento) per voti, note, tappe, forzieri, chiavi, verifiche nuove; un popup per apertura; figurine sbloccate dalla prima comparsa; notifiche push ogni 15 minuti (`notifiche`, cron `0014`). Prima del 23/11 niente popup né figurine.
 - Prima accensione: benvenuta di Lani (3 schermate, una volta per dispositivo) e avvio dei genitori (4 cose con lo stato vero).
 - Genitori: settimana, gesti e sgridate (con popup del copione), premi ed enigmi, correzioni delle spunte, fogli, impostazioni e PIN.
-- Grafica come le bozze (`design/*.html`) su Oggi, Pomeriggio, Sera, Astra, Figurina, Album e popup (in `main`); Studio, Flash card e Quiz sul ramo `grafica-2` (Grafica 6-7). Kit in `src/kit.tsx`. Mancano Benvenuta, Genitori, Genitori-avvio. Foto di confronto con `npm run confronto` (in `docs/confronto/`). Niente config di Prettier: se serve, `--single-quote --print-width 180`.
+- Grafica come le bozze (`design/*.html`) su Oggi, Pomeriggio, Sera, Astra, Figurina, Album, popup, Studio, Flash card e Quiz (Grafica 1-7b, tutto in `main`; flash card e quiz a tutto schermo, senza barra né "Genitori"). Kit in `src/kit.tsx`. Mancano Benvenuta, Genitori, Genitori-avvio. Foto di confronto con `npm run confronto` (in `docs/confronto/`). Niente config di Prettier: se serve, `--single-quote --print-width 180`.
 - Prove: `npm test` (97), `npm run prova:schema` (35), `npm run prova:schermate` (Playwright, 37, Supabase finto).
 
 ## Ultima sessione (9 novembre 2026)
 
-Ramo `grafica` (passi 1-5 e ritocchi di Jarvis) unito a `main` con tutte le prove verdi. Sul ramo `grafica-2`: Studio (Lani pensierosa, carte delle verifiche con "fra N giorni", pallini e pulsante, Le tue carte; "Materiali" della bozza rimandato), Flash card e Quiz (testata "← Studio" con barra, esiti affiancati, regole dei passi dal config, "Giusto!"). Pallini delle sessioni come le bozze anche nel Pomeriggio.
+Ramo `grafica` (passi 1-5 e ritocchi di Jarvis) e poi `grafica-2` uniti a `main` con tutte le prove verdi. In `grafica-2`: Studio (Lani pensierosa, carte delle verifiche con "fra N giorni", pallini e pulsante, Le tue carte; "Materiali" della bozza rimandato), Flash card e Quiz (testata "← Studio" con barra, esiti affiancati, regole dei passi dal config, "Giusto!"). Pallini delle sessioni come le bozze anche nel Pomeriggio. Correzioni di Jarvis (7b): esiti visibili e disattivati finché la carta non si gira, tutto schermo, regola del quiz in percentuale. Lista dei controlli della prova in famiglia in `docs/07-installazione.md`.
 
 ## Decisioni prese
 
@@ -53,15 +53,23 @@ Ramo `grafica` (passi 1-5 e ritocchi di Jarvis) unito a `main` con tutte le prov
 
 ## Prossimo passo
 
-1. Genitori: scegliere i 9 premi (area Genitori, Premi: ogni premio crea l'enigma), controllare orari e materiale nelle Impostazioni.
-2. Prova completa in famiglia sui dispositivi veri, prima della sorpresa a Lani: installazione su iPhone/iPad, promemoria, spunte, studio, lampadina, enigma.
-3. Dal 23/11: controllare i primi passi, popup e figurine; il 29/11 alle 21:30 le prime chiavi (`sync_log` fonte chiavi). Dopo due settimane: taratura (serve Python per `npm run simula`).
+Ordine dei lavori fino al 23/11 (Jarvis, 9/11, approvato dal signore):
 
-Debiti: "Da fotografare" (richieste di foto e Storage); riscatto della serie nera; frasi e citazioni da mostrare (32 caricate nella tabella `frasi` dalla migrazione 0017, fonte `data/frasi.json`; manca la scelta nei momenti: apertura, tappa, verifica, chiusura, una al giorno, mai la stessa prima di 30 giorni, mai nei rimproveri); "PIN non giusto" anche per errori del server; video; umore del giorno; `spiega`, borsa, enigma e push provati solo con le prove (serve un accesso di Lani); protezione delle password trapelate da accendere (Auth, dashboard: la accende il signore).
+1. **Vetrina** (priorità alta, prima della prova in famiglia): schermata nell'area genitori, dietro il PIN. Tutti i popup del copione raggruppati per tipo (lodi, rimproveri, tappe, forzieri, lucchetto, enigma, chiavi, verifiche, nota di merito) con posa, testo e numeri di esempio; animazioni (tappa, forziere con coriandoli, lucchetto, cima, sblocco figurina con "Album n/64", passi che salgono); anteprima delle notifiche con l'orario. Solo dati finti, nessuna scrittura. Confronti Playwright dei popup in `docs/confronto`.
+2. **Revisione con Impeccable** (impeccable.style, Apache 2.0): `npx impeccable install`, subito `npx impeccable telemetry off`; niente modalità live né hook. `/impeccable init` con il contesto (ragazza di 12 anni, 390 px, `design/*.html` e `design/Stile.html` fonte autorevole; sticker che sbordano, riquadri con icone, pillole e sfondo per momento voluti). `critique` e `audit` su Oggi, Pomeriggio, Sera, Studio, Flash card, Quiz, Astra, Figurina, Album, Genitori: rapporti in `docs/revisione-ui.md`, **senza toccare il codice** (scala delle spaziature 4/8/12/16/24/32, allineamenti a sinistra, gerarchia dei titoli, raggi e ombre). Il signore e Jarvis scelgono cosa adottare; poi una schermata per commit, con le immagini prima e dopo.
+3. **Grafica**: Benvenuta, Genitori-avvio, area Genitori (stesso kit, prima la chiarezza e poi l'aspetto).
+4. **Debiti prima dell'avvio**: "Da fotografare" (richieste di foto ai genitori, caricamento nel bucket `foto-pagine`, +2 passi a Lani per pagina richiesta, regola già nel config); frasi nei momenti (apertura, tappa, verifica, chiusura; una al giorno, mai la stessa prima di 30 giorni, mai nei rimproveri; 32 nella tabella `frasi`, fonte `data/frasi.json`); "PIN non giusto" solo se il PIN è sbagliato, un altro messaggio per gli errori del server.
+5. Genitori: scegliere i 9 premi (area Genitori, Premi: ogni premio crea l'enigma), controllare orari e materiale nelle Impostazioni.
+6. **Prova in famiglia**, prima su Android Chrome (il telefono di Lani è un Motorola: Home, push, tema scuro di sistema acceso, scorrimento fino in fondo su ogni schermata), poi l'iPad. Lista dei controlli in `docs/07-installazione.md`.
+7. Dal 23/11: controllare i primi passi, popup e figurine; il 29/11 alle 21:30 le prime chiavi (`sync_log` fonte chiavi).
+
+Poi: entro fine novembre il riscatto della serie nera. A inizio dicembre uno script che esporta i passi veri per giorno e per motivo in CSV: la simulazione la fa Jarvis (Python non è su questo PC). Dopo l'avvio: video, umore del giorno, "Materiali" in Studio.
+
+Altri debiti: `spiega`, borsa, enigma e push provati solo con le prove (serve un accesso di Lani); protezione delle password trapelate da accendere (Auth, dashboard: la accende il signore).
 
 ## In attesa di
 
-- Signore: prova di `grafica-2` sul telefono (anteprima Vercel); se va bene, unire a `main` e passare a Benvenuta e Genitori.
+- Signore e Jarvis: scelta di cosa adottare dalla revisione Impeccable (`docs/revisione-ui.md`, quando c'è).
 - Signore: sull'iPad rifare l'accesso su `ace-passino.vercel.app` quando vorrà provare (le anteprime hanno un'altra origine).
 
 ## Attenzione
