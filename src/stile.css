@@ -72,7 +72,7 @@ main { position: relative; width: min(100%, 430px); margin: 0 auto; padding: 16p
   border-radius: 22px;
   background: none;
   color: var(--testo-2);
-  font: 800 11px Nunito, sans-serif;
+  font: 800 12px Nunito, sans-serif;
 }
 .barra button[aria-current='page'] { background: var(--rosa); color: var(--accento); }
 /* flash card e quiz a tutto schermo; niente "Genitori" nello studio */
@@ -82,7 +82,7 @@ body:has(.studio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom)
 /* Testata delle schermate: testo a sinistra, avatar sticker che sborda a destra */
 .testata { display: grid; grid-template-columns: 1fr auto; align-items: start; margin: 0 -16px 0 0; min-height: 170px; }
 .testata-testo { display: flex; flex-direction: column; gap: 4px; padding: 14px 0 12px 4px; }
-.testata h1 { margin: 0; font-size: 31px; line-height: 1.02; }
+.testata h1 { margin: 0; font-size: 30px; line-height: 1.05; }
 .testata .riga, .testata .riga p { margin: 0; font-size: 15px; line-height: 1.4; color: var(--testo-2); }
 .testata-avatar { margin: -6px 0 -20px -24px; }
 .sopratitolo { margin: 0; min-height: 44px; display: flex; align-items: center; color: var(--testo-2); }
@@ -96,8 +96,8 @@ body:has(.studio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom)
 
 /* Carte, moduli, bottoni */
 .carta { background: #fff; border-radius: 26px; box-shadow: var(--ombra); padding: 16px; }
-.modulo { display: grid; gap: 14px; }
-.modulo label { display: grid; gap: 6px; color: var(--testo-2); }
+.modulo { display: grid; gap: 16px; }
+.modulo label { display: grid; gap: 8px; color: var(--testo-2); }
 .modulo input {
   min-height: 48px;
   padding: 0 16px;
@@ -130,54 +130,54 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .nota { margin: 0 0 4px; color: var(--testo-2); }
 .nota.accento { margin: 0; font: 800 13px Nunito, sans-serif; color: var(--accento); }
 .nota-riga { display: block; margin-top: 2px; font: 800 13px/1.3 Nunito, sans-serif; color: var(--accento); text-decoration: none; }
-.lady { margin: 8px 0 0; padding: 12px 14px; border-radius: 18px; background: var(--rosa); }
+.lady { margin: 8px 0 0; padding: 12px 16px; border-radius: 18px; background: var(--rosa); }
 .annulla { background: var(--rosa); color: var(--accento-premuto); }
 
 /* Schermate a colonna: .sera (Sera, Genitori) prima di .schermo, che vince sulla Sera ("schermo sera") */
-.sera { display: grid; gap: 16px; }
+.sera { display: grid; gap: 12px; }
 .sera h1 { margin: 0; font-size: 30px; line-height: 1.1; }
-.sera h2 { margin: 0 0 8px; font-size: 21px; }
+.sera h2 { margin: 0 0 8px; font-size: 20px; line-height: 1.15; }
 .sera > p { margin: 0; color: var(--testo-2); }
 
 /* Oggi (bozze Oggi e Pomeriggio) */
-.schermo { display: flex; flex-direction: column; gap: 10px; }
-.schermo .carta { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border-radius: 26px; }
-.schermo .carta h2 { margin: 0 0 4px; font-size: 19px; line-height: 1.15; }
+.schermo { display: flex; flex-direction: column; gap: 12px; }
+.schermo .carta { display: flex; flex-direction: column; gap: 8px; padding: 16px; border-radius: 26px; }
+.schermo .carta h2 { margin: 0 0 4px; font-size: 20px; line-height: 1.15; }
 .schermo .carta p { margin: 0; font-size: 15px; }
-.cose { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.cose { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px; }
 .cose li { display: flex; gap: 12px; align-items: center; padding: 4px 0; }
 .cose li > span { display: flex; flex-direction: column; min-width: 0; }
 .cose li > span.allarga { flex: 1; }
 .cose b { font: 800 17px/1.15 'Baloo 2', Nunito, sans-serif; }
 .cose small { font-size: 13px; line-height: 1.35; color: var(--testo-2); }
 .pillola-oro, .pillola-lilla {
-  display: flex; align-items: center; gap: 10px; margin: 0; width: 100%;
+  display: flex; align-items: center; gap: 12px; margin: 0; width: 100%;
   padding: 6px 16px 6px 8px; border-radius: 999px; background: #fff;
   font: 800 14px/1.3 Nunito, sans-serif; color: var(--testo); text-align: left;
 }
 .pillola-oro { border: 3px solid var(--burro); }
 .pillola-lilla { border: 3px solid var(--lilla-medio); min-height: 66px; }
-.famiglia { padding: 8px 14px 10px 8px; border-radius: 22px; background: var(--lilla); }
-.famiglia summary { list-style: none; cursor: pointer; min-height: 44px; display: flex; align-items: center; gap: 10px; }
+.famiglia { padding: 8px 16px 12px 8px; border-radius: 22px; background: var(--lilla); }
+.famiglia summary { list-style: none; cursor: pointer; min-height: 44px; display: flex; align-items: center; gap: 12px; }
 .famiglia summary::-webkit-details-marker { display: none; }
 .famiglia summary h2 { margin: 0; font: 800 13px Nunito, sans-serif; color: var(--testo-2); }
 .famiglia summary::after { content: '▾'; margin-left: auto; color: var(--testo-2); }
 .famiglia:not([open]) summary::after { content: '▸'; }
 .famiglia-avatar { display: flex; flex: none; }
 .famiglia-avatar .sticker + .sticker { margin-left: -12px; }
-.famiglia ul { margin: 0 0 0 4px; padding: 0; list-style: none; display: grid; gap: 4px; font-size: 14px; }
-.riga-chiavi { flex-direction: row !important; justify-content: space-between; align-items: center; gap: 10px; }
+.famiglia ul { margin: 0 0 0 8px; padding: 0; list-style: none; display: grid; gap: 4px; font-size: 14px; }
+.riga-chiavi { flex-direction: row !important; justify-content: space-between; align-items: center; gap: 12px; }
 .riga-chiavi > span { display: flex; flex-direction: column; gap: 2px; }
 .riga-chiavi small { font-size: 14px; font-weight: 800; color: var(--testo-2); }
 .chiavi { display: flex; gap: 2px; }
 .collegamento { display: flex; align-items: center; gap: 4px; min-height: 44px; border: 0; background: none; color: var(--accento); font: 800 14px Nunito, sans-serif; }
-.piccola { display: flex; gap: 6px; align-items: flex-start; font-size: 13px !important; }
+.piccola { display: flex; gap: 8px; align-items: flex-start; font-size: 13px !important; }
 /* pomeriggio: il numero dell'ordine fa da casella */
 .spunte { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
 .spunte label { display: flex; gap: 12px; align-items: flex-start; min-height: 44px; padding: 8px 0; }
 .spunte input[type='checkbox'] { flex: none; width: 28px; height: 28px; margin: 0; accent-color: var(--accento); }
 .spunte input:checked + span { color: var(--testo-2); text-decoration: line-through; }
-.ordine li { padding: 6px 0; border-bottom: 2px dashed var(--lilla); }
+.ordine li { padding: 8px 0; border-bottom: 2px dashed var(--lilla); }
 .ordine li:last-child { border-bottom: 0; }
 .ordine label { font-size: 15px; line-height: 1.35; }
 .numerata { position: relative; align-items: center !important; }
@@ -194,14 +194,14 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
   min-height: 44px; padding: 0 12px; border: 0; border-radius: 999px;
   background: var(--burro); color: var(--testo); font: 800 14px Nunito, sans-serif; white-space: nowrap;
 }
-.indizio { padding: 10px 12px; border-radius: 14px; background: var(--lilla); }
+.indizio { padding: 12px; border-radius: 14px; background: var(--lilla); }
 /* pallini delle sessioni (bozze): lilla pieni, oggi bianco con bordo fucsia, fatti fucsia */
 .pallini { display: flex; gap: 14px; margin: 12px 0; padding: 0; list-style: none; color: var(--testo-2); }
-.pallini li { display: grid; justify-items: center; gap: 2px; font-size: 11px; font-weight: 800; color: var(--testo-2); }
+.pallini li { display: grid; justify-items: center; gap: 4px; font-size: 12px; font-weight: 800; color: var(--testo-2); }
 .pallini span { width: 20px; height: 20px; border: 0; border-radius: 50%; background: var(--lilla); }
 .pallini .fatta span { background: var(--fucsia); }
 .pallini .oggi span { background: #fff; border: 4px solid var(--fucsia); }
-.riga-pallini { display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; }
+.riga-pallini { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
 .riga-pallini .pallini { margin: 4px 0 0; }
 .riga-pallini .secondario.compatto { align-self: auto; }
 
@@ -225,7 +225,7 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .sera .spunte input[type='checkbox']:focus-visible { outline: 3px solid var(--accento); outline-offset: 2px; }
 .con-lady { position: relative; padding: 8px 100px 8px 12px; border-radius: 16px; background: var(--rosa); font: 800 13px/1.35 Nunito, sans-serif; min-height: 64px; display: flex; align-items: center; }
 .lady-sticker { position: absolute; right: -10px; bottom: -14px; }
-.pastiglie { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 12px 6px; }
+.pastiglie { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 12px 8px; }
 .chip { position: relative; display: inline-flex; align-items: center; gap: 4px; min-height: 32px; padding: 6px 12px; border-radius: 999px; font: 800 13px Nunito, sans-serif; color: var(--testo); cursor: pointer; }
 .chip input { position: absolute; inset: -6px 0; width: 100%; height: calc(100% + 12px); margin: 0; opacity: 0; cursor: pointer; }
 .chip-lilla { background: var(--lilla); }
@@ -238,8 +238,8 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .foglio .principale { flex: none; padding: 0 20px; min-height: 44px; white-space: nowrap; }
 .dato { color: var(--testo-2); }
 .carta.tratteggiata { border: 3px dashed var(--lilla-medio); box-shadow: none; }
-.tratteggiata .foglio { gap: 10px; font-size: 13px; }
-.nota-famiglia { margin: 0; padding: 12px 14px; font-size: 14px; }
+.tratteggiata .foglio { gap: 12px; font-size: 13px; }
+.nota-famiglia { margin: 0; padding: 12px 16px; font-size: 14px; }
 
 /* titolo della carta con i passi a destra (dopo .sera h2: vince sul suo margine) */
 .testa-carta { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
@@ -251,24 +251,24 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .schermo .carta.studio-verifica p { font-size: 14px; line-height: 1.4; }
 
 /* Flash card e quiz (bozze Flashcard e Quiz) */
-.studio { display: flex; flex-direction: column; gap: 14px; }
+.studio { display: flex; flex-direction: column; gap: 12px; }
 .testa-studio { display: flex; flex-direction: column; gap: 8px; padding: 0 4px; }
-.testa-studio h1 { margin: 0; font-size: 24px; line-height: 1.15; }
+.testa-studio h1 { margin: 0; font-size: 26px; line-height: 1.1; }
 .testa-studio .testa-carta span { flex: none; font: 800 14px Nunito, sans-serif; color: var(--testo-2); }
 .testa-studio .avanzamento { background: #fff; }
 .testa-studio .avanzamento span { background: var(--fucsia); }
 .studio:has(.domanda) .testa-studio .avanzamento { background: var(--lilla); }
-.carta.flash { display: flex; flex-direction: column; gap: 14px; min-height: 400px; padding: 26px 24px; border-radius: 34px; border: 5px solid #fff; box-shadow: 0 18px 40px rgba(123, 106, 224, 0.28), 0 0 0 3px var(--rosa-bordo); }
+.carta.flash { display: flex; flex-direction: column; gap: 16px; min-height: 400px; padding: 24px; border-radius: 34px; border: 5px solid #fff; box-shadow: 0 18px 40px rgba(123, 106, 224, 0.28), 0 0 0 3px var(--rosa-bordo); }
 .carta.flash .testa-carta { align-items: center; }
 .carta.flash .chip { margin: 0; background: var(--lilla); }
-.carta.flash hr { width: 100%; margin: 6px 0; border: 0; border-top: 3px dashed var(--lilla); }
+.carta.flash hr { width: 100%; margin: 8px 0; border: 0; border-top: 3px dashed var(--lilla); }
 .etichetta { margin: 0; font: 800 13px Nunito, sans-serif; color: var(--testo-2); }
 .etichetta.accento { color: var(--accento); }
 .fronte { margin: 0; font: 800 26px/1.15 'Baloo 2', Nunito, sans-serif; }
 .retro { margin: 0; font-size: 19px; font-weight: 700; line-height: 1.45; white-space: pre-line; }
 .da-girare { display: flex; flex-direction: column; gap: 12px; margin-top: auto; }
 .come { margin: 8px 0 0; text-align: center; font: 800 14px Nunito, sans-serif; color: var(--testo-2); }
-.esiti { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.esiti { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .esiti button { min-height: 64px; border: 0; border-radius: 22px; color: var(--testo); font: 800 17px/1.1 'Baloo 2', Nunito, sans-serif; box-shadow: inset 0 -5px 0 rgba(0, 0, 0, 0.1); }
 .esiti .esito-no { background: var(--rosa-bordo); }
 .esiti .esito-quasi { background: var(--lilla-medio); }
@@ -276,11 +276,11 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .esiti button:disabled { opacity: 0.45; box-shadow: none; }
 .studio .link { align-self: center; padding: 0 14px; color: var(--testo-2); font: 800 13px Nunito, sans-serif; }
 .regola { margin: 0; text-align: center; font: 700 13px/1.4 Nunito, sans-serif; color: var(--testo-2); }
-.domanda { margin: 0; padding: 0 4px; font-size: 23px; line-height: 1.2; }
-.opzioni { display: flex; flex-direction: column; gap: 10px; }
+.domanda { margin: 0; padding: 0 4px; font-size: 22px; line-height: 1.2; }
+.opzioni { display: flex; flex-direction: column; gap: 12px; }
 .opzione {
-  display: flex; justify-content: space-between; align-items: center; gap: 10px;
-  min-height: 56px; padding: 8px 18px; text-align: left;
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  min-height: 56px; padding: 8px 16px; text-align: left;
   border: 3px solid var(--lilla-bordo); border-radius: 20px; background: #fff;
   color: var(--testo); font: 700 16px Nunito, sans-serif;
 }
@@ -289,23 +289,23 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .opzione.giusta svg { color: var(--accento); }
 .opzione.sbagliata { border-color: var(--rosa-bordo); background: var(--rosa); }
 .opzione.sbagliata svg { color: var(--testo-2); }
-.spiegazione { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; border-radius: 22px; background: var(--lilla); font-size: 15px; line-height: 1.45; }
+.spiegazione { display: flex; flex-direction: column; gap: 4px; padding: 16px; border-radius: 22px; background: var(--lilla); font-size: 15px; line-height: 1.45; }
 .spiegazione b { font: 800 18px 'Baloo 2', Nunito, sans-serif; }
 .studio .principale { font: 800 19px 'Baloo 2', Nunito, sans-serif; }
 
 /* Astra (bozza Main): sfondo del mondo, carta in testata, sentiero a serpentina */
 .astra { position: relative; display: block; overflow-x: clip; }
 .astra-sfondo { position: fixed; inset: 0; z-index: -1; background-size: cover; background-position: center; }
-.astra-testata { position: sticky; top: 14px; z-index: 2; gap: 8px; padding: 12px 14px 12px 18px; border-radius: 28px; box-shadow: 0 10px 26px rgba(123, 106, 224, 0.28); }
-.astra-titolo { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
-.astra-titolo .sopratitolo { margin: 0; min-height: 0; display: block; font: 800 13px Nunito, sans-serif; color: var(--testo-2); }
+.astra-testata { position: sticky; top: 16px; z-index: 2; gap: 8px; padding: 12px 16px; border-radius: 28px; box-shadow: 0 10px 26px rgba(123, 106, 224, 0.28); }
+.astra-titolo { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.astra-titolo .sopratitolo { margin: 0; min-height: 0; display: block; font: 800 14px Nunito, sans-serif; color: var(--testo-2); }
 .astra-titolo h1 { margin: 0; font-size: 26px; line-height: 1.05; }
 .mantra { margin: 0 0 12px; }
 .astra .mantra { margin: 2px 0 0; padding: 0; background: none; font: italic 800 13px Nunito, sans-serif; color: var(--accento); }
 .astra-figurina { flex: none; width: 60px; height: 60px; padding: 0; border: 0; background: none; }
 .astra-figurina img { width: 60px; height: 60px; object-fit: contain; }
-.astra-saldi { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding-top: 8px; border-top: 2px dashed var(--lilla); }
-.chiavi-settimana { display: flex; align-items: center; gap: 6px; margin: 10px 0 0; }
+.astra-saldi { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 8px; border-top: 2px dashed var(--lilla); }
+.chiavi-settimana { display: flex; align-items: center; gap: 8px; margin: 12px 0 0; }
 .chiavi-settimana small { font: 800 13px/1.2 Nunito, sans-serif; color: var(--testo-2); max-width: 90px; }
 .chiavi-settimana > span { display: flex; }
 .saldo { display: flex; align-items: center; gap: 6px; padding: 4px 14px 4px 8px; border: 3px solid var(--rosa-bordo); border-radius: 999px; }
@@ -328,14 +328,14 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .tappe .qui, .tappe .bandiera, .tappe .traguardo, .lani-sentiero { pointer-events: none; }
 /* "Sei qui" sotto la tappa attuale, Lani accanto dal lato largo, mai sovrapposti */
 .qui { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: #fff; box-shadow: var(--ombra-etichetta); font: 800 12px/1.2 Nunito, sans-serif; color: var(--accento); }
-.qui b { font: 800 16px/1.1 'Baloo 2', Nunito, sans-serif; color: var(--testo); }
+.qui b { font: 800 17px/1.1 'Baloo 2', Nunito, sans-serif; color: var(--testo); }
 .tappe .qui { left: 0; top: 38px; translate: -50% 0; z-index: 2; }
 .lani-sentiero { position: absolute; top: -62px; z-index: 1; width: 96px; height: 96px; }
 .lani-sentiero.destra { left: 34px; right: auto; }
 .lani-sentiero.sinistra { right: 34px; left: auto; }
 .bandiera { display: flex; align-items: center; gap: 4px; padding: 3px 10px 3px 4px; border-radius: 999px; background: #fff; box-shadow: var(--ombra-etichetta); font: 800 12px Nunito, sans-serif; color: var(--testo-2); }
 .tappe .bandiera { left: 0; top: 34px; translate: -50% 0; z-index: 2; }
-.tappe .bandiera.a-destra, .tappe .bandiera.a-sinistra { top: -22px; translate: none; max-width: 92px; white-space: normal; line-height: 1.15; font-size: 11px; border-radius: 14px; }
+.tappe .bandiera.a-destra, .tappe .bandiera.a-sinistra { top: -22px; translate: none; max-width: 92px; white-space: normal; line-height: 1.15; font-size: 12px; border-radius: 14px; }
 .tappe .bandiera.a-destra { left: 30px; }
 .tappe .bandiera.a-sinistra { right: 30px; left: auto; }
 .tappe .bandiera.sopra { top: -116px; }
@@ -358,49 +358,50 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .figurina-pagina .figurina { display: grid; padding: 0; overflow: hidden; gap: 0; border: 3px solid var(--rosa-bordo); background: #fff; text-align: left; justify-items: stretch; }
 .figurina h1 { margin: 0; }
 .fascia { position: relative; height: 196px; background: linear-gradient(180deg, var(--accento) 0%, var(--fucsia) 70%, #fff 100%); }
-.fascia span { position: absolute; left: 20px; top: 14px; font: 800 14px Nunito, sans-serif; color: #fff; }
-.fascia b { position: absolute; right: 18px; top: 4px; font: 800 52px/1 'Baloo 2', Nunito, sans-serif; color: #fff; }
+.fascia span { position: absolute; left: 16px; top: 14px; font: 800 14px Nunito, sans-serif; color: #fff; }
+.fascia b { position: absolute; right: 16px; top: 4px; font: 800 52px/1 'Baloo 2', Nunito, sans-serif; color: #fff; }
 .fascia img { position: absolute; left: 50%; bottom: -8px; translate: -50% 0; }
-.figurina .nome { display: flex; justify-content: space-between; align-items: baseline; padding: 10px 18px 6px; }
-.figurina .nome h1 { margin: 0; font-size: 28px; }
+.figurina .nome { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 16px 8px; }
+.figurina .nome h1 { margin: 0; font-size: 26px; }
 .figurina .nome small { font: 800 13px Nunito, sans-serif; color: var(--testo-2); }
 .numeri { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; margin: 0; }
 .numeri div { padding: 8px; border-radius: 16px; background: #fff; }
 .numeri dt { color: var(--testo-2); font-size: 14px; }
 .numeri dd { margin: 0; font: 800 22px 'Baloo 2', Nunito, sans-serif; }
-.figurina .numeri { padding: 0 18px; }
+.figurina .numeri { padding: 0 16px; }
 .figurina .numeri div { background: var(--panna); text-align: left; padding: 8px 12px; border-radius: 16px; }
 .figurina .numeri dt { font: 800 13px Nunito, sans-serif; color: var(--testo-2); }
 .figurina .numeri dd { font-size: 24px; }
-.obiettivo { display: flex; justify-content: space-between; gap: 8px; margin: 10px 18px 4px !important; font: 800 13px Nunito, sans-serif !important; }
+.obiettivo { display: flex; justify-content: space-between; gap: 8px; margin: 12px 16px 4px !important; font: 800 13px Nunito, sans-serif !important; }
 .obiettivo b { color: var(--accento); }
-.figurina .avanzamento { margin: 0 18px 16px; width: auto; height: 14px; background: var(--lilla); }
+.figurina .avanzamento { margin: 0 16px 16px; width: auto; height: 14px; background: var(--lilla); }
 .figurina .avanzamento span { background: var(--fucsia); }
-.medie { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.medie { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .medie li { display: grid; grid-template-columns: 1fr auto 28px; gap: 8px; align-items: center; min-height: 40px; border-bottom: 2px dashed var(--lilla); font-size: 14px; }
 .medie li:last-child { border-bottom: 0; }
 .tendenza { text-align: center; font-weight: 800; }
 .tsu { color: var(--verde); }
 .tgiu { color: var(--accento); }
-.album-pagina h1 { margin: 0; font-size: 28px; }
+.album-pagina h1 { margin: 0; font-size: 26px; line-height: 1.1; }
+.album-pagina h2 { margin: 8px 0 0; font-size: 20px; line-height: 1.15; }
 .album-conto { display: flex; align-items: center; gap: 12px; }
 .album-conto .avanzamento { flex: 1; height: 12px; background: var(--lilla); }
 .album-conto .avanzamento span { background: var(--fucsia); }
 .album-conto p { margin: 0; font: 800 15px Nunito, sans-serif; white-space: nowrap; }
-.album { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-.album li { display: grid; justify-items: center; gap: 2px; padding: 8px 6px 10px; border-radius: 20px; background: #fff; box-shadow: var(--ombra); text-align: center; font-size: 13px; }
+.album { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.album li { display: grid; justify-items: center; align-content: start; gap: 4px; padding: 8px 8px 12px; border-radius: 20px; background: #fff; box-shadow: var(--ombra); text-align: center; font-size: 13px; }
 .album li b { font: 800 14px/1.2 Nunito, sans-serif; }
 .album li small { font-size: 12px; line-height: 1.25; color: var(--testo-2); }
 .album .da-scoprire { background: var(--lilla); border: 3px dashed var(--lilla-medio); box-shadow: none; }
 .album .da-scoprire img { filter: brightness(0) invert(0.55) sepia(0.2) hue-rotate(220deg) opacity(0.35); }
 
 /* Popup (bozze Popup-*): <dialog> a tutto schermo, anello colorato, avatar che sborda, entrata leggera */
-.velo { position: fixed; inset: 0; z-index: 10; display: grid; align-items: start; justify-items: center; padding: 110px 22px 22px; overflow-y: auto; background: rgba(61, 35, 80, 0.45); }
+.velo { position: fixed; inset: 0; z-index: 10; display: grid; align-items: start; justify-items: center; padding: 112px 24px 24px; overflow-y: auto; background: rgba(61, 35, 80, 0.45); }
 dialog.velo { width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; border: 0; color: inherit; }
 dialog.velo:not([open]) { display: none; }
 dialog.velo::backdrop { background: transparent; }
 dialog.velo:focus { outline: none; }
-.popup { position: relative; width: min(100%, 346px); margin: 0 auto; display: grid; justify-items: center; gap: 10px; padding: 116px 22px 22px; border-radius: 34px; background: #fff; box-shadow: var(--ombra-popup), 0 0 0 4px var(--lilla-medio); text-align: center; }
+.popup { position: relative; width: min(100%, 346px); margin: 0 auto; display: grid; justify-items: center; gap: 12px; padding: 116px 24px 24px; border-radius: 34px; background: #fff; box-shadow: var(--ombra-popup), 0 0 0 4px var(--lilla-medio); text-align: center; }
 .popup-festa, .popup-enigma { box-shadow: var(--ombra-popup), 0 0 0 4px var(--burro); }
 .popup-bastone { box-shadow: var(--ombra-popup), 0 0 0 4px var(--rosa-bordo); }
 .popup-avatar { position: absolute; left: 50%; top: -96px; translate: -50% 0; display: flex; align-items: flex-end; justify-content: center; gap: 0; pointer-events: none; }
@@ -409,7 +410,7 @@ dialog.velo:focus { outline: none; }
 .popup h2 { margin: 0; font-size: 30px; line-height: 1.05; color: var(--testo); }
 .popup-festa h2 { color: var(--accento); }
 .popup p { margin: 0; font-size: 16px; line-height: 1.45; }
-.popup-riquadro { width: 100%; padding: 10px 14px; border-radius: 18px; background: var(--lilla); font: 800 13px/1.35 Nunito, sans-serif !important; }
+.popup-riquadro { width: 100%; padding: 12px 16px; border-radius: 18px; background: var(--lilla); font: 800 13px/1.35 Nunito, sans-serif !important; }
 .popup .principale { font: 800 19px 'Baloo 2', Nunito, sans-serif; }
 .popup .principale:focus { outline: none; }
 .popup .principale:focus-visible { outline: 3px solid var(--accento); outline-offset: 3px; }
@@ -429,35 +430,38 @@ dialog.velo:focus { outline: none; }
 .promemoria p { margin: 0; }
 
 /* Genitori */
-.schede { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
+.schede { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
 .schede button { flex: none; min-height: 44px; padding: 0 14px; border: 0; border-radius: 999px; background: var(--lilla); color: var(--testo-2); font: inherit; }
 .schede button[aria-current='page'] { background: var(--accento); color: #fff; }
 .griglia { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .griglia .secondario { margin-top: 0; min-height: 54px; padding: 0 8px; }
 .stretto { width: auto; margin-top: 0; padding: 0 16px; min-height: 44px; flex: none; }
-.giorno { border: 0; padding: 0; margin: 0; display: grid; gap: 6px; }
+.giorno { border: 0; padding: 0; margin: 0; display: grid; gap: 8px; }
 .giorno legend { font-weight: 800; text-transform: capitalize; margin-bottom: 4px; }
 .genitori .numeri dt:last-child { font-size: 12px; }
 /* Vetrina: popup e notifiche con dati di esempio */
 .vetrina { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; }
-.vetrina li { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-top: 2px dashed var(--lilla); }
+.vetrina li { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-top: 2px dashed var(--lilla); }
 .vetrina li:first-child { border-top: 0; }
 .vetrina li > span { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.vetrina b { font: 800 16px/1.2 'Baloo 2', Nunito, sans-serif; }
+.vetrina b { font: 800 17px/1.15 'Baloo 2', Nunito, sans-serif; }
 .vetrina small { font-size: 13px; line-height: 1.35; color: var(--testo-2); }
 .vetrina .secondario.compatto { margin: 0; align-self: center; }
 .notifiche-anteprima li { border-top: 0; padding: 4px 0; }
-.notifiche-anteprima li > span { padding: 10px 12px; border-radius: 16px; background: var(--lilla); font-size: 14px; }
+.notifiche-anteprima li > span { padding: 12px; border-radius: 16px; background: var(--lilla); font-size: 14px; }
 
 /* Prima accensione */
 .benvenuta { min-height: 100dvh; display: grid; align-content: center; }
 .benvenuta .carta { justify-items: center; text-align: center; }
 .benvenuta h1 { margin: 0; font-size: 32px; }
-.sezioni { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; text-align: left; }
-.sezioni li { display: flex; align-items: center; gap: 10px; }
+.sezioni { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; text-align: left; }
+.sezioni li { display: flex; align-items: center; gap: 12px; }
 .frase { margin: 0; font: 800 22px/1.3 'Baloo 2', Nunito, sans-serif; color: var(--accento-premuto); }
 .avvio ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; }
-.avvio li { display: grid; grid-template-columns: 36px 1fr; gap: 10px; align-items: start; }
+.avvio li { display: grid; grid-template-columns: 36px 1fr; gap: 12px; align-items: start; }
 .avvio .segno { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--lilla); font-weight: 800; }
 .avvio .fatto .segno { background: var(--verde); color: #fff; }
 .avvio small { display: block; color: var(--testo-2); }
+
+/* revisione UI, regola 2: il testo fuori dalle carte parte a 20 px (16 di main + 4) */
+.sera > h1, .album-pagina > h1, .album-pagina > h2, .sera > .sopratitolo, .sera > p { padding-left: 4px; }
