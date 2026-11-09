@@ -504,3 +504,8 @@ dialog.velo:focus { outline: none; }
 /* Oggi: pillola di ieri col numero grande (bozza Oggi) */
 .pillola-oro .numero { margin-left: auto; padding-left: 8px; font: 800 24px/1 'Baloo 2', Nunito, sans-serif; color: var(--accento); white-space: nowrap; }
 .riga-chiavi .collegamento { align-self: flex-end; }
+/* Pomeriggio: testata più bassa (ripasso e carte salgono), cerchi della stessa misura, "Inizia da qui" più quieto */
+.pomeriggio .testata { min-height: 150px; }
+.bollino { width: 44px; height: 44px; margin: 0; }
+.nota-riga { color: var(--testo-2); }
+.ordine label { padding: 0; }

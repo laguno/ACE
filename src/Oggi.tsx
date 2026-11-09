@@ -234,10 +234,11 @@ function Pomeriggio({ chiusura, apri }: { chiusura: string | null; apri: Apri })
   const ver = ripasso?.verifiche;
 
   return (
-    <section className="schermo">
+    <section className="schermo pomeriggio">
       <Testata
         sfondo="pomeriggio"
         posa="lani-concentrata"
+        misura={140}
         sopra={`${maiuscola(GIORNI[oggi.getDay()])} pomeriggio`}
         titolo={`Compiti per ${GIORNI[domani.getDay()]}`}
         riga={chiusura && compiti.length > 0 ? <p>Hai tempo fino alle {chiusura}.</p> : undefined}
