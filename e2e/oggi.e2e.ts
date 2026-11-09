@@ -44,7 +44,8 @@ test('mattina di lunedì: tre cose, passi di ieri, in famiglia', async ({ page }
   await expect(cose.nth(1)).toContainText('Allenamento alle 15:00');
   await expect(cose.nth(1)).toContainText('Esci con cartella e borsa insieme');
   await expect(cose.nth(2)).toContainText('Cartellina di tecnologia');
-  await expect(page.getByText('Ieri hai preso +15 passi')).toBeVisible();
+  await expect(page.locator('.pillola-oro')).toContainText('Passi di ieri');
+  await expect(page.locator('.pillola-oro .numero')).toHaveText('+15');
   await expect(page.locator('.famiglia')).toContainText('19:30 Cena dai nonni');
   await expect(page.locator('.famiglia')).toContainText('mar 17:30 Tennis Leonardo');
   await expect(page.locator('.famiglia')).not.toContainText('Allenamento');

@@ -51,6 +51,7 @@ function Mattina({ impegni, apri }: { impegni: Impegno[]; apri: Apri }) {
   const oggi = R.giornoRoma(new Date());
   const [cose, setCose] = useState<Cosa[]>();
   const [ieri, setIeri] = useState(0);
+  const [ieriChiusa, setIeriChiusa] = useState(false);
   const [famiglia, setFamiglia] = useState<Impegno[]>([]);
   const [chiavi, setChiavi] = useState<number | null>(null);
 
@@ -62,7 +63,8 @@ function Mattina({ impegni, apri }: { impegni: Impegno[]; apri: Apri }) {
       supabase.from('movimenti_passi').select('passi, moltiplicatore').eq('giorno', R.iso(piuGiorni(oggi, -1))),
       impegniTra(new Date(), piuGiorni(oggi, 8)),
       supabase.from('settimane').select('chiavi').not('chiavi', 'is', null).order('inizio', { ascending: false }).limit(1),
-    ]).then(([v, m, f, mov, prossimi, w]) => {
+      supabase.from('serate').select('cartella_il').eq('data', R.iso(piuGiorni(oggi, -1))).not('cartella_il', 'is', null).limit(1),
+    ]).then(([v, m, f, mov, prossimi, w, sera]) => {
       const lista: Cosa[] = [];
       for (const x of (v.data ?? []) as unknown as { tipo: string; materie: { nome: string } | null }[])
         lista.push({ titolo: `${maiuscola(x.tipo)} di ${x.materie?.nome ?? 'oggi'}`, sotto: 'Oggi, in classe', icona: 'verifica' });
@@ -81,6 +83,7 @@ function Mattina({ impegni, apri }: { impegni: Impegno[]; apri: Apri }) {
       else if (f.data?.[0]) lista.push({ titolo: f.data[0].titolo, sotto: 'Da far firmare: portalo a mamma o papà', icona: 'promemoria' });
       setCose(lista.slice(0, 3));
       setIeri((mov.data ?? []).reduce((a, x) => a + Math.round(x.passi * x.moltiplicatore), 0));
+      setIeriChiusa((sera.data ?? []).length > 0);
       setFamiglia(prossimi.filter((i) => C.tipoImpegno(i.titolo) === 'famiglia').slice(0, 3));
       setChiavi(w.data?.[0]?.chiavi ?? null);
     });
@@ -128,7 +131,10 @@ function Mattina({ impegni, apri }: { impegni: Impegno[]; apri: Apri }) {
       {ieri > 0 && (
         <p className="pillola-oro">
           <Sticker posa="bart-sonnecchia" misura={52} />
-          <span>Ieri hai preso +{ieri} passi</span>
+          <span>{ieriChiusa ? 'Ieri sera hai chiuso tutto: Bart ha dormito tranquillo' : 'Passi di ieri'}</span>
+          <b className="numero" aria-label={`${ieri} passi`}>
+            +{ieri}
+          </b>
         </p>
       )}
 

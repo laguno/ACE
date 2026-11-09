@@ -500,3 +500,7 @@ dialog.velo:focus { outline: none; }
 .genitori .gesto { font-size: 13px; }
 .genitori .sgridata { font-size: 12px; }
 .genitori .carta .nota.piccola { margin: 8px 0 0; }
+
+/* Oggi: pillola di ieri col numero grande (bozza Oggi) */
+.pillola-oro .numero { margin-left: auto; padding-left: 8px; font: 800 24px/1 'Baloo 2', Nunito, sans-serif; color: var(--accento); white-space: nowrap; }
+.riga-chiavi .collegamento { align-self: flex-end; }

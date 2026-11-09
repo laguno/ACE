@@ -62,7 +62,7 @@ function dati(): Tabelle {
       { giorno: '2026-11-08', passi: 35, moltiplicatore: 1 },
       { giorno: '2026-11-09', passi: 12, moltiplicatore: 1 },
     ],
-    serate: [],
+    serate: [{ data: '2026-11-08', cartella_il: '2026-11-08T19:40:00Z' }],
     saldo_passi: [{ passi: 725 }],
     chiavi_totali: [{ chiavi: 3 }],
     settimane: [{ inizio: '2026-11-02', chiavi: 2 }],
