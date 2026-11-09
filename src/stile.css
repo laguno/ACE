@@ -512,3 +512,7 @@ dialog.velo:focus { outline: none; }
 /* Studio: avviso dei compiti dentro la prima carta, gerarchia nelle carte delle verifiche */
 .avviso-compiti { padding: 8px 12px; border-radius: 16px; background: var(--rosa); font: 800 13px/1.35 Nunito, sans-serif !important; color: var(--testo); }
 .schermo .carta.studio-verifica p.nota { font-size: 13px; }
+
+/* Flash card: carta più bassa con risposte corte, chip dei secondi col suo stile (prima prendeva quello delle pastiglie) */
+.carta.flash { min-height: 320px; }
+.carta.flash .chip { min-height: 0; padding: 4px 12px; font: 800 12px Nunito, sans-serif; color: var(--testo-2); cursor: default; }

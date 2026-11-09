@@ -3,6 +3,7 @@ import { Sticker } from './kit';
 import * as K from './lib/copione';
 import * as R from './lib/regole';
 import { PopupVista, type Popup } from './Popup';
+import { regolaQuiz } from './Ripasso';
 
 // Vetrina (area genitori): tutti i popup del copione e le notifiche come li vedrà Lani, con numeri
 // di esempio presi dal config. Solo dati finti: niente letture né scritture nel database.
@@ -142,6 +143,14 @@ export default function Vetrina() {
           </ul>
         </div>
       ))}
+
+      <div className="carta">
+        <h2>Regole dello studio</h2>
+        <p className="nota">
+          Flash card: +{P.studio_facoltativo.flashcard_giro} passi a giro, fino a {P.studio_facoltativo.max_al_giorno_per_tipo} giri al giorno, solo con i compiti spuntati.
+        </p>
+        <p className="nota">Quiz: {regolaQuiz()} Lani vede solo la forma corta.</p>
+      </div>
 
       <div className="carta">
         <h2>Notifiche</h2>

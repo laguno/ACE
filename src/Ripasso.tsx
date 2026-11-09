@@ -149,7 +149,7 @@ export function Flashcard({ carte, titolo, sessione, chiudi }: { carte: Carta[];
         </button>
       </div>
       <button className="link" onClick={sbagliata}>
-        Questa carta è sbagliata
+        C’è un errore in questa carta
       </button>
       <p className="regola">
         Giro finito: +{STUDIO.flashcard_giro} passi. Fino a {STUDIO.max_al_giorno_per_tipo} giri al giorno.
@@ -158,8 +158,11 @@ export function Flashcard({ carte, titolo, sessione, chiudi }: { carte: Carta[];
   );
 }
 
-/** "Primo tentativo: 10 passi con almeno il 90% giusto, 6 sotto. Poi 6, 3 e dal quarto 1." dal config. */
-function regolaQuiz() {
+/** Per Lani, corta: "Quasi tutte giuste al primo colpo: 10 passi." (decisione del signore, 9/11). */
+const regolaQuizLani = () => `Quasi tutte giuste al primo colpo: ${(STUDIO.quiz.tentativi as Record<string, number[]>)['1'][0]} passi.`;
+
+/** Per i genitori, completa (Vetrina): "Primo tentativo: 10 passi con almeno il 90% giusto, 6 sotto. Poi 6, 3 e dal quarto 1." */
+export function regolaQuiz() {
   const q = STUDIO.quiz;
   const t = q.tentativi as Record<string, number[]>;
   return `Primo tentativo: ${t['1'][0]} passi con almeno il ${Math.round(q.soglia_giuste * 100)}% giusto, ${t['1'][1]} sotto. Poi ${t['2'][0]}, ${t['3'][0]} e dal quarto ${t['4+'][0]}.`;
@@ -237,7 +240,7 @@ export function Quiz({ quizId, domande, titolo, sessione, chiudi }: { quizId: st
           {i + 1 < domande.length ? 'Avanti' : 'Fine'}
         </button>
       )}
-      <p className="regola">{regolaQuiz()}</p>
+      <p className="regola">{regolaQuizLani()}</p>
     </section>
   );
 }
