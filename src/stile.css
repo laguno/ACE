@@ -465,3 +465,6 @@ dialog.velo:focus { outline: none; }
 
 /* revisione UI, regola 2: il testo fuori dalle carte parte a 20 px (16 di main + 4) */
 .sera > h1, .album-pagina > h1, .album-pagina > h2, .sera > .sopratitolo, .sera > p { padding-left: 4px; }
+
+/* Sera: "L'ho dato" su una riga */
+.foglio .secondario.compatto { flex: none; white-space: nowrap; margin-top: 0; align-self: center; }
