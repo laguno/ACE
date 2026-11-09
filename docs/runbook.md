@@ -41,7 +41,7 @@ Stato di ACE → Calendario. Se fallisce: l'indirizzo iCal privato di Google è 
 
 ## Taratura di dicembre
 
-`npm run esporta:passi` (sola lettura) scrive `DocumentiACE-backuppassi-AAAA-MM-GG.csv`: somme per giorno e motivo, saldo e bandierina, nello stesso formato di `docs/simulazione/*.csv`. Da passare a Jarvis per la simulazione in Python.
+`npm run esporta:passi` (sola lettura) scrive `Documenti\ACE-backup\passi-AAAA-MM-GG.csv`: somme per giorno e motivo, saldo e bandierina, nello stesso formato di `docs/simulazione/*.csv`. Da passare a Jarvis per la simulazione in Python.
 
 ## Una funzione dà errore
 
