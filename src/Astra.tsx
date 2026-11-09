@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ImageSquare } from '@phosphor-icons/react';
 import { useSfondo } from './kit';
+import { Contapassi, vediSaldo } from './Contapassi';
 import * as R from './lib/regole';
 import { supabase } from './supabase';
 
@@ -39,20 +40,21 @@ function curva(punti: { x: number; y: number }[]) {
 }
 
 export default function Astra({ apri }: { apri: (pagina: 'Figurina' | 'Album') => void }) {
-  const [dati, setDati] = useState<{ passi: number; chiavi: number; settimana: number | null; forzieri: Forziere[]; album: number }>();
+  const [dati, setDati] = useState<{ passi: number; prima: number; chiavi: number; settimana: number | null; forzieri: Forziere[]; album: number }>();
   const [scelto, setScelto] = useState<number>();
   useSfondo('panna');
 
   async function carica() {
     const [s, c, w, f, a] = await Promise.all([
-      supabase.from('saldo_passi').select('passi').maybeSingle(),
+      vediSaldo(),
       supabase.from('chiavi_totali').select('chiavi').maybeSingle(),
       supabase.from('settimane').select('chiavi').not('chiavi', 'is', null).order('inizio', { ascending: false }).limit(1),
       supabase.from('forzieri_lani').select('n, stato, enigma, premio, tentativi_enigma, enigma_risolto_il').order('n'),
       supabase.from('figurine').select('posa', { count: 'exact', head: true }).not('sbloccata_il', 'is', null),
     ]);
     setDati({
-      passi: s.data?.passi ?? 0,
+      passi: s.adesso,
+      prima: s.prima,
       chiavi: c.data?.chiavi ?? 0,
       settimana: w.data?.[0]?.chiavi ?? null,
       forzieri: (f.data ?? []) as Forziere[],
@@ -63,8 +65,14 @@ export default function Astra({ apri }: { apri: (pagina: 'Figurina' | 'Album') =
     carica();
   }, []);
   // il sentiero va dall'alto (la cima) in basso: si parte mostrando dove è Lani
+  // una volta per apertura (e al ritorno da un forziere), non a ogni ricarica dei dati
+  const scesa = useRef(false);
   useEffect(() => {
-    if (dati && !scelto) document.querySelector('.qui')?.scrollIntoView({ block: 'center' });
+    if (scelto) scesa.current = false;
+    else if (dati && !scesa.current) {
+      document.querySelector('.qui')?.scrollIntoView({ block: 'center' });
+      scesa.current = true;
+    }
   }, [dati, scelto]);
   if (!dati) return null;
 
@@ -119,8 +127,7 @@ export default function Astra({ apri }: { apri: (pagina: 'Figurina' | 'Album') =
           )}
           <span className="saldo">
             <img src={img('oggetti', 'passo')} alt="" width={30} height={30} />
-            <b>{dati.passi.toLocaleString('it-IT')}</b>
-            <span className="solo-lettori"> passi</span>
+            <Contapassi prima={dati.prima} adesso={dati.passi} />
           </span>
         </div>
         {dati.settimana !== null && (

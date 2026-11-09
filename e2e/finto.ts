@@ -86,6 +86,14 @@ export async function finto(page: Page, t: Tabelle, funzioni: Record<string, unk
     const metodo = req.method();
     const uno = (req.headers()['accept'] ?? '').includes('vnd.pgrst.object');
 
+    // come la funzione vera: saldo visto prima (o quello attuale, la prima volta), poi lo aggiorna
+    if (nome === 'rpc/vedi_saldo') {
+      const adesso = Number(t.saldo_passi?.[0]?.passi ?? 0);
+      const prima = Number(t.saldo_visto?.[0]?.passi ?? adesso);
+      t.saldo_visto = [{ passi: adesso }];
+      return json(uno ? { prima, adesso } : [{ prima, adesso }]);
+    }
+
     if (metodo === 'GET' || metodo === 'HEAD') {
       const trovate = ordina(filtra(righe, url.searchParams), url.searchParams.get('order')).map((r) => unisci(t, nome, r, url.searchParams.get('select')));
       if (uno) return trovate.length ? json(trovate[0]) : json({ code: 'PGRST116', message: 'nessuna riga' }, 406);

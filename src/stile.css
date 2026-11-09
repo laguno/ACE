@@ -311,7 +311,25 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .chiavi-settimana small { font: 800 13px/1.2 Nunito, sans-serif; color: var(--testo-2); max-width: 90px; }
 .chiavi-settimana > span { display: flex; }
 .saldo { display: flex; align-items: center; gap: 6px; padding: 4px 14px 4px 8px; border: 3px solid var(--rosa-bordo); border-radius: 999px; }
-.saldo b { font: 800 20px/1 'Baloo 2', Nunito, sans-serif; color: var(--accento); }
+.saldo b { font: 800 20px/1 'Baloo 2', Nunito, sans-serif; color: var(--accento); font-variant-numeric: tabular-nums; }
+.testata .saldo { align-self: flex-start; display: inline-flex; margin-top: 8px; background: #fff; }
+/* passi che salgono: il numero conta da solo (Contapassi), il "+N" sale e svanisce */
+.contapassi { position: relative; display: inline-flex; }
+.contapassi-delta { position: absolute; left: 50%; bottom: 100%; padding: 2px 8px; border-radius: 999px; background: var(--accento); color: #fff; font: 800 13px/1.2 Nunito, sans-serif; white-space: nowrap; pointer-events: none; opacity: 0; animation: delta-sale 1.6s ease-out forwards; }
+.contapassi-delta.giu { background: var(--testo-2); }
+@keyframes delta-sale {
+  0% { opacity: 0; transform: translate(-50%, 6px); }
+  15%, 60% { opacity: 1; transform: translate(-50%, -4px); }
+  100% { opacity: 0; transform: translate(-50%, -14px); }
+}
+/* nella testata di Oggi sopra c'è il testo: il "+N" esce a destra della pillola */
+.testata .contapassi-delta { left: calc(100% + 24px); bottom: auto; top: 50%; animation-name: delta-destra; }
+@keyframes delta-destra {
+  0% { opacity: 0; transform: translate(-8px, -50%); }
+  15%, 60% { opacity: 1; transform: translate(0, -50%); }
+  100% { opacity: 0; transform: translate(8px, -50%); }
+}
+@media (prefers-reduced-motion: reduce) { .contapassi-delta { display: none; } }
 .astra-chiavi-totali { margin: 0; font-size: 12px !important; }
 .chip-bandiera { display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; margin: 0 !important; padding: 4px 12px 4px 6px; border-radius: 999px; background: var(--burro-chiaro); font: 800 13px Nunito, sans-serif !important; color: var(--testo); }
 .mappa { position: relative; margin: 8px -16px 0; overflow-x: clip; }
@@ -449,6 +467,9 @@ dialog.velo:focus { outline: none; }
 .vetrina b { font: 800 17px/1.15 'Baloo 2', Nunito, sans-serif; }
 .vetrina small { font-size: 13px; line-height: 1.35; color: var(--testo-2); }
 .vetrina .secondario.compatto { margin: 0; align-self: center; }
+.vetrina li > .vetrina-saldo { flex: none; flex-direction: row; align-items: center; gap: 4px; padding: 2px 10px 2px 4px; }
+.vetrina-saldo img { width: 24px; height: 24px; }
+.vetrina .vetrina-saldo b { font: 800 18px/1 'Baloo 2', Nunito, sans-serif; color: var(--accento); }
 .notifiche-anteprima li { border-top: 0; padding: 4px 0; }
 .notifiche-anteprima li > span { padding: 12px; border-radius: 16px; background: var(--lilla); font-size: 14px; }
 

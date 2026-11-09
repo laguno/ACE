@@ -78,6 +78,21 @@ await come(LANI, `insert into umore (faccia) values ('contenta')`);
 await come(LANI, `update umore set faccia = 'broncio'`);
 verifica('Lani cambia la faccia di oggi', (await val(null, 'select faccia from umore')) === 'broncio');
 await fallisce('anon non legge il saldo', null, 'select * from saldo_passi', 'anon');
+// saldo visto (passi che salgono)
+await come(null, `insert into movimenti_passi (motivo, riferimento, passi) values ('prova_saldo', 'a', 40)`);
+const visto = async () => (await come(LANI, 'select prima, adesso from vedi_saldo()')).rows[0];
+const v1 = await visto();
+verifica('saldo visto: la prima volta prima = adesso', v1.prima === v1.adesso);
+await come(null, `insert into movimenti_passi (motivo, riferimento, passi) values ('prova_saldo', 'b', 12)`);
+const v2 = await visto();
+verifica('saldo visto: dal vecchio al nuovo', v2.prima === v1.adesso && v2.adesso === v1.adesso + 12);
+const v3 = await visto();
+verifica('saldo visto: la volta dopo è fermo', v3.prima === v3.adesso && v3.adesso === v2.adesso);
+await fallisce('Lani non scrive il saldo visto', LANI, `update saldo_visto set passi = 0`);
+await fallisce('Lani non inserisce il saldo visto', LANI, `insert into saldo_visto (profilo_id, passi) values ('${LANI}', 0)`);
+verifica('il papà non vede il saldo visto di Lani', (await come(PAPA, 'select * from saldo_visto')).rows.length === 0);
+await fallisce('anon non chiama vedi_saldo', null, 'select * from vedi_saldo()', 'anon');
+await come(null, `delete from movimenti_passi where motivo = 'prova_saldo'`);
 await fallisce('anon non legge i forzieri', null, 'select * from forzieri_lani', 'anon');
 
 // Genitori, PIN

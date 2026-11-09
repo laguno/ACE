@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Bell, CaretRight, Cards, ClipboardText, Lightbulb, Volleyball } from '@phosphor-icons/react';
 import { impegniTra, piuGiorni, oraAdesso, useGiornata, type Impegno } from './giornata';
 import { Riquadro, Sticker, Testata } from './kit';
+import { PillolaSaldo } from './Contapassi';
 import * as C from './lib/calendario';
 import * as N from './lib/nuvola';
 import * as R from './lib/regole';
@@ -106,7 +107,12 @@ function Mattina({ impegni, apri }: { impegni: Impegno[]; apri: Apri }) {
         posa="lani-buongiorno"
         sopra={`${maiuscola(GIORNI[oggi.getDay()])} ${oggi.getDate()} ${MESI[oggi.getMonth()]}`}
         titolo="Buongiorno, Lani"
-        riga={<p>{riga}</p>}
+        riga={
+          <>
+            <p>{riga}</p>
+            <PillolaSaldo />
+          </>
+        }
       />
 
       <div className="carta">
@@ -241,7 +247,12 @@ function Pomeriggio({ chiusura, apri }: { chiusura: string | null; apri: Apri })
         misura={140}
         sopra={`${maiuscola(GIORNI[oggi.getDay()])} pomeriggio`}
         titolo={`Compiti per ${GIORNI[domani.getDay()]}`}
-        riga={chiusura && compiti.length > 0 ? <p>Hai tempo fino alle {chiusura}.</p> : undefined}
+        riga={
+          <>
+            {chiusura && compiti.length > 0 && <p>Hai tempo fino alle {chiusura}.</p>}
+            <PillolaSaldo />
+          </>
+        }
       />
       {errore && <p role="alert">{errore}</p>}
 
