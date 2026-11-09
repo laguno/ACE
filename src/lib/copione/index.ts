@@ -30,8 +30,8 @@ export const POPUP = {
   // casa: gesti e sgridate segnati dai genitori
   gesto_papa: { priorita: 4, posa: 'papa-pollice', titolo: 'Passi di casa', testo: 'Papà: +{passi}, {cosa}.' },
   gesto_mamma: { priorita: 4, posa: 'mamma-pollice', titolo: 'Passi di casa', testo: 'Mamma: +{passi}, {cosa}.' },
-  bagno_papa: { priorita: 1, posa: 'papa-arrabbiato', titolo: 'Bagno da sistemare', testo: 'Asciugamani appesi, tappetino a posto, specchio pulito: {passi}.' },
-  bagno_mamma: { priorita: 1, posa: 'mamma-arrabbiata', titolo: 'Bagno da sistemare', testo: 'Asciugamani appesi, tappetino a posto, specchio pulito: {passi}.' },
+  bagno_papa: { priorita: 1, posa: 'papa-arrabbiato', titolo: 'Bagno da sistemare', testo: '{passi}. Ora: asciugamani appesi, tappetino a posto, specchio pulito.' },
+  bagno_mamma: { priorita: 1, posa: 'mamma-arrabbiata', titolo: 'Bagno da sistemare', testo: '{passi}. Ora: asciugamani appesi, tappetino a posto, specchio pulito.' },
   bagno_2: { priorita: 1, posa: 'lady-offesa', titolo: 'Di nuovo il bagno', testo: 'Perfino Lady si rifiuta di entrarci. {passi}.' },
   bagno_3: { priorita: 1, posa: 'leo-sbuffa', titolo: 'Ancora il bagno', testo: 'Leo non entra in bagno dopo di te, puzzolona. {passi}.' },
   antisportivo: { priorita: 1, posa: 'papa-arrabbiato', titolo: 'In campo', testo: 'Così non si gioca: {passi}. Il rispetto vale più di un punto.' },

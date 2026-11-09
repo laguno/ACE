@@ -160,7 +160,7 @@ Linea dura, come deciso: il rimprovero arriva subito, dice quanto è costato e c
 | Nota disciplinare | mamma-arrabbiata | "Nota disciplinare in {materia}. −20, e salta la seconda chiave. Stasera ne parliamo." | sospiro | −20 |
 | Nota per dimenticanza (prima e seconda) | papa-arrabbiato | "Nota per dimenticanza: {motivo}. Salta la seconda chiave; alla terza nota anche −10." | "ehm" | 0 |
 | Terza nota per dimenticanza | papa-arrabbiato | "Terza nota per dimenticanze: −10. Da domani doppia spunta sulla cartella." Poi il contatore riparte da zero. | "ehm" | −10 |
-| Bagno lasciato in disordine dopo la doccia | mamma-arrabbiata o papa-arrabbiato (chi lo segna) | "Asciugamani appesi, tappetino a posto, specchio pulito: −1." | borbottio | −1 |
+| Bagno lasciato in disordine dopo la doccia | mamma-arrabbiata o papa-arrabbiato (chi lo segna) | "−1. Ora: asciugamani appesi, tappetino a posto, specchio pulito." | borbottio | −1 |
 | Bagno, seconda volta nella settimana | lady-offesa | "Perfino Lady si rifiuta di entrarci. −1." | miagolio offeso | −1 |
 | Compiti non spuntati alla chiusura | lady-dispettosa | "Lady si è sdraiata sul quaderno di {materia}. Si sposta solo se lo apri." | miagolio | 0 |
 | Chiusura non fatta dopo il sollecito, la sera | bart-triste | "Bart è andato a dormire da solo. La sera è rimasta aperta." | guaito | 0 |

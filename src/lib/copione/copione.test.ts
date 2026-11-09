@@ -56,6 +56,11 @@ describe('copione', () => {
     expect(notifica('genitori_riepilogo', { chiavi: 0 }).testo).toBe('Riepilogo della settimana di Lani: 0 chiavi');
   });
 
+  it('bagno: prima i passi tolti, poi la cosa da fare subito (non "sistemare costa un passo")', () => {
+    for (const k of ['bagno_papa', 'bagno_mamma'] as ChiavePopup[])
+      expect(componi(k, { passi: '−1' }).testo).toBe('−1. Ora: asciugamani appesi, tappetino a posto, specchio pulito.');
+  });
+
   it('popup del voto: recupero, migliorato, fascia', () => {
     expect(popupVoto(6.5, 5)).toBe('voto_recupero');
     expect(popupVoto(8, 7)).toBe('voto_migliorato');
