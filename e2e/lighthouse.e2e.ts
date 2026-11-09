@@ -15,7 +15,7 @@ import { apri, CASI, prepara } from './casi';
 test.skip(!process.env.LH, 'solo con npm run lighthouse');
 test.setTimeout(300_000);
 
-const PORTA = 5180;
+const PORTA = Number(process.env.LH_PORTA ?? 5180);
 const DEBUG = 9333;
 const URL = `http://localhost:${PORTA}/`;
 const CONFIG = {
@@ -39,7 +39,10 @@ const conIntestazioni = (p: Page) =>
 
 let server: ChildProcess;
 test.beforeAll(async () => {
-  server = spawn('npx', ['vite', 'preview', '--outDir', 'dist-lh', '--port', String(PORTA), '--strictPort'], { shell: true, stdio: 'ignore' });
+  // un server rimasto acceso (anche da un'altra copia del progetto) farebbe misurare la build sbagliata
+  if (await fetch(URL).then(() => true, () => false)) throw new Error(`porta ${PORTA} già occupata: chiudi il server o usa LH_PORTA`);
+  // node diretto, senza shell: su Windows kill() fermerebbe solo la shell e vite resterebbe acceso
+  server = spawn(process.execPath, ['node_modules/vite/bin/vite.js', 'preview', '--outDir', 'dist-lh', '--port', String(PORTA), '--strictPort'], { stdio: 'ignore' });
   for (let i = 0; i < 60 && !(await fetch(URL).then((r) => r.ok).catch(() => false)); i++) await new Promise((r) => setTimeout(r, 500));
 });
 test.afterAll(() => {
