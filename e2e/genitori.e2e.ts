@@ -93,3 +93,26 @@ test('correzioni e fogli', async ({ page }) => {
   await expect.poll(() => chiamate).toContainEqual({ tipo: 'foglio', id: 'f1' });
   expect(t.fogli_firma[0].consegnato_il).toBeTruthy();
 });
+
+test('Stato di ACE: sincronizzazioni, chiavi ed errori (filone H)', async ({ page }) => {
+  const d = {
+    ...dati(),
+    sync_log: [
+      { fonte: 'nuvola', esito: 'ok', iniziato_il: '2026-11-10T13:30:00Z', finito_il: '2026-11-10T13:31:00Z' },
+      { fonte: 'calendario', esito: 'errore', iniziato_il: '2026-11-10T16:05:00Z', finito_il: '2026-11-10T16:05:10Z' },
+    ],
+    settimane: [{ inizio: '2026-11-02', chiavi: 2 }],
+    errori_client: [{ id: 1, creato_il: '2026-11-10T15:00:00Z', dove: 'Oggi', messaggio: 'Rete assente', origine: 'app' }],
+  };
+  await finto(page, d);
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Altro' }).click();
+  await page.getByRole('button', { name: /Stato di ACE/ }).click();
+  await expect(page.getByRole('heading', { name: 'Stato di ACE' })).toBeVisible();
+  await expect(page.getByText('ok, oggi alle 14:30')).toBeVisible();
+  await expect(page.getByText(/non riuscita, oggi alle 17:05/)).toBeVisible();
+  await expect(page.getByText('Prossima: oggi alle 19:30')).toBeVisible();
+  await expect(page.getByText('2 chiavi nella settimana dal 2')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Errori degli ultimi 7 giorni: 1' })).toBeVisible();
+  await expect(page.getByText('Rete assente')).toBeVisible();
+});

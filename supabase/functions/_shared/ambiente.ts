@@ -17,3 +17,20 @@ export async function apriRegistro(db: ReturnType<typeof dbServizio>, fonte: str
   if (error || !data) throw new Error(`sync_log: ${error?.message ?? 'nessuna riga'}`);
   return data.id;
 }
+
+/**
+ * Errore di una funzione: in console e in errori_client (scheda Stato dei genitori). Solo messaggio
+ * e pila, con gli indirizzi tolti (un indirizzo può contenere un segreto, come quello del calendario).
+ */
+export async function registraErroreServer(db: ReturnType<typeof dbServizio>, dove: string, e: unknown) {
+  console.error(dove, e);
+  const err = e instanceof Error ? e : new Error(typeof e === 'string' ? e : JSON.stringify(e));
+  const pulito = (s: string) => s.replace(/https?:\/\/\S+/g, '[indirizzo]');
+  await db
+    .from('errori_client')
+    .insert({ origine: 'funzione', dove, messaggio: pulito(err.message || 'errore').slice(0, 500), dettagli: pulito(err.stack ?? '').slice(0, 2000) })
+    .then(
+      () => undefined,
+      () => undefined,
+    );
+}

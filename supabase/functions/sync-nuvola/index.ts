@@ -5,7 +5,7 @@
 // Accesso (mappato l'8 novembre 2026): nuvola.madisoft.it rimanda al Keycloak
 // auth.nuvola.madisoft.it/realms/nuvola (da /connect/authentication-service); si invia il modulo (username, password, credentialId), si
 // seguono i rimandi con i cookie fino all'area tutore, poi /api-studente/v1/login-from-web dà il token.
-import { apriRegistro, dbServizio } from '../_shared/ambiente.ts';
+import { apriRegistro, dbServizio, registraErroreServer } from '../_shared/ambiente.ts';
 import * as N from '../../../src/lib/nuvola/index.ts';
 import * as R from '../../../src/lib/regole/index.ts';
 import { avvisaSeFallita, inviaPush } from '../_shared/push.ts';
@@ -247,7 +247,7 @@ Deno.serve(async (req) => {
   } catch (e) {
     esito = 'errore';
     dettagli = { errore: e instanceof Passo ? e.message : 'errore imprevisto' };
-    if (!(e instanceof Passo)) console.error(e);
+    if (!(e instanceof Passo)) await registraErroreServer(db, 'sync-nuvola', e);
     await avvisaSeFallita(db, 'nuvola', 'Nuvola', log.id).catch((x) => console.error('avviso', x));
   }
   await db.from('sync_log').update({ finito_il: new Date().toISOString(), esito, dettagli }).eq('id', log.id);

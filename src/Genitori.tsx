@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { CaretRight, Eye, GearSix } from '@phosphor-icons/react';
+import { CaretRight, Eye, GearSix, Pulse } from '@phosphor-icons/react';
 import { Riquadro, Sticker } from './kit';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import * as R from './lib/regole';
@@ -9,14 +9,15 @@ import Vetrina from './Vetrina';
 import { Biglietto } from './Biglietto';
 import { ImmaginePremio, immaginiPremi, type Immagine } from './ImmaginePremio';
 import { Fotografa, SELECT_RICHIESTE, descrizione, type RichiestaFoto } from './Foto';
+import Stato from './Stato';
 
 // Area genitori — design/Genitori.html. Tutto passa dal client del genitore (sul suo telefono la
 // sessione normale, sull'iPad di Lani quella a parte sbloccata con il PIN): la RLS lo riconosce
 // come genitore e la funzione "passi" decide i passi come per Lani.
 // ponytail: "Da fotografare" (richieste di foto e Storage) è ancora da fare.
 
-type Pagina = 'settimana' | 'premi' | 'correzioni' | 'fogli' | 'altro' | 'impostazioni' | 'vetrina';
-/** Quattro schede più "Altro" (Impostazioni e Vetrina stanno lì dentro). */
+type Pagina = 'settimana' | 'premi' | 'correzioni' | 'fogli' | 'altro' | 'impostazioni' | 'stato' | 'vetrina';
+/** Quattro schede più "Altro" (Impostazioni, Stato e Vetrina stanno lì dentro). */
 const SCHEDE: [Pagina, string][] = [
   ['settimana', 'Settimana'],
   ['premi', 'Premi'],
@@ -31,6 +32,7 @@ const TITOLI: Record<Pagina, string> = {
   fogli: 'Fogli da firmare',
   altro: 'Altro',
   impostazioni: 'Impostazioni',
+  stato: 'Stato di ACE',
   vetrina: 'Vetrina',
 };
 const VOCI_GESTI = [
@@ -80,7 +82,7 @@ export default function Genitori({ client, esci }: { client: SupabaseClient; esc
   const lun = R.lunedi(oggi);
   const dom = new Date(lun.getFullYear(), lun.getMonth(), lun.getDate() + 6);
   const vai = (p: Pagina) => (setPagina(p), setAvviso(''));
-  const scheda = pagina === 'impostazioni' || pagina === 'vetrina' ? 'altro' : pagina;
+  const scheda = pagina === 'impostazioni' || pagina === 'stato' || pagina === 'vetrina' ? 'altro' : pagina;
   return (
     <section className="sera genitori">
       <header className="testa-genitori">
@@ -106,6 +108,7 @@ export default function Genitori({ client, esci }: { client: SupabaseClient; esc
       {pagina === 'fogli' && <Fogli {...props} />}
       {pagina === 'altro' && <Altro vai={vai} />}
       {pagina === 'impostazioni' && <Impostazioni {...props} />}
+      {pagina === 'stato' && <Stato client={client} />}
       {pagina === 'vetrina' && <Vetrina />}
       <button className="link esci" onClick={esci}>
         Esci dall'area genitori
@@ -116,10 +119,11 @@ export default function Genitori({ client, esci }: { client: SupabaseClient; esc
 
 type Props = { client: SupabaseClient; passi: (tipo: string, id: string) => Promise<number>; avvisa: (s: string) => void };
 
-/** "Altro": Impostazioni e Vetrina, come le righe della bozza. */
+/** "Altro": Impostazioni, Stato e Vetrina, come le righe della bozza. */
 function Altro({ vai }: { vai: (p: Pagina) => void }) {
   const righe: [Pagina, string, string, typeof GearSix][] = [
     ['impostazioni', 'Impostazioni', 'Orari, materiale, PIN', GearSix],
+    ['stato', 'Stato di ACE', 'Sincronizzazioni, chiavi, errori', Pulse],
     ['vetrina', 'Vetrina', 'Popup, animazioni e notifiche, come li vede Lani', Eye],
   ];
   return (

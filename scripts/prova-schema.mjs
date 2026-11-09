@@ -186,7 +186,7 @@ const inserisce = async (uid, t, ruolo) => {
   }
 };
 // foto_pagine e serate: Lani inserisce solo a condizioni (file vero, data vicina), provate sopra e sotto
-const LANI_INSERISCE = ['flashcard_giri', 'push_iscrizioni', 'quiz_tentativi', 'umore', 'video_visti'];
+const LANI_INSERISCE = ['errori_client', 'flashcard_giri', 'push_iscrizioni', 'quiz_tentativi', 'umore', 'video_visti'];
 const GENITORE_INSERISCE = [...LANI_INSERISCE, 'foto_pagine', 'serate', 'compiti', 'fogli_firma', 'forzieri', 'frasi', 'gesti_casa', 'impostazioni', 'sgridate'];
 for (const t of tabelle) {
   verifica(`anon non inserisce in ${t}`, !(await inserisce(null, t, 'anon')));
@@ -234,6 +234,19 @@ verifica('enigma: al massimo 3 tentativi, poi niente', JSON.stringify(tentativi)
 await come(null, `select registra_passi('flashcard', 'flashcard:2026-11-24:1', 5)`);
 verifica('una casella di studio vale una volta sola', (await val(null, `select registra_passi('flashcard', 'flashcard:2026-11-24:1', 5)`)) === null);
 await come(null, `delete from movimenti_passi where motivo = 'flashcard'`);
+// errori dell'app (filone H): ognuno registra i suoi, leggono i genitori
+await come(LANI, `insert into errori_client (dove, messaggio) values ('Oggi', 'Cannot read properties of undefined')`);
+verifica('Lani registra un errore a suo nome', (await val(null, 'select profilo_id from errori_client')) === LANI);
+verifica('Lani non legge gli errori', (await come(LANI, 'select * from errori_client')).rows.length === 0);
+verifica('il genitore legge gli errori', (await come(PAPA, 'select * from errori_client')).rows.length === 1);
+await fallisce('Lani non registra errori a nome del papà', LANI, `insert into errori_client (profilo_id, messaggio) values ('${PAPA}', 'x')`);
+await fallisce('Lani non si spaccia per una funzione del server', LANI, `insert into errori_client (origine, messaggio) values ('funzione', 'x')`);
+await fallisce('messaggio di errore lungo: rifiutato', LANI, `insert into errori_client (messaggio) values (repeat('x', 501))`);
+await come(LANI, 'delete from errori_client where true').catch(() => {});
+verifica('Lani non cancella gli errori', (await val(null, 'select count(*)::int from errori_client')) === 1);
+// notifiche: una per tipo e giorno, anche se il cron gira due volte
+await come(null, `insert into notifiche_inviate (giorno, tipo, testo) values ('2026-11-24', 'mattina', 'x')`);
+await fallisce('la stessa notifica non parte due volte nello stesso giorno', null, `insert into notifiche_inviate (giorno, tipo, testo) values ('2026-11-24', 'mattina', 'y')`);
 // genitore: niente movimenti, chiavi, voti a mano; forzieri solo premio e consegna
 await fallisce('un genitore non scrive passi a mano', PAPA, `insert into movimenti_passi (motivo, riferimento, passi) values ('x', 'y', 100)`);
 await fallisce('un genitore non chiama registra_passi', PAPA, `select registra_passi('x', 'y', 100)`);

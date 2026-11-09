@@ -61,6 +61,10 @@ Prima il telefono Android di Lani, poi l'iPad. La fanno i genitori (Lani vede l'
 
 **Parte genitori**
 - [ ] Dal telefono di Lani "Genitori" chiede il PIN; con il PIN giusto si entra.
+- [ ] Settimana: un gesto di casa e una sgridata (poi toglierli da Correzioni o lasciarli e cancellarli prima del 23/11).
+- [ ] Premi: cambiare un premio di un forziere chiuso; il pulsante di un forziere con l'enigma comparso è spento.
+- [ ] Da fotografare: una foto da un genitore (la richiesta si chiude, nessun passo a Lani).
+- [ ] Altro → Stato di ACE: Nuvola e calendario "ok" con l'ora dell'ultimo giro; nessun errore strano.
 - [ ] Vetrina: popup, animazioni e notifiche si vedono tutti (solo esempi, non scrive niente).
 
 Dopo il telefono, ripetere sull'iPad installazione, notifiche e scorrimento. I passi, le spunte e le serate scritte durante la prova si tolgono dal database prima del 23/11.
