@@ -72,7 +72,7 @@ Ordine dei lavori fino al 23/11 (Jarvis, 9/11, approvato dal signore):
    - PIN: `controlla_pin` (0019) dice sbagliato, bloccato, manca, non genitore; messaggio a parte per gli errori del server.
    - Frasi: `frase_del_giorno` (0020). La prima richiesta del giorno prende il momento. Mattina (apertura, il lunedì inizio settimana) salvo verifica domani, che si tiene la frase per la Sera; Sera a chiusura finita; popup di tappa, lucchetto e cima se la frase del giorno non è ancora uscita. Frasi di famiglia nelle Impostazioni.
    - Da fotografare: richieste solo da pagine scritte nel compito o nella verifica (la mappa dei libri per il solo argomento non c'è ancora); push ai genitori; +2 a Lani per richiesta solo se la foto è sua, le foto dei genitori chiudono la richiesta senza passi.
-5. Genitori: scegliere i 9 premi (area Genitori, Premi: ogni premio crea l'enigma), controllare orari e materiale nelle Impostazioni.
+5. ~~Premi~~ inseriti il 9/11 (lista del signore), con gli enigmi scritti da Claude con le regole della funzione `enigma` (si rifanno da Premi, "Cambia e rifai l'enigma", finché il forziere è chiuso). Genitori: controllare orari e materiale nelle Impostazioni.
 6. **Prova in famiglia**, prima su Android Chrome (il telefono di Lani è un Motorola: Home, push, tema scuro di sistema acceso, scorrimento fino in fondo su ogni schermata), poi l'iPad. Lista dei controlli in `docs/07-installazione.md`.
 7. Dal 23/11: controllare i primi passi, popup e figurine; il 29/11 alle 21:30 le prime chiavi (`sync_log` fonte chiavi).
 
