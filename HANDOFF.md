@@ -12,12 +12,12 @@
 - Copione: popup accodati dal server (`_shared/popup.ts`, uno per evento) per voti, note, tappe, forzieri, chiavi, verifiche nuove; un popup per apertura; figurine sbloccate dalla prima comparsa; notifiche push ogni 15 minuti (`notifiche`, cron `0014`). Prima del 23/11 niente popup né figurine.
 - Prima accensione: benvenuta di Lani (3 schermate, una volta per dispositivo) e avvio dei genitori (4 cose con lo stato vero).
 - Genitori: settimana, gesti e sgridate (con popup del copione), premi ed enigmi, correzioni delle spunte, fogli, impostazioni e PIN.
-- Grafica come le bozze (`design/*.html`) su Oggi, Pomeriggio, Sera, Astra, Figurina, Album e popup; kit in `src/kit.tsx`. Mancano Studio, Flashcard, Quiz, Benvenuta, Genitori. Foto di confronto con `npm run confronto` (in `docs/confronto/`).
+- Grafica come le bozze (`design/*.html`) su Oggi, Pomeriggio, Sera, Astra, Figurina, Album e popup (in `main`); Studio, Flash card e Quiz sul ramo `grafica-2` (Grafica 6-7). Kit in `src/kit.tsx`. Mancano Benvenuta, Genitori, Genitori-avvio. Foto di confronto con `npm run confronto` (in `docs/confronto/`). Niente config di Prettier: se serve, `--single-quote --print-width 180`.
 - Prove: `npm test` (97), `npm run prova:schema` (35), `npm run prova:schermate` (Playwright, 37, Supabase finto).
 
 ## Ultima sessione (9 novembre 2026)
 
-Ramo `grafica` (passi 1-5 e ritocchi di Jarvis) unito a `main` con tutte le prove verdi. Si continua sul ramo `grafica-2`: Studio, Flashcard, Quiz, poi Benvenuta e Genitori.
+Ramo `grafica` (passi 1-5 e ritocchi di Jarvis) unito a `main` con tutte le prove verdi. Sul ramo `grafica-2`: Studio (Lani pensierosa, carte delle verifiche con "fra N giorni", pallini e pulsante, Le tue carte; "Materiali" della bozza rimandato), Flash card e Quiz (testata "← Studio" con barra, esiti affiancati, regole dei passi dal config, "Giusto!"). Pallini delle sessioni come le bozze anche nel Pomeriggio.
 
 ## Decisioni prese
 
@@ -61,6 +61,7 @@ Debiti: "Da fotografare" (richieste di foto e Storage); riscatto della serie ner
 
 ## In attesa di
 
+- Signore: prova di `grafica-2` sul telefono (anteprima Vercel); se va bene, unire a `main` e passare a Benvenuta e Genitori.
 - Signore: sull'iPad rifare l'accesso su `ace-passino.vercel.app` quando vorrà provare (le anteprime hanno un'altra origine).
 
 ## Attenzione
