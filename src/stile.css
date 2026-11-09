@@ -452,6 +452,7 @@ dialog.velo:focus { outline: none; }
 .lista-foto { list-style: none; margin: 0; padding: 0; display: grid; }
 .lista-foto li { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-top: 2px dashed var(--lilla); }
 .lista-foto li:first-child { border-top: 0; }
+.lista-foto .miniatura { flex: none; width: 56px; height: 56px; object-fit: cover; border-radius: 16px; background: var(--lilla); }
 .lista-foto li > span { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; font-weight: 800; }
 .lista-foto small { font: 700 13px Nunito, sans-serif; color: var(--testo-2); }
 .fotografa { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }

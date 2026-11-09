@@ -8,12 +8,11 @@ import { GIORNI, MESI } from './spunte';
 import Vetrina from './Vetrina';
 import { Biglietto } from './Biglietto';
 import { ImmaginePremio, immaginiPremi, type Immagine } from './ImmaginePremio';
-import { Fotografa, SELECT_RICHIESTE, descrizione, type RichiestaFoto } from './Foto';
+import { FotoSalvate, Fotografa, SELECT_RICHIESTE, descrizione, type RichiestaFoto } from './Foto';
 
 // Area genitori — design/Genitori.html. Tutto passa dal client del genitore (sul suo telefono la
 // sessione normale, sull'iPad di Lani quella a parte sbloccata con il PIN): la RLS lo riconosce
 // come genitore e la funzione "passi" decide i passi come per Lani.
-// ponytail: "Da fotografare" (richieste di foto e Storage) è ancora da fare.
 
 type Pagina = 'settimana' | 'premi' | 'correzioni' | 'fogli' | 'altro' | 'impostazioni' | 'vetrina';
 /** Quattro schede più "Altro" (Impostazioni e Vetrina stanno lì dentro). */
@@ -440,6 +439,7 @@ function Correzioni({ client, avvisa }: Props) {
   }, []);
 
   const [chiede, setChiede] = useState<Spuntato>();
+  const [cancellaFoto, setCancellaFoto] = useState<() => void>();
   async function togli(c: Spuntato) {
     setChiede(undefined);
     const { data: stornato, error } = await client.rpc('storna_spunta', { p_motivo: 'compito', p_riferimento: c.id });
@@ -452,7 +452,8 @@ function Correzioni({ client, avvisa }: Props) {
 
   if (!compiti) return null;
   return (
-    <div className="carta">
+    <>
+      <div className="carta">
       <h2>Spunte degli ultimi 7 giorni</h2>
       <p className="nota">Se un compito era spuntato ma non fatto. Per un imbroglio voluto c’è anche “Balla”.</p>
       {compiti.length === 0 && <p>Nessuna spunta.</p>}
@@ -480,7 +481,18 @@ function Correzioni({ client, avvisa }: Props) {
           chiudi={() => setChiede(undefined)}
         />
       )}
-    </div>
+      </div>
+      <FotoSalvate client={client} avvisa={avvisa} conferma={(si) => setCancellaFoto(() => si)} />
+      {cancellaFoto && (
+        <FoglioApp
+          titolo="Cancellare la foto?"
+          azione="Cancella"
+          testo="La foto si cancella per sempre. I passi di Lani restano."
+          conferma={() => (setCancellaFoto(undefined), cancellaFoto())}
+          chiudi={() => setCancellaFoto(undefined)}
+        />
+      )}
+    </>
   );
 }
 
