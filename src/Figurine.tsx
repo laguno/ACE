@@ -13,19 +13,21 @@ type Voto = { materia_id: string; data: string; voto: number; materie: { nome: s
 const POSE = manifest.avatar.filter((a) => a.personaggio !== 'allenatore');
 const NERA = (tono: string) => tono === 'arrabbiato' || tono === 'dispettoso';
 // ponytail: indizi per categoria; se servono indizi posa per posa, metterli nel manifest.
-const INDIZI: Record<string, string> = {
-  base: 'Arriva presto, con le prime giornate',
-  momento: 'Arriva in un momento della giornata',
-  sport: 'Arriva con la pallavolo',
-  stagione: 'Arriva con una festa o una stagione',
-  negativo: 'Arriva nei giorni storti',
-  extra: 'Rara: esce da un forziere',
-  tifo: 'Arriva quando mamma o papà fanno il tifo',
-  affettuoso: 'Arriva con Leo',
-  scherzoso: 'Arriva con Leo',
-  passioni: 'Rara: esce da un forziere',
-  animale: 'Arriva con Bart o Lady',
+/** Le figurine ancora da prendere stanno in un riquadro per momento (decisione del signore, 9/11). */
+const IN_ARRIVO: Record<string, string> = {
+  base: 'In arrivo con le prime giornate',
+  momento: 'In arrivo in un momento della giornata',
+  sport: 'In arrivo con la pallavolo',
+  stagione: 'In arrivo con una festa o una stagione',
+  negativo: 'In arrivo nei giorni storti',
+  extra: 'Rare: escono dai forzieri',
+  tifo: 'In arrivo quando mamma o papà fanno il tifo',
+  affettuoso: 'In arrivo con Leo',
+  scherzoso: 'In arrivo con Leo',
+  passioni: 'Rare: escono dai forzieri',
+  animale: 'In arrivo con Bart o Lady',
 };
+const RISCATTO = 'Si riscattano con 7 giorni fatti bene';
 
 export function Figurina({ chiudi }: { chiudi: () => void }) {
   useSfondo('viola');
@@ -141,15 +143,29 @@ export function Album({ chiudi }: { chiudi: () => void }) {
   const normali = POSE.filter((p) => !NERA(p.tono));
   const nere = POSE.filter((p) => NERA(p.tono));
   const prese64 = POSE.filter((p) => prese.has(p.id)).length;
-  const casella = (p: (typeof POSE)[number], nera: boolean) => {
-    const presa = prese.has(p.id);
-    return (
-      <li key={p.id} className={presa ? 'presa' : 'da-scoprire'}>
-        <img src={`/${p.webp}`} alt={presa ? p.descrizione : ''} width={96} height={96} loading="lazy" />
-        {presa ? <b>{nomeFigurina(p.id)}</b> : <b aria-hidden>???</b>}
-        {!presa && <small>{nera ? 'Si riscatta con 7 giorni fatti bene' : INDIZI[p.categoria] ?? 'Da scoprire'}</small>}
-      </li>
-    );
+  type Posa = (typeof POSE)[number];
+  const presa = (p: Posa) => (
+    <li key={p.id} className="presa">
+      <img src={`/${p.webp}`} alt={p.descrizione} width={96} height={96} loading="lazy" />
+      <b>{nomeFigurina(p.id)}</b>
+    </li>
+  );
+  /** Le figurine da prendere, raccolte per momento: "In arrivo con la pallavolo (6)" con le sagome piccole. */
+  const inArrivo = (pose: Posa[], titolo: (p: Posa) => string) => {
+    const gruppi = new Map<string, Posa[]>();
+    for (const p of pose.filter((x) => !prese.has(x.id))) gruppi.set(titolo(p), [...(gruppi.get(titolo(p)) ?? []), p]);
+    return [...gruppi].map(([nome, lista]) => (
+      <div key={nome} className="in-arrivo">
+        <p>
+          {nome} <span>({lista.length})</span>
+        </p>
+        <div className="sagome" aria-hidden>
+          {lista.map((p) => (
+            <img key={p.id} src={`/${p.webp}`} alt="" width={44} height={44} loading="lazy" />
+          ))}
+        </div>
+      </div>
+    ));
   };
 
   return (
@@ -164,10 +180,12 @@ export function Album({ chiudi }: { chiudi: () => void }) {
           {prese64} di {POSE.length}
         </p>
       </div>
-      <ul className="album">{normali.map((p) => casella(p, false))}</ul>
+      <ul className="album">{normali.filter((p) => prese.has(p.id)).map(presa)}</ul>
+      {inArrivo(normali, (p) => IN_ARRIVO[p.categoria] ?? 'Da scoprire')}
       <h2>Serie nera</h2>
       <p className="nota">Non danno passi: si sbloccano con il riscatto. L'album si completa anche senza.</p>
-      <ul className="album">{nere.map((p) => casella(p, true))}</ul>
+      {nere.some((p) => prese.has(p.id)) && <ul className="album">{nere.filter((p) => prese.has(p.id)).map(presa)}</ul>}
+      {inArrivo(nere, () => RISCATTO)}
     </section>
   );
 }

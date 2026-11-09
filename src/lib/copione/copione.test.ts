@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import config from '../../../data/config-gioco.json';
-import { NOTIFICHE, POPUP, componi, notifica, popupMostrabile, popupVoto, riempi, votoScritto, type ChiavePopup, type ChiaveNotifica } from './index';
+import { NOTIFICHE, POPUP, componi, notifica, nomeFigurina, popupMostrabile, popupVoto, riempi, votoScritto, type ChiavePopup, type ChiaveNotifica } from './index';
 
 // Valori di prova lunghi, per stare larghi con i limiti.
 const ESEMPIO = {
@@ -64,6 +64,8 @@ describe('copione', () => {
     expect(popupVoto(7)).toBe('voto_7_senza_ripasso');
     expect(popupVoto(5)).toBe('voto_insufficiente');
     expect(popupVoto(4.5, 4.5, 2)).toBe('voto_insufficiente_ancora');
+    expect(nomeFigurina('papa-pollice')).toBe('Papà pollice');
+    expect(nomeFigurina('lani-contenta')).toBe('Lani contenta');
     expect(votoScritto(7.5)).toBe('7½');
     expect(votoScritto(8)).toBe('8');
   });

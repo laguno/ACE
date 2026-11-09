@@ -107,7 +107,7 @@ export function popupVoto(voto: number, precedente?: number, insufficienzeMateri
 }
 
 /** "lani-contenta" -> "Lani contenta" (nome della figurina). */
-export const nomeFigurina = (posa: string) => posa.replace(/-/g, ' ').replace(/^./, (c) => c.toUpperCase());
+export const nomeFigurina = (posa: string) => posa.replace(/^papa(?=-|$)/, 'papà').replace(/-/g, ' ').replace(/^./, (c) => c.toUpperCase());
 
 /** "7.5" -> "7½", "8" -> "8": i voti come li scrive la scuola. */
 export const votoScritto = (v: number) => (v % 1 === 0.5 ? `${Math.floor(v)}½` : String(Math.round(v * 100) / 100).replace('.', ','));
