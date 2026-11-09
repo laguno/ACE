@@ -48,7 +48,7 @@ describe('copione', () => {
   it('singolare e plurale giusti con 1 (chiave, passo, tentativo, sessione, compito, cosa)', () => {
     const uno = { ...ESEMPIO, n: 1, mancano_passi: 1, chiavi: 1 };
     const testi = [...(Object.keys(POPUP) as ChiavePopup[]).map((k) => componi(k, uno).testo), ...(Object.keys(NOTIFICHE) as ChiaveNotifica[]).map((k) => notifica(k, uno).testo)];
-    for (const s of testi) expect(s).not.toMatch(/1 (chiavi|passi|tappe|tentativi|sessioni|compiti|cose)|servono 1|[Mm]ancano ancora 1/);
+    for (const s of testi) expect(s).not.toMatch(/\b1 (chiavi|passi|tappe|tentativi|sessioni|compiti|cose)\b|servono 1|[Mm]ancano ancora 1/);
     expect(componi('forziere_lucchetto', uno).testo).toBe('Sei arrivata al forziere, ma serve una chiave in più. Si apre appena ce l’hai.');
     expect(componi('forziere_lucchetto', { n: 2 }).testo).toBe('Sei arrivata al forziere, ma servono 2 chiavi in più. Si apre appena le hai.');
     expect(componi('tappa', { tappa: 4, mancano_passi: 1 }).testo).toBe('Tappa 4! Alla prossima: un passo.');
