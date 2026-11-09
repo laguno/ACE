@@ -593,25 +593,34 @@ function Avvio({ client, vai }: { client: SupabaseClient; vai: (p: Pagina) => vo
     { fatto: installata(), titolo: 'Metti ACE sulla schermata Home', testo: 'Da Safari: Condividi, poi Aggiungi alla schermata Home. Senza, niente notifiche' },
   ];
   return (
-    <section className="sera avvio">
-      <p className="sopratitolo">Per mamma e papà</p>
-      <h1>Prepariamo ACE</h1>
+    <section className="avvio">
+      <header className="avvio-testa">
+        <span className="coppia">
+          <Sticker posa="papa-passaggio" misura={70} />
+          <Sticker posa="mamma-passaggio" misura={70} />
+        </span>
+        <div>
+          <p className="sopratitolo">Per mamma e papà</p>
+          <h1>Prepariamo ACE</h1>
+        </div>
+      </header>
       <p>Quattro cose, una volta sola. Il resto lo fa ACE da solo, due volte al giorno.</p>
-      <div className="carta">
-        <ol>
-          {cose.map((c, i) => (
-            <li key={c.titolo} className={c.fatto ? 'fatto' : undefined}>
-              <span className="segno" aria-label={c.fatto ? 'fatto' : `passo ${i + 1}`}>{c.fatto ? '✓' : i + 1}</span>
-              <span>
-                <b>{c.titolo}</b>
-                <small>{c.testo}</small>
-              </span>
-            </li>
-          ))}
-        </ol>
+      <ol>
+        {cose.map((c, i) => (
+          <li key={c.titolo} className={`carta${c.fatto ? ' fatto' : ''}`}>
+            <span className="segno" aria-hidden>{c.fatto ? '✓' : i + 1}</span>
+            <span>
+              <b>{c.titolo}</b>
+              <span className="solo-lettori">{c.fatto ? ' (fatto)' : ' (da fare)'}</span>
+              <small>{c.testo}</small>
+            </span>
+          </li>
+        ))}
+      </ol>
+      <div className="avvio-piede">
+        <button className="principale largo" onClick={() => vai('premi')}>Scegli i premi</button>
+        <button className="link" onClick={() => vai('settimana')}>Lo faccio dopo</button>
       </div>
-      <button className="principale largo" onClick={() => vai('premi')}>Scegli i premi</button>
-      <button className="secondario" onClick={() => vai('settimana')}>Lo faccio dopo</button>
     </section>
   );
 }

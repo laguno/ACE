@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Sticker } from './kit';
+import { Contapassi } from './Contapassi';
 import * as K from './lib/copione';
 import * as R from './lib/regole';
 import { PopupVista, type Popup } from './Popup';
@@ -12,6 +13,7 @@ const P = R.CONFIG.passi;
 // i passi tolti col segno meno vero, come li scrive il server ("−20")
 const M = Object.fromEntries(Object.entries(P.malus).map(([k, v]) => [k, String(v).replace('-', '−')])) as Record<keyof typeof P.malus, string>;
 const PRIMO_COSTO = R.CONFIG.percorso.costi_tappe[1];
+const SALDO_PRIMA = 725;
 
 /** Numeri ed esempi per riempire i {segnaposto}: i passi vengono dal config, il resto è inventato. */
 const ESEMPI: Partial<Record<K.ChiavePopup, Record<string, string | number>>> = {
@@ -95,6 +97,8 @@ const NOTIFICHE: [string, string][] = [
 export default function Vetrina() {
   const [aperto, setAperto] = useState<{ p: Popup; n: number }>();
   const guarda = (chiave: K.ChiavePopup) => setAperto((a) => ({ p: esempio(chiave), n: (a?.n ?? 0) + 1 }));
+  // 0: fermo; a ogni "Guarda" il contatore riparte dal vecchio saldo (tre compiti fatti)
+  const [saldo, setSaldo] = useState(0);
 
   return (
     <>
@@ -115,8 +119,17 @@ export default function Vetrina() {
             </li>
           ))}
           <li>
-            <span>Passi che salgono</span>
-            <small>Non c'è ancora nell'app.</small>
+            <span>
+              Passi che salgono
+              <small>Su Oggi e Astra, se il saldo è cambiato da quando Lani l'ha visto.</small>
+            </span>
+            <span className="saldo vetrina-saldo">
+              <img src="/assets/oggetti/passo.webp" alt="" width={30} height={30} />
+              <Contapassi key={saldo} prima={SALDO_PRIMA} adesso={saldo ? SALDO_PRIMA + 3 * P.obbligatori.compiti : SALDO_PRIMA} />
+            </span>
+            <button className="secondario compatto" onClick={() => setSaldo((n) => n + 1)} aria-label="Guarda: Passi che salgono">
+              Guarda
+            </button>
           </li>
         </ul>
       </div>

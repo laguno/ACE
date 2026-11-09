@@ -35,6 +35,15 @@ test('vetrina: tutti i popup del copione e le notifiche, senza scrivere niente',
   await popup.getByRole('button', { name: 'Evviva!' }).click();
   await expect(popup).toHaveCount(0);
 
+  // passi che salgono: fermo finché non si guarda, poi da 725 a 755 con +30
+  const saldo = page.locator('.vetrina-saldo');
+  await expect(saldo.locator('b')).toHaveText('725');
+  await page.getByRole('button', { name: 'Guarda: Passi che salgono' }).click();
+  await expect(saldo.getByText('+30')).toBeVisible();
+  await expect(saldo.locator('b')).toHaveText('755');
+  await saldo.scrollIntoViewIfNeeded();
+  await page.screenshot({ path: 'e2e/risultati/vetrina-passi.png' });
+
   await page.getByRole('button', { name: /\(nota_disciplinare\)$/ }).click();
   await expect(page.locator('.bollino-malus')).toHaveText('−20');
   await page.getByRole('button', { name: 'Ok' }).click();
