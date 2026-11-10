@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Bell, CaretRight, Cards, ClipboardText, Lightbulb, Volleyball } from '@phosphor-icons/react';
+import { Bell, CaretDown, CaretRight, Cards, ClipboardText, Lightbulb, Volleyball } from '@phosphor-icons/react';
 import { impegniTra, piuGiorni, oraAdesso, useGiornata, type Impegno } from './giornata';
 import { Attesa, Riquadro, Sticker, Testata } from './kit';
 import { PillolaSaldo } from './Contapassi';
@@ -158,6 +158,7 @@ function Mattina({ impegni, apri }: { impegni: Impegno[]; apri: Apri }) {
               <Sticker posa="mamma-passaggio" misura={40} />
             </span>
             <h2>In famiglia</h2>
+            <CaretDown className="freccia-famiglia" size={20} weight="bold" aria-hidden />
           </summary>
           <ul>
             {famiglia.map((i) => {

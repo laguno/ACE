@@ -171,8 +171,10 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .famiglia summary { list-style: none; cursor: pointer; min-height: 44px; display: flex; align-items: center; gap: 12px; }
 .famiglia summary::-webkit-details-marker { display: none; }
 .famiglia summary h2 { margin: 0; font: 800 13px Nunito, sans-serif; color: var(--testo-2); }
-.famiglia summary::after { content: '▾'; margin-left: auto; color: var(--testo-2); }
-.famiglia:not([open]) summary::after { content: '▸'; }
+/* la freccia è un'icona Phosphor come le altre (era il carattere ▾ del testo) */
+.freccia-famiglia { flex: none; margin-left: auto; color: var(--testo-2); transition: rotate 0.2s; }
+.famiglia:not([open]) .freccia-famiglia { rotate: -90deg; }
+@media (prefers-reduced-motion: reduce) { .freccia-famiglia { transition: none; } }
 .famiglia-avatar { display: flex; flex: none; }
 .famiglia-avatar .sticker + .sticker { margin-left: -12px; }
 .famiglia ul { margin: 0 0 0 8px; padding: 0; list-style: none; display: grid; gap: 4px; font-size: 14px; }
@@ -236,7 +238,7 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .con-lady { position: relative; padding: 8px 100px 8px 12px; border-radius: 16px; background: var(--rosa); font: 800 13px/1.35 Nunito, sans-serif; min-height: 64px; display: flex; align-items: center; }
 .lady-sticker { position: absolute; right: -10px; bottom: -14px; }
 .pastiglie { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 12px 8px; }
-.chip { position: relative; display: inline-flex; align-items: center; gap: 4px; min-height: 32px; padding: 6px 12px; border-radius: 999px; font: 800 13px Nunito, sans-serif; color: var(--testo); cursor: pointer; }
+.chip { position: relative; display: inline-flex; align-items: center; gap: 4px; min-height: 44px; padding: 6px 12px; border-radius: 999px; font: 800 13px Nunito, sans-serif; color: var(--testo); cursor: pointer; }
 .chip input { position: absolute; inset: -6px 0; width: 100%; height: calc(100% + 12px); margin: 0; opacity: 0; cursor: pointer; }
 .chip-lilla { background: var(--lilla); }
 .chip-rosa { background: var(--rosa); }
@@ -594,6 +596,11 @@ body:has(.avvio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom))
 .foglio-app p { margin: 0; color: var(--testo-2); }
 .genitori .schede { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; overflow: visible; padding-bottom: 0; }
 .genitori .schede button { padding: 0 2px; font: 800 12px Nunito, sans-serif; }
+/* sotto i 380 px le cinque schede non stanno in griglia: scorrono, ognuna con il suo respiro */
+@media (max-width: 379px) {
+  .genitori .schede { display: flex; overflow-x: auto; }
+  .genitori .schede button { padding: 0 12px; }
+}
 .genitori .numeri div { display: flex; flex-direction: column; gap: 0; padding: 8px 12px; border-radius: 24px; box-shadow: var(--ombra); }
 .genitori .numeri dt { font: 800 12px Nunito, sans-serif; color: var(--testo-2); }
 .genitori .numeri dd { font: 800 26px/1.1 'Baloo 2', Nunito, sans-serif; }
