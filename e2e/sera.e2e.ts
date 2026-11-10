@@ -45,7 +45,7 @@ test('la sera mostra compiti, cartella del lunedì e fogli', async ({ page }) =>
   await page.getByRole('button', { name: 'Sera' }).click();
 
   await expect(page.getByRole('heading', { name: 'Pronta per lunedì?' })).toBeVisible();
-  await expect(page.getByText('0 su 5')).toBeVisible();
+  await expect(page.getByText('0 su 5 pronte')).toBeVisible();
   await expect(page.getByText('Pag 12 es 3')).toBeVisible();
   await expect(page.getByText('Per mercoledì')).toHaveCount(0);
   // frase della bozza (design/Domani.html), messa dopo la critique del 10/11
@@ -65,7 +65,7 @@ test('spunte: subito visibili, salvate, e la funzione passi chiamata', async ({ 
 
   await page.getByRole('checkbox', { name: /Pag 12 es 3/ }).check();
   await expect(page.getByRole('checkbox', { name: /Pag 12 es 3/ })).toBeDisabled();
-  await expect(page.getByText('1 su 5')).toBeVisible();
+  await expect(page.getByText('1 su 5 pronte')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Annulla' })).toBeVisible();
   expect(t.compiti[0].fatto_il).toBeNull(); // non ancora inviata
   await page.clock.runFor(5100);
@@ -75,7 +75,7 @@ test('spunte: subito visibili, salvate, e la funzione passi chiamata', async ({ 
   for (const voce of ['Italiano', 'Tecnologia', 'Matematica']) await cartella.getByRole('checkbox', { name: voce, exact: typeof voce === 'string' }).check();
   expect(t.serate).toHaveLength(0); // la cartella è pronta solo con l'ultima voce
   await cartella.getByRole('checkbox', { name: 'Cartellina di tecnologia' }).check();
-  await expect(page.getByText('2 su 5')).toBeVisible();
+  await expect(page.getByText('2 su 5 pronte')).toBeVisible();
   await page.clock.runFor(5100);
   await expect.poll(() => t.serate[0]).toMatchObject({ data: '2026-11-08' });
 
@@ -112,7 +112,7 @@ test('borsa dal calendario: domani allenamento alle 15, la porti a scuola', asyn
   await expect(borsa.getByText('Allenamento domani alle 15:00: la porti a scuola.')).toBeVisible();
   await expect(page.getByText('Domani in famiglia: Tennis Leonardo alle 17:30.', { exact: false })).toBeVisible();
   for (const voce of ['Divisa', 'Ginocchiere', 'Scarpe', 'Borraccia']) await borsa.getByRole('checkbox', { name: voce }).check();
-  await expect(page.getByText('1 su 5')).toBeVisible();
+  await expect(page.getByText('1 su 5 pronte')).toBeVisible();
   await page.clock.runFor(5100);
   await expect.poll(() => t.serate[0]?.borsa_il).toBeTruthy();
   await expect.poll(() => chiamate).toEqual([{ tipo: 'serata', id: '2026-11-08' }]);
@@ -126,7 +126,7 @@ test('senza allenamenti domani la borsa non c’è', async ({ page }) => {
   await page.getByRole('button', { name: 'Sera' }).click();
   await expect(page.getByRole('heading', { name: 'Pronta per lunedì?' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Borsa' })).toHaveCount(0);
-  await expect(page.getByText('0 su 4')).toBeVisible();
+  await expect(page.getByText('0 su 4 pronte')).toBeVisible();
 });
 
 test('venerdì con partita sabato: chiusura breve con la sola borsa', async ({ page }) => {
@@ -141,7 +141,7 @@ test('venerdì con partita sabato: chiusura breve con la sola borsa', async ({ p
   await expect(page.getByRole('heading', { name: 'Borsa' })).toBeVisible();
   await expect(page.getByText('Partita domani alle 18:30.')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Compiti per domani' })).toHaveCount(0);
-  await expect(page.getByText('0 su 1')).toBeVisible();
+  await expect(page.getByText('0 su 1 pronte')).toBeVisible();
 });
 
 test('Annulla entro 5 secondi: la spunta non parte', async ({ page }) => {

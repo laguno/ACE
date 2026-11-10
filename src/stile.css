@@ -320,7 +320,7 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .chiavi-settimana { display: flex; align-items: center; gap: 8px; margin: 12px 0 0; }
 .chiavi-settimana small { font: 800 13px/1.2 Nunito, sans-serif; color: var(--testo-2); max-width: 90px; }
 .chiavi-settimana > span { display: flex; }
-.saldo { display: flex; align-items: center; gap: 6px; padding: 4px 14px 4px 8px; border: 3px solid var(--rosa-bordo); border-radius: 999px; }
+.saldo { display: flex; align-items: center; gap: 6px; padding: 4px 11px; border: 3px solid var(--rosa-bordo); border-radius: 999px; }
 .saldo b { font: 800 20px/1 'Baloo 2', Nunito, sans-serif; color: var(--accento); font-variant-numeric: tabular-nums; }
 .testata .saldo { align-self: flex-start; display: inline-flex; margin-top: 8px; background: #fff; }
 /* passi che salgono: il numero conta da solo (Contapassi), il "+N" sale e svanisce */

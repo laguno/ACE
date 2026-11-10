@@ -193,7 +193,7 @@ export default function Sera() {
                 <span style={{ width: `${(fatte / cose) * 100}%` }} />
               </div>
               <p className="conto">
-                {fatte} su {cose}
+                {fatte} su {cose} pronte
                 {passiOggi > 0 && `, già +${passiOggi} passi`}.{fatte < cose && ' Chiudi tutto e Bart va a dormire.'}
               </p>
             </>
