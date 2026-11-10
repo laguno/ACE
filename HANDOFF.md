@@ -60,6 +60,7 @@ Ramo `decisioni` unito a `main` e in produzione, con il backup e i comandi lanci
 | 9/11 | signore + Jarvis | Revisione UI approvata tutta (harden, CSS pulito, regole 1-4, note di ogni schermata). Testi: il popup non ripete il titolo; "Evviva!" su forziere e cima; Sera "Chiudi tutto e Bart va a dormire."; Studio "Finiti i compiti, flash card e quiz valgono passi" nella prima carta; quiz per Lani "Quasi tutte giuste al primo colpo: 10 passi."; "C'è un errore in questa carta"; Figurina "come prima"; Album "In arrivo con… (n)"; singolare e plurale giusti. Il popup del voto insufficiente resta com'è |
 | 10/11 | signore | Da decidere del rapporto (1-14): tutte le proposte ok. Sprint 2 online al più tardi a dicembre. Un gesto per voce al giorno; storno di un compito toglie anche lo studio di quel giorno; foto cancellata = richiesta riaperta e +2 stornato, in automatico, rifatta il +2 torna (0027); riscatto della serie nera come proposto; avatar piccoli ok (originali intatti). Sera "2 su 7 pronte". Enigmi v4 ok tranne il 7: cambia tipo |
 | 10/11 | signore | Sera: niente scorciatoia "tutto nella borsa" per la cartella; si spunta una cosa alla volta |
+| 10/11 | signore | Lighthouse: bastano 86-89, niente scheletro statico in `index.html` (la testata non va tenuta in due posti) |
 
 ## Scelte di Claude approvate (revisione di Jarvis, 8/11, approvata dal signore)
 
@@ -81,7 +82,7 @@ Il piano della settimana è `docs/piano-fino-a-venerdi.md`; i Da decidere del ra
 
 **Per venerdì 13 (Claude):**
 Fatto il 10/11 sera (in produzione, `f881a41`): tabella "Dopo" compilata; testate di Oggi, Sera e Studio prima dei dati (Lighthouse 87 / 89 / 86 / 86); `Attesa` al posto dello schermo vuoto in `App.tsx` e `AreaGenitori.tsx`; barra della Sera con il bordo; pulsanti dei popup col gesto (`PULSANTI` in `src/Popup.tsx`, default "Ho capito", "Guardo/Vediamo il piano" apre Studio; regola in `docs/05-copione.md`). Passi in doppio nella Mattina: effetto dei dati finti. Sera lunga: resta com'è (signore). Prove: unitarie e funzioni 269, schermate 139, schema 250. Resta:
-1. Lighthouse a 90: frena il JS iniziale (555 KB, React + Supabase). Proposta: scheletro statico in `index.html` disegnato prima del JS. Da decidere col signore.
+1. Lighthouse resta a 86-89 (decisione del signore: niente scheletro statico in `index.html`).
 2. Impeccable dopo le correzioni: critique 31/40 (27→29→31), audit 16/20; obiettivi 34 e 18. Prossimi: `Suspense fallback={<Attesa />}` in `App.tsx` e niente `return null` in caricamento su Figurine e Astra; token per i 38 `#fff`; barra della Sera a tacche; spiegare le chiavi su Astra; Annulla nel messaggio delle sgridate. Dettagli in `.impeccable/critique/` e nel rapporto.
 
 **Fino al 23/11 (signore, con Claude se serve):**
