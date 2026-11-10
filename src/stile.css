@@ -625,3 +625,12 @@ body:has(.avvio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom))
 .album-pagina > .nota { padding-left: 4px; margin: 0; }
 .album li img { width: 80px; height: 80px; object-fit: contain; }
 .opzione { border-width: 2px; }
+
+/* Schermi stretti, sotto i 360 px: in pratica il testo ingrandito di Android o Safari (130% su un
+   telefono da 390 = 300 px). L'avatar della testata cede spazio al titolo, le etichette vanno a capo:
+   niente scorrimento orizzontale. Da 360 px in su non cambia niente. */
+@media (max-width: 359px) {
+  .testata-avatar, .sera .testata-avatar { width: 38vw; height: auto; }
+  .astra-saldi, .riga-pallini { flex-wrap: wrap; }
+  .tappe .traguardo { white-space: normal; max-width: 110px; }
+}
