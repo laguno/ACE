@@ -3,6 +3,7 @@ import type { Session } from '@supabase/supabase-js';
 import Accesso from './Accesso';
 import Genitori from './Genitori';
 import { supabase, supabaseGenitore } from './supabase';
+import { Attesa } from './kit';
 
 /**
  * Sul telefono di un genitore l'area è aperta. Sui dispositivi di Lani (iPad) serve la sessione
@@ -51,7 +52,7 @@ function Cancello({ chiudi }: { chiudi?: () => void }) {
 
   const torna = chiudi && <button className="secondario" onClick={chiudi}>Torna ad ACE</button>;
 
-  if (sessione === undefined) return null;
+  if (sessione === undefined) return <Attesa />;
   if (!sessione)
     return (
       <>

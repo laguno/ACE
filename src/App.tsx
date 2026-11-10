@@ -98,14 +98,14 @@ export default function App() {
       });
   }, [uid]);
 
-  if (sessione === undefined) return null;
+  if (sessione === undefined) return <Attesa />;
   if (!sessione)
     return (
       <main>
         <Accesso client={supabase} titolo="Ciao, entra in ACE" />
       </main>
     );
-  if (profilo === undefined) return null;
+  if (profilo === undefined) return <Attesa />;
   if (!profilo)
     return (
       <main className="carta modulo">
