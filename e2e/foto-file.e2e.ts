@@ -215,7 +215,7 @@ test('fotocamera negata o scelta annullata: niente errori, niente caricamento', 
   expect(errori).toEqual([]);
 });
 
-test('genitore: cancella una foto sbagliata (riga e file), i passi restano', async ({ page }) => {
+test('genitore: cancella una foto sbagliata (riga e file), Lani la ritrova da fotografare', async ({ page }) => {
   await page.clock.setFixedTime(new Date('2026-12-01T18:00:00+01:00'));
   const { t, chiamate } = await finto(page, {
     ...base(),
