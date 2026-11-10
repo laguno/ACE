@@ -5,7 +5,7 @@ import * as R from './lib/regole';
 import { GIORNI, RigaCompito, SELECT_COMPITI, adesso, maiuscola, passi, spuntaCompito, useAnnulla, type Compito } from './spunte';
 import { supabase } from './supabase';
 import { Check } from '@phosphor-icons/react';
-import { Attesa, Sticker, Testata } from './kit';
+import { Sticker, Testata } from './kit';
 import { Frase } from './Frase';
 
 // Sera — design/Domani.html. Lani spunta; i passi li decide la funzione "passi" sul server.
@@ -160,7 +160,10 @@ export default function Sera() {
         </div>
       </section>
     ) : (
-      <Attesa posa="lani-assonnata" />
+      // intestazione subito (Lighthouse, 13/11); il giorno può cambiare solo nella chiusura breve del ven/sab
+      <section className="schermo sera">
+        <Testata sfondo="sera" posa="lani-assonnata" sopra={`${maiuscola(GIORNI[oggi.getDay()])} sera`} titolo={`Pronta per ${GIORNI[domani.getDay()]}?`} />
+      </section>
     );
 
   const conCartella = R.cartellaConta(oggi);

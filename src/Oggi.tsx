@@ -96,7 +96,13 @@ function Mattina({ impegni, apri }: { impegni: Impegno[]; apri: Apri }) {
     });
   }, []);
 
-  if (!cose) return null;
+  // intestazione subito, la riga quando arrivano i dati (Lighthouse, 13/11)
+  if (!cose)
+    return (
+      <section className="schermo">
+        <Testata sfondo="mattina" posa="lani-buongiorno" sopra={`${maiuscola(GIORNI[oggi.getDay()])} ${oggi.getDate()} ${MESI[oggi.getMonth()]}`} titolo="Buongiorno, Lani" />
+      </section>
+    );
   const sport = impegni.find((i) => C.tipoImpegno(i.titolo) !== 'famiglia');
   const riga = R.giornoDiScuola(oggi)
     ? sport
@@ -246,7 +252,14 @@ function Pomeriggio({ chiusura, apri }: { chiusura: string | null; apri: Apri })
     });
   }, []);
 
-  if (!compiti) return errore ? <p role="alert">{errore}</p> : null;
+  if (!compiti)
+    return errore ? (
+      <p role="alert">{errore}</p>
+    ) : (
+      <section className="schermo pomeriggio">
+        <Testata sfondo="pomeriggio" posa="lani-concentrata" misura={140} sopra={`${maiuscola(GIORNI[oggi.getDay()])} pomeriggio`} titolo={`Compiti per ${GIORNI[domani.getDay()]}`} />
+      </section>
+    );
   if (aiuto) return <Aiuto compito={aiuto} chiudi={() => setAiuto(undefined)} />;
   const daFare = compiti.filter((c) => !c.fatto_il);
   const segna = (id: string) => (fatto_il: string | null) => setCompiti((l) => l?.map((x) => (x.id === id ? { ...x, fatto_il } : x)));

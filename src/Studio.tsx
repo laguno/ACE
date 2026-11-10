@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Cards, ClipboardText } from '@phosphor-icons/react';
-import { Attesa, Riquadro, Testata } from './kit';
+import { Riquadro, Testata } from './kit';
 import * as R from './lib/regole';
 import { Flashcard, Quiz, type Carta, type Domanda } from './Ripasso';
 import { GIORNI, MESI, maiuscola } from './spunte';
@@ -96,13 +96,15 @@ export default function Studio() {
     setAttivita(undefined);
     carica();
   };
+  const testata = <Testata sfondo="panna" posa="lani-pensierosa" misura={132} sopra="Studio" titolo="Le tue verifiche" riga={<p>Il ripasso è già organizzato nei pomeriggi liberi.</p>} />;
   if (attivita?.tipo === 'carte') return <Flashcard carte={attivita.carte} titolo={attivita.titolo} sessione={attivita.sessione} chiudi={chiudi} />;
   if (attivita?.tipo === 'quiz') return <Quiz quizId={attivita.quizId} titolo={attivita.titolo} domande={attivita.domande} sessione={attivita.sessione} chiudi={chiudi} />;
-  if (!verifiche) return <Attesa posa="lani-concentrata" />;
+  // intestazione subito, i dati dopo: titolo e avatar sono il primo disegno (Lighthouse, 13/11)
+  if (!verifiche) return <section className="schermo schermo-studio">{testata}</section>;
 
   return (
     <section className="schermo schermo-studio">
-      <Testata sfondo="panna" posa="lani-pensierosa" misura={132} sopra="Studio" titolo="Le tue verifiche" riga={<p>Il ripasso è già organizzato nei pomeriggi liberi.</p>} />
+      {testata}
 
       {verifiche.length === 0 && (
         <div className="carta">

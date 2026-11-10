@@ -79,9 +79,9 @@ Ramo `decisioni` unito a `main` e in produzione, con il backup e i comandi lanci
 Il piano della settimana è `docs/piano-fino-a-venerdi.md`; i Da decidere del rapporto sono tutti decisi e fatti. Restano:
 
 **Per venerdì 13 (Claude):**
-1. Tabella "Dopo" del rapporto (`docs/rapporto-venerdi.md`): stesse misure e stessi comandi della tabella "Prima".
-2. Critique e audit di Impeccable da rifare (`app:impeccable`), per il punteggio "Dopo" (prima 27/40 e 15/20; obiettivo ≥ 34 e ≥ 18).
-3. Lighthouse 83-87, obiettivo 90: le immagini non bastano più, serve disegnare la testata (titolo e avatar) prima che arrivino i dati. Cambiamento più grosso: proporlo al signore prima di farlo.
+Fatto il 10/11 sera: tabella "Dopo" compilata, Impeccable rifatto (critique 29/40, audit 16/20), testate di Oggi, Sera e Studio prima dei dati (Lighthouse 87 / 89 / 86 / 86). Resta:
+1. Lighthouse a 90: frena il JS iniziale (555 KB, React + Supabase). Proposta: scheletro statico in `index.html` disegnato prima del JS. Da decidere col signore.
+2. Impeccable verso 34 e 18: [P1] schermo vuoto in `App.tsx` e `AreaGenitori.tsx` mentre arrivano sessione e profilo; [P2] passi in doppio nella Mattina, Sera lunga, barra della Sera poco visibile; [P3] popup di default "Ok". Dettagli nel rapporto e in `.impeccable/critique/`.
 
 **Fino al 23/11 (signore, con Claude se serve):**
 4. Genitori: controllare orari e materiale nelle Impostazioni.
