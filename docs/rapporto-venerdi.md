@@ -89,6 +89,8 @@ Fuori dal simulatore per ora: enigmi (la funzione usa l'IA), pagella, notifiche,
 
 ## 5. Da decidere
 
+**Risposte del signore (10/11): tutte ok.** Sul 2: lo sprint 2 va online al più tardi a dicembre. Sul 7: niente riapertura a mano dei genitori, la foto cancellata riapre la richiesta e storna il +2 da sola (migrazione 0027; rifatta, il +2 torna). Già fatti: 3, 4, 7, 14 (ramo `decisioni`). Da fare: 9 (riscatto).
+
 1. **Quiz, flash card e video si fidano del telefono.** Le risposte giuste di un quiz, l'ora d'inizio di un giro di flash card e i secondi di video visti li manda l'app; il server controlla i tempi minimi e il tetto di 4 caselle al giorno, ma un quiz "tutto giusto" inventato vale i suoi passi. Le soluzioni dei quiz sono leggibili da Lani (servono all'app per correggere). Proposta: lasciare così per lo sprint 1 (serve un'app modificata, non un tocco sbagliato); se serve, correzione sul server (Lani manda le risposte, il server conta le giuste e le soluzioni non arrivano al telefono).
 2. **La cima non si raggiunge con le sole fonti dello sprint 1** (simulatore): all'80% si arriva alla tappa 24, al 95% alla 25. La taratura conta su dieci minuti, partite e R-Evolution (sprint 2). Proposta: tenere i numeri e confermare lo sprint 2 a gennaio; se slitta, alla taratura di dicembre abbassare le tappe rimaste o rallentare la bandierina fino a R-Evolution.
 3. **Lo stesso gesto due volte nello stesso giorno vale due volte** (mamma e papà segnano "letto fatto": +4). Proposta: un gesto per voce al giorno.
