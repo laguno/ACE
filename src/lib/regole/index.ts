@@ -306,6 +306,25 @@ export function compitoInTempo(scadenza: Date, fattoIl: Date): boolean {
   return startOfDay(fattoIl) <= startOfDay(scadenza);
 }
 
+/**
+ * Riscatto della serie nera (signore, 10/11): un giorno di scuola è fatto bene con tutti i compiti
+ * in scadenza spuntati in tempo, la cartella della sera prima spuntata quella sera, nessuna
+ * sgridata e nessuna nota (quelle di merito non contano).
+ */
+export function giornoFattoBene(g: { compitiInScadenza: number; compitiInTempo: number; cartella: boolean; sgridate: number; note: number }): boolean {
+  return g.compitiInTempo >= g.compitiInScadenza && g.cartella && g.sgridate === 0 && g.note === 0;
+}
+
+/** Riscatto: N giorni di scuola fatti bene di fila (config figurine), in ordine dal rimprovero. */
+export function riscattoFatto(esiti: boolean[]): boolean {
+  let fila = 0;
+  for (const bene of esiti) {
+    fila = bene ? fila + 1 : 0;
+    if (fila >= CONFIG.figurine.riscatto_giorni_di_fila) return true;
+  }
+  return false;
+}
+
 /** Cartella: vale la sera prima di un giorno di scuola. */
 export function cartellaConta(sera: Date): boolean {
   const dopo = startOfDay(sera);

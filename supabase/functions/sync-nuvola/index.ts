@@ -10,6 +10,7 @@ import * as N from '../../../src/lib/nuvola/index.ts';
 import * as R from '../../../src/lib/regole/index.ts';
 import { avvisaSeFallita, inviaPush } from '../_shared/push.ts';
 import { passiEForzieri, Passo } from '../_shared/voti.ts';
+import { riscatti } from '../_shared/riscatto.ts';
 import * as K from '../../../src/lib/copione/index.ts';
 import { chiChiama, cronOGenitore } from '../_shared/accesso.ts';
 
@@ -171,6 +172,7 @@ async function sincronizza() {
     note: await scrivi('note', note),
     lezioni: await scrivi('lezioni', N.lezioni(d.giorniLezioni).filter((l) => ids.has(l.materia_id))),
     ...(await passiEForzieri(db)),
+    riscatti: await riscatti(db), // dopo note e sgridate del giorno: serie nera riscattata
     foto: await richiesteFoto(),
     studio: preparaStudio(),
   };

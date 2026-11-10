@@ -6,7 +6,7 @@ import { NOTIFICHE, POPUP, componi, notifica, nomeFigurina, popupMostrabile, pop
 const ESEMPIO = {
   materia: 'Educazione civica', prima: '5½', voto: '7½', passi: 35, tappa: 27, mancano_passi: 410, n: 3,
   premio: 'una giornata al parco acquatico', cosa: 'la cartella di martedì', giorno: 'mercoledì 18', chiavi: 36,
-  cose: 'verifica di Mate, allenamento 18:30', ora: '18:30',
+  cose: 'verifica di Mate, allenamento 18:30', ora: '18:30', nome: 'Lady dispettosa',
 };
 const parole = (s: string) => s.trim().split(/\s+/).length;
 const EMOJI = /\p{Extended_Pictographic}/u;

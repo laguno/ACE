@@ -231,6 +231,10 @@
       "altro"
     ]
   },
+  "figurine": {
+    "_riscatto": "Serie nera: si sblocca con N giorni di scuola fatti bene di fila dopo il rimprovero. Fatto bene = compiti in scadenza e cartella della sera prima spuntati in tempo, nessuna sgridata e nessuna nota (tranne di merito); vacanze e weekend saltati (signore, 10/11).",
+    "riscatto_giorni_di_fila": 7
+  },
   "frasi": {
     "mantra": "Ogni giorno, passino passino",
     "max_al_giorno": 1,

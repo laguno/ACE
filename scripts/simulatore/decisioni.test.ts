@@ -43,3 +43,26 @@ test('storno di un compito: via anche i passi di studio di quel giorno', { timeo
   expect(await saldo()).toBe(3);
   expect(await v(`select count(*)::int as v from movimenti_passi where motivo = 'storno'`)).toBe(3);
 });
+
+test('riscatto: sette giorni di scuola fatti bene dopo il rimprovero sbloccano la figurina nera', { timeout: 60_000 }, async () => {
+  const { riscatti } = await import('../../supabase/functions/_shared/riscatto.ts');
+  const { db: pg } = (await creaDatabase()) as { db: PGlite };
+  const db = client(pg) as unknown as SupabaseClient;
+  const q = (sql: string) => pg.query(sql);
+  await q(`insert into figurine (posa, serie_nera, in_attesa_di_riscatto_dal) values ('lady-dispettosa', true, '2026-11-24')`);
+  const sere = ['2026-11-24', '2026-11-25', '2026-11-26', '2026-11-29', '2026-11-30', '2026-12-01', '2026-12-02'];
+  for (const sera of sere) await q(`insert into serate (data, cartella_il) values ('${sera}', '${sera}T20:00:00+01:00')`);
+  await q(`insert into compiti (testo, scadenza, fatto_il) values ('Es.', '2026-11-25', '2026-11-24T16:00:00+01:00')`);
+  // a metà strada non basta; il sabato e la domenica non contano
+  expect(await riscatti(db, new Date('2026-12-02T10:00:00+01:00'))).toEqual([]);
+  expect(await riscatti(db, new Date('2026-12-04T10:00:00+01:00'))).toEqual(['lady-dispettosa']);
+  expect((await q(`select sbloccata_il from figurine where posa = 'lady-dispettosa'`)).rows[0]).toMatchObject({ sbloccata_il: expect.anything() });
+  expect((await q(`select testo, posa from popup_coda where chiave = 'riscatto:lady-dispettosa'`)).rows).toEqual([{ testo: 'Sette giorni fatti bene: figurina nera sbloccata, Lady dispettosa.', posa: 'lady-dispettosa' }]);
+  // già sbloccata: il giro dopo non rifà niente
+  expect(await riscatti(db, new Date('2026-12-05T10:00:00+01:00'))).toEqual([]);
+
+  // un giorno storto (sgridata, compito non fatto) fa ripartire il conto
+  await q(`insert into figurine (posa, serie_nera, in_attesa_di_riscatto_dal) values ('leo-marameo', true, '2026-11-24')`);
+  await q(`insert into sgridate (data, tipo, dato_da) values ('2026-11-26', 'bagno', '${PAPA}')`);
+  expect(await riscatti(db, new Date('2026-12-04T10:00:00+01:00'))).toEqual([]);
+});

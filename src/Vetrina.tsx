@@ -48,6 +48,7 @@ const ESEMPI: Partial<Record<K.ChiavePopup, Record<string, string | number>>> = 
   chiavi_2: { cosa: 'nessuna dimenticanza' },
   verifica_nuova: { materia: 'Tecnologia', giorno: 'lunedì 16', n: 4 },
   verifica_nuova_una: { materia: 'Tecnologia', giorno: 'domani' },
+  figurina_nera: { nome: 'Lady dispettosa' },
 };
 
 /** Riga della figurina negli esempi dove nasce lo sblocco (sul server: la prima volta che compare una posa). */
@@ -67,6 +68,7 @@ const GRUPPI: [string, K.ChiavePopup[]][] = [
   ['Lucchetto', ['forziere_lucchetto']],
   ['Enigma', ['enigma_comparso']],
   ['Chiavi della domenica', ['chiavi_0', 'chiavi_1', 'chiavi_2', 'chiavi_3']],
+  ['Riscatto', ['figurina_nera']],
   ['Verifiche', ['verifica_nuova', 'verifica_nuova_una']],
 ];
 // una riga nuova del copione non resta fuori dalla Vetrina
