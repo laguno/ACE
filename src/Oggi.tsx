@@ -144,7 +144,7 @@ function Mattina({ impegni, apri }: { impegni: Impegno[]; apri: Apri }) {
         <p className="pillola-oro">
           <Sticker posa="bart-sonnecchia" misura={52} />
           <span>{ieriChiusa ? 'Ieri sera hai chiuso tutto: Bart ha dormito tranquillo' : 'Passi di ieri'}</span>
-          <b className="numero" aria-label={`${ieri} passi`}>
+          <b className="numero" role="img" aria-label={`${ieri} passi`}>
             +{ieri}
           </b>
         </p>
@@ -181,7 +181,7 @@ function Mattina({ impegni, apri }: { impegni: Impegno[]; apri: Apri }) {
         <div className="carta riga-chiavi">
           <span>
             <small>Chiavi della settimana</small>
-            <span className="chiavi" aria-label={`${chiavi} chiavi su 3`}>
+            <span className="chiavi" role="img" aria-label={`${chiavi} chiavi su 3`}>
               {[1, 2, 3].map((k) => (
                 <Sticker key={k} posa={k <= chiavi ? 'chiave-piena' : 'chiave-vuota'} cartella="oggetti" misura={40} />
               ))}

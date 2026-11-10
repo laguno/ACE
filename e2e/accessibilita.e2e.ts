@@ -1,11 +1,8 @@
 // Accessibilità con axe su ogni schermata (casi di e2e/casi.ts), a 390 px, tema chiaro e scuro.
-// Obiettivo del piano: zero violazioni. Gira con npm run axe finché non sono tutte a zero; poi
-// entra nelle prove normali (si toglie il test.skip).
+// Zero violazioni (filone G): fa parte delle prove normali; npm run axe le lancia da sole.
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 import { apri, CASI } from './casi';
-
-test.skip(!process.env.AXE, 'solo con npm run axe');
 
 for (const [nome, caso] of Object.entries(CASI))
   for (const tema of ['light', 'dark'] as const)

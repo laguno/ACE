@@ -165,11 +165,11 @@ export async function prepara(p: Page, caso: Caso, dataSpostata = false) {
   const d = dati();
   if (caso.genitore) d.profili = [{ id: 'lani', ruolo: 'genitore', nome: 'Mamma' }];
   caso.dati?.(d);
-  await finto(p, d);
+  await finto(p.context(), d); // sul contesto: vede anche le richieste del service worker (build vera)
 }
 
 /** Apre la schermata del caso con i dati finti, all'ora del caso, con immagini e font pronti. */
-export async function apri(p: Page, caso: Caso, indirizzo = 'http://localhost:5179/') {
+export async function apri(p: Page, caso: Caso, indirizzo = `http://localhost:${process.env.PORTA_PROVE ?? 5179}/`) {
   await prepara(p, caso);
   await p.goto(indirizzo);
   await expect(p.locator('main')).toBeVisible();

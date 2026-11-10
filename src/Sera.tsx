@@ -177,7 +177,7 @@ export default function Sera() {
         riga={
           cose > 0 && (
             <>
-              <div className="avanzamento" role="progressbar" aria-valuemin={0} aria-valuemax={cose} aria-valuenow={fatte}>
+              <div className="avanzamento" role="progressbar" aria-label="Cose pronte per domani" aria-valuemin={0} aria-valuemax={cose} aria-valuenow={fatte}>
                 <span style={{ width: `${(fatte / cose) * 100}%` }} />
               </div>
               <p className="conto">

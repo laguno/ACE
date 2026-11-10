@@ -11,6 +11,12 @@
     <meta name="apple-mobile-web-app-title" content="ACE" />
     <link rel="apple-touch-icon" href="/icone/pallone-apple.png" />
     <link rel="icon" href="/icone/pallone-192.png" />
+    <!-- la prima lettura dal database parte con la connessione già aperta -->
+    <!-- font dei testi più usati subito, prima del primo disegno: senza, il testo cambia carattere e la pagina salta -->
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/node_modules/@fontsource/nunito/files/nunito-latin-600-normal.woff2" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/node_modules/@fontsource/nunito/files/nunito-latin-800-normal.woff2" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/node_modules/@fontsource/baloo-2/files/baloo-2-latin-800-normal.woff2" />
+    <link rel="preconnect" href="%VITE_SUPABASE_URL%" crossorigin />
     <title>ACE</title>
   </head>
   <body>

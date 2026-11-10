@@ -107,7 +107,7 @@ export function Figurina({ chiudi }: { chiudi: () => void }) {
               <li key={m.nome}>
                 <span>{m.nome}</span>
                 <b>{fmt(media(m.voti))}</b>
-                <span className={`tendenza t${tendenza === '↑' ? 'su' : tendenza === '↓' ? 'giu' : 'pari'}`} aria-label={tendenza === '↑' ? 'in salita' : tendenza === '↓' ? 'in discesa' : 'stabile'}>
+                <span role="img" className={`tendenza t${tendenza === '↑' ? 'su' : tendenza === '↓' ? 'giu' : 'pari'}`} aria-label={tendenza === '↑' ? 'in salita' : tendenza === '↓' ? 'in discesa' : 'stabile'}>
                   {tendenza === '↑' ? <ArrowUp size={18} weight="bold" aria-hidden /> : tendenza === '↓' ? <ArrowDown size={18} weight="bold" aria-hidden /> : 'come prima'}
                 </span>
               </li>

@@ -3,7 +3,7 @@ import tseslint from 'typescript-eslint';
 
 // typescript-eslint strict. no-undef spento sui file TypeScript: lo controlla già tsc (consiglio di typescript-eslint).
 export default tseslint.config(
-  { ignores: ['dist', 'dist-lh', 'dev-dist', 'coverage', '.claude', '.agents', '.vercel', 'e2e/risultati', 'playwright-report', '.lighthouseci', 'public/push-sw.js'] },
+  { ignores: ['dist', 'dist-lh', 'dist-prove', 'dev-dist', 'coverage', '.claude', '.agents', '.vercel', 'e2e/risultati', 'playwright-report', '.lighthouseci', 'public/push-sw.js'] },
   js.configs.recommended,
   tseslint.configs.strict,
   {

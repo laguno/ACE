@@ -33,6 +33,21 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,png,webp,svg,woff2}'],
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         importScripts: ['push-sw.js'],
+        // Senza rete: le letture di Supabase (GET /rest/v1) vanno prima in rete e, se la rete non
+        // c'è, si prende l'ultima risposta salvata. Così Lani vede l'ultima situazione, non una
+        // pagina vuota. Fuori la tabella forzieri dei genitori (premi): solo forzieri_lani.
+        runtimeCaching: [
+          {
+            urlPattern: ({ url, request }) => request.method === 'GET' && url.pathname.startsWith('/rest/v1/') && url.pathname !== '/rest/v1/forzieri',
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'ace-dati',
+              networkTimeoutSeconds: 6,
+              expiration: { maxEntries: 300, maxAgeSeconds: 30 * 24 * 3600 },
+              cacheableResponse: { statuses: [200] },
+            },
+          },
+        ],
       },
     }),
   ],
