@@ -8,6 +8,7 @@ import CodaPopup from './Popup';
 import Benvenuta, { daAccogliere } from './Benvenuta';
 import { oraAdesso, useGiornata } from './giornata';
 import * as C from './lib/calendario';
+import { Attesa } from './kit';
 import { rinnovaIscrizione } from './notifiche';
 import { CHIAVE_SESSIONE, supabase, type Profilo } from './supabase';
 
@@ -134,7 +135,7 @@ function Lani() {
     if (giornata && !voce) setVoce(C.momento(oraAdesso(), giornata.chiusura) === 'sera' ? 'Sera' : 'Oggi');
   }, [giornata]);
   if (accogli) return <Benvenuta fine={() => setAccogli(false)} />;
-  if (!voce) return null;
+  if (!voce) return <Attesa />;
 
   if (voce === 'Genitori')
     return (

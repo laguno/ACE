@@ -5,7 +5,7 @@ import * as R from './lib/regole';
 import { GIORNI, RigaCompito, SELECT_COMPITI, adesso, maiuscola, passi, spuntaCompito, useAnnulla, type Compito } from './spunte';
 import { supabase } from './supabase';
 import { Check } from '@phosphor-icons/react';
-import { Sticker, Testata } from './kit';
+import { Attesa, Sticker, Testata } from './kit';
 import { Frase } from './Frase';
 
 // Sera — design/Domani.html. Lani spunta; i passi li decide la funzione "passi" sul server.
@@ -149,7 +149,19 @@ export default function Sera() {
       R.iso(oggi),
     );
 
-  if (!compiti) return errore ? <p role="alert">{errore}</p> : null;
+  if (!compiti)
+    return errore ? (
+      <section className="schermo">
+        <div className="carta errore-carta" role="alert">
+          <p>{errore}</p>
+          <button className="secondario" onClick={carica}>
+            Riprova
+          </button>
+        </div>
+      </section>
+    ) : (
+      <Attesa posa="lani-assonnata" />
+    );
 
   const conCartella = R.cartellaConta(oggi);
   const sport = impegni.find((i) => C.tipoImpegno(i.titolo) !== 'famiglia');

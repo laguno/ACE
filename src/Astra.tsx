@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { ImageSquare } from '@phosphor-icons/react';
-import { useSfondo } from './kit';
+import { Attesa, useSfondo } from './kit';
 import { Contapassi, vediSaldo } from './Contapassi';
 import { Biglietto } from './Biglietto';
 import { ImmaginePremio, immaginiPremi, type Immagine } from './ImmaginePremio';
@@ -77,7 +77,7 @@ export default function Astra({ apri, forziere: aperto }: { apri: (pagina: 'Figu
       scesa.current = true;
     }
   }, [dati, scelto]);
-  if (!dati) return null;
+  if (!dati) return <Attesa />;
 
   const pos = R.posizione(dati.passi);
   const nMondo = R.mondo(pos.tappeFatte);

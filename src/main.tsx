@@ -4,6 +4,7 @@ import { registerSW } from 'virtual:pwa-register';
 import App, { SenzaRete } from './App';
 import Errore from './Errore';
 import { ascoltaErrori } from './errori';
+import { Attesa } from './kit';
 // font dentro l'app (niente richieste a Google, funzionano offline): Baloo 2 per titoli e numeri, Nunito per il testo.
 // Solo l'alfabeto latino (all'italiano basta): niente cirillico, greco e vietnamita da scaricare.
 import '@fontsource/baloo-2/latin-800.css';
@@ -33,7 +34,7 @@ createRoot(radice).render(
   <StrictMode>
     <SenzaRete />
     <Errore>
-      <Suspense fallback={null}>
+      <Suspense fallback={<Attesa />}>
         <App />
       </Suspense>
     </Errore>

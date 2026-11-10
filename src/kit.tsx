@@ -40,3 +40,18 @@ export function Testata({ sopra, titolo, riga, posa, sfondo, misura = 170 }: { s
 export function Riquadro({ colore, children }: { colore: 'rosa' | 'lilla' | 'burro'; children: ReactNode }) {
   return <span className={`riquadro riquadro-${colore}`}>{children}</span>;
 }
+
+/**
+ * Mentre i dati arrivano: lo sticker di Lani al centro, mai una schermata vuota (critique del 10/11).
+ * Compare dopo un attimo (CSS), così con la rete veloce non lampeggia. Per i lettori di schermo "Un attimo".
+ */
+export function Attesa({ posa = 'lani-contenta' }: { posa?: string }) {
+  return (
+    <section className="schermo attesa" aria-busy="true">
+      <Sticker posa={posa} misura={120} />
+      <span className="solo-lettori" role="status">
+        Un attimo
+      </span>
+    </section>
+  );
+}

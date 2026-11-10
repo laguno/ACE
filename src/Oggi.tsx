@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Bell, CaretRight, Cards, ClipboardText, Lightbulb, Volleyball } from '@phosphor-icons/react';
 import { impegniTra, piuGiorni, oraAdesso, useGiornata, type Impegno } from './giornata';
-import { Riquadro, Sticker, Testata } from './kit';
+import { Attesa, Riquadro, Sticker, Testata } from './kit';
 import { PillolaSaldo } from './Contapassi';
 import { Frase, type Momento } from './Frase';
 import { Fotografa, SELECT_RICHIESTE, descrizione, type RichiestaFoto } from './Foto';
@@ -37,7 +37,7 @@ const ICONE = {
 
 export default function Oggi({ apri = () => {} }: { apri?: Apri }) {
   const giornata = useGiornata();
-  if (!giornata) return null;
+  if (!giornata) return <Attesa />;
   return (
     <>
       {C.momento(oraAdesso(), giornata.chiusura) === 'mattina' ? (

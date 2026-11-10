@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import manifest from '../data/manifest.json' with { type: 'json' };
 import { supabase } from './supabase';
 import { ArrowDown, ArrowLeft, ArrowUp } from '@phosphor-icons/react';
-import { useSfondo } from './kit';
+import { Attesa, useSfondo } from './kit';
 import { nomeFigurina } from './lib/copione';
 
 // Figurina di Lani (design/Figurina.html) e Album da 64 (design/Album.html).
@@ -47,7 +47,7 @@ export function Figurina({ chiudi }: { chiudi: () => void }) {
       }),
     );
   }, []);
-  if (!d) return null;
+  if (!d) return <Attesa />;
 
   const media = (l: number[]) => (l.length ? l.reduce((a, b) => a + Number(b), 0) / l.length : null);
   const generale = media(d.voti.map((v) => v.voto));

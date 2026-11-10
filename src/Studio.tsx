@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Cards, ClipboardText } from '@phosphor-icons/react';
-import { Riquadro, Testata } from './kit';
+import { Attesa, Riquadro, Testata } from './kit';
 import * as R from './lib/regole';
 import { Flashcard, Quiz, type Carta, type Domanda } from './Ripasso';
 import { GIORNI, MESI, maiuscola } from './spunte';
@@ -98,7 +98,7 @@ export default function Studio() {
   };
   if (attivita?.tipo === 'carte') return <Flashcard carte={attivita.carte} titolo={attivita.titolo} sessione={attivita.sessione} chiudi={chiudi} />;
   if (attivita?.tipo === 'quiz') return <Quiz quizId={attivita.quizId} titolo={attivita.titolo} domande={attivita.domande} sessione={attivita.sessione} chiudi={chiudi} />;
-  if (!verifiche) return null;
+  if (!verifiche) return <Attesa posa="lani-concentrata" />;
 
   return (
     <section className="schermo schermo-studio">
