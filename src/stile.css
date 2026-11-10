@@ -150,7 +150,8 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .schermo .carta p { margin: 0; font-size: 15px; }
 .cose { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px; }
 .cose li { display: flex; gap: 12px; align-items: center; padding: 4px 0; }
-.cose li > span { display: flex; flex-direction: column; min-width: 0; }
+/* :not(.riquadro): anche il riquadro dell'icona è uno span, e deve restare la sua griglia centrata */
+.cose li > span:not(.riquadro) { display: flex; flex-direction: column; min-width: 0; }
 .cose li > span.allarga { flex: 1; }
 .cose b { font: 800 17px/1.15 'Baloo 2', Nunito, sans-serif; }
 .cose small { font-size: 13px; line-height: 1.35; color: var(--testo-2); }
@@ -455,7 +456,7 @@ dialog.velo:focus { outline: none; }
 .lista-foto li { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-top: 2px dashed var(--lilla); }
 .lista-foto li:first-child { border-top: 0; }
 .lista-foto .miniatura { flex: none; width: 56px; height: 56px; object-fit: cover; border-radius: 16px; background: var(--lilla); }
-.lista-foto li > span { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; font-weight: 800; }
+.lista-foto li > span:not(.riquadro) { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; font-weight: 800; }
 .lista-foto small { font: 700 13px Nunito, sans-serif; color: var(--testo-2); }
 .fotografa { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
 .fotografa .secondario.compatto { margin: 0; }
@@ -496,7 +497,7 @@ dialog.velo:focus { outline: none; }
 .vetrina { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; }
 .vetrina li { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-top: 2px dashed var(--lilla); }
 .vetrina li:first-child { border-top: 0; }
-.vetrina li > span { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.vetrina li > span:not(.riquadro) { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .vetrina b { font: 800 17px/1.15 'Baloo 2', Nunito, sans-serif; }
 .vetrina small { font-size: 13px; line-height: 1.35; color: var(--testo-2); }
 .vetrina .secondario.compatto { margin: 0; align-self: center; }
@@ -566,7 +567,7 @@ body:has(.avvio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom))
 .elenco { display: flex; flex-direction: column; padding: 8px 16px; }
 .riga-elenco { display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 8px 0; border: 0; border-top: 2px dashed var(--lilla); background: none; color: var(--testo); text-align: left; font: inherit; }
 .riga-elenco:first-child { border-top: 0; }
-.riga-elenco > span { flex: 1; display: flex; flex-direction: column; }
+.riga-elenco > span:not(.riquadro) { flex: 1; display: flex; flex-direction: column; }
 .riga-elenco b { font-size: 16px; }
 .riga-elenco small { font-size: 13px; color: var(--testo-2); }
 /* schermata rotta (Errore.tsx) */
