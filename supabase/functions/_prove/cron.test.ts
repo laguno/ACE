@@ -114,10 +114,11 @@ describe('enigma', () => {
     expect(await valore(`select soluzione from forzieri where n = 1`)).toBe('pizza / pizza margherita');
   });
   it('risolutore che sbaglia tre volte: niente salvato, avviso ai genitori, 422', async () => {
+    const prima = await valore(`select enigma from forzieri where n = 1`); // quello della 0028
     for (let i = 0; i < 3; i++) ia.coda.push(USCITA, { risposta: 'un cerchio', dubbi: false }, { giusta: false });
     const f = await carica('enigma');
     expect((await f(richiesta({ azione: 'genera', n: 1 }, { gettone: 'gettone-papa' }))).status).toBe(422);
-    expect(await valore(`select enigma from forzieri where n = 1`)).toBeNull();
+    expect(await valore(`select enigma from forzieri where n = 1`)).toBe(prima);
     expect(inviate.some((i) => i.endpoint.includes('papa'))).toBe(true);
   });
   it('Lani non genera; forziere inesistente; enigma già comparso; cima senza le parole dei forzieri', async () => {
@@ -125,6 +126,7 @@ describe('enigma', () => {
     expect((await f(richiesta({ azione: 'genera', n: 1 }, { gettone: 'gettone-lani' }))).status).toBe(403);
     expect((await f(richiesta({ azione: 'genera', n: 12 }, { gettone: 'gettone-papa' }))).status).toBe(404);
     await stato.banco!.come(null, `update forzieri set premio = 'Gardaland' where n = 9`);
+    await stato.banco!.come(null, `update forzieri set parola = null where n = 2`); // una parola dei forzieri 1-8 manca
     expect((await f(richiesta({ azione: 'genera', n: 9 }, { gettone: 'gettone-papa' }))).status).toBe(409);
     await stato.banco!.come(null, `update forzieri set stato = 'enigma' where n = 1`);
     expect((await f(richiesta({ azione: 'genera', n: 1 }, { gettone: 'gettone-papa' }))).status).toBe(409);

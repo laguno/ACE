@@ -2,7 +2,7 @@
 // davvero i moduli condivisi delle funzioni (passi, chiavi, voti, forzieri, popup). Così il
 // simulatore esegue lo stesso codice delle Edge Functions, sul database con le migrazioni vere.
 // Le righe escono come JSON di Postgres (date "AAAA-MM-GG", ore ISO), come da PostgREST.
-// ponytail: solo gli operatori usati oggi (eq, neq, gt, gte, lt, lte, in, is, not is, or, order,
+// ponytail: solo gli operatori usati oggi (eq, neq, gt, gte, lt, lte, like, in, is, not is, or, order,
 // limit); un operatore nuovo nelle funzioni fallisce qui con "operatore non previsto".
 import type { PGlite } from '@electric-sql/pglite';
 
@@ -65,7 +65,7 @@ function pezzi(s: string): string[] {
   return fuori;
 }
 
-const OPERATORI: Record<string, string> = { eq: '=', neq: '<>', gt: '>', gte: '>=', lt: '<', lte: '<=' };
+const OPERATORI: Record<string, string> = { eq: '=', neq: '<>', gt: '>', gte: '>=', lt: '<', lte: '<=', like: 'like' };
 const nome = (c: string) => `"${c.replace(/"/g, '')}"`;
 
 class Query implements PromiseLike<Esito> {
@@ -143,6 +143,7 @@ class Query implements PromiseLike<Esito> {
   gte(c: string, v: unknown) { return this.f(c, 'gte', v); }
   lt(c: string, v: unknown) { return this.f(c, 'lt', v); }
   lte(c: string, v: unknown) { return this.f(c, 'lte', v); }
+  like(c: string, v: string) { return this.f(c, 'like', v); }
   in(c: string, v: unknown[]) { return this.f(c, 'in', v); }
   is(c: string, v: unknown) { return this.f(c, 'is', v); }
   not(c: string, op: string, v: unknown) {

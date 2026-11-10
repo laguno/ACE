@@ -117,7 +117,7 @@ export function FotoSalvate({ client, avvisa, conferma }: { client: SupabaseClie
     const { error } = await client.from('foto_pagine').delete().eq('id', f.id);
     if (error) return avvisa('Foto non cancellata. Riprova.');
     await client.storage.from('foto-pagine').remove([f.percorso_storage]);
-    avvisa('Foto cancellata.');
+    avvisa('Foto cancellata. Lani la ritrova da fotografare.');
     carica();
   }
 

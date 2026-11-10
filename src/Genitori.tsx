@@ -491,7 +491,7 @@ function Correzioni({ client, avvisa }: Props) {
         <FoglioApp
           titolo="Cancellare la foto?"
           azione="Cancella"
-          testo="La foto si cancella per sempre. I passi di Lani restano."
+          testo="La foto si cancella per sempre. Lani perde i passi della foto e la può rifare."
           conferma={() => (setCancellaFoto(undefined), cancellaFoto())}
           chiudi={() => setCancellaFoto(undefined)}
         />

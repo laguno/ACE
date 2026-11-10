@@ -4,6 +4,7 @@ import { supabase } from './supabase';
 import { ArrowDown, ArrowLeft, ArrowUp } from '@phosphor-icons/react';
 import { Attesa, useSfondo } from './kit';
 import { nomeFigurina } from './lib/copione';
+import { CONFIG } from './lib/regole';
 
 // Figurina di Lani (design/Figurina.html) e Album da 64 (design/Album.html).
 
@@ -27,7 +28,7 @@ const IN_ARRIVO: Record<string, string> = {
   passioni: 'Rare: escono dai forzieri',
   animale: 'In arrivo con Bart o Lady',
 };
-const RISCATTO = 'Si riscattano con 7 giorni fatti bene';
+const RISCATTO = `Si riscattano con ${CONFIG.figurine.riscatto_giorni_di_fila} giorni fatti bene`;
 
 export function Figurina({ chiudi }: { chiudi: () => void }) {
   useSfondo('viola');

@@ -18,9 +18,9 @@
 - Grafica come le bozze (`design/*.html`) su Oggi, Pomeriggio, Sera, Astra, Figurina, Album, popup, Studio, Flash card e Quiz (Grafica 1-7b, tutto in `main`; flash card e quiz a tutto schermo, senza barra né "Genitori"). Kit in `src/kit.tsx`. Revisione UI applicata a tutte le schermate (anche Genitori): scala degli spazi 4/8/12/16/24/32, bordi 20/16/32, titoli 30/26/20/17, raggi 16/24/32/999, ombre `--ombra`, `--ombra-alta`, `--ombra-etichetta`. Foto di confronto con `npm run confronto` (in `docs/confronto/`). Niente config di Prettier: se serve, `--single-quote --print-width 180`.
 - Prove: `npm test` (164), `npm run prova:schema` (70), `npm run prova:schermate` (Playwright, 63, Supabase finto). Le foto di `npm run confronto` sono stabili (movimento ridotto): servono per i confronti prima e dopo; la Sera alterna due foto anche senza cambiamenti.
 
-## Ultima sessione (9 novembre 2026, pomeriggio)
+## Ultima sessione (10 novembre 2026, pomeriggio)
 
-Rami `grafica-3` (Benvenuta, Genitori-avvio, passi che salgono), `debiti` (PIN, frasi nei momenti, Da fotografare) ed `enigmi` (enigmi a tipi, immagini dei premi) uniti a `main` con tutte le prove verdi e le foto di confronto rigenerate. Migrazioni 0018-0023 applicate; funzioni `passi`, `sync-nuvola`, `enigma` e `premi` pubblicate; 18 immagini nel bucket `premi`. I 9 premi inseriti (il 7 cambiato in "Biglietti per una partita di pallavolo femminile di Serie A"). Prova sul database vero con l'identità di Lani: non vede file del bucket `premi`, righe di `forzieri` né premi. Nessuna chiamata vera all'IA.
+Ramo `decisioni` unito a `main` e in produzione, con il backup e i comandi lanciati da Claude su autorizzazione del signore: backup `ace-2026-11-10_12-54-33.sql`, `db push` di 0027 (storno dello studio, foto cancellata che riapre la richiesta) e 0028 (enigmi v4), deploy delle 9 funzioni (401 senza accesso, migrazioni allineate). Dentro: le risposte ai 14 Da decidere (gesto una volta per voce al giorno, storno dello studio, foto, riscatto della serie nera in `_shared/riscatto.ts` lanciato da `sync-nuvola`, avatar piccoli `npm run avatar:piccoli`), enigmi v4 con il 7 cruciverba, Sera "2 su 7 pronte", pillola dei passi centrata e che tiene il posto mentre carica, `Attesa` anche nelle schermate interne dei genitori. Lighthouse: Oggi 83, Sera 86, Studio 87, Astra 87 (il limite ora è la catena JS + dati prima del primo disegno). Prove: unitarie e funzioni 269, schema 250, schermate 138.
 
 ## Settimana del piano (9-13/11)
 
@@ -58,6 +58,7 @@ Rami `grafica-3` (Benvenuta, Genitori-avvio, passi che salgono), `debiti` (PIN, 
 | 9/11 | signore | Frasi nei momenti: al massimo una al giorno, la prende il primo momento che la chiede (di solito il mattino; con una verifica domani si tiene per la Sera). Foto delle pagine: +2 a Lani per richiesta solo se la foto l'ha caricata lei; le foto dei genitori chiudono la richiesta senza passi |
 | 9/11 | signore | Passi che salgono nell'app, non solo nella Vetrina: su Oggi e Astra, se il saldo è cambiato dall'ultima volta che Lani l'ha visto, il numero va dal vecchio al nuovo in circa un secondo con un "+N" che svanisce; ultimo saldo visto nel database (vale su telefono e iPad); niente animazione con prefers-reduced-motion |
 | 9/11 | signore + Jarvis | Revisione UI approvata tutta (harden, CSS pulito, regole 1-4, note di ogni schermata). Testi: il popup non ripete il titolo; "Evviva!" su forziere e cima; Sera "Chiudi tutto e Bart va a dormire."; Studio "Finiti i compiti, flash card e quiz valgono passi" nella prima carta; quiz per Lani "Quasi tutte giuste al primo colpo: 10 passi."; "C'è un errore in questa carta"; Figurina "come prima"; Album "In arrivo con… (n)"; singolare e plurale giusti. Il popup del voto insufficiente resta com'è |
+| 10/11 | signore | Da decidere del rapporto (1-14): tutte le proposte ok. Sprint 2 online al più tardi a dicembre. Un gesto per voce al giorno; storno di un compito toglie anche lo studio di quel giorno; foto cancellata = richiesta riaperta e +2 stornato, in automatico, rifatta il +2 torna (0027); riscatto della serie nera come proposto; avatar piccoli ok (originali intatti). Sera "2 su 7 pronte". Enigmi v4 ok tranne il 7: cambia tipo |
 
 ## Scelte di Claude approvate (revisione di Jarvis, 8/11, approvata dal signore)
 
@@ -75,14 +76,14 @@ Rami `grafica-3` (Benvenuta, Genitori-avvio, passi che salgono), `debiti` (PIN, 
 
 ## Prossimo passo
 
-Il piano della settimana è `docs/piano-fino-a-venerdi.md`. Per venerdì 13: tabella "Dopo" del rapporto (`docs/rapporto-venerdi.md`, misure con gli stessi comandi della tabella "Prima"), critique e audit di Impeccable da rifare (`app:impeccable`), Lighthouse ancora 75-88 (obiettivo 90: leva rimasta, copie piccole degli avatar, serve l'ok del signore, Da decidere 14). Resti della critique: pillola dei passi 3 px a sinistra, figurina di Astra 3 px sotto, schermate interne dei genitori vuote mentre caricano, contatore "2 su N" della Sera. In più, fino al 23/11:
+Il piano della settimana è `docs/piano-fino-a-venerdi.md`. Per venerdì 13: tabella "Dopo" del rapporto (`docs/rapporto-venerdi.md`, misure con gli stessi comandi della tabella "Prima"), critique e audit di Impeccable da rifare (`app:impeccable`), Lighthouse 83-87 (obiettivo 90: serve disegnare la testata prima dei dati; la figurina di Astra 3 px sotto è voluta, come la bozza Main). In più, fino al 23/11:
 
-1. **Enigmi**: bozza v4 sul ramo `enigmi-v4` (`docs/enigmi-bozza.md`), dopo le segnalazioni del signore del 9/11: indovinelli in rima (1, 3, 8), il 3 più corto, il 7 più semplice, cima con le parole chiave nel biglietto, premio 1 "Pigiama party con le amiche", premio 9 "Una giornata al parco divertimenti". Aspetta l'ok del signore; poi si salvano nel database (enigmi e titoli dei premi 1 e 9) e si aggiornano `data/enigmi.json` e `src/lib/enigmi` (cima, regole dei tipi). Fino ad allora nel database c'è la prima versione e il 7 è vuoto.
+1. Il ramo `enigmi-v4` è superato (tutto in `main`): si può cancellare.
 2. Genitori: controllare orari e materiale nelle Impostazioni.
 3. **Prova in famiglia**, prima su Android Chrome (Motorola di Lani: Home, push, tema scuro, scorrimento fino in fondo), poi l'iPad. Lista in `docs/07-installazione.md`.
 4. Dal 23/11: primi passi, popup e figurine; il 29/11 alle 21:30 le prime chiavi (`sync_log` fonte chiavi). Primo giro di `sync-nuvola` con le richieste di foto: controllare `sync_log` e `richieste_foto` (solo conteggi).
 
-Poi: riscatto della serie nera entro fine novembre; a inizio dicembre il CSV dei passi per la taratura (la simulazione la fa Jarvis). Dopo l'avvio: video, umore del giorno, "Materiali" in Studio, pagine probabili dalla mappa dei libri per le verifiche con il solo argomento.
+Poi: a inizio dicembre il CSV dei passi per la taratura (la simulazione la fa Jarvis). Dopo l'avvio: video, umore del giorno, "Materiali" in Studio, pagine probabili dalla mappa dei libri per le verifiche con il solo argomento.
 
 Altri debiti: `spiega`, borsa, enigma, foto e push provati solo con le prove (serve un accesso di Lani); protezione delle password trapelate da accendere (la accende il signore).
 

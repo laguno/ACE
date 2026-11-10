@@ -32,6 +32,7 @@ import {
   storno,
   studioConta,
 } from './index';
+import * as R from './index';
 
 describe('percorso', () => {
   it('27 tappe per 7.200 passi, sempre più care', () => {
@@ -187,6 +188,27 @@ describe('controlli della funzione dei passi', () => {
     let dati = 0;
     for (const v of ['letto', 'scrivania', 'vestiti', 'lavastoviglie'] as const) dati += passiNuovoGesto(dati, v);
     expect(dati).toBe(6);
+  });
+
+  it('riscatto della serie nera: sette giorni fatti bene di fila', () => {
+    const bene = { compitiInScadenza: 2, compitiInTempo: 2, cartella: true, sgridate: 0, note: 0 };
+    expect(R.giornoFattoBene(bene)).toBe(true);
+    expect(R.giornoFattoBene({ ...bene, compitiInScadenza: 0, compitiInTempo: 0 })).toBe(true); // niente compiti: basta la cartella
+    expect(R.giornoFattoBene({ ...bene, compitiInTempo: 1 })).toBe(false);
+    expect(R.giornoFattoBene({ ...bene, cartella: false })).toBe(false);
+    expect(R.giornoFattoBene({ ...bene, sgridate: 1 })).toBe(false);
+    expect(R.giornoFattoBene({ ...bene, note: 1 })).toBe(false);
+    const n = R.CONFIG.figurine.riscatto_giorni_di_fila;
+    expect(R.riscattoFatto(Array(n).fill(true))).toBe(true);
+    expect(R.riscattoFatto(Array(n - 1).fill(true))).toBe(false);
+    // un giorno storto fa ripartire il conto
+    expect(R.riscattoFatto([...Array(n - 1).fill(true), false, ...Array(n - 1).fill(true)])).toBe(false);
+    expect(R.riscattoFatto([false, ...Array(n).fill(true)])).toBe(true);
+  });
+
+  it('gesti di casa: la stessa voce due volte nello stesso giorno vale una volta', () => {
+    expect(passiNuovoGesto(2, 'letto', true)).toBe(0);
+    expect(passiNuovoGesto(2, 'scrivania', false)).toBe(2);
   });
 
   it('sgridate', () => {

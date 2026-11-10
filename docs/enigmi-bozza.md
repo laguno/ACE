@@ -1,22 +1,27 @@
 # Enigmi dei forzieri: bozza da controllare
 
-Terza versione, 9 novembre 2026 (premio 7 cambiato: solo i biglietti, senza la cena). Ogni forziere ha un tipo diverso e la difficoltà sale (tipi e regole in `data/enigmi.json`). **Non è ancora nel database**: si salva dopo il controllo del signore e di Jarvis.
+Quarta versione, 9 novembre 2026, dopo le segnalazioni del signore sulla terza; il 7 rifatto il 10/11 come cruciverba. **Approvata dal signore il 10/11** e salvata nel database con la migrazione `0028_enigmi_v4.sql`.
 
-Le parti meccaniche le ha fatte il codice (`src/lib/enigmi`), non a mano: messaggio cifrato e striscia, calcoli, anagrammi, griglia, tabella della cima. I test le ricontrollano.
+Cosa è cambiato:
+- Indovinelli in rima (1, 3, 8); i codici (2, 4, 6) restano senza rima.
+- Premio 1: "Pigiama party con le amiche" (al massimo 2, le sceglie Lani). Premio 9: "Una giornata al parco divertimenti" (Gardaland, Mirabilandia o altro). Le parole chiave PIGIAMA e la parola della cima MONTAGNE non cambiano.
+- Il 3 più corto; il 7 è un cruciverba a colonna (la logica a indizi non si capiva, 10/11); la cima con le parole chiave scritte nel biglietto.
+
+Le parti meccaniche le fa il codice (`src/lib/enigmi`), non a mano: messaggio cifrato e striscia, calcoli, anagrammi, griglia, tabella della cima. I test le ricontrollano.
 
 Per ogni forziere: il biglietto come lo vede Lani, le risposte accettate, l'aiutino (compare dopo il primo tentativo sbagliato) e la parola chiave (serve alla cima). Lani ha 3 tentativi; se indovina, +20 passi.
 
 ---
 
-## 1. Indovinello in rima: Pigiama party con le amiche del volley
+## 1. Indovinello in rima: Pigiama party con le amiche
 
-> Niente rete e niente palla, ma la squadra c'è al completo:
-> la trasferta è in casa tua e l'orario è un po' segreto.
-> Si scende in campo coi calzini e la divisa a fiorellini:
-> vince chi resta sveglia di più, tra risate e cuscini.
+> Due amiche le scegli tu, e da noi restano a dormire,
+> ma la luce non si spegne: c'è sempre troppo da dire.
+> Vestite tutte e tre per la nanna, coi calzini colorati,
+> vince chi resta sveglia, tra cuscini e segreti sussurrati.
 
-- **Risposte accettate:** pigiama party con le amiche del volley / pigiama party con la squadra / festa in pigiama
-- **Aiutino:** Pensa a cosa ti metti per dormire, e a chi dorme da te quella notte.
+- **Risposte accettate:** pigiama party con le amiche / pigiama party / festa in pigiama
+- **Aiutino:** Pensa a come ti vesti per dormire, e a chi dorme da te quella notte.
 - **Parola chiave:** PIGIAMA
 
 ## 2. Codice segreto: Cinema con popcorn
@@ -44,18 +49,17 @@ Che cosa c'è nel forziere?
 - **Aiutino:** La prima parola è LUCI.
 - **Parola chiave:** CINEMA
 
-## 3. Acrostico: Pantaloncini di Hello Kitty
+## 3. Acrostico in rima: Pantaloncini di Hello Kitty
 
-> Fa caldo, è giugno, e le gambe chiedono aria.
-> Indossi qualcosa di corto, che non arriva al ginocchio.
-> Ogni volta che lo guardi c'è una gatta: non è Lady, è bianca e viene dal Giappone.
-> Coi baffi e le orecchie a punta, ma la bocca proprio no.
-> Cerca bene sul suo orecchio: c'è sempre qualcosa di rosso.
-> Ora leggi le prime lettere: è proprio quella cosa rossa.
+> Giugno scotta: che si fa?
+> Al ginocchio non ci arriverà.
+> Tutta bianca e senza bocca,
+> tiene un fiocco e non si tocca.
+> Alle iniziali: chi è? Lo sai già.
 
-- **Parola delle iniziali:** FIOCCO
+- **Parola delle iniziali:** GATTA
 - **Risposte accettate:** pantaloncini di Hello Kitty / shorts di Hello Kitty / pantaloncini corti con Hello Kitty
-- **Aiutino:** È una gattina famosa con un fiocco: la trovi su astucci e diari.
+- **Aiutino:** È una gattina famosa con un fiocco, stampata su una cosa corta che metti d'estate.
 - **Parola chiave:** PANTALONCINI
 
 ## 4. Codice matematico: Un set per la skincare
@@ -130,51 +134,48 @@ Aderenti come una seconda pelle, e sul fianco un segno a forma di baffo.
 - **Aiutino:** Li porti in partita, con la maglia numero 9.
 - **Parola chiave:** PALLAVOLO
 
-## 7. Logica a indizi: Biglietti per una partita di pallavolo femminile di Serie A
+## 7. Cruciverba a colonna: Biglietti per una partita di pallavolo femminile di Serie A
 
-Leo, il nonno, Bart e Lady propongono una serata a testa, in quattro giorni diversi.
-
-Cose da fare: tifo dal vivo per le campionesse sotto rete, teatro, concerto, pattinaggio sul ghiaccio.
-Giorni: mercoledì, venerdì, sabato, domenica.
-
+Scrivi le risposte nelle righe, una lettera per casella. Le caselle # in colonna, lette dall’alto in basso, formano una parola.
 ```
-        da fare      giorno
-Leo
-nonno
-Bart
-Lady
+ 1        # _ _ _ _ _ _ _
+ 2      _ # _ _ _ _ _
+ 3        # _ _ _
+ 4        # _ _ _ _ _ _
+ 5      _ # _ _ _ _
+ 6        # _ _ _ _ _
+ 7  _ _ _ #
 ```
+1) Al parco ci riposi, in palestra ci aspetti il tuo turno. (8)
+2) Verde o nera, in classe: ci scrivi col gesso e si cancella in un attimo. (7)
+3) Il pesce ci resta dentro, la palla deve passarle sopra. (4)
+4) Bart ci si sdraia sopra, e la mamma lo vuole pulito. (7)
+5) Ha le pagine ma non è un libro, e la sera ci guardi cosa c’è per domani. (6)
+6) Ha quattro gambe ma non cammina, e a cena ci state intorno tutti. (6)
+7) Ce l’ha Bart dietro, e al supermercato ci stai in mezzo per pagare. (4)
+È quello che vai a vedere dal vivo, sugli spalti, con le più forti del campionato.
 
-1. Leo sceglie il concerto: fa sempre rumore.
-2. Bart non va a teatro e non pattina: sul ghiaccio scivola con tutte e quattro le zampe.
-3. Lady non va a teatro: sulle poltrone di velluto si addormenta.
-4. Il nonno va a teatro di domenica, come ha sempre fatto.
-5. Lady pattina a metà settimana.
-6. Il concerto di Leo è il giorno prima della serata di Bart.
-
-Nel forziere c'è la serata di sabato. Che cos'è?
-
-- **Soluzione della tabella:** Leo concerto venerdì; nonno teatro domenica; Bart tifo sotto rete sabato; Lady pattinaggio mercoledì (unica: Bart non può né teatro né ghiaccio e il concerto è di Leo, quindi Bart fa il tifo; Lady non va a teatro, quindi pattina e il teatro è del nonno; nonno domenica, Lady mercoledì; Leo il giorno prima di Bart: venerdì e sabato)
+- **Righe:** PANCHINA, LAVAGNA, RETE, TAPPETO, DIARIO, TAVOLO, CODA; colonna PARTITA
 - **Risposte accettate:** biglietti per una partita di pallavolo femminile di Serie A / partita di Serie A di volley femminile / biglietti per la partita di pallavolo
-- **Aiutino:** Bart non può andare né a teatro né sul ghiaccio, e il concerto è già di Leo.
-- **Parola chiave:** PARTITA (la cima non cambia: la T è la 4ª lettera)
+- **Aiutino:** La terza è RETE: il pesce ci resta dentro, la palla no.
+- **Parola chiave:** PARTITA
 
-## 8. Rebus a parole: Una libreria con le ante, scelta e sistemata insieme
+## 8. Rebus a parole (in rima): Una libreria con le ante, scelta e sistemata insieme
 
-> Il mio primo si apre per entrare, e dietro Bart ti aspetta quando torni da scuola.
-> Il mio secondo li apri per studiare, e anche per sognare prima di dormire.
-> Primo e secondo insieme tengono in ordine le tue storie.
-> Il mio terzo sta sugli armadi: si apre a due a due, e dietro sparisce il disordine.
-> Il mio intero è in camera tua: lo scegliamo insieme e lo montiamo insieme, cacciavite in mano.
+> Il mio primo si apre per entrare, e dietro c'è Bart ad aspettare.
+> Il mio secondo li apri per studiare, e la sera per sognare.
+> Primo e secondo insieme tengono in fila le storie da leggere e rileggere.
+> Il mio terzo si apre a due a due sull'armadio, e dietro il disordine non si fa vedere.
+> Il mio intero sta in camera tua: lo scegliamo e lo montiamo insieme, cacciavite in mano e niente da temere.
 
 - **Pezzi:** PORTA + LIBRI (portalibri) + ANTE
 - **Risposte accettate:** libreria con le ante / portalibri con le ante / libreria
 - **Aiutino:** Il primo è PORTA; il secondo sono quelli che leggi.
 - **Parola chiave:** LIBRERIA
 
-## 9. La cima: Una giornata a Gardaland con un'amica
+## 9. La cima: Una giornata al parco divertimenti
 
-Prendi la parola chiave del premio di ogni forziere (la cosa principale: per un pigiama party, PIGIAMA). Da ognuna una lettera, e trovi la parola della cima.
+Le parole chiave dei forzieri sono: PIGIAMA, CINEMA, PANTALONCINI, SKINCARE, FELPA, PALLAVOLO, PARTITA, LIBRERIA. Da ognuna prendi una lettera, e trovi la parola della cima.
 
 ```
  1ª lettera: forziere 2, la 5ª
@@ -187,16 +188,16 @@ Prendi la parola chiave del premio di ogni forziere (la cosa principale: per un 
  8ª lettera: forziere 8, la 5ª
 ```
 
-Mettici dopo «russe»: è un giorno intero tra giri a testa in giù, con un'amica accanto.
+Mettici dopo «russe»: è un giorno intero tra giri a testa in giù e urla in discesa.
 
-- **Parola finale:** MONTAGNE (C**I**NE**M**A → M; PALLAV**O**LO → O; PA**N**TALONCINI → N; PAR**T**ITA → T; FELP**A** → A; PI**G**IAMA → G; SKI**N**CARE → N; LIBR**E**RIA → E)
-- **Risposte accettate:** giornata a Gardaland con un'amica / Gardaland / parco divertimenti con un'amica
-- **Aiutino:** Le parole chiave sono: PIGIAMA, CINEMA, PANTALONCINI, SKINCARE, FELPA, PALLAVOLO, PARTITA, LIBRERIA.
+- **Parola finale:** MONTAGNE (CINE**M**A → M; PALLAV**O**LO → O; PA**N**TALONCINI → N; PAR**T**ITA → T; FELP**A** → A; PI**G**IAMA → G; SKI**N**CARE → N; LIBR**E**RIA → E)
+- **Risposte accettate:** giornata al parco divertimenti / parco divertimenti / giornata alle montagne russe
+- **Aiutino:** La 1ª lettera è M: la 5ª di CINEMA.
 
 ---
 
-## Da decidere
+## Salvataggio (fatto il 10/11)
 
-1. **Cima, parole chiave.** Il 3 e il 6 sono tutti e due pantaloncini: Lani potrebbe scegliere PANTALONCINI anche per il 6 invece di PALLAVOLO, e la 7ª lettera non tornerebbe. Proposte: (a) le parole chiave scritte nel biglietto della cima (più facile, mai ambigua); (b) restano nell'aiutino, come ora.
-2. **Riconoscibilità.** Nel 3 la gatta bianca senza bocca viene dal Giappone alla terza riga; nel 6 il "baffo" sul fianco è nell'ultima riga. Vanno bene così o si tolgono?
-3. **Se un premio cambia** prima che il suo enigma compaia, si rifanno quell'enigma e la cima (le lettere dipendono dalle parole chiave).
+- Migrazione `0028_enigmi_v4.sql`, generata da questa bozza: i 9 biglietti, titoli dei premi 1 e 9; immagini invariate. Una prova (`src/lib/enigmi`) la rilegge: il 7 dà PARTITA, la cima MONTAGNE.
+- In `data/enigmi.json` e `src/lib/enigmi`: acrostico e rebus in rima; il 7 è il tipo "cruciverba" (al posto della logica a indizi); la cima scrive le parole chiave nel biglietto e l'aiutino è libero. Con i test.
+- Se un premio cambia, si rifanno il suo enigma e la cima (decisione del 9/11).

@@ -107,7 +107,7 @@ export default function Astra({ apri, forziere: aperto }: { apri: (pagina: 'Figu
             <p className="mantra">Ogni giorno, passino passino.</p>
           </span>
           <button className="astra-figurina" onClick={() => apri('Figurina')} aria-label="La tua figurina">
-            <img src={img('avatar/lani', 'lani-contenta')} alt="" width={50} height={50} />
+            <img src={img('avatar-piccoli/lani', 'lani-contenta')} alt="" width={50} height={50} />
           </button>
         </div>
         <div className="astra-saldi">

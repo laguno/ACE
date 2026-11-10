@@ -86,6 +86,10 @@ describe('data/enigmi.json: gli esempi tornano', () => {
     const coord = es(6).enigma.split('```')[2].trim().split('\n')[0].split(' / ').map((p) => p.split(' '));
     expect(E.leggiGriglia(g, coord)).toBe('ROTONDO E NUOVO'); // la prima riga (le colonne) si salta
   });
+  it('cruciverba: la colonna dell’esempio fa la parola nascosta', () => {
+    const e = es(7) as unknown as { enigma: string; nascosta: string; voci: { parola: string }[] };
+    expect(E.leggiCruciverba(blocchi(e.enigma)[0], e.voci.map((v) => v.parola))).toBe(e.nascosta);
+  });
   it('cima: la tabella compone la parola dalle parole dei forzieri', () => {
     const e = es(9) as unknown as { enigma: string; parola: string; parole_dei_forzieri: string[] };
     const righe = blocchi(e.enigma)[0].split('\n');
@@ -127,14 +131,65 @@ describe('componi: il biglietto dal testo dell’IA', () => {
     const coordinate = resto.trim().split('\n')[0].split(' / ').map((p) => p.split(' '));
     expect(E.leggiGriglia(g.trim(), coordinate)).toBe('CORTI PER IL MURO');
   });
-  it('cima: tabella e aiutino con le parole dei forzieri; senza parole si ferma', () => {
+  it('cima: tabella e parole dei forzieri nel biglietto; senza parole si ferma', () => {
     const parole = ['PIGIAMA', 'CINEMA', 'PANTALONCINI', 'SKINCARE', 'FELPA', 'PALLAVOLO', 'PARTITA', 'LIBRERIA'];
     const b = E.componi('cima', { ...base, parola: 'Gardaland', candidate: ['LUNAPARK', 'MONTAGNE'], finale: 'Russe.' }, rng(), parole);
     expect(b.enigma).toContain('1ª lettera: forziere');
-    expect(b.aiutino).toContain('PIGIAMA, CINEMA');
+    expect(b.enigma).toContain('PIGIAMA, CINEMA'); // le parole chiave nel biglietto (v4)
     expect(() => E.componi('cima', { ...base, candidate: ['MONTAGNE'] }, rng(), [])).toThrow();
+  });
+  it('cruciverba: colonna allineata che dà la parola, definizioni con la lunghezza, mai oltre 25 caratteri', () => {
+    const voci = ['PANCHINA', 'LAVAGNA', 'RETE', 'TAPPETO', 'DIARIO', 'TAVOLO', 'CODA'].map((parola) => ({ parola, indizio: 'Indizio.' }));
+    const b = E.componi('cruciverba', { ...base, nascosta: 'PARTITA', voci, finale: 'Fine.' }, rng());
+    const [, g] = b.enigma.split('```');
+    const righe = g.trim().split('\n');
+    expect(new Set(g.split('\n').filter(Boolean).map((r) => r.indexOf('#'))).size).toBe(1);
+    expect(E.leggiCruciverba(g.replace(/^\n|\n$/g, ''), voci.map((v) => v.parola))).toBe('PARTITA');
+    expect(Math.max(...righe.map((r) => r.length))).toBeLessThanOrEqual(25);
+    expect(b.enigma).toContain('1) Indizio. (8)');
+    // una parola senza la lettera, o il numero sbagliato di parole: si rigenera
+    expect(() => E.componi('cruciverba', { ...base, nascosta: 'PARTITA', voci: voci.map((v, i) => (i === 6 ? { ...v, parola: 'CANE' } : v)), finale: '' }, rng())).not.toThrow(); // CANE ha la A
+    expect(() => E.componi('cruciverba', { ...base, nascosta: 'PARTITA', voci: voci.map((v, i) => (i === 6 ? { ...v, parola: 'BUIO' } : v)), finale: '' }, rng())).toThrow();
+    expect(() => E.componi('cruciverba', { ...base, nascosta: 'PARTITA', voci: voci.slice(1), finale: '' }, rng())).toThrow();
   });
   it('indovinello senza testo: errore', () => {
     expect(() => E.componi('indovinello', { ...base }, rng())).toThrow();
+  });
+});
+
+import { readFileSync } from 'node:fs';
+
+describe('migrazione 0028: gli enigmi v4 salvati tornano', () => {
+  const sql = readFileSync('supabase/migrations/0028_enigmi_v4.sql', 'utf8').replace(/\r\n/g, '\n');
+  const forzieri = sql
+    .split('update forzieri set ')
+    .slice(1)
+    .map((u) => ({
+      n: Number(u.match(/where n = (\d)/)![1]),
+      enigma: u.match(/enigma = '([\s\S]*?)',\n {2}soluzione/)![1].replace(/''/g, "'"),
+      parola: u.match(/parola = '([A-Z]+)'/)![1],
+    }));
+  const blocco = (t: string) => t.split('```')[1].replace(/^\n|\n$/g, '');
+
+  it('nove forzieri, parole chiave diverse', () => {
+    expect(forzieri.map((f) => f.n)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    expect(new Set(forzieri.map((f) => f.parola)).size).toBe(9);
+  });
+  it('7: il cruciverba dà PARTITA, e nel biglietto non ci sono parole del premio', () => {
+    const f = forzieri[6];
+    const parole = ['PANCHINA', 'LAVAGNA', 'RETE', 'TAPPETO', 'DIARIO', 'TAVOLO', 'CODA'];
+    expect(E.leggiCruciverba(blocco(f.enigma), parole)).toBe('PARTITA');
+    expect(f.enigma).not.toMatch(/partit|pallavol|serie a|bigliett/i);
+  });
+  it('9: la tabella della cima compone MONTAGNE dalle parole chiave salvate', () => {
+    const parole = forzieri.slice(0, 8).map((f) => f.parola);
+    const lettere = blocco(forzieri[8].enigma)
+      .split('\n')
+      .map((r) => {
+        const [, f, p] = r.match(/forziere (\d+), la (\d+)ª/)!;
+        return parole[Number(f) - 1][Number(p) - 1];
+      });
+    expect(lettere.join('')).toBe(forzieri[8].parola);
+    expect(forzieri[8].enigma).toContain(parole.join(', '));
   });
 });

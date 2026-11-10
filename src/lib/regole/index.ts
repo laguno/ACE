@@ -306,6 +306,25 @@ export function compitoInTempo(scadenza: Date, fattoIl: Date): boolean {
   return startOfDay(fattoIl) <= startOfDay(scadenza);
 }
 
+/**
+ * Riscatto della serie nera (signore, 10/11): un giorno di scuola è fatto bene con tutti i compiti
+ * in scadenza spuntati in tempo, la cartella della sera prima spuntata quella sera, nessuna
+ * sgridata e nessuna nota (quelle di merito non contano).
+ */
+export function giornoFattoBene(g: { compitiInScadenza: number; compitiInTempo: number; cartella: boolean; sgridate: number; note: number }): boolean {
+  return g.compitiInTempo >= g.compitiInScadenza && g.cartella && g.sgridate === 0 && g.note === 0;
+}
+
+/** Riscatto: N giorni di scuola fatti bene di fila (config figurine), in ordine dal rimprovero. */
+export function riscattoFatto(esiti: boolean[]): boolean {
+  let fila = 0;
+  for (const bene of esiti) {
+    fila = bene ? fila + 1 : 0;
+    if (fila >= CONFIG.figurine.riscatto_giorni_di_fila) return true;
+  }
+  return false;
+}
+
 /** Cartella: vale la sera prima di un giorno di scuola. */
 export function cartellaConta(sera: Date): boolean {
   const dopo = startOfDay(sera);
@@ -336,8 +355,10 @@ export type VoceGesto = keyof typeof P.gesti_casa.voci;
  * Passi di un nuovo gesto di casa dati i passi dei gesti già registrati oggi, entro il tetto
  * giornaliero. Dai passi già dati, non dall'elenco dei gesti "di prima": due gesti nello stesso
  * istante non si vedevano e il tetto saltava (simulatore dell'anno, 9/11).
+ * Un gesto per voce al giorno: "letto fatto" segnato da mamma e da papà vale una volta (signore, 10/11).
  */
-export function passiNuovoGesto(passiGiaDatiOggi: number, voce: VoceGesto): number {
+export function passiNuovoGesto(passiGiaDatiOggi: number, voce: VoceGesto, vocePresaOggi = false): number {
+  if (vocePresaOggi) return 0;
   return Math.min(passiGestiCasa([voce]), Math.max(0, P.gesti_casa.tetto_giornaliero - passiGiaDatiOggi));
 }
 

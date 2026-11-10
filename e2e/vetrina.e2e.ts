@@ -19,7 +19,7 @@ async function apriVetrina(page: Page) {
 
 test('vetrina: tutti i popup del copione e le notifiche, senza scrivere niente', async ({ page }) => {
   const scritture = await apriVetrina(page);
-  for (const g of ['Animazioni', 'Lodi', 'Rimproveri', 'Nota di merito', 'Tappe', 'Forzieri', 'Lucchetto', 'Enigma', 'Chiavi della domenica', 'Verifiche', 'Notifiche'])
+  for (const g of ['Animazioni', 'Lodi', 'Rimproveri', 'Nota di merito', 'Tappe', 'Forzieri', 'Lucchetto', 'Enigma', 'Chiavi della domenica', 'Riscatto', 'Verifiche', 'Notifiche'])
     await expect(page.getByRole('heading', { name: g, exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Altri', exact: true })).toHaveCount(0);
   for (const chiave of Object.keys(POPUP)) await expect(page.getByRole('button', { name: new RegExp(`\\(${chiave}\\)$`) })).toHaveCount(1);

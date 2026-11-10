@@ -17,7 +17,8 @@ export function useSfondo(sfondo: Sfondo) {
 
 /** Avatar sticker: WebP grande con il contorno bianco, mai dentro un cerchio, mai piccolo. */
 export function Sticker({ posa, cartella, alt = '', misura = 160, className = '' }: { posa: string; cartella?: string; alt?: string; misura?: number; className?: string }) {
-  const dove = cartella ?? `avatar/${posa.split('-')[0]}`;
+  // fino a 72 px la copia a 144 px (npm run avatar:piccoli): i file da 512 pesavano troppo per Lighthouse
+  const dove = cartella ?? `${misura <= 72 ? 'avatar-piccoli' : 'avatar'}/${posa.split('-')[0]}`;
   return <img className={`sticker ${className}`} src={`/assets/${dove}/${posa}.webp`} alt={alt} width={misura} height={misura} />;
 }
 

@@ -43,21 +43,33 @@ test('foto: +2 una volta per richiesta, solo se la foto è di Lani', { timeout: 
   expect(await v(`select count(*)::int as v from foto_pagine where richiesta_id = '${a}'`)).toBe(2);
   expect(await v(`select count(*)::int as v from storage.objects where name like '${a}/%'`)).toBe(2);
 
-  // un genitore cancella la foto sbagliata (riga e file, come l'area genitori); i passi restano
+  // un genitore cancella la foto sbagliata (riga e file, come l'area genitori): la richiesta si
+  // riapre da sola e il +2 si storna (0027, decisione del 10/11)
+  const saldo = () => v(`select passi as v from saldo_passi`);
   await come(PAPA, `delete from foto_pagine where percorso_storage = '${a}/1-1.jpg'`);
   await come(PAPA, `delete from storage.objects where bucket_id = 'foto-pagine' and name = '${a}/1-1.jpg'`);
   expect(await v(`select count(*)::int as v from foto_pagine where richiesta_id = '${a}'`)).toBe(1);
   expect(await v(`select count(*)::int as v from storage.objects where name like '${a}/%'`)).toBe(1);
-  // riaprire la richiesta non spetta ai genitori (0024: leggono soltanto): zero righe
-  await come(PAPA, `update richieste_foto set stato = 'aperta' where id = '${a}'`);
-  expect(await stato(a)).toBe('fatta');
-  expect(await movimenti(a)).toHaveLength(1);
-  // se il server la riaprisse e Lani la rifacesse, il +2 non arriverebbe una seconda volta
-  await come(null, `update richieste_foto set stato = 'aperta' where id = '${a}'`);
+  expect(await stato(a)).toBe('aperta');
+  expect(await saldo()).toBe(0);
+  // senza una foto nuova la richiesta resta aperta (la foto rimasta è di prima dello storno)
+  expect(await passi(a)).toBe(0);
+  expect(await stato(a)).toBe('aperta');
+  // Lani la rifà: il +2 torna, una volta
   await carica(LANI, a, '3-0.jpg');
+  expect(await passi(a)).toBe(R.CONFIG.passi.foto_compito);
   expect(await passi(a)).toBe(0);
   expect(await stato(a)).toBe('fatta');
-  expect(await movimenti(a)).toHaveLength(1);
+  expect(await saldo()).toBe(R.CONFIG.passi.foto_compito);
+  // un'altra cancellata e rifatta: stesso giro, mai passi doppi
+  await come(PAPA, `delete from foto_pagine where percorso_storage = '${a}/3-0.jpg'`);
+  expect(await saldo()).toBe(0);
+  await carica(LANI, a, '4-0.jpg');
+  expect(await passi(a)).toBe(R.CONFIG.passi.foto_compito);
+  expect(await saldo()).toBe(R.CONFIG.passi.foto_compito);
+  // riaprire a mano la richiesta non spetta ai genitori (0024: leggono soltanto): zero righe
+  await come(PAPA, `update richieste_foto set stato = 'aperta' where id = '${a}'`);
+  expect(await stato(a)).toBe('fatta');
 
   // foto del genitore: richiesta chiusa senza passi; se poi carica anche Lani, niente (è già chiusa)
   const b = await richiesta('41');

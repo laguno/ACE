@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "icone": "node scripts/icone.mjs",
+    "avatar:piccoli": "node scripts/avatar-piccoli.mjs",
     "simula": "python3 scripts/simula_passi.py 7200 125",
     "prova:schema": "node scripts/prova-schema.mjs",
     "prova:schermate": "playwright test",
