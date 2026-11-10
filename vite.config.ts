@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import { configDefaults, defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
@@ -7,7 +8,16 @@ const ICONA = 'pallone';
 
 export default defineConfig({
   // le copie di lavoro degli agenti (.claude/worktrees) non sono prove di questo ramo
-  test: { exclude: [...configDefaults.exclude, '.claude/**'] },
+  test: {
+    exclude: [...configDefaults.exclude, '.claude/**'],
+    // le Edge Functions importano da npm: come Deno; nelle prove le stesse librerie, o finti senza rete
+    alias: {
+      'npm:@supabase/supabase-js@2': '@supabase/supabase-js',
+      'npm:ical.js@2.1.0': 'ical.js',
+      'npm:@anthropic-ai/sdk': fileURLToPath(new URL('./supabase/functions/_prove/anthropic-finto.ts', import.meta.url)),
+      'npm:web-push@3.6.7': fileURLToPath(new URL('./supabase/functions/_prove/web-push-finto.ts', import.meta.url)),
+    },
+  },
   plugins: [
     react(),
     VitePWA({
