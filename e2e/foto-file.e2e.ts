@@ -240,7 +240,7 @@ test('genitore: cancella una foto sbagliata (riga e file), i passi restano', asy
   expect(t.foto_pagine).toHaveLength(1);
   await carta.getByRole('button', { name: 'Cancella la foto di Italiano: pagine 340–352' }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Cancella' }).click();
-  await expect(page.getByRole('status')).toHaveText('Foto cancellata.');
+  await expect(page.getByRole('status')).toHaveText('Foto cancellata. Lani la ritrova da fotografare.');
   expect(t.foto_pagine).toHaveLength(0);
   expect(t.cancellate).toEqual([{ percorso: 'foto-pagine/r1/1.jpg' }]);
   expect(t.caricate).toEqual([]);

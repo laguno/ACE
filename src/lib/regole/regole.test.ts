@@ -189,6 +189,11 @@ describe('controlli della funzione dei passi', () => {
     expect(dati).toBe(6);
   });
 
+  it('gesti di casa: la stessa voce due volte nello stesso giorno vale una volta', () => {
+    expect(passiNuovoGesto(2, 'letto', true)).toBe(0);
+    expect(passiNuovoGesto(2, 'scrivania', false)).toBe(2);
+  });
+
   it('sgridate', () => {
     expect(passiSgridata('bagno')).toBe(-1);
     expect(passiSgridata('balla')).toBe(-10);

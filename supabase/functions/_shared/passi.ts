@@ -203,10 +203,20 @@ export function creaGestori(db: SupabaseClient) {
     },
 
     // id = richiesta di foto: con almeno una foto caricata la richiesta è fatta; i passi vanno a Lani
-    // solo se una foto è sua (una volta per richiesta)
+    // solo se una foto è sua (una volta per richiesta). Una foto cancellata riapre la richiesta e
+    // storna il +2 (trigger foto_cancellata, 0027): contano solo le foto dopo l'ultimo storno, e il
+    // riferimento cambia a ogni storno (richiesta, richiesta:1, ...) così il +2 rifatto torna una volta.
     async foto(id) {
       const r = await riga('richieste_foto', 'id', id);
-      const { data: foto, error } = await db.from('foto_pagine').select('caricata_da, caricata_il, profili(ruolo)').eq('richiesta_id', id).order('caricata_il');
+      const { data: storni, error: es } = await db
+        .from('movimenti_passi')
+        .select('creato_il')
+        .eq('motivo', 'storno')
+        .like('riferimento', `foto:${id}%`) // "foto:<richiesta>" e "foto:<richiesta>:1"...
+        .order('creato_il', { ascending: false });
+      if (es) throw es;
+      const dopo = storni?.[0]?.creato_il ?? '1970-01-01T00:00:00Z';
+      const { data: foto, error } = await db.from('foto_pagine').select('caricata_da, caricata_il, profili(ruolo)').eq('richiesta_id', id).gt('caricata_il', dopo).order('caricata_il');
       if (error) throw error;
       if (!foto?.length) return niente('nessuna foto caricata');
       if (r.stato !== 'fatta') {
@@ -215,7 +225,8 @@ export function creaGestori(db: SupabaseClient) {
       }
       const diLani = foto.find((x) => (x.profili as unknown as { ruolo: string } | null)?.ruolo === 'lani');
       const passi = R.passiFoto({ richiestaDaAce: true, caricataDaLani: !!diLani });
-      return diLani ? registra('foto', id, passi, R.giornoRoma(diLani.caricata_il)) : niente('foto dei genitori: richiesta chiusa');
+      const rif = storni?.length ? `${id}:${storni.length}` : id;
+      return diLani ? registra('foto', rif, passi, R.giornoRoma(diLani.caricata_il)) : niente('foto dei genitori: richiesta chiusa');
     },
 
     async gesto(id) {
@@ -227,7 +238,11 @@ export function creaGestori(db: SupabaseClient) {
       // lock per giorno se mai capita.
       const { data: dati, error } = await db.from('movimenti_passi').select('passi').eq('motivo', 'gesto').eq('giorno', ge.data);
       if (error) throw error;
-      const passi = R.passiNuovoGesto((dati ?? []).reduce((s, m) => s + m.passi, 0), ge.voce);
+      // un gesto per voce al giorno: la stessa voce segnata da mamma e da papà vale una volta
+      const { data: stessi, error: e2 } = await db.from('gesti_casa').select('id').eq('voce', ge.voce).eq('data', ge.data).neq('id', id);
+      if (e2) throw e2;
+      const presa = !!stessi?.length && (await conta('movimenti_passi', (q) => q.eq('motivo', 'gesto').gt('passi', 0).in('riferimento', stessi.map((x) => x.id)))) > 0;
+      const passi = R.passiNuovoGesto((dati ?? []).reduce((s, m) => s + m.passi, 0), ge.voce, presa);
       const esito = await registra('gesto', id, passi, R.giorno(ge.data), ge.dato_da);
       if (esito.passi) {
         const chi = await riga('profili', 'id', ge.dato_da, 'nome');
