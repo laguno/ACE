@@ -36,7 +36,15 @@ export function PillolaSaldo() {
   useEffect(() => {
     vediSaldo().then(setSaldo);
   }, []);
-  if (!saldo) return null;
+  // mentre il saldo arriva la pillola tiene il suo posto (invisibile): prima compariva dopo e
+  // spingeva giù le carte (Lighthouse, spostamento 0,25 sul Pomeriggio)
+  if (!saldo)
+    return (
+      <span className="saldo" aria-hidden style={{ visibility: 'hidden' }}>
+        <img src="/assets/oggetti/passo.webp" alt="" width={30} height={30} />
+        <b>0</b>
+      </span>
+    );
   return (
     <span className="saldo">
       <img src="/assets/oggetti/passo.webp" alt="" width={30} height={30} />
