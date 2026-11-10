@@ -106,8 +106,8 @@ Fuori dal simulatore per ora: enigmi (la funzione usa l'IA), pagella, notifiche,
 ## 6. Rischi aperti prima del 23/11
 
 1. Filone A in produzione il 9/11 sera: migrazione `0024` e 9 funzioni pubblicate dal signore (il controllo automatico di Claude Code blocca i deploy), merge in `main` (`c4356e7`). Advisors da 79 a 69: in più `rls_enabled_no_policy` su `pin_genitori`, voluto (il PIN passa solo dalle funzioni). CORS e intestazioni verificati dal vivo (pagina di accesso senza violazioni della CSP). Manca la prova dell'app vera da un genitore: Oggi, area Genitori, una foto.
-2. **Da pubblicare dal signore** (il controllo automatico blocca i deploy), in quest'ordine: `npm run backup`, `npx supabase db push --remote --yes` (migrazioni `0025` e `0026`), `npx supabase functions deploy --use-api --yes` (tutte: moduli condivisi, tetto dei gesti, parser del calendario, registro degli errori). Dopo: Stato di ACE con Nuvola e calendario "ok" al giro successivo.
-3. **Copertura delle funzioni** al 32% (era 0%; i moduli condivisi al 78%): sotto l'obiettivo del 90%. Per arrivarci bisogna portare in `_shared/` anche la logica di `notifiche`, `enigma`, `premi`, `sync-nuvola` (scrittura) e provarla come il resto.
+2. **In produzione dal 10/11 mattina**: backup fatto dal signore (115 KB), migrazioni `0025` e `0026`, 9 funzioni ripubblicate. Verificato dal vivo: tutte le funzioni rispondono 401 senza accesso, CORS solo per ACE, calendario "ok" alle 07:05 e 08:05 UTC con il parser nuovo, nessun errore registrato. Advisors da 79 a 34, tutti voluti (Da decidere 11).
+3. ~~Copertura delle funzioni~~: raggiunta, 92,9% (era 0%). Le funzioni vere provate in vitest con Deno.serve finto, PGlite e finti di Anthropic, web-push e Nuvola (`supabase/functions/_prove/`, 28 prove).
 
 ## 7. Chiamate all'IA e skill
 
