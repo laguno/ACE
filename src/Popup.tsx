@@ -34,14 +34,40 @@ function pulsante(p: Popup): string {
   if (p.situazione?.startsWith('bagno')) return 'Vado a sistemare';
   if (p.situazione === 'forziere_lucchetto') return 'Ho capito';
   if (p.situazione === 'enigma_comparso') return 'Prova';
-  return 'Ok';
+  return PULSANTI[p.situazione] ?? 'Ho capito';
 }
+// scelti dal signore il 10/11: il gesto da fare, mai una lode alla persona; sui voti si guarda il piano
+const PULSANTI: Record<string, string> = {
+  tappa: 'Avanti!',
+  chiavi_3: 'Avanti!',
+  chiavi_0: 'Vado avanti',
+  chiavi_1: 'Vado avanti',
+  chiavi_2: 'Vado avanti',
+  chiavi_totali: 'Vado avanti',
+  gesto: 'Grazie!',
+  gesto_mamma: 'Grazie!',
+  gesto_papa: 'Grazie!',
+  voto_9: 'Evviva!',
+  voto_migliorato: 'Evviva!',
+  voto_recupero: 'Evviva!',
+  nota_merito: 'Evviva!',
+  voto_6: 'Guardo il piano',
+  voto_7: 'Guardo il piano',
+  voto_7_senza_ripasso: 'Guardo il piano',
+  voto_corretto: 'Guardo il piano',
+  voto_insufficiente: 'Vediamo il piano',
+  voto_insufficiente_ancora: 'Vediamo il piano',
+  serie_nera: 'Ci riprovo',
+  figurina_nera: 'Ci riprovo',
+};
+/** I pulsanti "il piano" portano a Studio, dove c'è il ripasso. */
+const AL_PIANO = (p: Popup) => /piano$/.test(pulsante(p));
 /** Numero del forziere dalla chiave dell'evento ("forziere:3:enigma"). */
 const forziereDi = (p: Popup) => Number(String(p.chiave ?? '').split(':')[1]) || undefined;
 const FILA_MASSIMA = 12;
 
 /** La coda dei popup di Lani; apriEnigma porta su Astra al biglietto (pulsante "Prova"). */
-export default function CodaPopup({ apriEnigma }: { apriEnigma?: (n: number) => void }) {
+export default function CodaPopup({ apriEnigma, apriStudio }: { apriEnigma?: (n: number) => void; apriStudio?: () => void }) {
   const [p, setP] = useState<Popup>();
 
   useEffect(() => {
@@ -79,7 +105,12 @@ export default function CodaPopup({ apriEnigma }: { apriEnigma?: (n: number) => 
     setP(undefined);
   };
   const n = forziereDi(p);
-  const azione = p.situazione === 'enigma_comparso' && apriEnigma && n ? () => (chiudi(), apriEnigma(n)) : undefined;
+  const azione =
+    p.situazione === 'enigma_comparso' && apriEnigma && n
+      ? () => (chiudi(), apriEnigma(n))
+      : AL_PIANO(p) && apriStudio
+        ? () => (chiudi(), apriStudio())
+        : undefined;
   return <PopupVista p={p} chiudi={chiudi} azione={azione} />;
 }
 

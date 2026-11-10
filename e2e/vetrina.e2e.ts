@@ -46,7 +46,7 @@ test('vetrina: tutti i popup del copione e le notifiche, senza scrivere niente',
 
   await page.getByRole('button', { name: /\(nota_disciplinare\)$/ }).click();
   await expect(page.locator('.bollino-malus')).toHaveText('−20');
-  await page.getByRole('button', { name: 'Ok' }).click();
+  await page.getByRole('button', { name: 'Ho capito' }).click();
 
   // enigmi: un esempio per ognuno dei 9 tipi, con i blocchi a larghezza fissa
   await expect(page.getByRole('heading', { name: 'Enigmi dei forzieri' })).toBeVisible();

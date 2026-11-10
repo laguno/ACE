@@ -18,7 +18,7 @@ test('un popup per apertura, il più importante, poi segnato come visto', async 
   await page.goto('/');
   await expect(page.getByRole('dialog')).toContainText('Nota disciplinare in Storia');
   await expect(page.getByRole('dialog')).toHaveCount(1);
-  await page.getByRole('button', { name: 'Ok' }).click();
+  await page.getByRole('button', { name: 'Ho capito' }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
   expect(t.popup_coda.find((p) => p.id === 'p1')?.mostrato_il).toBeTruthy();
   expect(t.popup_coda.find((p) => p.id === 'p2')?.mostrato_il).toBeNull();
@@ -81,4 +81,12 @@ test('enigma: "Prova" porta su Astra al biglietto', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Prova' }).click();
   await expect(page.getByText('Rotonda e calda, con il pomodoro sopra')).toBeVisible();
+});
+
+test('voto: "Guardo il piano" porta a Studio', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-11-24T16:00:00+01:00'));
+  await finto(page, { ...uno({ situazione: 'voto_6', titolo: 'Un 6 in Storia', testo: 'Il ripasso è già nel piano.' }), verifiche: [] });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Guardo il piano' }).click();
+  await expect(page.getByRole('heading', { name: 'Le tue verifiche' })).toBeVisible();
 });

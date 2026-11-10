@@ -30,7 +30,7 @@ Ogni messaggio dice a Lani cosa è successo e cosa fare adesso, in due righe al 
 - Massimo 3 notifiche al giorno, come deciso: 7:00, pomeriggio solo con compiti nuovi, chiusura della sera, più un solo sollecito.
 - Il testo di un popup non ripete il titolo (decisione del 9/11): il titolo dice cos'è, il testo aggiunge.
 - Singolare e plurale sempre giusti nei segnaposti numerici (una chiave / 2 chiavi, un passo, un tentativo, una sessione, un compito, una cosa); nel codice la forma è {n:singolare:plurale}.
-- Forziere aperto e cima si chiudono con "Evviva!", gli altri popup con "Ok".
+- Il pulsante dice il gesto (deciso il 10/11): forziere aperto, cima, voto da 9, voto migliorato, recupero e nota di merito "Evviva!"; tappa e tre chiavi "Avanti!"; chiavi della settimana "Vado avanti"; gesti dei genitori "Grazie!"; voti da 6 e 7 "Guardo il piano", insufficienze "Vediamo il piano" (tutti e due portano a Studio); serie nera e figurina nera "Ci riprovo"; bagno "Vado a sistemare"; enigma "Prova"; lucchetto, note, sgridate, bastone e il resto "Ho capito".
 - Massimo un popup per ogni apertura dell'app. Se ce ne sono di più in coda, aspettano la volta dopo, partendo dal più importante.
 - Lo stesso testo non torna prima di 7 giorni: per i messaggi frequenti ci sono più varianti, a rotazione.
   - Se nello stesso momento scattano più situazioni, vince quella con priorità più alta: bastone del giorno, poi voto, poi forziere e tappa, poi il resto. Per i voti un solo popup: recupero dopo insufficienza, poi voto migliorato, poi fascia del voto; i passi si sommano comunque.
