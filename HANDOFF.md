@@ -76,14 +76,22 @@ Ramo `decisioni` unito a `main` e in produzione, con il backup e i comandi lanci
 
 ## Prossimo passo
 
-Il piano della settimana è `docs/piano-fino-a-venerdi.md`. Per venerdì 13: tabella "Dopo" del rapporto (`docs/rapporto-venerdi.md`, misure con gli stessi comandi della tabella "Prima"), critique e audit di Impeccable da rifare (`app:impeccable`), Lighthouse 83-87 (obiettivo 90: serve disegnare la testata prima dei dati; la figurina di Astra 3 px sotto è voluta, come la bozza Main). In più, fino al 23/11:
+Il piano della settimana è `docs/piano-fino-a-venerdi.md`; i Da decidere del rapporto sono tutti decisi e fatti. Restano:
 
-1. Il ramo `enigmi-v4` è superato (tutto in `main`): si può cancellare.
-2. Genitori: controllare orari e materiale nelle Impostazioni.
-3. **Prova in famiglia**, prima su Android Chrome (Motorola di Lani: Home, push, tema scuro, scorrimento fino in fondo), poi l'iPad. Lista in `docs/07-installazione.md`.
-4. Dal 23/11: primi passi, popup e figurine; il 29/11 alle 21:30 le prime chiavi (`sync_log` fonte chiavi). Primo giro di `sync-nuvola` con le richieste di foto: controllare `sync_log` e `richieste_foto` (solo conteggi).
+**Per venerdì 13 (Claude):**
+1. Tabella "Dopo" del rapporto (`docs/rapporto-venerdi.md`): stesse misure e stessi comandi della tabella "Prima".
+2. Critique e audit di Impeccable da rifare (`app:impeccable`), per il punteggio "Dopo" (prima 27/40 e 15/20; obiettivo ≥ 34 e ≥ 18).
+3. Lighthouse 83-87, obiettivo 90: le immagini non bastano più, serve disegnare la testata (titolo e avatar) prima che arrivino i dati. Cambiamento più grosso: proporlo al signore prima di farlo.
 
-Poi: a inizio dicembre il CSV dei passi per la taratura (la simulazione la fa Jarvis). Dopo l'avvio: video, umore del giorno, "Materiali" in Studio, pagine probabili dalla mappa dei libri per le verifiche con il solo argomento.
+**Fino al 23/11 (signore, con Claude se serve):**
+4. Genitori: controllare orari e materiale nelle Impostazioni.
+5. **Prova in famiglia**, prima su Android Chrome (Motorola di Lani: Home, push, tema scuro, scorrimento fino in fondo), poi l'iPad. Lista in `docs/07-installazione.md`.
+
+**Dal 23/11 (controlli sul vivo):**
+6. Primi passi, popup e figurine; enigmi v4 sull'app vera quando Lani arriva al primo forziere (il 7 è il cruciverba: guardare che la griglia resti allineata sul telefono). Il 29/11 alle 21:30 le prime chiavi (`sync_log` fonte chiavi).
+7. Primo giro di `sync-nuvola` con richieste di foto e riscatti: `sync_log` (campi `foto`, `riscatti`) e `richieste_foto`, solo conteggi.
+
+**Poi:** a inizio dicembre il CSV dei passi per la taratura (`npm run esporta:passi`, la simulazione la fa Jarvis); **sprint 2 online al più tardi a dicembre** (decisione del signore: dieci minuti, partite, R-Evolution). Dopo l'avvio: video, umore del giorno, "Materiali" in Studio, pagine probabili dalla mappa dei libri per le verifiche con il solo argomento.
 
 Altri debiti: `spiega`, borsa, enigma, foto e push provati solo con le prove (serve un accesso di Lani); protezione delle password trapelate da accendere (la accende il signore).
 
