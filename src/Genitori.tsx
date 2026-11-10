@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { CaretRight, Eye, GearSix, Pulse } from '@phosphor-icons/react';
-import { Riquadro, Sticker } from './kit';
+import { Attesa, Riquadro, Sticker } from './kit';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import * as R from './lib/regole';
 import { installata } from './Benvenuta';
@@ -233,7 +233,7 @@ function Settimana({ client, passi, avvisa }: Props) {
     avvisa(p ? `${nome}: ${String(p).replace('-', '−')} passi.` : `${nome} segnata.`);
   }
 
-  if (!d) return null;
+  if (!d) return <Attesa />;
   const fmt = (n: number | null) => (n === null ? '–' : n.toLocaleString('it-IT', { maximumFractionDigits: 2 }));
   const tetto = R.CONFIG.passi.gesti_casa.tetto_giornaliero;
   return (
@@ -364,7 +364,7 @@ function Premi({ client, avvisa }: Props) {
     carica();
   }
 
-  if (!forzieri) return null;
+  if (!forzieri) return <Attesa />;
   const senza = forzieri.filter((f) => !f.premio).length;
   return (
     <>
@@ -454,7 +454,7 @@ function Correzioni({ client, avvisa }: Props) {
     carica();
   }
 
-  if (!compiti) return null;
+  if (!compiti) return <Attesa />;
   return (
     <>
       <div className="carta">
@@ -532,7 +532,7 @@ function Fogli({ client, passi, avvisa }: Props) {
     carica();
   }
 
-  if (!fogli) return null;
+  if (!fogli) return <Attesa />;
   return (
     <>
       <form className="carta modulo" onSubmit={aggiungi}>
@@ -607,7 +607,7 @@ function Impostazioni({ client, avvisa }: Props) {
     if (!error) form.reset();
   }
 
-  if (!v) return null;
+  if (!v) return <Attesa />;
   return (
     <>
       <form className="carta modulo" onSubmit={salva}>
@@ -724,7 +724,7 @@ function Avvio({ client, vai }: { client: SupabaseClient; vai: (p: Pagina) => vo
       client.from('forzieri').select('n', { count: 'exact', head: true }).is('premio', null),
     ]).then(([l, f]) => setS({ nuvola: l.data?.[0]?.esito === 'ok', senzaPremio: f.count ?? 9 }));
   }, []);
-  if (!s) return null;
+  if (!s) return <Attesa />;
   const g = R.CONFIG.passi.gesti_casa;
   const cose = [
     { fatto: s.nuvola, titolo: 'Collega Nuvola', testo: 'Compiti, verifiche e voti arrivano alle 14:30 e alle 19:30' },

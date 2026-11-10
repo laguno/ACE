@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { Attesa } from './kit';
 import { GIORNI, MESI } from './spunte';
 import { prossimo } from './lib/calendario';
 
@@ -35,7 +36,7 @@ export default function Stato({ client }: { client: SupabaseClient }) {
       setS({ giri: (g.data ?? []) as Giro[], chiavi: k.data?.[0] ?? null, errori: (e.data ?? []) as Errore[], erroriSettimana: n.count ?? 0 }),
     );
   }, [client]);
-  if (!s) return null;
+  if (!s) return <Attesa />;
 
   const ultimo = (fonte: string) => s.giri.find((g) => g.fonte === fonte);
   const riga = (nome: string, fonte: string, orari?: string[]) => {
