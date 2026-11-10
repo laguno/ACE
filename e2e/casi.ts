@@ -148,7 +148,8 @@ export const CASI: Record<string, Caso> = {
  * anche performance e i timer, e Lighthouse non riesce più a misurare.
  */
 export async function prepara(p: Page, caso: Caso, dataSpostata = false) {
-  if (caso.prima) await p.addInitScript(() => sessionStorage.setItem('prova-accoglienza', '1'));
+  // sul contesto, come il Supabase finto: gli script del contesto partono prima di quelli della pagina
+  if (caso.prima) await p.context().addInitScript(() => sessionStorage.setItem('prova-accoglienza', '1'));
   if (!dataSpostata) await p.clock.setFixedTime(caso.quando);
   else
     await p.addInitScript((t) => {
