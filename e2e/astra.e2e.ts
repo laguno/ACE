@@ -37,11 +37,11 @@ test('percorso: sei qui, forzieri, bandierina, chiavi della settimana', async ({
   await page.evaluate(() => window.scrollTo(0, 0));
   await expect(page.getByText('Ogni giorno, passino passino.')).toBeVisible();
   await expect(page.getByText('300 passi')).toBeAttached();
-  await expect(page.getByText('1 chiave', { exact: true })).toBeAttached();
   await expect(page.getByText('Sei qui: mancano 105')).toBeVisible();
   await expect(page.locator('.tappa', { hasText: 'Sei qui' })).toContainText('Tappa 3');
   await expect(page.getByText('Il calendario è qui')).toBeVisible();
   await expect(page.getByLabel("Chiavi dell'ultima settimana: 1 su 3")).toBeVisible();
+  await expect(page.getByText('Hai 1 chiave: il prossimo forziere ne vuole 2.')).toBeAttached();
   await expect(page.getByRole('button', { name: /Forziere \d/ })).toHaveCount(9);
   await page.screenshot({ path: 'e2e/risultati/astra.png' });
 });

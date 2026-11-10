@@ -226,7 +226,8 @@ Deciso dal signore il 6 novembre: i punti si chiamano **passi** e le stelle **ch
 |---|---|---|---|---|---|---|---|---|---|
 | Chiavi | 2 | 4 | 7 | 14 | 17 | 21 | 26 | 31 | 36 |
 
-- **La frase che spiega tutto**, detta da Lani in posa timida la prima volta che apre Astra e ripetuta nel popup del lucchetto: "I passi ti fanno camminare, le chiavi aprono i forzieri."
+- **La frase che spiega tutto**, detta da Lani in posa timida la prima volta che apre Astra e ripetuta nel popup del lucchetto: "I passi ti fanno camminare, le chiavi aprono i forzieri."
+- **Sotto le chiavi della settimana**, sulla testata di Astra (approvata dal signore il 10/11): "Hai {n} chiavi: il prossimo forziere ne vuole {m}."; se bastano "Hai {n} chiavi: bastano per il prossimo forziere."; a forzieri tutti aperti "Hai {n} chiavi.". {m} è il numero del primo forziere non ancora aperto, dalla tabella sopra.
 
 **Il mantra: "Ogni giorno, passino passino."** È la frase di famiglia e diventa la firma dell'app.
 

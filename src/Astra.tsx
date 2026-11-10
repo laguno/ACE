@@ -23,6 +23,13 @@ const img = (cartella: string, id: string) => `/assets/${cartella}/${id}.webp`;
 const SOGLIE = R.soglieTappe();
 const tappaDi = (passi: number) => Math.min(SOGLIE.length, R.posizione(passi).tappeFatte + 1);
 
+/** Sotto le chiavi della settimana: quante ne ha Lani e quante ne vuole il prossimo forziere chiuso. */
+function fraseChiavi(chiavi: number, servono?: number) {
+  const hai = `Hai ${chiavi} ${chiavi === 1 ? 'chiave' : 'chiavi'}`;
+  if (servono === undefined) return `${hai}.`;
+  return chiavi >= servono ? `${hai}: bastano per il prossimo forziere.` : `${hai}: il prossimo forziere ne vuole ${servono}.`;
+}
+
 // Mappa del sentiero (bozza Main): 27 tappe dal basso (la terra) all'alto (le stelle), a serpentina.
 // Unico posto con posizioni assolute (indicazioni di Jarvis). x in percentuale, y in px.
 const PASSO = 130;
@@ -87,6 +94,7 @@ export default function Astra({ apri, forziere: aperto }: { apri: (pagina: 'Figu
   const bandierina = tappaDi(R.bandierina(oggi));
   const natale = tappaDi(R.bandierina(new Date(oggi.getFullYear(), 11, 23)));
   const forziere = (n: number) => dati.forzieri.find((f) => f.n === n);
+  const prossimo = R.CONFIG.forzieri.find((c) => !['aperto', 'consegnato'].includes(forziere(c.n)?.stato ?? 'chiuso'));
 
   if (scelto) return <SchedaForziere f={forziere(scelto)} n={scelto} passi={dati.passi} chiavi={dati.chiavi} chiudi={() => (setScelto(undefined), carica())} />;
 
@@ -134,12 +142,7 @@ export default function Astra({ apri, forziere: aperto }: { apri: (pagina: 'Figu
           </span>
         </div>
         {dati.settimana !== null && (
-          <p className="nota astra-chiavi-totali">
-            <span>
-              {dati.chiavi} {dati.chiavi === 1 ? 'chiave' : 'chiavi'}
-            </span>{' '}
-            in tutto
-          </p>
+          <p className="nota astra-chiavi-totali">{fraseChiavi(dati.chiavi, prossimo?.chiavi)}</p>
         )}
         {Math.abs(bandierina - qui) >= 2 && (
           // la bandierina è lontana e fuori dallo schermo: lo dice la testata (revisione di Jarvis)
