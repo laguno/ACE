@@ -21,7 +21,7 @@ Piano: `docs/piano-fino-a-venerdi.md`. Ogni numero si ricontrolla con il comando
 | Lighthouse Astra (caricamento; clic e fotografia) | idem | 85 / 100 / 100; scheda 93 / 95 / 100 | 86 / 100 / 100 | idem |
 | Lighthouse Studio | idem | 85 / 100 / 100; scheda 100 / 100 / 100 | 86 / 100 / 100 | idem |
 | axe, 16 schermate in tema chiaro e scuro | `npm run axe` | 8 violazioni, 2 regole: `aria-prohibited-attr` (Oggi, Astra, Figurina), `aria-progressbar-name` (Sera) | 0 (dentro `prova:schermate`) | 0 |
-| Impeccable (critique / audit) | skill `impeccable` | 27/40, 14/20 (9/11) | 31/40, 16/20 (13/11) | ≥ 34/40, ≥ 18/20 |
+| Impeccable (critique / audit) | skill `impeccable` | 27/40, 14/20 (9/11) | 32/40, 17/20 (13/11) | ≥ 34/40, ≥ 18/20 |
 | Peso della build | `npm run build` | JS 624 KB (181 KB gzip), un solo pezzo; precache 145 file, 4,48 MB | JS iniziale 555 KB (160 KB gzip) + pezzi al primo tocco; precache 196 file, 4,57 MB | |
 | Advisors di Supabase | `npx supabase db advisors --remote --type all` | 79: sicurezza 1 errore (vista `forzieri_lani`, voluta) + 8 funzioni security definer (volute) + protezione delle password trapelate (la accende il signore); prestazioni 45 `multiple_permissive_policies`, 20 `unindexed_foreign_keys`, 3 `auth_rls_initplan`, 1 `unused_index` | 10 sul remoto, tutti voluti: vista `forzieri_lani` + 8 funzioni security definer + password trapelate (le accende il signore); prestazioni 0 | solo i voluti, spiegati |
 | gitleaks | `gitleaks git --redact` | 0 su 105 commit. Nei file locali (`gitleaks dir`) 2 in `.env.local`, escluso dal repository e mai committato: atteso | 0 su 192 commit | 0 |
@@ -46,7 +46,7 @@ Note sulle misure:
 - **I. Debiti**: `npm run esporta:passi` (CSV della taratura).
 - **J. Documenti**: `docs/architettura.md`, `docs/runbook.md`, `docs/guida-genitori.md`, `docs/07-installazione.md`.
 - **Decisioni del 10/11** (sezione 5): migrazione `0027` (storno dello studio, foto cancellata), gesto una volta per voce al giorno, riscatto della serie nera (`_shared/riscatto.ts`), avatar piccoli (`npm run avatar:piccoli`). In produzione dal 10/11.
-- **Impeccable e Lighthouse** (`53620c7`, `7d23210`, `f881a41`): testate di Oggi, Sera e Studio prima dei dati (Lighthouse Oggi 83→87, Sera 86→89); `Attesa` invece dello schermo bianco all'avvio; bordo della barra della Sera; pulsanti dei popup con il gesto ("Ho capito", "Guardo il piano" che apre Studio). Critique 27 → 29 → 31/40, audit 15 → 16/20, snapshot in `.impeccable/critique/`. Restano: schermi vuoti mentre si caricano Studio, Astra e Figurine (`Suspense fallback={null}` in `App.tsx`), 38 `#fff` fuori da `:root`, chiavi di Astra senza spiegazione, sgridate senza Annulla.
+- **Impeccable e Lighthouse** (`53620c7`, `7d23210`, `f881a41`): testate di Oggi, Sera e Studio prima dei dati (Lighthouse Oggi 83→87, Sera 86→89); `Attesa` invece dello schermo bianco all'avvio; bordo della barra della Sera; pulsanti dei popup con il gesto ("Ho capito", "Guardo il piano" che apre Studio). Poi (`d1c6c73`, `c2c21a9`): `Attesa` anche nel caricamento delle schermate e dell'Album, token `--bianco` al posto dei 38 `#fff`, contapassi annunciato ai lettori di schermo, frase sulle chiavi di Astra; le sgridate avevano già la conferma. Critique 27 → 29 → 31 → 32/40, audit 15 → 16 → 17/20 (temi 4), snapshot in `.impeccable/critique/`. Restano: numeri del forziere sul percorso ("7.200 · 36 chiavi") da spiegare, testi a 12 px, fascia vuota sotto la testata di Studio.
 
 ## 3. Bug trovati e corretti
 
@@ -97,13 +97,16 @@ Tutti decisi dal signore il 10/11; quelli da fare sono in produzione dal 10/11.
 | 14 | Lighthouse sotto 90: avatar da 512 px mostrati a 52 | Fatto: copie piccole, originali intatti |
 | 15 | Lighthouse ancora sotto 90 (JS iniziale): scheletro statico in `index.html` | No: si resta a 86-89 |
 | 16 | Sera: nessuna scorciatoia per la cartella (critique) | No: si spunta una cosa alla volta |
+| 17 | Astra: "1 chiave in tutto" non dice a cosa servono (critique) | Fatto: "Hai 1 chiave: il prossimo forziere ne vuole 2." (`c2c21a9`, nel copione) |
+| 18 | Pillola "0 passi" la mattina (critique) | Tenuta: è il totale, a 0 solo prima del primo giorno |
+| 19 | Barra della Sera a tacche (critique) | No: continua come la bozza `Domani.html` |
 
 ## 6. Rischi aperti prima del 23/11
 
 1. **Prova in famiglia non ancora fatta** sui dispositivi veri (Motorola di Lani, poi iPad): lista in `docs/07-installazione.md`.
 2. **Provati solo con dati finti**: `spiega`, borsa, enigma, foto e push. Serve un accesso di Lani sull'app vera.
 3. **Protezione delle password trapelate spenta** in Supabase Auth: la accende il signore (unico avviso di sicurezza non voluto).
-4. **Obiettivi non raggiunti**: Lighthouse 86-89 invece di 90 (scelta del signore); Impeccable 31/40 e 16/20 invece di 34 e 18.
+4. **Obiettivi non raggiunti**: Lighthouse 86-89 invece di 90 (scelta del signore); Impeccable 32/40 e 17/20 invece di 34 e 18.
 5. Dal 23/11 da guardare sul vivo: primi passi, popup e figurine, primo forziere ed enigma 7 sul telefono, prime chiavi il 29/11 alle 21:30, primo giro di `sync-nuvola` con foto e riscatti.
 
 ## 7. Chiamate all'IA e skill
