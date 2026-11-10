@@ -358,7 +358,7 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .lani-sentiero.sinistra { right: 34px; left: auto; }
 .bandiera { display: flex; align-items: center; gap: 4px; padding: 3px 10px 3px 4px; border-radius: 999px; background: #fff; box-shadow: var(--ombra-etichetta); font: 800 12px Nunito, sans-serif; color: var(--testo-2); }
 .tappe .bandiera { left: 0; top: 34px; translate: -50% 0; z-index: 2; }
-.tappe .bandiera.a-destra, .tappe .bandiera.a-sinistra { top: -22px; translate: none; max-width: 92px; white-space: normal; line-height: 1.15; font-size: 12px; border-radius: 16px; }
+.tappe .bandiera.a-destra, .tappe .bandiera.a-sinistra { top: -22px; translate: none; max-width: 112px; white-space: normal; line-height: 1.15; font-size: 12px; border-radius: 16px; }
 .tappe .bandiera.a-destra { left: 30px; }
 .tappe .bandiera.a-sinistra { right: 30px; left: auto; }
 .tappe .bandiera.sopra { top: -116px; }
