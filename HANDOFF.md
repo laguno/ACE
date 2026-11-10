@@ -83,7 +83,7 @@ Il piano della settimana è `docs/piano-fino-a-venerdi.md`; i Da decidere del ra
 **Per venerdì 13 (Claude):**
 Fatto il 10/11 sera (in produzione, `f881a41`): tabella "Dopo" compilata; testate di Oggi, Sera e Studio prima dei dati (Lighthouse 87 / 89 / 86 / 86); `Attesa` al posto dello schermo vuoto in `App.tsx` e `AreaGenitori.tsx`; barra della Sera con il bordo; pulsanti dei popup col gesto (`PULSANTI` in `src/Popup.tsx`, default "Ho capito", "Guardo/Vediamo il piano" apre Studio; regola in `docs/05-copione.md`). Passi in doppio nella Mattina: effetto dei dati finti. Sera lunga: resta com'è (signore). Prove: unitarie e funzioni 269, schermate 139, schema 250. Resta:
 1. Lighthouse resta a 86-89 (decisione del signore: niente scheletro statico in `index.html`).
-2. Impeccable dopo le correzioni: critique 31/40 (27→29→31), audit 16/20; obiettivi 34 e 18. Prossimi: `Suspense fallback={<Attesa />}` in `App.tsx` e niente `return null` in caricamento su Figurine e Astra; token per i 38 `#fff`; barra della Sera a tacche; spiegare le chiavi su Astra; Annulla nel messaggio delle sgridate. Dettagli in `.impeccable/critique/` e nel rapporto.
+2. Impeccable dopo le correzioni: critique 31/40 (27→29→31), audit 16/20; obiettivi 34 e 18. Fatto dopo (non rimisurato): `Attesa` anche nel caricamento delle schermate e dell'Album, token `--bianco` al posto dei 38 `#fff`, contapassi annunciato ai lettori di schermo. Le sgridate avevano già la conferma. Proposte di testo per il signore: riga sulle chiavi di Astra, pillola "0" nascosta la mattina, barra della Sera a tacche. Dettagli in `.impeccable/critique/` e nel rapporto.
 
 **Fino al 23/11 (signore, con Claude se serve):**
 4. Genitori: controllare orari e materiale nelle Impostazioni.

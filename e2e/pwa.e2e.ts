@@ -40,7 +40,7 @@ async function installata(browser: Browser) {
 
 test('senza rete: ultima situazione salvata e striscia', async ({ browser }) => {
   const { ctx, p } = await installata(browser);
-  await expect(p.getByRole('status')).toHaveCount(0);
+  await expect(p.getByText('Sei senza rete')).toHaveCount(0);
   await senzaRete(ctx);
   await p.reload();
   await expect(p.getByRole('heading', { name: 'Buongiorno, Lani' })).toBeVisible();

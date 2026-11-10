@@ -147,7 +147,7 @@ function Lani() {
   return (
     <>
       <main>
-        <Suspense fallback={null}>
+        <Suspense fallback={<Attesa />}>
           {voce === 'Sera' ? (
             <Sera />
           ) : voce === 'Oggi' ? (

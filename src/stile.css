@@ -1,5 +1,6 @@
 /* Kit "zucchero filato" (design/Stile.html): colori, caratteri, sfondi, barra. */
 :root {
+  --bianco: #fff;         /* carte, pulsanti e testo su colore */
   --panna: #fff6fa;       /* fondo di ogni schermata */
   --testo: #3d2350;       /* prugna: testi */
   --testo-2: #5e4470;     /* prugna chiaro: testi secondari */
@@ -68,7 +69,7 @@ main { position: relative; width: min(100%, 430px); margin: 0 auto; padding: 16p
   gap: 4px;
   padding: 6px;
   border-radius: 32px;
-  background: #fff;
+  background: var(--bianco);
   box-shadow: var(--ombra-alta);
 }
 .barra button {
@@ -104,7 +105,7 @@ body:has(.studio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom)
 .link-genitori { display: block; margin: 24px auto 0; min-height: 44px; padding: 0 16px; border: 0; background: none; color: var(--testo-2); font: 700 14px Nunito, sans-serif; text-decoration: underline; }
 
 /* Carte, moduli, bottoni */
-.carta { background: #fff; border-radius: 24px; box-shadow: var(--ombra); padding: 16px; }
+.carta { background: var(--bianco); border-radius: 24px; box-shadow: var(--ombra); padding: 16px; }
 .modulo { display: grid; gap: 16px; }
 .modulo label { display: grid; gap: 8px; color: var(--testo-2); }
 .modulo input {
@@ -124,15 +125,15 @@ body:has(.studio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom)
   border-radius: 999px;
   font: 800 17px Nunito, sans-serif;
 }
-.principale { border: 0; background: var(--accento); color: #fff; box-shadow: inset 0 -4px 0 var(--accento-premuto); }
+.principale { border: 0; background: var(--accento); color: var(--bianco); box-shadow: inset 0 -4px 0 var(--accento-premuto); }
 .principale:active { background: var(--accento-premuto); }
 .principale:disabled { opacity: 0.6; }
-.secondario { width: 100%; margin-top: 12px; border: 2px solid var(--accento); background: #fff; color: var(--accento); }
+.secondario { width: 100%; margin-top: 12px; border: 2px solid var(--accento); background: var(--bianco); color: var(--accento); }
 .secondario.compatto { width: auto; align-self: flex-end; margin-top: 4px; min-height: 44px; padding: 0 18px; display: inline-flex; align-items: center; gap: 8px; border-width: 3px; border-color: var(--lilla-medio); color: var(--testo); }
 .largo { width: 100%; }
 .link { min-height: 44px; border: 0; background: none; color: var(--accento); font: inherit; text-decoration: underline; }
 .indietro { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 4px; border: 0; background: none; color: var(--testo); font: 800 15px Nunito, sans-serif; }
-body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999px; background: #fff; box-shadow: var(--ombra); }
+body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999px; background: var(--bianco); box-shadow: var(--ombra); }
 .pillola { margin: 0; padding: 10px 16px; border-radius: 999px; background: var(--rosa); color: var(--testo); font: 800 14px/1.35 Nunito, sans-serif; }
 .avanzamento { height: 12px; border-radius: 999px; background: var(--lilla); overflow: hidden; }
 .avanzamento span { display: block; height: 100%; background: var(--accento); border-radius: inherit; }
@@ -162,7 +163,7 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .cose small { font-size: 13px; line-height: 1.35; color: var(--testo-2); }
 .pillola-oro, .pillola-lilla {
   display: flex; align-items: center; gap: 12px; margin: 0; width: 100%;
-  padding: 6px 16px 6px 8px; border-radius: 999px; background: #fff;
+  padding: 6px 16px 6px 8px; border-radius: 999px; background: var(--bianco);
   font: 800 14px/1.3 Nunito, sans-serif; color: var(--testo); text-align: left;
 }
 .pillola-oro { border: 3px solid var(--burro); }
@@ -195,10 +196,10 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .numerata { position: relative; align-items: center !important; }
 .numerata input[type='checkbox'] { position: absolute; left: 0; top: 50%; translate: 0 -50%; width: 44px; height: 44px; opacity: 0; margin: 0; cursor: pointer; }
 .bollino { flex: none; width: 34px; height: 34px; margin: 5px; border-radius: 50%; display: grid; place-items: center; background: var(--rosa); color: var(--accento); font: 800 17px 'Baloo 2', Nunito, sans-serif; }
-.numerata input:checked ~ .bollino { background: var(--accento); color: #fff; }
+.numerata input:checked ~ .bollino { background: var(--accento); color: var(--bianco); }
 .numerata input:focus-visible ~ .bollino { outline: 3px solid var(--accento); outline-offset: 2px; }
 .numerata input:checked ~ span:last-child { color: var(--testo-2); text-decoration: line-through; }
-.tondo { flex: none; width: 52px; height: 52px; border-radius: 50%; border: 3px solid var(--lilla-medio); background: #fff; color: var(--testo); display: grid; place-items: center; }
+.tondo { flex: none; width: 52px; height: 52px; border-radius: 50%; border: 3px solid var(--lilla-medio); background: var(--bianco); color: var(--testo); display: grid; place-items: center; }
 .ordine .tondo { width: 44px; height: 44px; }
 /* lampadina "Non ho capito" */
 .con-aiuto { display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 8px; }
@@ -212,7 +213,7 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .pallini li { display: grid; justify-items: center; gap: 4px; font-size: 12px; font-weight: 800; color: var(--testo-2); }
 .pallini span { width: 20px; height: 20px; border: 0; border-radius: 50%; background: var(--lilla); }
 .pallini .fatta span { background: var(--fucsia); }
-.pallini .oggi span { background: #fff; border: 4px solid var(--fucsia); }
+.pallini .oggi span { background: var(--bianco); border: 4px solid var(--fucsia); }
 .riga-pallini { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
 .riga-pallini .pallini { margin: 4px 0 0; }
 .riga-pallini .secondario.compatto { align-self: auto; }
@@ -220,14 +221,14 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 /* Sera (bozza Domani) */
 .sera .testata { min-height: 150px; }
 .sera .testata-avatar { width: 140px; height: 140px; }
-.testata .avanzamento { width: 100%; max-width: 236px; height: 14px; margin-top: 4px; background: #fff; border: 2px solid var(--lilla-bordo); box-sizing: content-box; }
+.testata .avanzamento { width: 100%; max-width: 236px; height: 14px; margin-top: 4px; background: var(--bianco); border: 2px solid var(--lilla-bordo); box-sizing: content-box; }
 .testata .avanzamento span { background: var(--fucsia); }
 .testata .conto { margin: 4px 0 0; font: 800 13px/1.35 Nunito, sans-serif; color: var(--testo); }
 .sera .spunte label { min-height: 44px; padding: 4px 0; gap: 12px; align-items: center; font-size: 14px; }
 .sera .spunte input:checked + span { text-decoration-color: var(--lilla-medio); }
 .sera .spunte input[type='checkbox'] {
   appearance: none; -webkit-appearance: none; display: grid; place-items: center;
-  width: 22px; height: 22px; margin: 0; border: 2px solid var(--testo-2); border-radius: 6px; background: #fff;
+  width: 22px; height: 22px; margin: 0; border: 2px solid var(--testo-2); border-radius: 6px; background: var(--bianco);
 }
 .sera .spunte input[type='checkbox']:checked {
   border-color: var(--fucsia); background: var(--fucsia)
@@ -243,7 +244,7 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .chip-lilla { background: var(--lilla); }
 .chip-rosa { background: var(--rosa); }
 .chip .segno { display: none; }
-.chip:has(input:checked) { background: var(--accento); color: #fff; }
+.chip:has(input:checked) { background: var(--accento); color: var(--bianco); }
 .chip:has(input:checked) .segno { display: block; }
 .chip:has(input:focus-visible) { outline: 3px solid var(--accento); outline-offset: 2px; }
 .foglio { display: flex; gap: 12px; align-items: center; justify-content: space-between; min-height: 54px; }
@@ -267,10 +268,10 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .testa-studio { display: flex; flex-direction: column; gap: 8px; padding: 0 4px; }
 .testa-studio h1 { margin: 0; font-size: 26px; line-height: 1.1; }
 .testa-studio .testa-carta span { flex: none; font: 800 14px Nunito, sans-serif; color: var(--testo-2); }
-.testa-studio .avanzamento { background: #fff; }
+.testa-studio .avanzamento { background: var(--bianco); }
 .testa-studio .avanzamento span { background: var(--fucsia); }
 .studio:has(.domanda) .testa-studio .avanzamento { background: var(--lilla); }
-.carta.flash { display: flex; flex-direction: column; gap: 16px; min-height: 400px; padding: 24px; border-radius: 32px; border: 5px solid #fff; box-shadow: var(--ombra-alta), 0 0 0 3px var(--rosa-bordo); }
+.carta.flash { display: flex; flex-direction: column; gap: 16px; min-height: 400px; padding: 24px; border-radius: 32px; border: 5px solid var(--bianco); box-shadow: var(--ombra-alta), 0 0 0 3px var(--rosa-bordo); }
 .carta.flash .testa-carta { align-items: center; }
 .carta.flash .chip { margin: 0; background: var(--lilla); }
 .carta.flash hr { width: 100%; margin: 8px 0; border: 0; border-top: 3px dashed var(--lilla); }
@@ -284,7 +285,7 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .esiti button { min-height: 64px; border: 0; border-radius: 24px; color: var(--testo); font: 800 17px/1.1 'Baloo 2', Nunito, sans-serif; box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.1); }
 .esiti .esito-no { background: var(--rosa-bordo); }
 .esiti .esito-quasi { background: var(--lilla-medio); }
-.esiti .esito-si { background: var(--accento); color: #fff; box-shadow: inset 0 -4px 0 var(--accento-premuto); }
+.esiti .esito-si { background: var(--accento); color: var(--bianco); box-shadow: inset 0 -4px 0 var(--accento-premuto); }
 .esiti button:disabled { opacity: 0.45; box-shadow: none; }
 .studio .link { align-self: center; padding: 0 14px; color: var(--testo-2); font: 800 13px Nunito, sans-serif; }
 .regola { margin: 0; text-align: center; font: 700 13px/1.4 Nunito, sans-serif; color: var(--testo-2); }
@@ -293,7 +294,7 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .opzione {
   display: flex; justify-content: space-between; align-items: center; gap: 12px;
   min-height: 56px; padding: 8px 16px; text-align: left;
-  border: 3px solid var(--lilla-bordo); border-radius: 16px; background: #fff;
+  border: 3px solid var(--lilla-bordo); border-radius: 16px; background: var(--bianco);
   color: var(--testo); font: 700 16px Nunito, sans-serif;
 }
 .opzione svg { flex: none; }
@@ -322,10 +323,10 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .chiavi-settimana > span { display: flex; }
 .saldo { display: flex; align-items: center; gap: 6px; padding: 4px 11px; border: 3px solid var(--rosa-bordo); border-radius: 999px; }
 .saldo b { font: 800 20px/1 'Baloo 2', Nunito, sans-serif; color: var(--accento); font-variant-numeric: tabular-nums; }
-.testata .saldo { align-self: flex-start; display: inline-flex; margin-top: 8px; background: #fff; }
+.testata .saldo { align-self: flex-start; display: inline-flex; margin-top: 8px; background: var(--bianco); }
 /* passi che salgono: il numero conta da solo (Contapassi), il "+N" sale e svanisce */
 .contapassi { position: relative; display: inline-flex; }
-.contapassi-delta { position: absolute; left: 50%; bottom: 100%; padding: 2px 8px; border-radius: 999px; background: var(--accento); color: #fff; font: 800 13px/1.2 Nunito, sans-serif; white-space: nowrap; pointer-events: none; opacity: 0; animation: delta-sale 1.6s ease-out forwards; }
+.contapassi-delta { position: absolute; left: 50%; bottom: 100%; padding: 2px 8px; border-radius: 999px; background: var(--accento); color: var(--bianco); font: 800 13px/1.2 Nunito, sans-serif; white-space: nowrap; pointer-events: none; opacity: 0; animation: delta-sale 1.6s ease-out forwards; }
 .contapassi-delta.giu { background: var(--testo-2); }
 @keyframes delta-sale {
   0% { opacity: 0; transform: translate(-50%, 6px); }
@@ -345,7 +346,7 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .mappa { position: relative; margin: 8px -16px 0; overflow-x: clip; }
 .sentiero { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .sentiero path { fill: none; vector-effect: non-scaling-stroke; stroke-linecap: round; stroke-linejoin: round; }
-.sentiero .strada { stroke: #fff; stroke-width: 30; opacity: 0.92; }
+.sentiero .strada { stroke: var(--bianco); stroke-width: 30; opacity: 0.92; }
 .sentiero .puntini { stroke: var(--lilla-medio); stroke-width: 7; stroke-dasharray: 0 18; }
 .sentiero .fatta { stroke: var(--fucsia); stroke-width: 14; }
 .tappe { list-style: none; margin: 0; padding: 0; }
@@ -357,20 +358,20 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 /* etichette della mappa: non prendono i tocchi */
 .tappe .qui, .tappe .bandiera, .tappe .traguardo, .lani-sentiero { pointer-events: none; }
 /* "Sei qui" sotto la tappa attuale, Lani accanto dal lato largo, mai sovrapposti */
-.qui { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: #fff; box-shadow: var(--ombra-etichetta); font: 800 12px/1.2 Nunito, sans-serif; color: var(--accento); }
+.qui { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: var(--bianco); box-shadow: var(--ombra-etichetta); font: 800 12px/1.2 Nunito, sans-serif; color: var(--accento); }
 .qui b { font: 800 17px/1.1 'Baloo 2', Nunito, sans-serif; color: var(--testo); }
 .tappe .qui { left: 0; top: 38px; translate: -50% 0; z-index: 2; }
 .lani-sentiero { position: absolute; top: -62px; z-index: 1; width: 96px; height: 96px; }
 .lani-sentiero.destra { left: 34px; right: auto; }
 .lani-sentiero.sinistra { right: 34px; left: auto; }
-.bandiera { display: flex; align-items: center; gap: 4px; padding: 3px 10px 3px 4px; border-radius: 999px; background: #fff; box-shadow: var(--ombra-etichetta); font: 800 12px Nunito, sans-serif; color: var(--testo-2); }
+.bandiera { display: flex; align-items: center; gap: 4px; padding: 3px 10px 3px 4px; border-radius: 999px; background: var(--bianco); box-shadow: var(--ombra-etichetta); font: 800 12px Nunito, sans-serif; color: var(--testo-2); }
 .tappe .bandiera { left: 0; top: 34px; translate: -50% 0; z-index: 2; }
 .tappe .bandiera.a-destra, .tappe .bandiera.a-sinistra { top: -22px; translate: none; max-width: 112px; white-space: normal; line-height: 1.15; font-size: 12px; border-radius: 16px; }
 .tappe .bandiera.a-destra { left: 30px; }
 .tappe .bandiera.a-sinistra { right: 30px; left: auto; }
 .tappe .bandiera.sopra { top: -116px; }
 .tappe .bandiera.sopra-2 { top: -170px; }
-.traguardo { display: flex; align-items: center; gap: 4px; padding: 8px 12px; border-radius: 16px; background: #fff; border: 3px solid var(--burro); box-shadow: var(--ombra-etichetta); font: 800 14px 'Baloo 2', Nunito, sans-serif; color: var(--testo); }
+.traguardo { display: flex; align-items: center; gap: 4px; padding: 8px 12px; border-radius: 16px; background: var(--bianco); border: 3px solid var(--burro); box-shadow: var(--ombra-etichetta); font: 800 14px 'Baloo 2', Nunito, sans-serif; color: var(--testo); }
 .tappe .traguardo { top: -16px; }
 .tappe .traguardo.destra { left: 40px; right: auto; }
 .tappe .traguardo.sinistra { right: 40px; left: auto; }
@@ -378,37 +379,37 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .tappe .forziere { position: absolute; top: -50px; margin: 0; padding: 0; border: 0; background: none; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 76px; min-height: 64px; color: var(--testo-2); font: inherit; }
 .tappe .forziere.destra { left: 34px; right: auto; }
 .tappe .forziere.sinistra { right: 34px; left: auto; }
-.tappe .forziere small { padding: 2px 9px; border-radius: 999px; background: #fff; box-shadow: var(--ombra-etichetta); font: 800 14px 'Baloo 2', Nunito, sans-serif; color: var(--testo); white-space: nowrap; }
+.tappe .forziere small { padding: 2px 9px; border-radius: 999px; background: var(--bianco); box-shadow: var(--ombra-etichetta); font: 800 14px 'Baloo 2', Nunito, sans-serif; color: var(--testo); white-space: nowrap; }
 .forziere.enigma img { filter: drop-shadow(0 0 8px var(--burro)); }
-.album-fluttuante { position: fixed; z-index: 4; right: max(16px, calc((100% - 430px) / 2 + 16px)); bottom: calc(92px + env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 6px; min-height: 48px; padding: 0 16px 0 10px; border-radius: 999px; background: #fff; border: 3px solid var(--rosa-bordo); box-shadow: var(--ombra-alta); color: var(--testo); font: 800 14px Nunito, sans-serif; }
+.album-fluttuante { position: fixed; z-index: 4; right: max(16px, calc((100% - 430px) / 2 + 16px)); bottom: calc(92px + env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 6px; min-height: 48px; padding: 0 16px 0 10px; border-radius: 999px; background: var(--bianco); border: 3px solid var(--rosa-bordo); box-shadow: var(--ombra-alta); color: var(--testo); font: 800 14px Nunito, sans-serif; }
 .scheda-forziere { justify-items: center; text-align: center; }
 /* immagini dei premi: sagoma, vera o pacco regalo (Astra, popup del forziere, Premi dei genitori) */
 .premio-figura { margin: 0; display: grid; justify-items: center; gap: 8px; }
 .premio-figura figcaption { font: 800 17px 'Baloo 2', Nunito, sans-serif; color: var(--accento); }
 .premio-immagine { display: grid; place-items: center; border-radius: 24px; object-fit: contain; }
 .premio-pacco { position: relative; background: var(--lilla); color: var(--viola); }
-.premio-pacco b { position: absolute; top: 12%; right: 16%; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; background: var(--accento); color: #fff; font: 800 22px 'Baloo 2', Nunito, sans-serif; }
+.premio-pacco b { position: absolute; top: 12%; right: 16%; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; background: var(--accento); color: var(--bianco); font: 800 22px 'Baloo 2', Nunito, sans-serif; }
 .popup-premio { width: 160px; height: 160px; object-fit: contain; border-radius: 24px; }
 .premio-genitori { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
 .premio-genitori .nota { margin: 0; }
 .biglietto { display: grid; gap: 12px; padding: 16px; border-radius: 16px; background: var(--carta-gialla); text-align: left; }
 .biglietto p { margin: 0; white-space: pre-line; font-style: italic; line-height: 1.45; }
 /* griglie, tabelle e striscia: larghezza fissa, 13 px stanno in 25 colonne anche a 360 px (carta di 296 px) */
-.biglietto-blocco { margin: 0; padding: 8px 10px; border-radius: 12px; background: #fff; border: 2px dashed var(--burro); font: 700 13px/1.5 ui-monospace, 'SF Mono', Menlo, Consolas, 'Roboto Mono', monospace; color: var(--testo); white-space: pre-wrap; overflow-wrap: anywhere; }
+.biglietto-blocco { margin: 0; padding: 8px 10px; border-radius: 12px; background: var(--bianco); border: 2px dashed var(--burro); font: 700 13px/1.5 ui-monospace, 'SF Mono', Menlo, Consolas, 'Roboto Mono', monospace; color: var(--testo); white-space: pre-wrap; overflow-wrap: anywhere; }
 .biglietto-aiutino { padding: 8px 12px; border-radius: 12px; background: var(--rosa); font-style: normal !important; }
 
 /* Figurina e Album (bozze) */
-.figurina-pagina .figurina { display: grid; padding: 0; overflow: hidden; gap: 0; border: 3px solid var(--rosa-bordo); background: #fff; text-align: left; justify-items: stretch; }
+.figurina-pagina .figurina { display: grid; padding: 0; overflow: hidden; gap: 0; border: 3px solid var(--rosa-bordo); background: var(--bianco); text-align: left; justify-items: stretch; }
 .figurina h1 { margin: 0; }
-.fascia { position: relative; height: 196px; background: linear-gradient(180deg, var(--accento) 0%, var(--fucsia) 70%, #fff 100%); }
-.fascia span { position: absolute; left: 16px; top: 14px; font: 800 14px Nunito, sans-serif; color: #fff; }
-.fascia b { position: absolute; right: 16px; top: 4px; font: 800 52px/1 'Baloo 2', Nunito, sans-serif; color: #fff; }
+.fascia { position: relative; height: 196px; background: linear-gradient(180deg, var(--accento) 0%, var(--fucsia) 70%, var(--bianco) 100%); }
+.fascia span { position: absolute; left: 16px; top: 14px; font: 800 14px Nunito, sans-serif; color: var(--bianco); }
+.fascia b { position: absolute; right: 16px; top: 4px; font: 800 52px/1 'Baloo 2', Nunito, sans-serif; color: var(--bianco); }
 .fascia img { position: absolute; left: 50%; bottom: -8px; translate: -50% 0; }
 .figurina .nome { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 16px 8px; }
 .figurina .nome h1 { margin: 0; font-size: 26px; }
 .figurina .nome small { font: 800 13px Nunito, sans-serif; color: var(--testo-2); }
 .numeri { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; margin: 0; }
-.numeri div { padding: 8px; border-radius: 16px; background: #fff; }
+.numeri div { padding: 8px; border-radius: 16px; background: var(--bianco); }
 .numeri dt { color: var(--testo-2); font-size: 14px; }
 .numeri dd { margin: 0; font: 800 22px 'Baloo 2', Nunito, sans-serif; }
 .figurina .numeri { padding: 0 16px; }
@@ -432,7 +433,7 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .album-conto .avanzamento span { background: var(--fucsia); }
 .album-conto p { margin: 0; font: 800 15px Nunito, sans-serif; white-space: nowrap; }
 .album { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-.album li { display: grid; justify-items: center; align-content: start; gap: 4px; padding: 8px 8px 12px; border-radius: 24px; background: #fff; box-shadow: var(--ombra); text-align: center; font-size: 13px; }
+.album li { display: grid; justify-items: center; align-content: start; gap: 4px; padding: 8px 8px 12px; border-radius: 24px; background: var(--bianco); box-shadow: var(--ombra); text-align: center; font-size: 13px; }
 .album li b { font: 800 14px/1.2 Nunito, sans-serif; }
 .album li small { font-size: 12px; line-height: 1.25; color: var(--testo-2); }
 .album .da-scoprire { background: var(--lilla); border: 3px dashed var(--lilla-medio); box-shadow: none; }
@@ -444,7 +445,7 @@ dialog.velo { width: 100%; height: 100%; max-width: none; max-height: none; marg
 dialog.velo:not([open]) { display: none; }
 dialog.velo::backdrop { background: transparent; }
 dialog.velo:focus { outline: none; }
-.popup { position: relative; width: min(100%, 346px); margin: 0 auto; display: grid; justify-items: center; gap: 12px; padding: 116px 24px 24px; border-radius: 32px; background: #fff; box-shadow: var(--ombra-alta), 0 0 0 4px var(--lilla-medio); text-align: center; }
+.popup { position: relative; width: min(100%, 346px); margin: 0 auto; display: grid; justify-items: center; gap: 12px; padding: 116px 24px 24px; border-radius: 32px; background: var(--bianco); box-shadow: var(--ombra-alta), 0 0 0 4px var(--lilla-medio); text-align: center; }
 .popup-festa, .popup-enigma { box-shadow: var(--ombra-alta), 0 0 0 4px var(--burro); }
 .popup-bastone { box-shadow: var(--ombra-alta), 0 0 0 4px var(--rosa-bordo); }
 /* lucchetto e papà sono piccoli (110-120 px): niente vuoto sotto, come nella bozza */
@@ -480,7 +481,7 @@ dialog.velo:focus { outline: none; }
 .frase-popup { width: 100%; margin: 0; }
 .frase-popup blockquote { font-size: 14px; }
 .riga-figurina { width: 100%; margin: 0; padding: 8px 0 0; border-top: 2px dashed var(--lilla); font: 800 13px Nunito, sans-serif !important; color: var(--testo-2); }
-.bollino-malus { position: absolute; right: 18px; top: 18px; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--testo); color: #fff; font: 800 17px 'Baloo 2', Nunito, sans-serif; }
+.bollino-malus { position: absolute; right: 18px; top: 18px; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--testo); color: var(--bianco); font: 800 17px 'Baloo 2', Nunito, sans-serif; }
 @media (prefers-reduced-motion: no-preference) {
   .popup { animation: entra 0.35s cubic-bezier(0.22, 1, 0.36, 1) both; }
   @keyframes entra { from { opacity: 0; transform: translateY(24px) scale(0.94); } to { opacity: 1; transform: none; } }
@@ -496,7 +497,7 @@ dialog.velo:focus { outline: none; }
 /* Genitori */
 .schede { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
 .schede button { flex: none; min-height: 44px; padding: 0 14px; border: 0; border-radius: 999px; background: var(--lilla); color: var(--testo-2); font: inherit; }
-.schede button[aria-current='page'] { background: var(--accento); color: #fff; }
+.schede button[aria-current='page'] { background: var(--accento); color: var(--bianco); }
 .griglia { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .griglia .secondario { margin-top: 0; min-height: 54px; padding: 0 8px; }
 .stretto { width: auto; margin-top: 0; padding: 0 16px; min-height: 44px; flex: none; }
@@ -536,7 +537,7 @@ dialog.velo:focus { outline: none; }
 .pallini-passi span { width: 10px; height: 10px; border-radius: 999px; background: var(--lilla-medio); }
 .pallini-passi .attivo { width: 26px; background: var(--fucsia); }
 .sezioni { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-.sezioni li { display: flex; align-items: center; gap: 12px; padding: 8px 16px 8px 12px; border-radius: 24px; background: #fff; font-size: 15px; line-height: 1.35; }
+.sezioni li { display: flex; align-items: center; gap: 12px; padding: 8px 16px 8px 12px; border-radius: 24px; background: var(--bianco); font-size: 15px; line-height: 1.35; }
 .sezioni .sticker { flex: none; }
 .frase { margin: 0; font: 800 20px/1.3 'Baloo 2', Nunito, sans-serif; color: var(--accento-premuto); }
 /* Avvio dei genitori (bozza Genitori-avvio): mamma e papà in testata, una carta per cosa, bottoni in fondo */
@@ -552,7 +553,7 @@ body:has(.avvio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom))
 .avvio li { display: flex; align-items: center; gap: 12px; padding: 12px 16px; }
 .avvio li b { display: block; font-size: 15px; }
 .avvio .segno { flex: none; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--rosa); color: var(--accento); font: 800 17px 'Baloo 2', Nunito, sans-serif; }
-.avvio .fatto .segno { background: var(--accento); color: #fff; }
+.avvio .fatto .segno { background: var(--accento); color: var(--bianco); }
 .avvio small { display: block; font: 700 13px/1.35 Nunito, sans-serif; color: var(--testo-2); }
 .avvio-piede { margin-top: auto; display: flex; flex-direction: column; gap: 8px; }
 .avvio-piede .link { color: var(--testo-2); font: 800 14px Nunito, sans-serif; }
@@ -573,7 +574,7 @@ body:has(.avvio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom))
 .gesto:disabled { background: var(--lilla); box-shadow: none; color: var(--testo-2); }
 .gesto:disabled span { color: var(--testo-2); }
 .griglia.tre { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.sgridata { min-height: 48px; padding: 4px 8px; border: 2px solid var(--lilla-medio); border-radius: 16px; background: #fff; color: var(--testo); font: 800 14px/1.2 Nunito, sans-serif; }
+.sgridata { min-height: 48px; padding: 4px 8px; border: 2px solid var(--lilla-medio); border-radius: 16px; background: var(--bianco); color: var(--testo); font: 800 14px/1.2 Nunito, sans-serif; }
 .elenco { display: flex; flex-direction: column; padding: 8px 16px; }
 .riga-elenco { display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 8px 0; border: 0; border-top: 2px dashed var(--lilla); background: none; color: var(--testo); text-align: left; font: inherit; }
 .riga-elenco:first-child { border-top: 0; }

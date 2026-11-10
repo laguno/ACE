@@ -139,7 +139,7 @@ export function Album({ chiudi }: { chiudi: () => void }) {
       .not('sbloccata_il', 'is', null)
       .then(({ data }) => setPrese(new Set((data ?? []).map((f) => f.posa))));
   }, []);
-  if (!prese) return null;
+  if (!prese) return <Attesa />;
 
   const normali = POSE.filter((p) => !NERA(p.tono));
   const nere = POSE.filter((p) => NERA(p.tono));

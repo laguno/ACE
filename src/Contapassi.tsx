@@ -79,7 +79,7 @@ export function Contapassi({ prima, adesso, className = '' }: Saldo & { classNam
   return (
     <span className={`contapassi ${className}`}>
       <b aria-hidden>{formato(mostrato)}</b>
-      <span className="solo-lettori">{formato(adesso)} passi</span>
+      <span className="solo-lettori" role="status">{formato(adesso)} passi</span>
       {sale && (
         <span className={`contapassi-delta ${d > 0 ? 'su' : 'giu'}`} aria-hidden>
           {d > 0 ? `+${formato(d)}` : `−${formato(-d)}`}
