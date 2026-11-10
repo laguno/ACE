@@ -1,5 +1,5 @@
 {
-  "_nota": "Enigmi dei forzieri (approvato dal signore il 9/11): ogni forziere ha un tipo diverso, difficoltà in salita. La funzione enigma usa il tipo del forziere e il suo esempio. Le parti meccaniche (cifrare, calcoli, mescolare, griglia, lettere della cima) le fa il codice in src/lib/enigmi: l'IA scrive solo i testi. Gli esempi hanno premi inventati, diversi da quelli veri. Formato del biglietto: testo semplice; i blocchi a larghezza fissa (griglie, tabelle, striscia dell'alfabeto, messaggi in codice) stanno tra due righe ``` e l'app li mostra con un carattere a larghezza fissa.",
+  "_nota": "Enigmi dei forzieri (approvato dal signore il 9/11, v4 il 10/11): ogni forziere ha un tipo diverso, difficoltà in salita. La funzione enigma usa il tipo del forziere e il suo esempio. Le parti meccaniche (cifrare, calcoli, mescolare, griglia, lettere della cima) le fa il codice in src/lib/enigmi: l'IA scrive solo i testi. Gli esempi hanno premi inventati, diversi da quelli veri. Formato del biglietto: testo semplice; i blocchi a larghezza fissa (griglie, tabelle, striscia dell'alfabeto, messaggi in codice) stanno tra due righe ``` e l'app li mostra con un carattere a larghezza fissa.",
   "regole_comuni": [
     "Italiano di casa per una ragazza di 12 anni: frasi corte, parole sue, mai da adulti.",
     "Risolvibile con carta e penna in 10-20 minuti, da sola.",
@@ -67,10 +67,11 @@
     {
       "forziere": 3,
       "tipo": "acrostico",
-      "nome": "Acrostico",
+      "nome": "Acrostico in rima",
       "difficolta": 3,
       "regole": [
         "Tante righe quante le lettere della parola nascosta (5-8).",
+        "Righe corte in rima baciata (AABB); l'ultima riga può rimare da sola.",
         "Le iniziali delle righe, lette dall'alto, formano una parola che aiuta a capire il premio (non il premio stesso).",
         "Le righe, da sole, descrivono il premio un pezzo alla volta; l'ultima invita a leggere le iniziali.",
         "Nel risultato: \"nascosta\" è la parola delle iniziali."
@@ -152,35 +153,60 @@
     },
     {
       "forziere": 7,
-      "tipo": "logica",
-      "nome": "Logica a indizi",
+      "tipo": "cruciverba",
+      "nome": "Cruciverba a colonna",
       "difficolta": 7,
       "regole": [
-        "3-4 personaggi di casa, ognuno abbinato a una o due cose (attività, cena, oggetto).",
-        "4-6 indizi numerati, alcuni simpatici (Lady ama il pesce, Bart scivola sul ghiaccio).",
-        "Una sola soluzione possibile; la domanda finale chiede la cosa abbinata a un personaggio, ed è il premio.",
-        "Le opzioni descrivono senza nominare il premio."
+        "Una parola nascosta di 5-9 lettere che porta al premio senza nominarlo: una riga del cruciverba per lettera.",
+        "Ogni riga è una parola comune con la lettera nascosta dentro; il codice allinea le righe sulla colonna.",
+        "Definizioni difficili: doppio senso, cose di casa e di scuola mescolate, mai tutte dello stesso argomento del premio (altrimenti la colonna si indovina subito).",
+        "Nessuna parola del premio nelle definizioni né nella riga finale.",
+        "Una riga finale lega la parola della colonna al premio."
       ],
-      "ia_scrive": "tutto il biglietto, con la tabella da riempire",
-      "codice_fa": "niente: lo controlla il risolutore",
-      "formato": "testo con le opzioni; un blocco con la tabella vuota; gli indizi numerati; la domanda",
+      "ia_scrive": "la parola della colonna (nascosta), le parole con le definizioni (voci), la riga finale",
+      "codice_fa": "allinea le righe sulla colonna e controlla che la colonna dia la parola (cruciverba, leggiCruciverba)",
+      "formato": "testo; poi un blocco con le righe di caselle (_ e #); poi le definizioni numerate con la lunghezza; poi la riga finale",
       "esempio": {
-        "premio": "Un concerto con papà",
-        "parola": "CONCERTO",
-        "enigma": "Leo, il nonno e Lady scelgono una serata a testa: musica dal vivo, museo, bowling.\n```\n        musica  museo  bowling\nLeo\nnonno\nLady\n```\n1. Leo sceglie il bowling: gli piace far cadere le cose.\n2. Lady non sopporta il rumore.\nNel forziere c'è la serata del nonno, e la passi con papà. Qual è?",
-        "soluzione": "concerto con papà / concerto / musica dal vivo con papà",
-        "aiutino": "Lady va dove c'è silenzio."
+        "premio": "Una gita in bicicletta lungo il fiume",
+        "parola": "BICICLETTA",
+        "enigma": "Scrivi le risposte nelle righe, una lettera per casella. Le caselle # in colonna, lette dall’alto in basso, formano una parola.\n```\n 1    # _ _ _\n 2  _ # _ _\n 3    # _ _ _ _ _ _ _\n 4    # _ _ _ _\n 5  _ # _ _\n```\n1) Salta nello stagno e canta di notte. (4)\n2) La guardi dalla finestra: certe sere è piena, certe sere a metà. (4)\n3) Lo apri quando piove, e Bart ci scappa sotto. (8)\n4) Si taglia a fette e ha le candeline sopra. (5)\n5) Rossa o verde, la mordi a merenda. (4)\nSono due e girano: le spingi pedalando lungo il fiume.",
+        "soluzione": "gita in bicicletta lungo il fiume / gita in bici / giro in bicicletta",
+        "aiutino": "La prima è RANA.",
+        "nascosta": "RUOTE",
+        "voci": [
+          {
+            "parola": "RANA",
+            "indizio": "Salta nello stagno e canta di notte."
+          },
+          {
+            "parola": "LUNA",
+            "indizio": "La guardi dalla finestra: certe sere è piena, certe sere a metà."
+          },
+          {
+            "parola": "OMBRELLO",
+            "indizio": "Lo apri quando piove, e Bart ci scappa sotto."
+          },
+          {
+            "parola": "TORTA",
+            "indizio": "Si taglia a fette e ha le candeline sopra."
+          },
+          {
+            "parola": "MELA",
+            "indizio": "Rossa o verde, la mordi a merenda."
+          }
+        ]
       }
     },
     {
       "forziere": 8,
       "tipo": "rebus",
-      "nome": "Rebus a parole",
+      "nome": "Rebus a parole in rima",
       "difficolta": 8,
       "regole": [
         "Sciarada: \"il mio primo... il mio secondo... (il mio terzo...) il mio intero...\".",
         "Ogni pezzo è una parola vera con un indizio a doppio senso; il mio intero è una parola composta che porta al premio.",
-        "L'intero si descrive per ultimo, con un dettaglio che fa capire il premio."
+        "L'intero si descrive per ultimo, con un dettaglio che fa capire il premio.",
+        "Ogni riga ha una rima interna o rima con la seguente: si legge come una filastrocca."
       ],
       "ia_scrive": "tutto il biglietto",
       "codice_fa": "niente: lo controlla il risolutore",
@@ -200,8 +226,8 @@
       "difficolta": 9,
       "regole": [
         "Una lettera presa dalla parola chiave del premio di ciascun forziere da 1 a 8 forma la parola finale.",
-        "Per ogni lettera della parola finale il biglietto dice il forziere e la posizione.",
-        "Una riga finale lega la parola finale al premio della cima senza nominarlo."
+        "Il biglietto scrive le parole chiave dei forzieri 1-8; per ogni lettera della parola finale dice il forziere e la posizione.",
+        "Una riga finale lega la parola finale al premio della cima senza nominarlo; l'aiutino dice la prima lettera e da dove viene."
       ],
       "ia_scrive": "5-10 parole candidate lunghe quanto i forzieri (8 lettere) legate al premio, e la riga finale",
       "codice_fa": "cerca una candidata che si può comporre e scrive la tabella (cima, righeCima)",
@@ -219,9 +245,9 @@
           "CONCERTO",
           "GIRASOLE"
         ],
-        "enigma": "Prendi la parola chiave del premio di ogni forziere (la cosa principale: per una torta, TORTA). Da ognuna una lettera, e trovi la parola della cima.\n```\n 1ª lettera: forziere 3, la 1ª\n 2ª lettera: forziere 1, la 2ª\n 3ª lettera: forziere 4, la 4ª\n 4ª lettera: forziere 2, la 8ª\n 5ª lettera: forziere 5, la 3ª\n 6ª lettera: forziere 8, la 1ª\n 7ª lettera: forziere 7, la 3ª\n 8ª lettera: forziere 6, la 2ª\n```\nLa parola che trovi è dove andiamo, tutti insieme, per un fine settimana.",
+        "enigma": "Le parole chiave dei forzieri sono: TORTA, BICICLETTA, MARE, ZAINO, BRACCIALETTO, PALLONE, CONCERTO, GIRASOLE. Da ognuna prendi una lettera, e trovi la parola della cima.\n```\n 1ª lettera: forziere 3, la 1ª\n 2ª lettera: forziere 1, la 2ª\n 3ª lettera: forziere 4, la 4ª\n 4ª lettera: forziere 2, la 8ª\n 5ª lettera: forziere 5, la 3ª\n 6ª lettera: forziere 8, la 1ª\n 7ª lettera: forziere 7, la 3ª\n 8ª lettera: forziere 6, la 2ª\n```\nLa parola che trovi è dove andiamo, tutti insieme, per un fine settimana.",
         "soluzione": "weekend in montagna / fine settimana in montagna / montagna",
-        "aiutino": "Le parole chiave sono: TORTA, BICICLETTA, MARE, ZAINO, BRACCIALETTO, PALLONE, CONCERTO, GIRASOLE."
+        "aiutino": "La 1ª lettera è M: la 1ª di MARE."
       }
     }
   ]

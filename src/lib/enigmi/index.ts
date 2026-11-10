@@ -147,6 +147,33 @@ export function leggiGriglia(testo: string, coordinate: string[][]): string {
   return coordinate.map((p) => p.map((c) => righe[Number(c.slice(1)) - 1][ALFABETO.indexOf(c[0])]).join('')).join(' ');
 }
 
+/**
+ * Cruciverba a colonna: una riga di caselle per parola, spostata in modo che la lettera della
+ * parola nascosta (la prima uguale nella parola) cada sempre nella stessa colonna, segnata con #.
+ * Due caratteri per casella: 11 caselle stanno in 25 caratteri, leggibili a 360 px.
+ */
+function cruciverba(nascosta: string, parole: string[]): { griglia: string; posizioni: number[] } {
+  const n = soloLettere(nascosta);
+  const pulite = parole.map(soloLettere);
+  if (pulite.length !== n.length) throw new Error(`servono ${n.length} parole, una per lettera di ${n}`);
+  const posizioni = pulite.map((p, i) => {
+    const k = p.indexOf(n[i]);
+    if (k < 0) throw new Error(`${p} non ha la ${n[i]}`);
+    return k;
+  });
+  const colonna = Math.max(...posizioni);
+  const righe = pulite.map((p, i) => `${String(i + 1).padStart(2)}  ${'  '.repeat(colonna - posizioni[i])}${p.split('').map((_, j) => (j === posizioni[i] ? '#' : '_')).join(' ')}`);
+  return { griglia: righe.join('\n'), posizioni };
+}
+
+/** Legge la colonna del cruciverba dalle parole scritte nelle righe (controllo prima di salvare). */
+export function leggiCruciverba(griglia: string, parole: string[]): string {
+  const righe = griglia.split('\n').map((r) => r.replace(/^\s*\d+ {2}/, '')); // via il numero della riga
+  const colonne = new Set(righe.map((r) => r.indexOf('#')));
+  if (colonne.size !== 1) return ''; // le caselle colorate non sono in colonna
+  return righe.map((r, i) => soloLettere(parole[i])[r.trimStart().split(' ').indexOf('#')] ?? '').join('');
+}
+
 /** Acrostico: le iniziali delle righe (per controllare che formino la parola). */
 export const iniziali = (righe: string[]) => righe.map((r) => soloLettere(r)[0] ?? '').join('');
 
@@ -184,17 +211,17 @@ const righeCima = (mappa: { forziere: number; posizione: number }[]) =>
 
 // ---------------------------------------------------------------- composizione del biglietto
 
-export type TipoEnigma = 'indovinello' | 'codice' | 'acrostico' | 'matematico' | 'anagramma' | 'griglia' | 'logica' | 'rebus' | 'cima';
+export type TipoEnigma = 'indovinello' | 'codice' | 'acrostico' | 'matematico' | 'anagramma' | 'griglia' | 'cruciverba' | 'rebus' | 'cima';
 /** Il tipo di ogni forziere, in ordine (data/enigmi.json). */
-export const TIPO_DEL_FORZIERE: TipoEnigma[] = ['indovinello', 'codice', 'acrostico', 'matematico', 'anagramma', 'griglia', 'logica', 'rebus', 'cima'];
+export const TIPO_DEL_FORZIERE: TipoEnigma[] = ['indovinello', 'codice', 'acrostico', 'matematico', 'anagramma', 'griglia', 'cruciverba', 'rebus', 'cima'];
 
 /** Quello che scrive l'IA, secondo il tipo; sempre con soluzione, aiutino e parola chiave. */
 export type Uscita = { soluzione: string; aiutino: string; parola: string } & Partial<{
-  enigma: string; // indovinello, logica, rebus
+  enigma: string; // indovinello, rebus
   presentazione: string; messaggio: string; domanda: string; // codice
-  nascosta: string; righe: string[]; // acrostico
+  nascosta: string; righe: string[]; // acrostico (nascosta anche nel cruciverba)
   parole: string[]; finale: string; // matematico, griglia (finale), cima (finale)
-  voci: { parola: string; indizio: string }[]; // anagramma
+  voci: { parola: string; indizio: string }[]; // anagramma, cruciverba
   candidate: string[]; // cima
 }>;
 
@@ -213,10 +240,19 @@ export function componi(tipo: TipoEnigma, u: Uscita, rng: Rng, paroleForzieri: s
   if (!parola) throw new Error('manca la parola chiave');
   switch (tipo) {
     case 'indovinello':
-    case 'logica':
     case 'rebus':
       if (!u.enigma?.trim()) throw new Error('manca il testo');
       return fine(u.enigma);
+    case 'cruciverba': {
+      const voci = u.voci ?? [];
+      const nascosta = soloLettere(u.nascosta ?? '');
+      if (nascosta.length < 5 || nascosta.length > 9) throw new Error('la parola della colonna va da 5 a 9 lettere');
+      const c = cruciverba(nascosta, voci.map((v) => v.parola));
+      if (leggiCruciverba(c.griglia, voci.map((v) => v.parola)) !== nascosta) throw new Error('cruciverba che non torna');
+      const definizioni = voci.map((v, k) => `${k + 1}) ${v.indizio.trim()} (${soloLettere(v.parola).length})`);
+      const intro = 'Scrivi le risposte nelle righe, una lettera per casella. Le caselle # in colonna, lette dall’alto in basso, formano una parola.';
+      return fine(`${intro}\n${blocco(c.griglia)}\n${definizioni.join('\n')}\n${u.finale}`);
+    }
     case 'codice': {
       const msg = pulisci(u.messaggio ?? '').trim();
       if (soloLettere(msg).length < 15) throw new Error('messaggio troppo corto');
@@ -255,8 +291,8 @@ export function componi(tipo: TipoEnigma, u: Uscita, rng: Rng, paroleForzieri: s
       if (paroleForzieri.length !== 8 || paroleForzieri.some((p) => !soloLettere(p))) throw new Error('servono le parole chiave dei forzieri 1-8');
       const c = cima(paroleForzieri, u.candidate ?? []);
       if (!c) throw new Error('nessuna parola candidata si compone con le lettere dei forzieri');
-      const intro = `Prendi la parola chiave del premio di ogni forziere (la cosa principale: per il forziere 1, ${soloLettere(paroleForzieri[0])}). Da ognuna una lettera, e trovi la parola della cima.`;
-      return fine(`${intro}\n${blocco(righeCima(c.mappa).join('\n'))}\n${u.finale}`, `Le parole chiave sono: ${paroleForzieri.map(soloLettere).join(', ')}.`);
+      const intro = `Le parole chiave dei forzieri sono: ${paroleForzieri.map(soloLettere).join(', ')}. Da ognuna prendi una lettera, e trovi la parola della cima.`;
+      return fine(`${intro}\n${blocco(righeCima(c.mappa).join('\n'))}\n${u.finale}`);
     }
   }
 }

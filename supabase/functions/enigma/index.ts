@@ -43,7 +43,7 @@ const comuni = { soluzione: s, aiutino: s, parola: s };
 /** Cosa scrive l'IA per ogni tipo: le parti meccaniche le aggiunge componi(). */
 const CAMPI: Record<E.TipoEnigma, Record<string, object>> = {
   indovinello: { enigma: s },
-  logica: { enigma: s },
+  cruciverba: { nascosta: s, voci: lista({ type: 'object', additionalProperties: false, required: ['parola', 'indizio'], properties: { parola: s, indizio: s } }), finale: s },
   rebus: { enigma: s },
   codice: { presentazione: s, messaggio: s, domanda: s },
   acrostico: { nascosta: s, righe: lista(s) },
