@@ -165,7 +165,7 @@ export default function Sera() {
     fogliVisti.filter((f) => f.dato_il).length +
     (conCartella && serata.cartella ? 1 : 0) +
     (conBorsa && serata.borsa ? 1 : 0);
-  const mancante = compiti.find((c) => !c.fatto_il);
+  const mancanti = compiti.filter((c) => !c.fatto_il).length;
 
   return (
     <section className="schermo sera">
@@ -215,13 +215,42 @@ export default function Sera() {
             />
           ))}
         </ul>
-        {mancante && (
+        {mancanti > 0 && (
           <p className="lady con-lady">
-            Lady si è sdraiata sul quaderno di {mancante.materie?.nome ?? 'domani'}. Si sposta solo se lo apri.
+            Lady si è sdraiata sui compiti: {mancanti === 1 ? 'ne manca uno' : `ne mancano ${mancanti}`}.
             <Sticker posa="lady-compiti" misura={92} className="lady-sticker" />
           </p>
         )}
       </div>
+      )}
+
+      {conCartella && (
+        <Voci
+          titolo="Cartella"
+          valore={R.CONFIG.passi.obbligatori.cartella}
+          voci={orario.length ? orario : [`Cartella pronta per ${GIORNI[domani.getDay()]}`]}
+          pronta={serata.cartella}
+          quandoPronta={() => chiudiSerata('cartella')}
+          colore="lilla"
+          onAnnulla={attesa.inAttesa('cartella') ? () => attesa.annulla('cartella', () => setSerata((s) => ({ ...s, cartella: false }))) : undefined}
+        />
+      )}
+
+      {sport && (
+        <Voci
+          titolo="Borsa"
+          valore={R.CONFIG.passi.obbligatori.borsa}
+          voci={VOCI_BORSA}
+          pronta={serata.borsa}
+          quandoPronta={() => chiudiSerata('borsa')}
+          colore="rosa"
+          onAnnulla={attesa.inAttesa('borsa') ? () => attesa.annulla('borsa', () => setSerata((s) => ({ ...s, borsa: false }))) : undefined}
+        >
+          <p className="nota accento">
+            {C.tipoImpegno(sport.titolo) === 'partita' ? 'Partita' : 'Allenamento'} domani alle {C.oraRoma(sport.inizio)}
+            {R.giornoDiScuola(domaniCal) && C.oraRoma(sport.inizio) < PRIMA_DI_USCIRE_DA_SCUOLA ? ': la porti a scuola.' : '.'}
+          </p>
+        </Voci>
       )}
 
       {fogliVisti.length > 0 && (
@@ -257,35 +286,6 @@ export default function Sera() {
             ))}
           </ul>
         </div>
-      )}
-
-      {conCartella && (
-        <Voci
-          titolo="Cartella"
-          valore={R.CONFIG.passi.obbligatori.cartella}
-          voci={orario.length ? orario : [`Cartella pronta per ${GIORNI[domani.getDay()]}`]}
-          pronta={serata.cartella}
-          quandoPronta={() => chiudiSerata('cartella')}
-          colore="lilla"
-          onAnnulla={attesa.inAttesa('cartella') ? () => attesa.annulla('cartella', () => setSerata((s) => ({ ...s, cartella: false }))) : undefined}
-        />
-      )}
-
-      {sport && (
-        <Voci
-          titolo="Borsa"
-          valore={R.CONFIG.passi.obbligatori.borsa}
-          voci={VOCI_BORSA}
-          pronta={serata.borsa}
-          quandoPronta={() => chiudiSerata('borsa')}
-          colore="rosa"
-          onAnnulla={attesa.inAttesa('borsa') ? () => attesa.annulla('borsa', () => setSerata((s) => ({ ...s, borsa: false }))) : undefined}
-        >
-          <p className="nota accento">
-            {C.tipoImpegno(sport.titolo) === 'partita' ? 'Partita' : 'Allenamento'} domani alle {C.oraRoma(sport.inizio)}
-            {R.giornoDiScuola(domaniCal) && C.oraRoma(sport.inizio) < PRIMA_DI_USCIRE_DA_SCUOLA ? ': la porti a scuola.' : '.'}
-          </p>
-        </Voci>
       )}
 
       {famiglia && (

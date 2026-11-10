@@ -48,7 +48,8 @@ test('la sera mostra compiti, cartella del lunedì e fogli', async ({ page }) =>
   await expect(page.getByText('0 su 5')).toBeVisible();
   await expect(page.getByText('Pag 12 es 3')).toBeVisible();
   await expect(page.getByText('Per mercoledì')).toHaveCount(0);
-  await expect(page.getByText('Lady si è sdraiata sul quaderno di Matematica.')).toBeVisible();
+  // frase della bozza (design/Domani.html), messa dopo la critique del 10/11
+  await expect(page.getByText('Lady si è sdraiata sui compiti: ne mancano 2.')).toBeVisible();
 
   const cartella = page.locator('.carta', { has: page.getByRole('heading', { name: 'Cartella' }) });
   await expect(cartella.getByRole('checkbox')).toHaveCount(4);
