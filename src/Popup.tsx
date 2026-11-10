@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import manifest from '../data/manifest.json' with { type: 'json' };
 import { oraAdesso } from './giornata';
 import * as K from './lib/copione';
+import * as R from './lib/regole';
 import { adesso } from './spunte';
 import { supabase } from './supabase';
 import { MOMENTO_DEL_POPUP, VistaFrase, fraseDelGiorno, type FraseDelGiorno } from './Frase';
@@ -13,7 +14,7 @@ import { immaginiPremi } from './ImmaginePremio';
 // Aspetto: lo stampo delle bozze Popup-forziere, -lucchetto, -bastone, -enigma (anello colorato,
 // avatar che sborda, titolo grande, riga della figurina in fondo).
 
-export type Popup = { id: string; priorita: number; situazione: string; posa: string; titolo: string; testo: string; figurina: string | null; frase?: FraseDelGiorno | null; chiave?: string | null; immagine?: string | null };
+export type Popup = { id: string; priorita: number; situazione: string; posa: string; titolo: string; testo: string; figurina: string | null; frase?: FraseDelGiorno | null; chiave?: string | null; immagine?: string | null; chiavi?: { prese: number; servono: number } | null };
 const GIORNI_VALIDO = 3;
 const immagine = (posa: string) => manifest.avatar.find((a) => a.id === posa)?.webp ?? manifest.oggetti.find((o) => o.id === posa)?.webp;
 
@@ -27,7 +28,20 @@ function tono(p: Popup): 'festa' | 'lucchetto' | 'bastone' | 'enigma' | 'calmo' 
 }
 const CON_CORIANDOLI = ['forziere_aperto', 'cima'];
 
-export default function CodaPopup() {
+/** Il pulsante dice il gesto, come nelle bozze (design/Popup-*.html); forziere e cima "Evviva!" (decisione del 9/11). */
+function pulsante(p: Popup): string {
+  if (CON_CORIANDOLI.includes(p.situazione)) return 'Evviva!';
+  if (p.situazione?.startsWith('bagno')) return 'Vado a sistemare';
+  if (p.situazione === 'forziere_lucchetto') return 'Ho capito';
+  if (p.situazione === 'enigma_comparso') return 'Prova';
+  return 'Ok';
+}
+/** Numero del forziere dalla chiave dell'evento ("forziere:3:enigma"). */
+const forziereDi = (p: Popup) => Number(String(p.chiave ?? '').split(':')[1]) || undefined;
+const FILA_MASSIMA = 12;
+
+/** La coda dei popup di Lani; apriEnigma porta su Astra al biglietto (pulsante "Prova"). */
+export default function CodaPopup({ apriEnigma }: { apriEnigma?: (n: number) => void }) {
   const [p, setP] = useState<Popup>();
 
   useEffect(() => {
@@ -48,7 +62,10 @@ export default function CodaPopup() {
       // forziere aperto: l'immagine vera del premio (la dà il server solo a forziere aperto)
       const n = scelto?.situazione === 'forziere_aperto' ? Number(String(scelto.chiave ?? '').split(':')[1]) : NaN;
       const premio = n ? (await immaginiPremi(n)).find((x) => x.n === n && x.vera) : undefined;
-      setP(scelto && { ...scelto, frase: momento ? await fraseDelGiorno(momento) : null, immagine: premio?.vera ?? null });
+      // lucchetto: la fila di chiavi, prese e mancanti, come nella bozza
+      const conf = scelto?.situazione === 'forziere_lucchetto' && forziereDi(scelto) ? R.forziere(forziereDi(scelto) as number) : undefined;
+      const prese = conf ? ((await supabase.from('chiavi_totali').select('chiavi').maybeSingle()).data?.chiavi ?? 0) : 0;
+      setP(scelto && { ...scelto, frase: momento ? await fraseDelGiorno(momento) : null, immagine: premio?.vera ?? null, chiavi: conf ? { prese: Math.min(prese, conf.chiavi), servono: conf.chiavi } : null });
     }
     apri();
     const tornata = () => document.visibilityState === 'visible' && apri();
@@ -61,11 +78,13 @@ export default function CodaPopup() {
     supabase.from('popup_coda').update({ mostrato_il: adesso() }).eq('id', p.id).then();
     setP(undefined);
   };
-  return <PopupVista p={p} chiudi={chiudi} />;
+  const n = forziereDi(p);
+  const azione = p.situazione === 'enigma_comparso' && apriEnigma && n ? () => (chiudi(), apriEnigma(n)) : undefined;
+  return <PopupVista p={p} chiudi={chiudi} azione={azione} />;
 }
 
 /** Il popup com'è davvero: lo usano la coda di Lani e la Vetrina dei genitori (che non scrive niente). */
-export function PopupVista({ p, chiudi }: { p: Popup; chiudi: () => void }) {
+export function PopupVista({ p, chiudi, azione }: { p: Popup; chiudi: () => void; azione?: () => void }) {
   const t = tono(p);
   const src = immagine(p.posa);
   const malus = t === 'bastone' ? p.testo.match(/[−-]\d+/)?.[0] : undefined;
@@ -99,14 +118,28 @@ export function PopupVista({ p, chiudi }: { p: Popup; chiudi: () => void }) {
         <h2 id="popup-titolo">{p.titolo}</h2>
         {p.immagine && <img className="popup-premio" src={p.immagine} alt="Il premio del forziere" width={160} height={160} />}
         <p>{p.testo}</p>
+        {p.chiavi && <FilaChiavi {...p.chiavi} />}
         {t === 'lucchetto' && <p className="popup-riquadro">I passi ti fanno camminare, le chiavi aprono i forzieri.</p>}
         {p.frase && <VistaFrase frase={p.frase} className="frase-popup" />}
-        <button className="principale largo" onClick={chiudi}>
-          {CON_CORIANDOLI.includes(p.situazione) ? 'Evviva!' : 'Ok'}
+        <button className="principale largo" onClick={azione ?? chiudi}>
+          {pulsante(p)}
         </button>
         {p.figurina && <p className="riga-figurina">{p.figurina}</p>}
       </div>
     </dialog>
+  );
+}
+
+/** Chiavi del lucchetto: prese piene e mancanti vuote; oltre 12 si mostrano solo le mancanti. */
+function FilaChiavi({ prese, servono }: { prese: number; servono: number }) {
+  const mancano = servono - prese;
+  const fila = servono <= FILA_MASSIMA ? Array.from({ length: servono }, (_, i) => i < prese) : Array.from({ length: Math.min(mancano, FILA_MASSIMA) }, () => false);
+  return (
+    <span className="popup-chiavi" role="img" aria-label={`${prese} chiavi su ${servono}`}>
+      {fila.map((piena, i) => (
+        <img key={i} src={`/assets/oggetti/${piena ? 'chiave-piena' : 'chiave-vuota'}.webp`} alt="" width={30} height={30} />
+      ))}
+    </span>
   );
 }
 

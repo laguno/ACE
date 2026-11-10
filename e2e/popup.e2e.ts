@@ -45,3 +45,40 @@ test('il popup è un dialog vero: Esc lo chiude e lo segna come visto, la pagina
   await expect(d).toHaveCount(0);
   expect(t.popup_coda.find((p) => p.id === 'p1')?.mostrato_il).toBeTruthy();
 });
+
+// Pulsanti con il gesto, come nelle bozze (critique del 10/11): bagno, lucchetto, enigma
+const uno = (p: Record<string, unknown>) => ({ popup_coda: [{ id: 'x', priorita: 3, posa: 'lani-detective', figurina: null, mostrato_il: null, creato_il: '2026-11-24T15:00:00Z', ...p }] });
+
+test('bagno: "Vado a sistemare"', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-11-24T16:00:00+01:00'));
+  await finto(page, uno({ priorita: 1, situazione: 'bagno_mamma', posa: 'mamma-arrabbiata', titolo: 'Bagno da sistemare', testo: '−1. Ora: asciugamani appesi.' }));
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Vado a sistemare' }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+});
+
+test('lucchetto: la fila delle chiavi, prese e mancanti, e "Ho capito"', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-11-24T16:00:00+01:00'));
+  await finto(page, { ...uno({ situazione: 'forziere_lucchetto', chiave: 'forziere:2:lucchetto', posa: 'papa-dispiaciuto', titolo: 'Servono chiavi', testo: 'Sei arrivata al forziere, ma servono 2 chiavi in più.' }), chiavi_totali: [{ chiavi: 2 }] });
+  await page.goto('/');
+  const fila = page.getByRole('img', { name: /chiavi su/ });
+  await expect(fila).toBeVisible();
+  const servono = (await fila.getAttribute('aria-label'))!.match(/(\d+) chiavi su (\d+)/)!;
+  expect(Number(servono[1])).toBe(2);
+  await expect(fila.locator('img')).toHaveCount(Number(servono[2]));
+  await page.getByRole('button', { name: 'Ho capito' }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+});
+
+test('enigma: "Prova" porta su Astra al biglietto', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-11-24T16:00:00+01:00'));
+  await finto(page, {
+    ...uno({ situazione: 'enigma_comparso', chiave: 'forziere:1:enigma', titolo: 'Un biglietto', testo: 'Un biglietto vicino al forziere. Riesci a decifrarlo?' }),
+    forzieri_lani: Array.from({ length: 9 }, (_, i) => ({ n: i + 1, stato: i === 0 ? 'enigma' : 'chiuso', enigma: i === 0 ? 'Rotonda e calda, con il pomodoro sopra' : null, premio: null, tentativi_enigma: 0, enigma_risolto_il: null })),
+    saldo_passi: [{ passi: 300 }],
+    chiavi_totali: [{ chiavi: 1 }],
+  });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Prova' }).click();
+  await expect(page.getByText('Rotonda e calda, con il pomodoro sopra')).toBeVisible();
+});

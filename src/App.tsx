@@ -128,6 +128,8 @@ function Lani() {
   const giornata = useGiornata();
   const [accogli, setAccogli] = useState(daAccogliere);
   const [voce, setVoce] = useState<Voce>();
+  // "Prova" del popup dell'enigma: Astra si apre sul forziere con il biglietto
+  const [forziere, setForziere] = useState<number>();
   useEffect(() => {
     if (giornata && !voce) setVoce(C.momento(oraAdesso(), giornata.chiusura) === 'sera' ? 'Sera' : 'Oggi');
   }, [giornata]);
@@ -156,20 +158,20 @@ function Lani() {
           ) : voce === 'Album' ? (
             <Album chiudi={() => setVoce('Astra')} />
           ) : (
-            <Astra apri={setVoce} />
+            <Astra apri={setVoce} forziere={forziere} />
           )}
         </Suspense>
         <button className="link-genitori" onClick={() => setVoce('Genitori')}>
           Genitori
         </button>
       </main>
-      <CodaPopup />
+      <CodaPopup apriEnigma={(n) => (setForziere(n), setVoce('Astra'))} />
       <nav className="barra" aria-label="Sezioni">
         {VOCI.map((v) => {
           const attiva = v === voce || (v === 'Astra' && (voce === 'Figurina' || voce === 'Album'));
           const Icona = ICONE[v];
           return (
-            <button key={v} aria-current={attiva ? 'page' : undefined} onClick={() => setVoce(v)}>
+            <button key={v} aria-current={attiva ? 'page' : undefined} onClick={() => (setForziere(undefined), setVoce(v))}>
               <Icona size={24} weight={attiva ? 'fill' : 'bold'} aria-hidden />
               {v}
             </button>

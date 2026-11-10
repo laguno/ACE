@@ -440,12 +440,15 @@ dialog.velo:focus { outline: none; }
 .popup { position: relative; width: min(100%, 346px); margin: 0 auto; display: grid; justify-items: center; gap: 12px; padding: 116px 24px 24px; border-radius: 32px; background: #fff; box-shadow: var(--ombra-alta), 0 0 0 4px var(--lilla-medio); text-align: center; }
 .popup-festa, .popup-enigma { box-shadow: var(--ombra-alta), 0 0 0 4px var(--burro); }
 .popup-bastone { box-shadow: var(--ombra-alta), 0 0 0 4px var(--rosa-bordo); }
+/* lucchetto e papà sono piccoli (110-120 px): niente vuoto sotto, come nella bozza */
+.popup-lucchetto { padding-top: 48px; }
 .popup-avatar { position: absolute; left: 50%; top: -96px; translate: -50% 0; display: flex; align-items: flex-end; justify-content: center; gap: 0; pointer-events: none; }
 .popup-avatar img { display: block; object-fit: contain; }
 .popup-oggetto { margin-left: -46px; }
 .popup h2 { margin: 0; font-size: 30px; line-height: 1.05; color: var(--testo); }
 .popup-festa h2 { color: var(--accento); }
 .popup p { margin: 0; font-size: 16px; line-height: 1.45; }
+.popup-chiavi { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px; }
 .popup-riquadro { width: 100%; padding: 12px 16px; border-radius: 16px; background: var(--lilla); font: 800 13px/1.35 Nunito, sans-serif !important; }
 .popup .principale { font: 800 19px 'Baloo 2', Nunito, sans-serif; }
 .popup .principale:focus { outline: none; }

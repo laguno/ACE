@@ -41,9 +41,10 @@ function curva(punti: { x: number; y: number }[]) {
   return d;
 }
 
-export default function Astra({ apri }: { apri: (pagina: 'Figurina' | 'Album') => void }) {
+export default function Astra({ apri, forziere: aperto }: { apri: (pagina: 'Figurina' | 'Album') => void; forziere?: number }) {
   const [dati, setDati] = useState<{ passi: number; prima: number; chiavi: number; settimana: number | null; forzieri: Forziere[]; album: number }>();
-  const [scelto, setScelto] = useState<number>();
+  const [scelto, setScelto] = useState<number | undefined>(aperto);
+  useEffect(() => setScelto(aperto), [aperto]);
   useSfondo('panna');
 
   async function carica() {
