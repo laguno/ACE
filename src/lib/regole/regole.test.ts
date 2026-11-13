@@ -44,11 +44,12 @@ describe('percorso', () => {
 
   it('i forzieri cadono alle soglie approvate', () => {
     const s = soglieTappe();
-    expect(CONFIG.forzieri.map((f) => s[f.tappa - 1])).toEqual([405, 915, 1515, 2220, 3020, 3920, 4915, 6010, 7200]);
+    expect(CONFIG.forzieri.map((f) => s[f.tappa - 1])).toEqual([395, 890, 1490, 2190, 2990, 3890, 4895, 6000, 7200]);
   });
 
-  it('posizione: a 725 passi è alla tappa 4 e mancano 10 passi', () => {
-    expect(posizione(725)).toMatchObject({ tappeFatte: 4, mancanoPassi: 10, inCima: false });
+  it('posizione: a 750 passi è alla tappa 5 e mancano 140 passi', () => {
+    expect(posizione(750)).toMatchObject({ tappeFatte: 5, mancanoPassi: 140, inCima: false });
+    expect(posizione(7199).inCima).toBe(false);
     expect(posizione(7200).inCima).toBe(true);
   });
 });
@@ -57,8 +58,8 @@ describe('forzieri', () => {
   it('enigma all’ultima tappa prima del forziere, poi lucchetto se mancano chiavi', () => {
     expect(statoForziere(2, 800, 3)).toBe('enigma'); // 5 tappe fatte su 6
     expect(statoForziere(2, 600, 3)).toBe('lontano'); // 4 tappe fatte
-    expect(statoForziere(2, 915, 3)).toBe('mancano_chiavi');
-    expect(statoForziere(2, 915, 4)).toBe('aperto');
+    expect(statoForziere(2, 960, 3)).toBe('mancano_chiavi');
+    expect(statoForziere(2, 960, 4)).toBe('aperto');
     expect(statoForziere(9, 100, 0)).toBe('lontano');
   });
 });
@@ -291,6 +292,20 @@ describe('conteggio della settimana', async () => {
     expect(s.cosePossibili).toBe(15);
     expect(chiaviSettimana(s)).toBe(2); // 13/15 < 95%
   });
+  it('dieci minuti: possibili e fatti solo con le sere previste', () => {
+    const s = contaSettimana({
+      compiti: 0,
+      sereCartella: 0,
+      sereBorsa: 0,
+      fogli: 0,
+      sessioni: 0,
+      sereDieciMinuti: 7,
+      note: 0,
+      movimenti: Array(5).fill({ motivo: 'dieci_minuti', passi: P.dieci_minuti }),
+    });
+    expect(s.passiPossibili).toBe(7 * P.dieci_minuti);
+    expect([s.coseFatte, s.cosePossibili]).toEqual([5, 7]);
+  });
   it('mondi ogni 7 tappe, la cima resta nello spazio', () => {
     expect([0, 6, 7, 14, 21, 26, 27].map(mondo)).toEqual([0, 0, 1, 2, 3, 3, 3]);
   });
@@ -313,5 +328,67 @@ describe('foto di un compito richiesta da ACE', () => {
     expect(passiFoto({ richiestaDaAce: true, caricataDaLani: true })).toBe(CONFIG.passi.foto_compito);
     expect(passiFoto({ richiestaDaAce: true, caricataDaLani: false })).toBe(0);
     expect(passiFoto({ richiestaDaAce: false, caricataDaLani: true })).toBe(0);
+  });
+});
+
+describe('dieci minuti (sprint 2)', async () => {
+  const { rEvolutionAttiva, inizioREvolution, dieciMinutiValidi, dentroFinestraDieciMinuti, esercizioDelGiorno, passiPartita } = await import('./index');
+  const giorno = (s: string) => new Date(s + 'T12:00:00');
+  const MENU = [
+    { id: 'plank', nome: 'Plank', tipo: 'forza_riflessi' },
+    { id: 'corpo-libero', nome: 'Squat', tipo: 'forza_riflessi' },
+    { id: 'visore', nome: 'Visore', tipo: 'forza_riflessi' },
+    { id: 'respiro', nome: 'Respiro', tipo: 'recupero' },
+  ];
+  it('valgono da quando i genitori accendono R-Evolution, spenta mai', () => {
+    expect(rEvolutionAttiva(giorno('2026-11-22'), '2026-11-23')).toBe(false);
+    expect(rEvolutionAttiva(giorno('2026-11-23'), '2026-11-23')).toBe(true);
+    expect(rEvolutionAttiva(giorno('2027-05-01'), null)).toBe(false);
+    // la bandierina usa il giorno vero se accesa, altrimenti quello previsto nel config
+    expect(inizioREvolution('2026-11-23')).toBe('2026-11-23');
+    expect(inizioREvolution(null)).toBe(CONFIG.periodo.r_evolution_prevista);
+  });
+  it('si avviano al mattino, nella finestra del config (ora di Roma)', () => {
+    const { da, a } = CONFIG.dieci_minuti.finestra;
+    expect([da, a]).toEqual(['06:00', '13:00']);
+    expect(dentroFinestraDieciMinuti(new Date('2026-11-24T05:59:00+01:00'))).toBe(false);
+    expect(dentroFinestraDieciMinuti(new Date('2026-11-24T06:00:00+01:00'))).toBe(true);
+    expect(dentroFinestraDieciMinuti(new Date('2026-11-24T12:59:00+01:00'))).toBe(true);
+    expect(dentroFinestraDieciMinuti(new Date('2026-11-24T13:00:00+01:00'))).toBe(false);
+    expect(dentroFinestraDieciMinuti(new Date('2026-11-24T20:00:00+01:00'))).toBe(false);
+  });
+  it('solo se avviati nella finestra, il timer arriva in fondo e la spunta è dello stesso giorno', () => {
+    const s = CONFIG.dieci_minuti.secondi;
+    const dopo = (t: Date, sec: number) => new Date(t.getTime() + sec * 1000);
+    const mattina = new Date('2027-01-11T07:00:00+01:00');
+    expect(dieciMinutiValidi(mattina, dopo(mattina, s))).toBe(true);
+    expect(dieciMinutiValidi(mattina, dopo(mattina, s - 1))).toBe(false);
+    expect(dieciMinutiValidi(null, dopo(mattina, s))).toBe(false);
+    // avviati alle 12:55 e finiti dopo le 13: valgono (conta l'avvio)
+    const tardi = new Date('2027-01-11T12:55:00+01:00');
+    expect(dieciMinutiValidi(tardi, dopo(tardi, s))).toBe(true);
+    // la sera no
+    const sera = new Date('2027-01-11T20:00:00+01:00');
+    expect(dieciMinutiValidi(sera, dopo(sera, s))).toBe(false);
+    // spunta il giorno dopo: no
+    expect(dieciMinutiValidi(mattina, dopo(mattina, 86400))).toBe(false);
+  });
+  it('recupero nei giorni di pallavolo, forza e riflessi negli altri, a rotazione sul menu', () => {
+    const g = giorno('2027-01-11');
+    expect(esercizioDelGiorno(g, true, MENU)?.tipo).toBe('recupero');
+    expect(esercizioDelGiorno(g, false, MENU)?.tipo).toBe('forza_riflessi');
+    const settimana = Array.from({ length: 7 }, (_, i) => esercizioDelGiorno(giorno(`2027-01-${11 + i}`), false, MENU)?.id);
+    expect(new Set(settimana).size).toBeGreaterThan(1);
+    // nessun esercizio di quel tipo: si sceglie tra tutti; menu vuoto: niente
+    expect(esercizioDelGiorno(g, true, MENU.slice(0, 1))?.id).toBe('plank');
+    expect(esercizioDelGiorno(g, true, [])).toBeUndefined();
+  });
+  it('partite: in campo +10 e +15 se vinta, tutta in panchina +5 e +5', () => {
+    const p = CONFIG.passi.partite;
+    expect([p.giocata, p.vinta_in_piu, p.panchina, p.panchina_vinta_in_piu]).toEqual([10, 15, 5, 5]);
+    expect(passiPartita(3, 1)).toEqual({ giocata: 10, vinta: 15 });
+    expect(passiPartita(1, 3)).toEqual({ giocata: 10, vinta: 0 });
+    expect(passiPartita(3, 0, false)).toEqual({ giocata: 5, vinta: 5 });
+    expect(passiPartita(0, 3, false)).toEqual({ giocata: 5, vinta: 0 });
   });
 });

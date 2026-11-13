@@ -14,6 +14,7 @@ type Errore = { creato_il: string; dove: string | null; messaggio: string; origi
 const PROSSIMI: [string, string[]][] = [
   ['Nuvola', ['14:30', '19:30']],
   ['Calendario', Array.from({ length: 24 }, (_, h) => `${String(h).padStart(2, '0')}:05`)],
+  ['Classifiche', ['06:15']],
 ];
 
 const quando = (iso: string) => {
@@ -28,7 +29,7 @@ export default function Stato({ client }: { client: SupabaseClient }) {
   useEffect(() => {
     const settimana = new Date(Date.now() - 7 * 864e5).toISOString();
     Promise.all([
-      client.from('sync_log').select('fonte, esito, iniziato_il, finito_il').order('iniziato_il', { ascending: false }).limit(30),
+      client.from('sync_log').select('fonte, esito, iniziato_il, finito_il').order('iniziato_il', { ascending: false }).limit(60), // ~2 giorni: il calendario gira ogni ora, le classifiche una volta
       client.from('settimane').select('inizio, chiavi').not('chiavi', 'is', null).order('inizio', { ascending: false }).limit(1),
       client.from('errori_client').select('creato_il, dove, messaggio, origine').order('creato_il', { ascending: false }).limit(5),
       client.from('errori_client').select('id', { count: 'exact', head: true }).gte('creato_il', settimana),
@@ -58,6 +59,7 @@ export default function Stato({ client }: { client: SupabaseClient }) {
         <ul className="stato-elenco">
           {riga('Nuvola', 'nuvola', PROSSIMI[0][1])}
           {riga('Calendario', 'calendario', PROSSIMI[1][1])}
+          {riga('Classifiche FIPAV', 'classifiche', PROSSIMI[2][1])}
           <li>
             <b>Chiavi della domenica</b>
             <span>{s.chiavi ? `${s.chiavi.chiavi} ${s.chiavi.chiavi === 1 ? 'chiave' : 'chiavi'} nella settimana dal ${Number(s.chiavi.inizio.slice(8))}` : 'ancora nessuna settimana contata'}</span>

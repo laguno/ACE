@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState, useSyncExternalStore } from 'react';
-import { BookOpen, MoonStars, Star, Sun } from '@phosphor-icons/react';
+import { BookOpen, MoonStars, Star, Sun, Volleyball } from '@phosphor-icons/react';
 import type { Session } from '@supabase/supabase-js';
 import Accesso from './Accesso';
 import Oggi from './Oggi';
@@ -8,23 +8,27 @@ import CodaPopup from './Popup';
 import Benvenuta, { daAccogliere } from './Benvenuta';
 import { oraAdesso, useGiornata } from './giornata';
 import * as C from './lib/calendario';
+import * as R from './lib/regole';
 import { Attesa } from './kit';
 import { rinnovaIscrizione } from './notifiche';
 import { CHIAVE_SESSIONE, supabase, type Profilo } from './supabase';
+import { useREvolutionDa } from './accensione';
 
 // L'app si apre su Oggi o Sera: le altre schermate si caricano al primo tocco (il service worker
 // le tiene già in memoria, anche senza rete).
 const AreaGenitori = lazy(() => import('./AreaGenitori'));
 const Studio = lazy(() => import('./Studio'));
 const Astra = lazy(() => import('./Astra'));
+const REvolution = lazy(() => import('./REvolution'));
 const Figurina = lazy(() => import('./Figurine').then((m) => ({ default: m.Figurina })));
 const Album = lazy(() => import('./Figurine').then((m) => ({ default: m.Album })));
 
-// R-Evolution resta nascosta nello sprint 1: comparirà con un popup di annuncio.
-const VOCI = ['Oggi', 'Studio', 'Sera', 'Astra'] as const;
+// R-Evolution (sprint 2) compare nella barra da quando i genitori la accendono (Impostazioni).
+const TUTTE = ['Oggi', 'Studio', 'Sera', 'R-Evolution', 'Astra'] as const;
+const voci = (rEvolutionDa: string | null) => TUTTE.filter((v) => v !== 'R-Evolution' || R.rEvolutionAttiva(R.giornoRoma(new Date()), rEvolutionDa));
 // icone di servizio Phosphor (design/Stile.html): bold, la sezione attiva piena in fucsia scuro
-const ICONE = { Oggi: Sun, Studio: BookOpen, Sera: MoonStars, Astra: Star };
-type Voce = (typeof VOCI)[number] | 'Genitori' | 'Figurina' | 'Album';
+const ICONE = { Oggi: Sun, Studio: BookOpen, Sera: MoonStars, 'R-Evolution': Volleyball, Astra: Star };
+type Voce = (typeof TUTTE)[number] | 'Genitori' | 'Figurina' | 'Album';
 
 // Senza rete e con il gettone scaduto Supabase non riesce a rinnovarlo e risponde "nessuna sessione",
 // ma la tiene salvata (la toglie solo uscendo o con un rinnovo rifiutato): finché c'è, si resta dentro
@@ -127,6 +131,7 @@ export default function App() {
 /** Parte di Lani: si apre su Sera da un'ora prima della chiusura, altrimenti su Oggi. */
 function Lani() {
   const giornata = useGiornata();
+  const barra = voci(useREvolutionDa());
   const [accogli, setAccogli] = useState(daAccogliere);
   const [voce, setVoce] = useState<Voce>();
   // "Prova" del popup dell'enigma: Astra si apre sul forziere con il biglietto
@@ -154,6 +159,8 @@ function Lani() {
             <Oggi apri={setVoce} />
           ) : voce === 'Studio' ? (
             <Studio />
+          ) : voce === 'R-Evolution' ? (
+            <REvolution />
           ) : voce === 'Figurina' ? (
             <Figurina chiudi={() => setVoce('Astra')} />
           ) : voce === 'Album' ? (
@@ -166,15 +173,22 @@ function Lani() {
           Genitori
         </button>
       </main>
-      <CodaPopup apriEnigma={(n) => (setForziere(n), setVoce('Astra'))} apriStudio={() => setVoce('Studio')} />
-      <nav className="barra" aria-label="Sezioni">
-        {VOCI.map((v) => {
+      <CodaPopup apriEnigma={(n) => (setForziere(n), setVoce('Astra'))} apriStudio={() => setVoce('Studio')} apriREvolution={() => setVoce('R-Evolution')} />
+      <nav className={`barra${barra.length > 4 ? ' cinque' : ''}`} aria-label="Sezioni">
+        {barra.map((v) => {
           const attiva = v === voce || (v === 'Astra' && (voce === 'Figurina' || voce === 'Album'));
           const Icona = ICONE[v];
           return (
-            <button key={v} aria-current={attiva ? 'page' : undefined} onClick={() => (setForziere(undefined), setVoce(v))}>
+            <button key={v} aria-current={attiva ? 'page' : undefined} aria-label={v} onClick={() => (setForziere(undefined), setVoce(v))}>
               <Icona size={24} weight={attiva ? 'fill' : 'bold'} aria-hidden />
-              {v}
+              {v === 'R-Evolution' ? (
+                <>
+                  <span className="lungo">{v}</span>
+                  <span className="corto">R-Evo</span>
+                </>
+              ) : (
+                v
+              )}
             </button>
           );
         })}

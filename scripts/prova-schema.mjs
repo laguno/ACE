@@ -38,6 +38,40 @@ await come(LANI, `update compiti set fatto_il = '2026-11-01' where id = '${COMPI
 verifica('una spunta già data non si sposta', (await val(null, 'select fatto_il::text from compiti')) === primaOra);
 await come(LANI, `insert into serate (data, cartella_il) values (oggi(), '2026-11-01')`);
 verifica('serata: ora del server', (await val(null, `select cartella_il > now() - interval '1 minute' from serate`)) === true);
+await come(LANI, `update serate set dieci_minuti_da = '2026-11-01', dieci_minuti_esercizio = 'plank' where data = oggi()`);
+verifica('dieci minuti: avvio con l\'ora del server', (await val(null, `select dieci_minuti_da > now() - interval '1 minute' from serate`)) === true);
+verifica('dieci minuti: Lani sceglie l\'esercizio', (await val(null, `select dieci_minuti_esercizio from serate`)) === 'plank');
+// partite (sprint 2): le segna Lani da approvare, le approva e corregge un genitore
+await fallisce('partita: Lani non se la segna già approvata', LANI, `insert into partite (avversaria, set_nostri, set_loro, approvata_il) values ('Foxes', 3, 0, now())`);
+await fallisce('partita: Lani non la segna di un mese fa', LANI, `insert into partite (data, avversaria, set_nostri, set_loro) values (oggi() - 30, 'Foxes', 3, 0)`);
+await fallisce('partita: Lani non la segna a nome di un genitore', LANI, `insert into partite (avversaria, set_nostri, set_loro, dato_da) values ('Foxes', 3, 0, '${PAPA}')`);
+await fallisce('partita: niente pareggi', PAPA, `insert into partite (avversaria, set_nostri, set_loro) values ('Foxes', 2, 2)`);
+await come(LANI, `insert into partite (avversaria, set_nostri, set_loro, in_campo) values ('Foxes', 3, 1, false)`);
+verifica('partita: Lani la segna da approvare', (await val(null, `select count(*)::int from partite where approvata_il is null and not in_campo`)) === 1);
+await come(LANI, `update partite set approvata_il = now(), set_loro = 0`);
+verifica('partita: Lani non la approva né la corregge', (await val(null, `select approvata_il is null and set_loro = 1 from partite`)) === true);
+await come(PAPA, `update partite set approvata_il = now(), approvata_da = '${LANI}'`);
+verifica('partita: approvata dal genitore, la firma la mette il server', (await val(null, `select approvata_da::text from partite`)) === PAPA);
+await come(LANI, `delete from partite`);
+verifica('partita: Lani non la cancella', (await val(null, `select count(*)::int from partite`)) === 1);
+await come(null, `delete from partite`);
+// menu dei dieci minuti (sprint 2): lo legge Lani, lo cambiano i genitori
+verifica('menu dei dieci minuti: Lani lo legge', (await come(LANI, 'select * from esercizi_dieci_minuti')).rows.length === 5);
+await fallisce('menu dei dieci minuti: Lani non lo cambia', LANI, `insert into esercizi_dieci_minuti (nome, tipo) values ('Corda', 'recupero')`);
+await come(PAPA, `insert into esercizi_dieci_minuti (nome, tipo) values ('Corda', 'recupero')`);
+verifica('menu dei dieci minuti: il genitore aggiunge', (await val(null, `select count(*)::int from esercizi_dieci_minuti`)) === 6);
+await fallisce('menu dei dieci minuti: tipo sconosciuto', PAPA, `insert into esercizi_dieci_minuti (nome, tipo) values ('Salti', 'salti')`);
+await come(PAPA, `delete from esercizi_dieci_minuti where nome = 'Corda'`);
+verifica('menu dei dieci minuti: il genitore toglie', (await val(null, `select count(*)::int from esercizi_dieci_minuti`)) === 5);
+// annuncio di R-Evolution (0034): l'accensione del genitore accoda il popup, una volta per giorno
+await come(PAPA, `insert into impostazioni (chiave, valore) values ('r_evolution_da', '"2026-11-23"')`);
+await come(PAPA, `delete from impostazioni where chiave = 'r_evolution_da'`);
+await come(PAPA, `insert into impostazioni (chiave, valore) values ('r_evolution_da', '"2026-11-23"')`);
+verifica('R-Evolution accesa: un solo annuncio per Lani', (await val(LANI, `select count(*)::int from popup_coda where chiave = 'r_evolution:2026-11-23' and situazione = 'r_evolution_accesa'`)) === 1);
+await fallisce('R-Evolution: Lani non chiama il trigger', LANI, `select annuncia_r_evolution()`);
+await come(null, `delete from impostazioni where chiave = 'r_evolution_da'`);
+await come(null, `delete from popup_coda where chiave = 'r_evolution:2026-11-23'`);
+
 await come(LANI, `insert into flashcard_giri (iniziato_il, fatto_il, carte, sapevo, quasi, non_sapevo) values (now() - interval '2 minutes', '2020-01-01', 10, 5, 3, 2)`);
 verifica('giro di flash card: fine con l\'ora del server', (await val(null, `select fatto_il > now() - interval '1 minute' from flashcard_giri`)) === true);
 await fallisce('giro di flash card senza inizio rifiutato', LANI, `insert into flashcard_giri (carte, sapevo, quasi, non_sapevo) values (10, 5, 3, 2)`);
@@ -186,8 +220,9 @@ const inserisce = async (uid, t, ruolo) => {
   }
 };
 // foto_pagine e serate: Lani inserisce solo a condizioni (file vero, data vicina), provate sopra e sotto
-const LANI_INSERISCE = ['errori_client', 'flashcard_giri', 'push_iscrizioni', 'quiz_tentativi', 'umore', 'video_visti'];
-const GENITORE_INSERISCE = [...LANI_INSERISCE, 'foto_pagine', 'serate', 'compiti', 'fogli_firma', 'forzieri', 'frasi', 'gesti_casa', 'impostazioni', 'sgridate'];
+// partite: Lani solo da approvare, provato sopra
+const LANI_INSERISCE = ['errori_client', 'flashcard_giri', 'partite', 'push_iscrizioni', 'quiz_tentativi', 'umore', 'video_visti'];
+const GENITORE_INSERISCE = [...LANI_INSERISCE, 'foto_pagine', 'serate', 'compiti', 'esercizi_dieci_minuti', 'fogli_firma', 'forzieri', 'frasi', 'gesti_casa', 'impostazioni', 'sgridate'];
 for (const t of tabelle) {
   verifica(`anon non inserisce in ${t}`, !(await inserisce(null, t, 'anon')));
   verifica(`anon non legge ${t}`, await come(null, `select * from ${t}`, 'anon').then((r) => r.rows.length === 0, () => true));

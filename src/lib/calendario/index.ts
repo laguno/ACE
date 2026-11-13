@@ -12,6 +12,18 @@ export function tipoImpegno(titolo: string): TipoImpegno {
   return 'famiglia';
 }
 
+/**
+ * Avversaria dal titolo di una partita del calendario di famiglia, scritto come
+ * "Partita Lani U13: CASA vs OSPITI": la squadra che non è R-Evolution. null se il titolo non torna.
+ */
+export function avversariaDelTitolo(titolo: string): string | null {
+  const m = /:\s*(.+?)\s+vs\.?\s+(.+?)\s*$/i.exec(titolo);
+  if (!m) return null;
+  const noi = (s: string) => /r-?evolut/i.test(s);
+  if (noi(m[1]) === noi(m[2])) return null;
+  return (noi(m[1]) ? m[2] : m[1]).slice(0, 60);
+}
+
 /** Borsa pronta: la sera prima di un allenamento o di una partita di Lani (docs/02). */
 export function serveBorsa(titoliDiDomani: string[]): boolean {
   return titoliDiDomani.some((t) => tipoImpegno(t) !== 'famiglia');

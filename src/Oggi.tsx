@@ -11,6 +11,8 @@ import * as R from './lib/regole';
 import { GIORNI, MESI, RigaCompito, SELECT_COMPITI, adesso, maiuscola, spuntaCompito, useAnnulla, type Compito } from './spunte';
 import { attivaNotifiche, notifichePossibili } from './notifiche';
 import { supabase } from './supabase';
+import { DieciMinuti } from './DieciMinuti';
+import { useREvolutionDa } from './accensione';
 
 // Oggi — design/Oggi.html (mattina) e design/Pomeriggio.html (pomeriggio).
 // ponytail: riga dell'umore facoltativa e foto dei compiti, più avanti.
@@ -37,13 +39,20 @@ const ICONE = {
 
 export default function Oggi({ apri = () => {} }: { apri?: Apri }) {
   const giornata = useGiornata();
+  const rEvolutionDa = useREvolutionDa();
   if (!giornata) return <Attesa />;
+  const oggi = R.giornoRoma(new Date());
   return (
     <>
       {C.momento(oraAdesso(), giornata.chiusura) === 'mattina' ? (
         <Mattina impegni={giornata.impegni} apri={apri} />
       ) : (
         <Pomeriggio chiusura={giornata.chiusura} apri={apri} />
+      )}
+      {R.rEvolutionAttiva(oggi, rEvolutionDa) && (
+        <section className="schermo dopo">
+          <DieciMinuti oggi={oggi} />
+        </section>
       )}
       <AttivaNotifiche />
     </>

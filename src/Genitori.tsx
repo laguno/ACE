@@ -10,6 +10,7 @@ import { Biglietto } from './Biglietto';
 import { ImmaginePremio, immaginiPremi, type Immagine } from './ImmaginePremio';
 import { FotoSalvate, Fotografa, SELECT_RICHIESTE, descrizione, type RichiestaFoto } from './Foto';
 import Stato from './Stato';
+import { PartiteDaApprovare, SegnaPartita } from './Partita';
 
 // Area genitori — design/Genitori.html. Tutto passa dal client del genitore (sul suo telefono la
 // sessione normale, sull'iPad di Lani quella a parte sbloccata con il PIN): la RLS lo riconosce
@@ -191,16 +192,17 @@ function Settimana({ client, passi, avvisa }: Props) {
   const oggi = R.giornoRoma(new Date());
   const lun = R.lunedi(oggi);
   const dom = new Date(lun.getFullYear(), lun.getMonth(), lun.getDate() + 6);
-  const [d, setD] = useState<{ media: number | null; obiettivo: number; note: number; serate: number; gestiOggi: number; foto: RichiestaFoto[] }>();
+  const [d, setD] = useState<{ media: number | null; obiettivo: number; note: number; serate: number; gestiOggi: number; foto: RichiestaFoto[]; rEvolutionDa: string | null }>();
 
   async function carica() {
-    const [v, o, n, s, g, rf] = await Promise.all([
+    const [v, o, n, s, g, rf, re] = await Promise.all([
       client.from('voti').select('voto'),
       client.from('impostazioni').select('valore').eq('chiave', 'obiettivo_media').maybeSingle(),
       client.from('note').select('id', { count: 'exact', head: true }).gte('data', R.iso(lun)).lte('data', R.iso(dom)),
       client.from('serate').select('data').gte('data', R.iso(lun)).lte('data', R.iso(dom)).not('cartella_il', 'is', null),
       client.from('movimenti_passi').select('passi').eq('motivo', 'gesto').eq('giorno', R.iso(oggi)),
       client.from('richieste_foto').select(SELECT_RICHIESTE).eq('stato', 'aperta').order('creato_il'),
+      client.from('impostazioni').select('valore').eq('chiave', R.CHIAVE_R_EVOLUTION).maybeSingle(),
     ]);
     const voti = (v.data ?? []).map((x) => Number(x.voto));
     setD({
@@ -210,6 +212,7 @@ function Settimana({ client, passi, avvisa }: Props) {
       serate: (s.data ?? []).length,
       gestiOggi: (g.data ?? []).reduce((a, x) => a + x.passi, 0),
       foto: (rf.data ?? []) as unknown as RichiestaFoto[],
+      rEvolutionDa: typeof re.data?.valore === 'string' ? re.data.valore : null,
     });
   }
   useEffect(() => {
@@ -298,6 +301,12 @@ function Settimana({ client, passi, avvisa }: Props) {
         </div>
         <p className="nota piccola">Lani vedrà la tua faccia col pollice.</p>
       </div>
+      {R.rEvolutionAttiva(oggi, d.rEvolutionDa) && (
+        <>
+          <PartiteDaApprovare client={client} passi={passi} avvisa={avvisa} />
+          <SegnaPartita client={client} passi={passi} avvisa={avvisa} />
+        </>
+      )}
       <div className="carta">
         <h2>Da segnare, se serve</h2>
         <div className="griglia tre">
@@ -633,6 +642,8 @@ function Impostazioni({ client, avvisa }: Props) {
         <button className="principale">Salva</button>
       </form>
       <FrasiDiFamiglia client={client} avvisa={avvisa} />
+      <InterruttoreREvolution client={client} avvisa={avvisa} />
+      <MenuDieciMinuti client={client} avvisa={avvisa} />
       <form className="carta modulo" onSubmit={pin}>
         <h2>PIN dell’area genitori (iPad)</h2>
         <label>
@@ -642,6 +653,153 @@ function Impostazioni({ client, avvisa }: Props) {
         <button className="principale">Salva PIN</button>
       </form>
     </>
+  );
+}
+
+/**
+ * R-Evolution (sprint 2) non ha una data: la accendono i genitori. Da quel giorno Lani vede la voce
+ * nella barra e i dieci minuti, le partite danno passi e la bandierina pesa di più i giorni dopo.
+ */
+function InterruttoreREvolution({ client, avvisa }: Pick<Props, 'client' | 'avvisa'>) {
+  // undefined: in lettura; 'errore': lettura fallita (niente pulsante, sennò si riscrive la data vera)
+  const [da, setDa] = useState<string | null | 'errore'>();
+  const carica = () =>
+    client
+      .from('impostazioni')
+      .select('valore')
+      .eq('chiave', R.CHIAVE_R_EVOLUTION)
+      .maybeSingle()
+      .then(({ data, error }) => setDa(error ? 'errore' : typeof data?.valore === 'string' ? data.valore : null));
+  useEffect(() => {
+    carica();
+  }, []);
+
+  async function accendi() {
+    const { error } = await client.from('impostazioni').upsert({ chiave: R.CHIAVE_R_EVOLUTION, valore: R.iso(R.giornoRoma(new Date())) });
+    avvisa(error ? 'R-Evolution non accesa. Riprova.' : 'R-Evolution accesa: Lani la trova alla prossima apertura.');
+    carica();
+  }
+  async function spegni() {
+    const { error } = await client.from('impostazioni').delete().eq('chiave', R.CHIAVE_R_EVOLUTION);
+    avvisa(error ? 'R-Evolution non spenta. Riprova.' : 'R-Evolution spenta. I passi già presi restano.');
+    carica();
+  }
+
+  if (da === undefined) return null;
+  if (da === 'errore')
+    return (
+      <div className="carta modulo">
+        <h2>R-Evolution</h2>
+        <p role="alert">Non riesco a leggere se R-Evolution è accesa. Riprova tra poco.</p>
+        <button type="button" className="secondario" onClick={carica}>
+          Riprova
+        </button>
+      </div>
+    );
+  const g = da ? R.giorno(da) : null;
+  return (
+    <div className="carta modulo">
+      <h2>R-Evolution</h2>
+      {g ? (
+        <>
+          <p className="nota">
+            Accesa dal {g.getDate()} {MESI[g.getMonth()]}: dieci minuti al mattino, partite segnate da Lani, classifiche.
+          </p>
+          <button type="button" className="secondario" onClick={spegni}>
+            Spegni R-Evolution
+          </button>
+        </>
+      ) : (
+        <>
+          <p className="nota">Spenta. Da quando la accendete Lani vede la sezione R-Evolution e i dieci minuti al mattino, e le partite danno passi.</p>
+          <button type="button" className="principale" onClick={accendi}>
+            Accendi R-Evolution da oggi
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+
+const TIPI_DIECI_MINUTI = [
+  ['forza_riflessi', 'Forza e riflessi (giorni senza pallavolo)'],
+  ['recupero', 'Recupero (giorni di pallavolo)'],
+] as const;
+
+/** Menu dei dieci minuti (docs/01): lo cambiano i genitori. Almeno un esercizio per tipo resta. */
+function MenuDieciMinuti({ client, avvisa }: Pick<Props, 'client' | 'avvisa'>) {
+  const [menu, setMenu] = useState<R.EsercizioDieciMinuti[]>([]);
+  const carica = () =>
+    client
+      .from('esercizi_dieci_minuti')
+      .select('id, nome, tipo')
+      .order('creato_il')
+      .then(({ data }) => setMenu(data ?? []));
+  useEffect(() => {
+    carica();
+  }, []);
+
+  async function aggiungi(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const f = new FormData(form);
+    const { error } = await client.from('esercizi_dieci_minuti').insert({ nome: String(f.get('nome')).trim(), tipo: String(f.get('tipo')) });
+    avvisa(error ? 'Esercizio non salvato: forse c’è già.' : 'Esercizio aggiunto al menu.');
+    if (!error) {
+      form.reset();
+      carica();
+    }
+  }
+  async function togli(id: string) {
+    const { error } = await client.from('esercizi_dieci_minuti').delete().eq('id', id);
+    avvisa(error ? 'Esercizio non tolto.' : 'Esercizio tolto dal menu.');
+    carica();
+  }
+
+  return (
+    <form className="carta modulo" onSubmit={aggiungi}>
+      <h2>Menu dei dieci minuti</h2>
+      <p className="nota">Al mattino l’app propone un esercizio del tipo giusto per la giornata; Lani può sceglierne un altro.</p>
+      {TIPI_DIECI_MINUTI.map(([tipo, titolo]) => {
+        const delTipo = menu.filter((x) => x.tipo === tipo);
+        return (
+          <fieldset key={tipo} className="giorno">
+            <legend>{titolo}</legend>
+            <ul className="spunte">
+              {delTipo.map((x) => (
+                <li key={x.id} className="foglio">
+                  <span>{x.nome}</span>
+                  <button
+                    type="button"
+                    className="secondario stretto"
+                    disabled={delTipo.length < 2}
+                    onClick={() => togli(x.id)}
+                    aria-label={`Togli: ${x.nome}`}
+                  >
+                    Togli
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </fieldset>
+        );
+      })}
+      <label>
+        Esercizio nuovo
+        <input name="nome" maxLength={60} required autoComplete="off" placeholder="Corda, addominali…" />
+      </label>
+      <label>
+        Tipo
+        <select name="tipo" defaultValue="forza_riflessi">
+          {TIPI_DIECI_MINUTI.map(([tipo, titolo]) => (
+            <option key={tipo} value={tipo}>
+              {titolo}
+            </option>
+          ))}
+        </select>
+      </label>
+      <button className="principale">Aggiungi al menu</button>
+    </form>
   );
 }
 

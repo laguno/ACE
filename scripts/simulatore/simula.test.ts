@@ -20,6 +20,10 @@ test('4 settimane del profilo normale: invarianti e passi', { timeout: 120_000 }
   expect(r.settimane).toHaveLength(4);
   // il database segue l'orologio finto: i movimenti hanno i giorni simulati
   expect(Object.keys(r.giorni[1].motivi).length).toBeGreaterThan(0);
+  // R-Evolution accesa dal giorno previsto: dieci minuti e partite danno passi col codice vero
+  const motivi = new Set(r.giorni.flatMap((g) => Object.keys(g.motivi)));
+  expect(motivi).toContain('dieci_minuti');
+  expect(motivi).toContain('partita');
 });
 
 test.skipIf(!process.env.ANNO)('anno intero, tutti i profili', { timeout: 3_600_000 }, async () => {

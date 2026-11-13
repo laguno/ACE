@@ -212,7 +212,7 @@ function pesoGiorno(d: Date, rEvolutionDa: string): number {
 export function bandierina(
   oggi: Date,
   totale: number = CONFIG.percorso.totale_passi,
-  rEvolutionDa: string = CONFIG.periodo.r_evolution_da,
+  rEvolutionDa: string = CONFIG.periodo.r_evolution_prevista,
 ): number {
   const inizio = new Date(CONFIG.periodo.inizio + 'T00:00:00');
   const fine = new Date(CONFIG.periodo.fine + 'T00:00:00');
@@ -419,15 +419,85 @@ export function prossimaRevisione(intervallo: number, esito: Esito, oggi: Date):
   return { intervallo: nuovo, data: iso(d) };
 }
 
+// ---------------------------------------------------------------- dieci minuti (sprint 2)
+
+/** Menu dei dieci minuti: tabella esercizi_dieci_minuti, la cambiano i genitori. */
+export type EsercizioDieciMinuti = { id: string; nome: string; tipo: string };
+
+/** Impostazione (tabella impostazioni) in cui i genitori salvano il giorno di accensione di R-Evolution. */
+export const CHIAVE_R_EVOLUTION = 'r_evolution_da';
+
+/**
+ * R-Evolution non ha una data fissa: la accendono i genitori (impostazione r_evolution_da,
+ * 'YYYY-MM-DD'). Spenta (null) niente voce nella barra, niente dieci minuti, niente passi dalle partite.
+ */
+export function rEvolutionAttiva(g: Date, accesaDa: string | null | undefined): boolean {
+  return !!accesaDa && iso(g) >= accesaDa;
+}
+
+/** Giorno da cui la bandierina pesa i giorni di R-Evolution: quello vero se accesa, se no quello previsto. */
+export function inizioREvolution(accesaDa: string | null | undefined): string {
+  return accesaDa ?? CONFIG.periodo.r_evolution_prevista;
+}
+
+const oraRomana = (t: Date) =>
+  new Intl.DateTimeFormat('it-IT', { timeZone: 'Europe/Rome', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(t);
+
+/** Si possono avviare adesso? Solo al mattino, nella finestra del config (ora di Roma). */
+export function dentroFinestraDieciMinuti(t: Date): boolean {
+  const ora = oraRomana(t);
+  return ora >= CONFIG.dieci_minuti.finestra.da && ora < CONFIG.dieci_minuti.finestra.a;
+}
+
+/**
+ * Valgono solo se avviati dentro la finestra del mattino, con il timer arrivato in fondo (tra avvio
+ * e spunta almeno i secondi del config) e spuntati lo stesso giorno.
+ */
+export function dieciMinutiValidi(da: Date | null, il: Date | null): boolean {
+  return (
+    !!da &&
+    !!il &&
+    dentroFinestraDieciMinuti(da) &&
+    iso(giornoRoma(da)) === iso(giornoRoma(il)) &&
+    il.getTime() - da.getTime() >= CONFIG.dieci_minuti.secondi * 1000
+  );
+}
+
+/**
+ * Esercizio proposto per il giorno: recupero nei giorni di pallavolo, forza e riflessi negli altri,
+ * a rotazione sul giorno dell'anno così non è sempre lo stesso. Lani può sceglierne un altro.
+ * Se nel menu non c'è nessun esercizio di quel tipo si sceglie tra tutti; menu vuoto: undefined.
+ */
+export function esercizioDelGiorno<E extends EsercizioDieciMinuti>(g: Date, pallavolo: boolean, menu: E[]): E | undefined {
+  const tipo = pallavolo ? 'recupero' : 'forza_riflessi';
+  const delTipo = menu.filter((e) => e.tipo === tipo);
+  const scelta = delTipo.length ? delTipo : menu;
+  const giornoAnno = Math.round((Date.UTC(g.getFullYear(), g.getMonth(), g.getDate()) - Date.UTC(g.getFullYear(), 0, 1)) / 86400000);
+  return scelta[giornoAnno % scelta.length];
+}
+
+/**
+ * Partita (da R-Evolution): passi per esserci stata e, se vinta, quelli in più.
+ * Tutta la gara in panchina vale meno (passi.partite.panchina_*), ma vale.
+ */
+export function passiPartita(setNostri: number, setLoro: number, inCampo = true): { giocata: number; vinta: number } {
+  const p = P.partite;
+  const vinta = setNostri > setLoro;
+  return inCampo
+    ? { giocata: p.giocata, vinta: vinta ? p.vinta_in_piu : 0 }
+    : { giocata: p.panchina, vinta: vinta ? p.panchina_vinta_in_piu : 0 };
+}
+
 // ---------------------------------------------------------------- conteggio della settimana
 
 /** Motivi dei movimenti che contano come cose obbligatorie (docs/02). */
-const MOTIVI_OBBLIGATORI = ['compito', 'compito_rifatto', 'cartella', 'borsa', 'foglio', 'ripasso'] as const;
+const MOTIVI_OBBLIGATORI = ['compito', 'compito_rifatto', 'cartella', 'borsa', 'foglio', 'ripasso', 'dieci_minuti'] as const;
 
 /**
  * Cose obbligatorie possibili e fatte in una settimana, per le chiavi della domenica.
  * Possibili: compiti in scadenza, sere con la cartella (domani c'è scuola), sere con la borsa,
- * fogli da consegnare, sessioni di ripasso previste. Fatte: i movimenti obbligatori della settimana.
+ * fogli da consegnare, sessioni di ripasso previste, sere con i dieci minuti (da R-Evolution).
+ * Fatte: i movimenti obbligatori della settimana.
  */
 export function contaSettimana(s: {
   compiti: number;
@@ -435,16 +505,19 @@ export function contaSettimana(s: {
   sereBorsa: number;
   fogli: number;
   sessioni: number;
+  /** Sere con i dieci minuti: 0 prima di R-Evolution. */
+  sereDieciMinuti?: number;
   movimenti: { motivo: string; passi: number }[];
   note: number;
 }): SettimanaObbligatori {
   const o = P.obbligatori;
   const fatti = s.movimenti.filter((m) => (MOTIVI_OBBLIGATORI as readonly string[]).includes(m.motivo) && m.passi > 0);
-  // ponytail: i dieci minuti (sprint 2) entreranno qui come sereDieciMinuti × o.dieci_minuti
+  const dieci = s.sereDieciMinuti ?? 0;
   return {
-    passiPossibili: s.compiti * o.compiti + s.sereCartella * o.cartella + s.sereBorsa * o.borsa + s.fogli * o.fogli + s.sessioni * o.ripasso,
+    passiPossibili:
+      s.compiti * o.compiti + s.sereCartella * o.cartella + s.sereBorsa * o.borsa + s.fogli * o.fogli + s.sessioni * o.ripasso + dieci * o.dieci_minuti,
     passiFatti: fatti.reduce((a, m) => a + m.passi, 0),
-    cosePossibili: s.compiti + s.sereCartella + s.sereBorsa + s.fogli + s.sessioni,
+    cosePossibili: s.compiti + s.sereCartella + s.sereBorsa + s.fogli + s.sessioni + dieci,
     coseFatte: fatti.length,
     note: s.note,
   };

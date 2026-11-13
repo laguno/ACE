@@ -171,6 +171,12 @@ Linea dura, come deciso: il rimprovero arriva subito, dice quanto è costato e c
 | Riscatto: sette giorni di cartella completa dopo una nota | papa-pollice | "Sette giorni di cartella completa dopo la nota. Papà se n'è accorto." | fischio | 0 (è un riconoscimento) |
 | Bagno, terza volta nella settimana | leo-sbuffa | "Leo non entra in bagno dopo di te, puzzolona. −1." | sbuffo | −1 |
 
+**Annuncio di R-Evolution** (signore, 13/11). Il giorno in cui un genitore accende R-Evolution, alla prima apertura di Lani (trigger di 0034).
+
+| Situazione | Posa | Titolo | Testo | Pulsante | Passi |
+|---|---|---|---|---|---|
+| R-Evolution accesa | lani-divisa | Arriva R-Evolution | "Da oggi anche la pallavolo fa camminare Astra: dieci minuti al mattino, le tue partite e le classifiche del campionato." | Vediamo (apre R-Evolution) | 0 |
+
 **Bastone, aggiunte del 7 novembre.** Li segna un genitore; parte subito il popup e si sblocca la figurina della serie nera.
 
 | Situazione | Posa | Testo | Verso | Passi |
@@ -218,7 +224,7 @@ Sul percorso la famiglia fa il tifo dal bordo. Ogni messaggio dice dove si trova
 
 Deciso dal signore il 6 novembre: i punti si chiamano **passi** e le stelle **chiavi**. I passi fanno camminare lungo il percorso, le chiavi aprono i forzieri. Il calcolo resta quello approvato.
 
-- **Passi.** Ogni azione dà passi: "+10 passi", "−1 passo". Le tappe costano da 125 a 410 passi (percorso di 7.200, ricalcolato il 7 novembre).
+- **Passi.** Ogni azione dà passi: "+10 passi", "−1 passo". Le tappe costano da 120 a 410 passi (percorso di 7.200, tarato il 13 novembre col simulatore vero).
 - **Chiavi.** Ogni domenica sera da 0 a 3 chiavi, contate solo sulle cose obbligatorie (compiti, cartella, borsa, fogli, ripasso prima delle verifiche e, con R-Evolution, i dieci minuti): una con almeno il 70% fatto, due se in più nessuna nota, tre se ha fatto quasi tutto. Una nota toglie la seconda chiave. Lo studio facoltativo dà passi, non chiavi.
 - **Ogni forziere mostra sul lucchetto quante chiavi servono**, con un numero fisso:
 

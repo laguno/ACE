@@ -14,17 +14,17 @@ Mantra dell'app: **"Ogni giorno, passino passino."**
 
 ## Il percorso
 
-27 tappe per **7.200 passi**, sempre più care (come nei videogiochi): 125, 135, 145, 160, 170, 180, 190, 200, 210, 225, 235, 245, 255, 265, 280, 290, 300, 310, 320, 330, 345, 355, 365, 375, 385, 395, 410.
+27 tappe per **7.200 passi**, sempre più care (come nei videogiochi): 120, 130, 145, 155, 165, 175, 190, 200, 210, 220, 235, 245, 255, 265, 280, 290, 300, 310, 325, 335, 345, 355, 370, 380, 390, 400, 410. Decisi il 13/11/2026 sulla taratura col simulatore vero (`npm run simula`, `docs/simulazione/taratura.md`) con R-Evolution accesa il 16/11: con l'80% di impegno la cima arriva in 8 anni simulati su 10, verso fine maggio. Il 7.700 deciso prima la stessa mattina veniva dal modello semplificato, che sovrastimava di circa 900 passi.
 
 | Forziere | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | Cima |
 |---|---|---|---|---|---|---|---|---|---|
 | Tappa | 3 | 6 | 9 | 12 | 15 | 18 | 21 | 24 | 27 |
-| Passi | 405 | 915 | 1.515 | 2.220 | 3.020 | 3.920 | 4.915 | 6.010 | 7.200 |
+| Passi | 395 | 890 | 1.490 | 2.190 | 2.990 | 3.890 | 4.895 | 6.000 | 7.200 |
 | Chiavi totali | 2 | 4 | 7 | 14 | 17 | 21 | 26 | 31 | 36 |
 
 Quattro mondi (sfondi in `public/assets/sfondi/`): Colline di caramelle, Montagne di zucchero, Nuvole di zucchero filato, Lo spazio.
 
-**Se R-Evolution esce a dicembre** il percorso giusto è di 7.600 passi (`config.percorso.alternativa_r_evolution_dicembre`). Alla taratura di inizio dicembre si alzano **solo le tappe ancora da fare**: Lani non deve mai vedere cambiare nulla all'indietro.
+**R-Evolution** non ha una data: la accendono i genitori in Impostazioni. Se si ritara il percorso dopo l'inizio del gioco si cambiano **solo le tappe ancora da fare**: Lani non deve mai vedere cambiare nulla all'indietro.
 
 ## Passi: cose obbligatorie (contano anche per le chiavi)
 
@@ -134,7 +134,7 @@ Forziere d'oro in R-Evolution, fuori dai 9: «convocata nella rappresentativa te
 
 ## Taratura
 
-Dopo due settimane d'uso si confrontano i passi reali con il modello (`scripts/simula_passi.py`) e si ritoccano i numeri in `data/config-gioco.json`. Risultati attesi con le regole attuali (R-Evolution a gennaio):
+Dopo due settimane d'uso si confrontano i passi reali con il simulatore vero (`npm run simula`, `npm run simula:anno`) e si ritoccano i numeri in `data/config-gioco.json`. Risultati attesi con le regole attuali (R-Evolution a gennaio):
 
 | Impegno | Arriva in cima | Quando |
 |---|---|---|

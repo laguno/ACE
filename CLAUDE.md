@@ -5,7 +5,7 @@ ACE è un'app ad uso **solo familiare** per Leilani (Lani), 12 anni, seconda med
 ## Leggere prima di scrivere codice
 
 0. HANDOFF.md: leggilo per primo, sempre.
-1. `docs/06-sprint-1.md`: cosa si costruisce ora, in che ordine, criteri di fatto.
+1. `docs/06-sprint-1.md`: cosa si costruisce ora, in che ordine, criteri di fatto. Sprint 2 (R-Evolution): `docs/08-sprint-2.md`, branch `sprint-2`.
 2. `docs/02-regole-di-gioco.md` + `data/config-gioco.json`: regole e numeri (fonte autorevole).
 3. `docs/03-schermate.md` + `design/*.html`: schermate e stile.
 4. `docs/05-copione.md`: ogni testo che vede Lani, con posa e verso.
@@ -45,7 +45,7 @@ ACE è un'app ad uso **solo familiare** per Leilani (Lani), 12 anni, seconda med
 - `npm test`: test delle regole.
 - `npm run prova:schema`: applica le migrazioni su PGlite e prova la sicurezza (cosa può fare Lani).
 - `npm run icone`: rigenera le icone della PWA in `public/icone/`.
-- `npm run simula`: simulazione Monte Carlo del percorso (Python 3), per la taratura.
+- `npm run simula`: taratura del percorso col simulatore vero, più anni simulati per impegno (`TOTALI`, `SEMI`, `ACCESA`; risultati in `docs/simulazione/taratura.md`).
 
 ## Fine sessione
 

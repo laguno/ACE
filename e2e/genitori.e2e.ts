@@ -116,3 +116,89 @@ test('Stato di ACE: sincronizzazioni, chiavi ed errori (filone H)', async ({ pag
   await expect(page.getByRole('heading', { name: 'Errori degli ultimi 7 giorni: 1' })).toBeVisible();
   await expect(page.getByText('Rete assente')).toBeVisible();
 });
+
+const ACCESA = { chiave: 'r_evolution_da', valore: '2027-01-07' };
+
+test('partita (sprint 2): un genitore la segna già approvata e chiama i passi', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2027-01-16T19:00:00+01:00'));
+  const d = dati();
+  const { t, chiamate } = await finto(page, { ...d, impostazioni: [...d.impostazioni, ACCESA], partite: [] }, { passi: { passi: 25 } });
+  await page.goto('/');
+  const carta = page.locator('.carta', { has: page.getByRole('heading', { name: 'Partita', exact: true }) });
+  await carta.getByLabel('Contro').fill('Volley Bibbiano');
+  await carta.getByLabel('Set di Lani').selectOption('3');
+  await carta.getByLabel('Set loro').selectOption('1');
+  await carta.getByRole('button', { name: 'Segna la partita' }).click();
+  await expect(page.getByRole('status')).toContainText('Partita 3-1 con Volley Bibbiano');
+  expect(t.partite[0]).toMatchObject({ data: '2027-01-16', avversaria: 'Volley Bibbiano', set_nostri: 3, set_loro: 1, in_campo: true });
+  expect(t.partite[0].approvata_il).toBeTruthy();
+  await expect.poll(() => chiamate.map((c) => c.tipo)).toEqual(['partita']);
+  await page.screenshot({ path: 'e2e/risultati/genitori-partita.png', fullPage: true });
+});
+
+test('partita segnata da Lani: il genitore corregge e approva, oppure rifiuta', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2027-01-17T10:00:00+01:00'));
+  const d = dati();
+  const partite = [
+    { id: 'p1', data: '2027-01-16', avversaria: 'Foxes Volley', set_nostri: 3, set_loro: 1, in_campo: true, approvata_il: null },
+    { id: 'p2', data: '2027-01-16', avversaria: 'Arbor Itarca', set_nostri: 0, set_loro: 3, in_campo: true, approvata_il: null },
+  ];
+  const { t, chiamate } = await finto(page, { ...d, impostazioni: [...d.impostazioni, ACCESA], partite }, { passi: { passi: 10 } });
+  await page.goto('/');
+  const foxes = page.getByRole('form', { name: 'Partita con Foxes Volley' });
+  await foxes.getByLabel('Set loro').selectOption('2');
+  await foxes.getByLabel('Lani è entrata in campo').uncheck();
+  await foxes.getByRole('button', { name: 'Approva' }).click();
+  await expect(page.getByRole('status')).toHaveText('Partita 3-2 con Foxes Volley approvata: +10 passi.');
+  expect(t.partite.find((p) => p.id === 'p1')).toMatchObject({ set_loro: 2, in_campo: false });
+  expect(t.partite.find((p) => p.id === 'p1')?.approvata_il).toBeTruthy();
+  await expect.poll(() => chiamate).toEqual([{ tipo: 'partita', id: 'p1' }]);
+  await expect(foxes).toHaveCount(0);
+
+  await page.getByRole('form', { name: 'Partita con Arbor Itarca' }).getByRole('button', { name: 'Rifiuta' }).click();
+  await expect(page.getByRole('status')).toHaveText('Partita con Arbor Itarca rifiutata.');
+  expect(t.partite.map((p) => p.id)).toEqual(['p1']);
+  await expect(page.getByRole('heading', { name: 'Partite da approvare' })).toHaveCount(0);
+});
+
+test('Impostazioni (sprint 2): accendere R-Evolution e cambiare il menu dei dieci minuti', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-11-23T18:00:00+01:00'));
+  const menu = [
+    { id: 'plank', nome: 'Plank e varianti', tipo: 'forza_riflessi', creato_il: '2026-11-13T10:00:00Z' },
+    { id: 'visore', nome: 'Riflessi con il visore', tipo: 'forza_riflessi', creato_il: '2026-11-13T10:00:01Z' },
+    { id: 'respiro', nome: 'Respirazione guidata', tipo: 'recupero', creato_il: '2026-11-13T10:00:02Z' },
+  ];
+  const { t } = await finto(page, { ...dati(), esercizi_dieci_minuti: menu });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Altro' }).click();
+  await page.getByRole('button', { name: /^Impostazioni/ }).click();
+
+  await page.getByRole('button', { name: 'Accendi R-Evolution da oggi' }).click();
+  await expect(page.getByRole('status')).toContainText('R-Evolution accesa');
+  expect(t.impostazioni.find((i) => i.chiave === 'r_evolution_da')?.valore).toBe('2026-11-23');
+  await expect(page.getByText(/^Accesa dal 23 novembre/)).toBeVisible();
+
+  const carta = page.locator('form', { has: page.getByRole('heading', { name: 'Menu dei dieci minuti' }) });
+  // l'unico esercizio di recupero non si toglie
+  await expect(carta.getByRole('button', { name: 'Togli: Respirazione guidata' })).toBeDisabled();
+  await carta.getByLabel('Esercizio nuovo').fill('Mobilità delle spalle');
+  await carta.getByLabel('Tipo').selectOption('recupero');
+  await carta.getByRole('button', { name: 'Aggiungi al menu' }).click();
+  await expect(page.getByRole('status')).toHaveText('Esercizio aggiunto al menu.');
+  expect(t.esercizi_dieci_minuti.find((e) => e.nome === 'Mobilità delle spalle')).toMatchObject({ tipo: 'recupero' });
+  await carta.getByRole('button', { name: 'Togli: Riflessi con il visore' }).click();
+  await expect(page.getByRole('status')).toHaveText('Esercizio tolto dal menu.');
+  expect(t.esercizi_dieci_minuti.map((e) => e.id)).not.toContain('visore');
+  await page.screenshot({ path: 'e2e/risultati/genitori-impostazioni-sprint2.png', fullPage: true });
+
+  await page.getByRole('button', { name: 'Spegni R-Evolution' }).click();
+  await expect(page.getByRole('status')).toContainText('R-Evolution spenta');
+  expect(t.impostazioni.find((i) => i.chiave === 'r_evolution_da')).toBeUndefined();
+});
+
+test('partita: prima di R-Evolution non si vede', async ({ page }) => {
+  await finto(page, dati());
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: 'La settimana di Lani' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Partita' })).toHaveCount(0);
+});

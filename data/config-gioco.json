@@ -3,21 +3,23 @@
   "periodo": {
     "inizio": "2026-11-16",
     "fine": "2027-06-04",
-    "r_evolution_da": "2027-01-07"
+    "r_evolution_prevista": "2026-11-16",
+    "nota_r_evolution": "R-Evolution non ha una data: la accendono i genitori in Impostazioni (impostazione r_evolution_da). r_evolution_prevista (16/11, accensione decisa dal signore il 13/11) serve solo alla bandierina finché non è accesa."
   },
   "percorso": {
+    "nota": "7.200 passi, decisi dal signore il 13/11/2026 sulla taratura col simulatore vero (docs/simulazione/taratura.md, npm run simula): con R-Evolution accesa il 16/11, cima con impegno 70/75/80/90% in 10/30/80/100 anni su 100. Il 7.700 di prima veniva dal modello semplificato, che sovrastimava di circa 900 passi.",
     "totale_passi": 7200,
     "costi_tappe": [
-      125,
-      135,
+      120,
+      130,
       145,
-      160,
-      170,
-      180,
+      155,
+      165,
+      175,
       190,
       200,
       210,
-      225,
+      220,
       235,
       245,
       255,
@@ -26,48 +28,16 @@
       290,
       300,
       310,
-      320,
-      330,
+      325,
+      335,
       345,
       355,
-      365,
-      375,
-      385,
-      395,
+      370,
+      380,
+      390,
+      400,
       410
-    ],
-    "alternativa_r_evolution_dicembre": {
-      "totale_passi": 7600,
-      "costi_tappe": [
-        130,
-        140,
-        155,
-        165,
-        175,
-        190,
-        200,
-        210,
-        225,
-        235,
-        245,
-        260,
-        270,
-        280,
-        295,
-        305,
-        315,
-        330,
-        340,
-        350,
-        365,
-        375,
-        385,
-        400,
-        410,
-        420,
-        430
-      ]
-    }
+    ]
   },
   "forzieri": [
     {
@@ -182,7 +152,9 @@
     },
     "partite": {
       "giocata": 10,
-      "vinta_in_piu": 15
+      "vinta_in_piu": 15,
+      "panchina": 5,
+      "panchina_vinta_in_piu": 5
     },
     "enigma_risolto": 20,
     "nota_merito": 50,
@@ -239,6 +211,19 @@
     "mantra": "Ogni giorno, passino passino",
     "max_al_giorno": 1,
     "non_ripetere_prima_di_giorni": 30
+  },
+  "dieci_minuti": {
+    "nota": "Sprint 2 (decisi dal signore il 13/11): al mattino, si avviano dalle 6:00 alle 13:00 tutti i giorni, da quando R-Evolution è accesa. Il menu sta nella tabella esercizi_dieci_minuti (lo cambiano i genitori in Impostazioni). Recupero nei giorni di pallavolo, forza e riflessi negli altri.",
+    "secondi": 600,
+    "finestra": { "da": "06:00", "a": "13:00" }
+  },
+  "classifiche": {
+    "nota": "Sprint 2: classifiche dal portale FIPAV Reggio Emilia, lette una volta al giorno dalla funzione classifiche. Stagione 2026/27. Se la squadra passa alla fase dopo cambia il girone (CId): per ora si cambia qui.",
+    "portale": "https://reggioemilia.portalefipav.net/classifica.aspx?CId=",
+    "campionati": [
+      { "nome": "Under 13", "girone": "U13 Femminile girone C", "cid": 93436, "squadra": "13R-EVOLUT. POLO DIGITALE" },
+      { "nome": "Under 14", "girone": "U14 Femminile girone A", "cid": 93399, "squadra": "U14R-EVOLUTION" }
+    ]
   },
   "calendario": {
     "giorni_scuola": "lunedì-venerdì",
