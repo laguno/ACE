@@ -6,19 +6,27 @@
 
 **Sprint 1 costruito**: tutte le 8 tappe unite a `main` (produzione su `ace-passino.vercel.app`). Manca solo la prova completa in famiglia sui dispositivi veri. Il gioco parte lunedì 16/11/2026 (`periodo.inizio`, anticipato dal 23/11 il 13/11; Lani usa l'app dal 13/11): prima di allora niente passi di voti e note, popup, figurine né chiavi.
 
-- Nuvola: `sync-nuvola` alle 14:30 e 19:30 (cron `0003`): compiti, verifiche, voti, note, lezioni; passi di voti e note dal 23/11.
+- Nuvola: `sync-nuvola` alle 14:30 e 19:30 (cron `0003`): compiti, verifiche, voti, note, lezioni; passi di voti e note dall'inizio del gioco (16/11, `periodo.inizio`).
 - Calendario di famiglia: `sync-calendario` ogni ora (cron `0007`), 14 giorni, ricorrenze espanse, "privato" escluso.
 - Oggi: mattina (tre cose, passi di ieri, In famiglia) e pomeriggio (compiti in ordine, il più lungo prima). Sera: compiti, cartella dall'orario + materiale del giorno, borsa dal calendario, fogli, Domani in famiglia. L'app si apre su Sera da un'ora prima della chiusura.
 - Studio: `genera-studio` (lanciata da sync-nuvola) fa il piano di ripasso e, con Claude, 10-15 flash card e 8-10 domande per verifica (max 3 nuove a giro); Studio con sessioni, carte del giorno, quiz; lampadina "Non ho capito" (`spiega`). Video rimandati (manca l'elenco dei video).
 - Astra: percorso con Sei qui, forzieri (stato aggiornato dal server dopo ogni passo: `_shared/forzieri.ts`), enigma (`enigma`: genera per i genitori, rispondi per Lani), chiavi della domenica 21:30 (`chiavi`, cron `0010`, con rimonta), Figurina e Album.
-- Copione: popup accodati dal server (`_shared/popup.ts`, uno per evento) per voti, note, tappe, forzieri, chiavi, verifiche nuove; un popup per apertura; figurine sbloccate dalla prima comparsa; notifiche push ogni 15 minuti (`notifiche`, cron `0014`). Prima del 23/11 niente popup né figurine.
+- Copione: popup accodati dal server (`_shared/popup.ts`, uno per evento) per voti, note, tappe, forzieri, chiavi, verifiche nuove; un popup per apertura; figurine sbloccate dalla prima comparsa; notifiche push ogni 15 minuti (`notifiche`, cron `0014`). Prima del 16/11 niente popup né figurine.
 - Prima accensione: benvenuta di Lani e avvio dei genitori, come le bozze. Passi che salgono su Oggi e Astra (`vedi_saldo`). Frasi nei momenti (`frase_del_giorno`), PIN (`controlla_pin`), Da fotografare (richieste da `sync-nuvola`, bucket `foto-pagine`).
 - Forzieri: enigmi a tipi (`data/enigmi.json`, `src/lib/enigmi`, funzione `enigma` con risolutore di controllo), aiutino dopo il primo errore, premio fermo a enigma comparso; immagini dei premi nel bucket privato `premi` (funzione `premi`, URL firmati: sagoma prima, vera con enigma risolto o forziere aperto).
 - Genitori: settimana, gesti e sgridate (con popup del copione), premi ed enigmi, correzioni delle spunte, fogli, impostazioni e PIN.
 - Grafica come le bozze (`design/*.html`) su Oggi, Pomeriggio, Sera, Astra, Figurina, Album, popup, Studio, Flash card e Quiz (Grafica 1-7b, tutto in `main`; flash card e quiz a tutto schermo, senza barra né "Genitori"). Kit in `src/kit.tsx`. Revisione UI applicata a tutte le schermate (anche Genitori): scala degli spazi 4/8/12/16/24/32, bordi 20/16/32, titoli 30/26/20/17, raggi 16/24/32/999, ombre `--ombra`, `--ombra-alta`, `--ombra-etichetta`. Foto di confronto con `npm run confronto` (in `docs/confronto/`). Niente config di Prettier: se serve, `--single-quote --print-width 180`.
-- Prove (13/11, ramo `sprint-2`): `npm test` 291, `npm run prova:schema` 277, `npx playwright test` 153 (22 saltate a richiesta, Supabase finto). Le foto di `npm run confronto` sono stabili (movimento ridotto): servono per i confronti prima e dopo; la Sera alterna due foto anche senza cambiamenti.
+- Prove (13/11, ramo `sprint-2`): `npm test` 292, `npm run prova:schema` 277, `npx playwright test` 153 (22 saltate a richiesta, Supabase finto). Le foto di `npm run confronto` sono stabili (movimento ridotto): servono per i confronti prima e dopo; la Sera alterna due foto anche senza cambiamenti.
 
-## Ultima sessione (13 novembre 2026, sprint 2)
+## Sessione del 13/11 sera (revisione profonda, ramo `sprint-2`)
+
+- **Domenica 15/11 sera il signore unisce e accende R-Evolution**: sequenza in `docs/08-sprint-2.md` (backup, unione, `db push`, **tutte** le funzioni, Spegni e Accendi). Le funzioni pubblicate potrebbero avere ancora l'inizio al 23/11 (cambiato il 13/11 senza ripubblicarle): ripubblicarle tutte lo sistema.
+- **Percorso a 7.200** (deciso dal signore) sulla taratura col simulatore vero: `npm run simula` al posto del modello semplificato, che sovrastimava di circa 900 passi (con 7.700, all'80%, la cima non arrivava mai). Il simulatore ora genera dieci minuti e partite (sabato e metà dei mercoledì).
+- **Flash card**: chi le farma (furbetta) arriva in cima prima di chi fa l'80%, e nessun numero lo corregge (1 passo a giro o 2 giri al giorno riducono il distacco ma non lo tolgono). Decisione del signore: aspettare i dati veri e decidere alla taratura di dicembre. La strada è dare passi solo dopo una prova (3 carte rifatte come domanda).
+- Forziere aperto che resta aperto anche se poi i passi scendono: confermato dal signore; corretto il controllo del simulatore che lo segnava come errore. Astra: il forziere sulla tappa di Lani usciva dallo schermo a 360 px nella metà sinistra del sentiero, ora sale sopra di lei.
+- Da fare dopo: misurare gli esiti veri (serate chiuse, aperture, ripasso prima delle verifiche, media) oltre ai passi; controllo che funzioni pubblicate e schema di produzione coincidano con `main`.
+
+## Sessione precedente (13 novembre 2026, sprint 2)
 
 Sprint 2 (R-Evolution) finito sul ramo `sprint-2`, PR in bozza [laguno/ACE#3](https://github.com/laguno/ACE/pull/3) (CI verde, non unita). Dettagli, decisioni e lista del giorno dell'unione in `docs/08-sprint-2.md`. Dentro: interruttore dei genitori (nessuna data), dieci minuti al mattino 6-13 in fondo a Oggi con menu in Impostazioni, partite segnate da Lani e approvate dai genitori (avversaria proposta dal calendario), classifiche FIPAV (U13 girone C, U14 girone A) alle 6:15, annuncio il giorno dell'accensione, percorso a 7.700 passi. Revisione con Open Code Review (`ocr` 1.13.6, modo delega): 6 correzioni fatte, la 7 da decidere.
 

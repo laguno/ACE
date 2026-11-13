@@ -27,13 +27,25 @@
 | Partite | `src/Partita.tsx`: `SegnaPartita` (Lani in R-Evolution, genitore in Settimana), `PartiteDaApprovare` (Settimana) | Lani: "Manda da approvare", con "Sono entrata in campo". Genitore: corregge set e campo, Approva (chiama `passi`) o Rifiuta (cancella). Il server firma `approvata_da` (trigger). Passi da `passiPartita(nostri, loro, inCampo)`. |
 | Classifiche | `src/lib/classifiche` (lettura della pagina, con test), funzione `classifiche`, tabella `classifiche` (0032), cron 0033 alle 6:15, riga in Stato | Schermata R-Evolution: una carta per campionato, riga di Lani in fucsia, data di aggiornamento. Errore: avviso ai genitori, resta la classifica di prima. |
 | Schermata R-Evolution | `src/REvolution.tsx` | Classifiche, partite (quelle da approvare segnate così e non contate), dieci minuti del mese, modulo per segnare la partita. |
-| Simulazione | `scripts/simula_passi.mjs` (porting in Node di `simula_passi.py`) | Vedi proposta del percorso. |
+| Simulazione | `scripts/simulatore/` (dieci minuti e partite col codice vero), `npm run simula` (taratura) | Vedi percorso. Il modello semplificato `simula_passi.py/.mjs` è stato tolto il 13/11. |
 | Annuncio | `r_evolution_accesa` in `src/lib/copione`, trigger `annuncia_r_evolution` (0034) su `impostazioni`, pulsante "Vediamo" in `src/Popup.tsx` | All'accensione il server accoda il popup (i genitori non scrivono `popup_coda`), uno per giorno di accensione. Testo uguale nel copione e nella migrazione (test). Se la riga `r_evolution_da` c'è già prima di 0034, niente popup: spegnere e riaccendere. |
 | Prove | `regole.test.ts`, `classifiche.test.ts`, `cron.test.ts` (classifiche), `scripts/simulatore/dieci-minuti.test.ts`, `e2e/dieci-minuti`, `e2e/r-evolution`, `e2e/genitori`, `prova:schema` (partite, menu) | Esito dell'ultimo giro in fondo. |
 
-## Percorso: 7.700 passi (approvato dal signore il 13/11, nel config)
+## Percorso: 7.200 passi (deciso dal signore il 13/11 sera, nel config)
 
-Simulazione Monte Carlo, stesso criterio di docs/01 (cima con impegno 70/75/80/90%: circa 4/40/86/100 su 100). `node scripts/simula_passi.mjs <accensione> <totale> <prima tappa> [prob. panchina]`.
+Taratura col simulatore vero (`npm run simula`, stesso codice delle funzioni su PGlite), R-Evolution accesa il 16/11, partite il sabato e metà dei mercoledì, 10 anni simulati per riga. Criterio di docs/01: cima con impegno 70/75/80/90% circa 4/40/86/100 su 100. Tabella completa in `docs/simulazione/taratura.md`.
+
+| Totale | 70 | 75 | 80 | 90 | Cima all'80% (mediana) |
+|---|---|---|---|---|---|
+| 6.800 | 40 | 100 | 100 | 100 | 19/5 |
+| 7.000 | 20 | 60 | 100 | 100 | 25/5 |
+| **7.200** | 10 | 30 | 80 | 100 | 27/5 |
+| 7.400 | 0 | 10 | 60 | 100 | 22/5 |
+| 7.700 | 0 | 0 | 0 | 100 | – |
+
+**Deciso: `totale_passi` 7.200**, tappe da 120 a 410, forzieri a 395, 890, 1.490, 2.190, 2.990, 3.890, 4.895, 6.000, 7.200; `r_evolution_prevista` = 16/11. La furbetta (70%, farma le flash card) arriva in cima con ogni totale e prima dell'80%: da guardare con i dati veri alla taratura di dicembre (decisione del signore: non toccare le flash card prima).
+
+Storia: la mattina del 13/11 si era deciso 7.700 sulla tabella qui sotto, fatta con il modello semplificato `simula_passi.mjs`. Messo alla prova contro il simulatore vero nelle stesse condizioni sovrastimava di circa 900 passi l'anno (all'80% con 7.700: 8.233 previsti, 7.357 veri, cima mai).
 
 | Scenario | 70 | 75 | 80 | 90 |
 |---|---|---|---|---|
@@ -44,7 +56,7 @@ Simulazione Monte Carlo, stesso criterio di docs/01 (cima con impegno 70/75/80/9
 | 1/12, 7.700 | 2 | 41 | 87 | 100 |
 | 23/11, 7.700, 25% partite in panchina | 3 | 36 | 86 | 100 |
 
-**Deciso: `totale_passi` 7.700**, 27 tappe `[130,140,155,165,180,190,200,215,225,235,250,260,275,285,295,310,320,335,345,355,370,380,395,405,415,430,440]`, e `periodo.r_evolution_prevista` = giorno di accensione. Va bene sia per il 23/11 sia per l'1/12. Nel config dal 13/11 (tolta la riserva da 7.600), `r_evolution_prevista` = 23/11; docs/02, docs/05 e `npm run simula` aggiornati. Con 7.200 e avvio a novembre il percorso diventa troppo facile. Regola di docs/02: si alzano **solo le tappe ancora da fare**. Se all'accensione Lani ha già passato delle tappe, quelle restano com'erano (125, 135, …) e la differenza va spalmata sulle successive.
+Decisione superata: `totale_passi` 7.700, 27 tappe `[130,140,155,165,180,190,200,215,225,235,250,260,275,285,295,310,320,335,345,355,370,380,395,405,415,430,440]`, e `periodo.r_evolution_prevista` = giorno di accensione. Va bene sia per il 23/11 sia per l'1/12. Nel config dal 13/11 (tolta la riserva da 7.600), `r_evolution_prevista` = 23/11; docs/02, docs/05 e `npm run simula` aggiornati. Con 7.200 e avvio a novembre il percorso diventa troppo facile. Regola di docs/02: si alzano **solo le tappe ancora da fare**. Se all'accensione Lani ha già passato delle tappe, quelle restano com'erano (125, 135, …) e la differenza va spalmata sulle successive.
 
 ## Da fare, in ordine
 
@@ -55,6 +67,18 @@ Simulazione Monte Carlo, stesso criterio di docs/01 (cima con impegno 70/75/80/9
 5. **Livello bonus della selezione**, selezioni e raduni: rimandati.
 6. **Tutor di matematica**; raccolta video; versi dei personaggi.
 7. **Da decidere (signore): accensione dopo le 13.** Il giorno in cui R-Evolution si accende conta già i dieci minuti tra le cose possibili della settimana, anche se accesa dopo la finestra del mattino: +10 passi e +1 cosa che Lani non può fare, percentuale per le chiavi un po' più bassa. Alternative: contare dal giorno dopo se accesa dopo le 13, oppure lasciare così (si accende di mattina). Dalla revisione con Open Code Review del 13/11.
+
+## Domenica 15/11 sera: unione e accensione (R-Evolution da lunedì 16/11)
+
+Le lancia il signore (i comandi di produzione sono bloccati per Claude), da `C:\progetti\ace\app`, **dopo le 21:35** (sono già partite le chiavi della domenica: la settimana 9-15/11 è prima dell'inizio e la funzione la salta). Domenica è l'ultimo momento in cui cambiare il percorso non costa niente: Lani ha ancora zero passi.
+
+1. `npm run backup`
+2. Unire `sprint-2` in `main` (avanti veloce, nessun conflitto: `git merge --ff-only sprint-2`, oppure la PR laguno/ACE#3) e `git push`: Vercel pubblica.
+3. `npx supabase db push --remote --yes` (0034 e 0035).
+4. **Tutte** le funzioni, una per comando, non solo `passi` e `chiavi`: ognuna porta dentro `data/config-gioco.json` del giorno in cui è pubblicata, e dopo l'anticipo dell'inizio al 16/11 e il percorso a 7.200 devono avere tutte gli stessi numeri. `npx supabase functions deploy <nome> --use-api --yes` per: chiavi, classifiche, enigma, genera-studio, notifiche, passi, premi, spiega, sync-calendario, sync-nuvola.
+5. Nell'app, Genitori, Impostazioni: **Spegni** e poi **Accendi** R-Evolution. `r_evolution_da` diventa 15/11 (domenica, prima dell'inizio: niente passi né chiavi quel giorno), lunedì mattina Lani trova l'annuncio e i suoi primi dieci minuti contano. Accendere domenica sera evita il caso del punto 7 qui sopra (accesa dopo le 13: dieci minuti contati tra le cose possibili ma non più fattibili).
+6. Controlli: in Stato di ACE le funzioni senza errori; in SQL `select version from supabase_migrations.schema_migrations order by version desc limit 3` (0035 in cima), `select * from impostazioni where chiave = 'r_evolution_da'` (2026-11-15), `select chiave from popup_coda where chiave like 'r_evolution:%'` (una riga).
+7. `src/tipi-database.ts` si può rigenerare dopo (`npm run tipi:db`, serve Docker): oggi è ritoccato a mano e i test passano.
 
 ## Prima di unire a `main`
 
