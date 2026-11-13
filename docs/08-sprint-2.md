@@ -30,7 +30,7 @@
 | Simulazione | `scripts/simula_passi.mjs` (porting in Node di `simula_passi.py`) | Vedi proposta del percorso. |
 | Prove | `regole.test.ts`, `classifiche.test.ts`, `cron.test.ts` (classifiche), `scripts/simulatore/dieci-minuti.test.ts`, `e2e/dieci-minuti`, `e2e/r-evolution`, `e2e/genitori`, `prova:schema` (partite, menu) | Esito dell'ultimo giro in fondo. |
 
-## Proposta del percorso (da approvare)
+## Percorso: 7.700 passi (approvato dal signore il 13/11, nel config)
 
 Simulazione Monte Carlo, stesso criterio di docs/01 (cima con impegno 70/75/80/90%: circa 4/40/86/100 su 100). `node scripts/simula_passi.mjs <accensione> <totale> <prima tappa> [prob. panchina]`.
 
@@ -43,17 +43,16 @@ Simulazione Monte Carlo, stesso criterio di docs/01 (cima con impegno 70/75/80/9
 | 1/12, 7.700 | 2 | 41 | 87 | 100 |
 | 23/11, 7.700, 25% partite in panchina | 3 | 36 | 86 | 100 |
 
-**Proposta: `totale_passi` 7.700**, 27 tappe `[130,140,155,165,180,190,200,215,225,235,250,260,275,285,295,310,320,335,345,355,370,380,395,405,415,430,440]`, e `periodo.r_evolution_prevista` = giorno di accensione. Va bene sia per il 23/11 sia per l'1/12. **Non è nel config**: lo cambia il signore (o lo dice e si cambia), insieme a docs/02:27 che parla ancora di 7.600. Con 7.200 e avvio a novembre il percorso diventa troppo facile. Regola di docs/02: si alzano **solo le tappe ancora da fare**. Se all'accensione Lani ha già passato delle tappe, quelle restano com'erano (125, 135, …) e la differenza va spalmata sulle successive.
+**Deciso: `totale_passi` 7.700**, 27 tappe `[130,140,155,165,180,190,200,215,225,235,250,260,275,285,295,310,320,335,345,355,370,380,395,405,415,430,440]`, e `periodo.r_evolution_prevista` = giorno di accensione. Va bene sia per il 23/11 sia per l'1/12. Nel config dal 13/11 (tolta la riserva da 7.600), `r_evolution_prevista` = 23/11; docs/02, docs/05 e `npm run simula` aggiornati. Con 7.200 e avvio a novembre il percorso diventa troppo facile. Regola di docs/02: si alzano **solo le tappe ancora da fare**. Se all'accensione Lani ha già passato delle tappe, quelle restano com'erano (125, 135, …) e la differenza va spalmata sulle successive.
 
 ## Da fare, in ordine
 
-1. **Percorso**: decisione sulla proposta qui sopra, poi config + docs/02.
-2. **Popup di annuncio** il giorno dell'accensione (copione da scrivere) e prova della barra a 5 voci sui telefoni veri.
-3. **Partite dal calendario**: avversaria proposta dal titolo dell'evento, quando si sa come sono scritti.
-4. **Fase successiva dei campionati**: come cambiare girone senza toccare il config (es. CId in Impostazioni).
-5. **Pagina "La squadra"**, automatica con gli avatar.
-6. **Livello bonus della selezione**, selezioni e raduni: rimandati.
-7. **Tutor di matematica**; raccolta video; versi dei personaggi.
+1. **Popup di annuncio** il giorno dell'accensione (copione da scrivere) e prova della barra a 5 voci sui telefoni veri.
+2. **Partite dal calendario**: avversaria proposta dal titolo dell'evento, quando si sa come sono scritti.
+3. **Fase successiva dei campionati**: come cambiare girone senza toccare il config (es. CId in Impostazioni).
+4. **Pagina "La squadra"**, automatica con gli avatar.
+5. **Livello bonus della selezione**, selezioni e raduni: rimandati.
+6. **Tutor di matematica**; raccolta video; versi dei personaggi.
 
 ## Prima di unire a `main`
 

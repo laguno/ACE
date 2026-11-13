@@ -14,17 +14,17 @@ Mantra dell'app: **"Ogni giorno, passino passino."**
 
 ## Il percorso
 
-27 tappe per **7.200 passi**, sempre più care (come nei videogiochi): 125, 135, 145, 160, 170, 180, 190, 200, 210, 225, 235, 245, 255, 265, 280, 290, 300, 310, 320, 330, 345, 355, 365, 375, 385, 395, 410.
+27 tappe per **7.700 passi**, sempre più care (come nei videogiochi): 130, 140, 155, 165, 180, 190, 200, 215, 225, 235, 250, 260, 275, 285, 295, 310, 320, 335, 345, 355, 370, 380, 395, 405, 415, 430, 440. Decisi il 13/11/2026 per R-Evolution accesa a fine novembre (prima erano 7.200 con R-Evolution a gennaio; simulazione in docs/08-sprint-2.md).
 
 | Forziere | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | Cima |
 |---|---|---|---|---|---|---|---|---|---|
 | Tappa | 3 | 6 | 9 | 12 | 15 | 18 | 21 | 24 | 27 |
-| Passi | 405 | 915 | 1.515 | 2.220 | 3.020 | 3.920 | 4.915 | 6.010 | 7.200 |
+| Passi | 425 | 960 | 1.600 | 2.345 | 3.200 | 4.165 | 5.235 | 6.415 | 7.700 |
 | Chiavi totali | 2 | 4 | 7 | 14 | 17 | 21 | 26 | 31 | 36 |
 
 Quattro mondi (sfondi in `public/assets/sfondi/`): Colline di caramelle, Montagne di zucchero, Nuvole di zucchero filato, Lo spazio.
 
-**Se R-Evolution esce a dicembre** il percorso giusto è di 7.600 passi (`config.percorso.alternativa_r_evolution_dicembre`). Alla taratura di inizio dicembre si alzano **solo le tappe ancora da fare**: Lani non deve mai vedere cambiare nulla all'indietro.
+**R-Evolution** non ha una data: la accendono i genitori in Impostazioni. Se si ritara il percorso dopo l'inizio del gioco si cambiano **solo le tappe ancora da fare**: Lani non deve mai vedere cambiare nulla all'indietro.
 
 ## Passi: cose obbligatorie (contano anche per le chiavi)
 
