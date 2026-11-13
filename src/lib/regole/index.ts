@@ -419,15 +419,41 @@ export function prossimaRevisione(intervallo: number, esito: Esito, oggi: Date):
   return { intervallo: nuovo, data: iso(d) };
 }
 
+// ---------------------------------------------------------------- dieci minuti (sprint 2)
+
+export type EsercizioDieciMinuti = (typeof CONFIG.dieci_minuti.menu)[number];
+
+/** I dieci minuti valgono (passi e chiavi) dal giorno in cui arriva R-Evolution. */
+export function dieciMinutiAttivi(g: Date): boolean {
+  return iso(g) >= CONFIG.periodo.r_evolution_da;
+}
+
+/** Valgono solo se il timer è arrivato in fondo: tra avvio e spunta almeno i secondi del config. */
+export function dieciMinutiValidi(da: Date | null, il: Date | null): boolean {
+  return !!da && !!il && il.getTime() - da.getTime() >= CONFIG.dieci_minuti.secondi * 1000;
+}
+
+/**
+ * Esercizio proposto per la sera: recupero nei giorni di pallavolo, forza e riflessi negli altri,
+ * a rotazione sul giorno dell'anno così non è sempre lo stesso. Lani può sceglierne un altro.
+ */
+export function esercizioDelGiorno(g: Date, pallavolo: boolean): EsercizioDieciMinuti {
+  const tipo = pallavolo ? 'recupero' : 'forza_riflessi';
+  const scelta = CONFIG.dieci_minuti.menu.filter((e) => e.tipo === tipo);
+  const giornoAnno = Math.round((Date.UTC(g.getFullYear(), g.getMonth(), g.getDate()) - Date.UTC(g.getFullYear(), 0, 1)) / 86400000);
+  return scelta[giornoAnno % scelta.length];
+}
+
 // ---------------------------------------------------------------- conteggio della settimana
 
 /** Motivi dei movimenti che contano come cose obbligatorie (docs/02). */
-const MOTIVI_OBBLIGATORI = ['compito', 'compito_rifatto', 'cartella', 'borsa', 'foglio', 'ripasso'] as const;
+const MOTIVI_OBBLIGATORI = ['compito', 'compito_rifatto', 'cartella', 'borsa', 'foglio', 'ripasso', 'dieci_minuti'] as const;
 
 /**
  * Cose obbligatorie possibili e fatte in una settimana, per le chiavi della domenica.
  * Possibili: compiti in scadenza, sere con la cartella (domani c'è scuola), sere con la borsa,
- * fogli da consegnare, sessioni di ripasso previste. Fatte: i movimenti obbligatori della settimana.
+ * fogli da consegnare, sessioni di ripasso previste, sere con i dieci minuti (da R-Evolution).
+ * Fatte: i movimenti obbligatori della settimana.
  */
 export function contaSettimana(s: {
   compiti: number;
@@ -435,16 +461,19 @@ export function contaSettimana(s: {
   sereBorsa: number;
   fogli: number;
   sessioni: number;
+  /** Sere con i dieci minuti: 0 prima di R-Evolution. */
+  sereDieciMinuti?: number;
   movimenti: { motivo: string; passi: number }[];
   note: number;
 }): SettimanaObbligatori {
   const o = P.obbligatori;
   const fatti = s.movimenti.filter((m) => (MOTIVI_OBBLIGATORI as readonly string[]).includes(m.motivo) && m.passi > 0);
-  // ponytail: i dieci minuti (sprint 2) entreranno qui come sereDieciMinuti × o.dieci_minuti
+  const dieci = s.sereDieciMinuti ?? 0;
   return {
-    passiPossibili: s.compiti * o.compiti + s.sereCartella * o.cartella + s.sereBorsa * o.borsa + s.fogli * o.fogli + s.sessioni * o.ripasso,
+    passiPossibili:
+      s.compiti * o.compiti + s.sereCartella * o.cartella + s.sereBorsa * o.borsa + s.fogli * o.fogli + s.sessioni * o.ripasso + dieci * o.dieci_minuti,
     passiFatti: fatti.reduce((a, m) => a + m.passi, 0),
-    cosePossibili: s.compiti + s.sereCartella + s.sereBorsa + s.fogli + s.sessioni,
+    cosePossibili: s.compiti + s.sereCartella + s.sereBorsa + s.fogli + s.sessioni + dieci,
     coseFatte: fatti.length,
     note: s.note,
   };

@@ -661,3 +661,7 @@ body:has(.avvio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom))
   .astra-saldi, .riga-pallini { flex-wrap: wrap; }
   .tappe .traguardo { white-space: normal; max-width: 110px; }
 }
+
+/* Dieci minuti (sprint 2): il timer grande al centro della carta */
+.schermo .carta p.timer { margin: 8px 0 12px; text-align: center; font: 800 56px/1 'Baloo 2', Nunito, sans-serif; font-variant-numeric: tabular-nums; color: var(--testo); }
+.dieci-minuti .principale { margin-top: 12px; }

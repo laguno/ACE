@@ -291,6 +291,20 @@ describe('conteggio della settimana', async () => {
     expect(s.cosePossibili).toBe(15);
     expect(chiaviSettimana(s)).toBe(2); // 13/15 < 95%
   });
+  it('dieci minuti: possibili e fatti solo con le sere previste', () => {
+    const s = contaSettimana({
+      compiti: 0,
+      sereCartella: 0,
+      sereBorsa: 0,
+      fogli: 0,
+      sessioni: 0,
+      sereDieciMinuti: 7,
+      note: 0,
+      movimenti: Array(5).fill({ motivo: 'dieci_minuti', passi: P.dieci_minuti }),
+    });
+    expect(s.passiPossibili).toBe(7 * P.dieci_minuti);
+    expect([s.coseFatte, s.cosePossibili]).toEqual([5, 7]);
+  });
   it('mondi ogni 7 tappe, la cima resta nello spazio', () => {
     expect([0, 6, 7, 14, 21, 26, 27].map(mondo)).toEqual([0, 0, 1, 2, 3, 3, 3]);
   });
@@ -313,5 +327,31 @@ describe('foto di un compito richiesta da ACE', () => {
     expect(passiFoto({ richiestaDaAce: true, caricataDaLani: true })).toBe(CONFIG.passi.foto_compito);
     expect(passiFoto({ richiestaDaAce: true, caricataDaLani: false })).toBe(0);
     expect(passiFoto({ richiestaDaAce: false, caricataDaLani: true })).toBe(0);
+  });
+});
+
+describe('dieci minuti (sprint 2)', async () => {
+  const { dieciMinutiAttivi, dieciMinutiValidi, esercizioDelGiorno } = await import('./index');
+  const da = CONFIG.periodo.r_evolution_da;
+  const giorno = (s: string) => new Date(s + 'T12:00:00');
+  it('valgono dal giorno di R-Evolution', () => {
+    const prima = giorno(da);
+    prima.setDate(prima.getDate() - 1);
+    expect(dieciMinutiAttivi(prima)).toBe(false);
+    expect(dieciMinutiAttivi(giorno(da))).toBe(true);
+  });
+  it('solo se il timer arriva in fondo', () => {
+    const avvio = new Date('2027-01-10T20:00:00');
+    const dopo = (s: number) => new Date(avvio.getTime() + s * 1000);
+    expect(dieciMinutiValidi(avvio, dopo(CONFIG.dieci_minuti.secondi))).toBe(true);
+    expect(dieciMinutiValidi(avvio, dopo(CONFIG.dieci_minuti.secondi - 1))).toBe(false);
+    expect(dieciMinutiValidi(null, dopo(CONFIG.dieci_minuti.secondi))).toBe(false);
+  });
+  it('recupero nei giorni di pallavolo, forza e riflessi negli altri, a rotazione', () => {
+    const g = giorno('2027-01-11');
+    expect(esercizioDelGiorno(g, true).tipo).toBe('recupero');
+    expect(esercizioDelGiorno(g, false).tipo).toBe('forza_riflessi');
+    const settimana = Array.from({ length: 7 }, (_, i) => esercizioDelGiorno(giorno(`2027-01-${11 + i}`), false).id);
+    expect(new Set(settimana).size).toBeGreaterThan(1);
   });
 });

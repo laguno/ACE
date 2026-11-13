@@ -38,6 +38,9 @@ await come(LANI, `update compiti set fatto_il = '2026-11-01' where id = '${COMPI
 verifica('una spunta già data non si sposta', (await val(null, 'select fatto_il::text from compiti')) === primaOra);
 await come(LANI, `insert into serate (data, cartella_il) values (oggi(), '2026-11-01')`);
 verifica('serata: ora del server', (await val(null, `select cartella_il > now() - interval '1 minute' from serate`)) === true);
+await come(LANI, `update serate set dieci_minuti_da = '2026-11-01', dieci_minuti_esercizio = 'plank' where data = oggi()`);
+verifica('dieci minuti: avvio con l\'ora del server', (await val(null, `select dieci_minuti_da > now() - interval '1 minute' from serate`)) === true);
+verifica('dieci minuti: Lani sceglie l\'esercizio', (await val(null, `select dieci_minuti_esercizio from serate`)) === 'plank');
 await come(LANI, `insert into flashcard_giri (iniziato_il, fatto_il, carte, sapevo, quasi, non_sapevo) values (now() - interval '2 minutes', '2020-01-01', 10, 5, 3, 2)`);
 verifica('giro di flash card: fine con l\'ora del server', (await val(null, `select fatto_il > now() - interval '1 minute' from flashcard_giri`)) === true);
 await fallisce('giro di flash card senza inizio rifiutato', LANI, `insert into flashcard_giri (carte, sapevo, quasi, non_sapevo) values (10, 5, 3, 2)`);

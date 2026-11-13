@@ -240,6 +240,17 @@
     "max_al_giorno": 1,
     "non_ripetere_prima_di_giorni": 30
   },
+  "dieci_minuti": {
+    "nota": "Sprint 2 (bozza del 13/11, da approvare dal signore): menu da docs/01, da far vedere all'allenatrice. Valgono dal giorno periodo.r_evolution_da. Recupero nei giorni di pallavolo, forza e riflessi negli altri.",
+    "secondi": 600,
+    "menu": [
+      { "id": "plank", "nome": "Plank e varianti", "tipo": "forza_riflessi" },
+      { "id": "corpo-libero", "nome": "Squat e affondi a corpo libero", "tipo": "forza_riflessi" },
+      { "id": "visore", "nome": "Riflessi con il visore", "tipo": "forza_riflessi" },
+      { "id": "mobilita", "nome": "Mobilità e allungamento", "tipo": "recupero" },
+      { "id": "respiro", "nome": "Respirazione guidata", "tipo": "recupero" }
+    ]
+  },
   "calendario": {
     "giorni_scuola": "lunedì-venerdì",
     "vacanze": [

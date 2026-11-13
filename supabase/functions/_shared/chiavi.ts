@@ -43,6 +43,7 @@ export async function contaChiavi(db: SupabaseClient, lun: Date) {
     sereBorsa: giorni.filter((d) => sportIl.has(R.iso(piu(d, 1)))).length,
     fogli: ok(fogli, 'fogli').length,
     sessioni: ok(sessioni, 'sessioni').length,
+    sereDieciMinuti: giorni.filter((d) => R.dieciMinutiAttivi(d)).length,
     movimenti: ok(movimenti, 'movimenti'),
     note: ok(note, 'note').length,
   });

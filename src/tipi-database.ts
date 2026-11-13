@@ -501,14 +501,14 @@ isOneToOne: true
                   ]
                 },"serate": {
                   Row: {
-                    "borsa_il": string | null,"cartella_il": string | null,"chiusa_il": string | null,"data": string,"dieci_minuti_il": string | null
+                    "borsa_il": string | null,"cartella_il": string | null,"chiusa_il": string | null,"data": string,"dieci_minuti_da": string | null,"dieci_minuti_esercizio": string | null,"dieci_minuti_il": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "borsa_il"?: string | null,"cartella_il"?: string | null,"chiusa_il"?: string | null,"data": string,"dieci_minuti_il"?: string | null
+                    "borsa_il"?: string | null,"cartella_il"?: string | null,"chiusa_il"?: string | null,"data": string,"dieci_minuti_da"?: string | null,"dieci_minuti_esercizio"?: string | null,"dieci_minuti_il"?: string | null
                   }
                   Update: {
-                    "borsa_il"?: string | null,"cartella_il"?: string | null,"chiusa_il"?: string | null,"data"?: string,"dieci_minuti_il"?: string | null
+                    "borsa_il"?: string | null,"cartella_il"?: string | null,"chiusa_il"?: string | null,"data"?: string,"dieci_minuti_da"?: string | null,"dieci_minuti_esercizio"?: string | null,"dieci_minuti_il"?: string | null
                   }
                   Relationships: [
                     

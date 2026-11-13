@@ -135,7 +135,7 @@ export function creaGestori(db: SupabaseClient) {
       return registra('compito_rifatto', id, passi, g);
     },
 
-    // id = data della serata ('YYYY-MM-DD'): cartella e borsa (dieci minuti con lo sprint 2).
+    // id = data della serata ('YYYY-MM-DD'): cartella, borsa e dieci minuti (da R-Evolution).
     // Ognuna vale solo se spuntata quella sera; registra_passi è idempotente, quindi si
     // può richiamare dopo ogni spunta.
     async serata(id) {
@@ -147,6 +147,10 @@ export function creaGestori(db: SupabaseClient) {
         passi += (await registra('cartella', `serata:${s.data}`, P.obbligatori.cartella, g)).passi;
       if (quellaSera(s.borsa_il) && (await borsaServe(g)))
         passi += (await registra('borsa', `serata:${s.data}`, P.obbligatori.borsa, g)).passi;
+      const dieciDa = s.dieci_minuti_da ? new Date(s.dieci_minuti_da) : null;
+      const dieciIl = s.dieci_minuti_il ? new Date(s.dieci_minuti_il) : null;
+      if (quellaSera(s.dieci_minuti_il) && R.dieciMinutiAttivi(g) && R.dieciMinutiValidi(dieciDa, dieciIl))
+        passi += (await registra('dieci_minuti', `serata:${s.data}`, P.obbligatori.dieci_minuti, g)).passi;
       return passi ? { passi, motivo: 'serata' } : niente('niente di nuovo');
     },
 

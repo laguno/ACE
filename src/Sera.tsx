@@ -7,6 +7,7 @@ import { supabase } from './supabase';
 import { Check } from '@phosphor-icons/react';
 import { Sticker, Testata } from './kit';
 import { Frase } from './Frase';
+import { DieciMinuti } from './DieciMinuti';
 
 // Sera — design/Domani.html. Lani spunta; i passi li decide la funzione "passi" sul server.
 // Cartella dalle lezioni di Nuvola (orario) più il materiale del giorno (impostazioni);
@@ -75,7 +76,7 @@ export default function Sera() {
   const domaniCal = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate() + 1);
   const [compiti, setCompiti] = useState<Compito[]>();
   const [fogli, setFogli] = useState<Foglio[]>([]);
-  const [serata, setSerata] = useState({ cartella: false, borsa: false });
+  const [serata, setSerata] = useState({ cartella: false, borsa: false, dieci: false });
   const [passiOggi, setPassiOggi] = useState(0);
   const [orario, setOrario] = useState<string[]>([]);
   const [impegni, setImpegni] = useState<Impegno[]>([]);
@@ -109,13 +110,13 @@ export default function Sera() {
     const [c, f, s, m] = await Promise.all([
       supabase.from('compiti').select(SELECT_COMPITI).eq('scadenza', R.iso(domani)).order('creato_il'),
       supabase.from('fogli_firma').select('id, titolo, scadenza, dato_il').is('consegnato_il', null).order('scadenza'),
-      supabase.from('serate').select('cartella_il, borsa_il').eq('data', R.iso(oggi)).maybeSingle(),
+      supabase.from('serate').select('cartella_il, borsa_il, dieci_minuti_il').eq('data', R.iso(oggi)).maybeSingle(),
       supabase.from('movimenti_passi').select('passi, moltiplicatore').eq('giorno', R.iso(oggi)),
     ]);
     if (c.error || f.error) return setErrore('Non riesco a leggere la sera. Riprova tra poco.');
     setCompiti(c.data as unknown as Compito[]);
     setFogli(f.data ?? []);
-    setSerata({ cartella: !!s.data?.cartella_il, borsa: !!s.data?.borsa_il });
+    setSerata({ cartella: !!s.data?.cartella_il, borsa: !!s.data?.borsa_il, dieci: !!s.data?.dieci_minuti_il });
     setPassiOggi((m.data ?? []).reduce((a, x) => a + Math.round(x.passi * x.moltiplicatore), 0));
   }, [R.iso(oggi)]);
 
@@ -170,16 +171,18 @@ export default function Sera() {
   const sport = impegni.find((i) => C.tipoImpegno(i.titolo) !== 'famiglia');
   const famiglia = impegni.find((i) => C.tipoImpegno(i.titolo) === 'famiglia');
   const conBorsa = !!sport;
+  const conDieci = R.dieciMinutiAttivi(oggi);
   // venerdì e sabato con partita il giorno dopo: chiusura breve con la sola borsa (decisione 8/11)
   const soloBorsa = !conCartella && C.partitaTra(impegni);
   const visti = soloBorsa ? [] : compiti;
   const fogliVisti = soloBorsa ? [] : fogli;
-  const cose = visti.length + fogliVisti.length + (conCartella ? 1 : 0) + (conBorsa ? 1 : 0);
+  const cose = visti.length + fogliVisti.length + (conCartella ? 1 : 0) + (conBorsa ? 1 : 0) + (conDieci && !soloBorsa ? 1 : 0);
   const fatte =
     visti.filter((c) => c.fatto_il).length +
     fogliVisti.filter((f) => f.dato_il).length +
     (conCartella && serata.cartella ? 1 : 0) +
-    (conBorsa && serata.borsa ? 1 : 0);
+    (conBorsa && serata.borsa ? 1 : 0) +
+    (conDieci && !soloBorsa && serata.dieci ? 1 : 0);
   const mancanti = compiti.filter((c) => !c.fatto_il).length;
 
   return (
@@ -238,6 +241,8 @@ export default function Sera() {
         )}
       </div>
       )}
+
+      {!soloBorsa && conDieci && <DieciMinuti oggi={oggi} quandoFatto={carica} />}
 
       {conCartella && (
         <Voci
