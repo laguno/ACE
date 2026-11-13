@@ -35,22 +35,22 @@ import {
 import * as R from './index';
 
 describe('percorso', () => {
-  it('27 tappe per 7.700 passi, sempre più care', () => {
+  it('27 tappe per 7.200 passi, sempre più care', () => {
     const c = CONFIG.percorso.costi_tappe;
     expect(c).toHaveLength(27);
-    expect(c.reduce((a, b) => a + b, 0)).toBe(7700);
+    expect(c.reduce((a, b) => a + b, 0)).toBe(7200);
     for (let i = 1; i < c.length; i++) expect(c[i]).toBeGreaterThanOrEqual(c[i - 1]);
   });
 
   it('i forzieri cadono alle soglie approvate', () => {
     const s = soglieTappe();
-    expect(CONFIG.forzieri.map((f) => s[f.tappa - 1])).toEqual([425, 960, 1600, 2345, 3200, 4165, 5235, 6415, 7700]);
+    expect(CONFIG.forzieri.map((f) => s[f.tappa - 1])).toEqual([395, 890, 1490, 2190, 2990, 3890, 4895, 6000, 7200]);
   });
 
-  it('posizione: a 750 passi è alla tappa 4 e mancano 20 passi', () => {
-    expect(posizione(750)).toMatchObject({ tappeFatte: 4, mancanoPassi: 20, inCima: false });
-    expect(posizione(7699).inCima).toBe(false);
-    expect(posizione(7700).inCima).toBe(true);
+  it('posizione: a 750 passi è alla tappa 5 e mancano 140 passi', () => {
+    expect(posizione(750)).toMatchObject({ tappeFatte: 5, mancanoPassi: 140, inCima: false });
+    expect(posizione(7199).inCima).toBe(false);
+    expect(posizione(7200).inCima).toBe(true);
   });
 });
 
@@ -110,7 +110,7 @@ describe('bandierina e rimonta', () => {
   it('si ferma in vacanza e arriva in cima l’ultimo giorno', () => {
     expect(giornoDiScuola(new Date(2026, 11, 25))).toBe(false);
     expect(bandierina(new Date(2026, 11, 23))).toBe(bandierina(new Date(2027, 0, 6)));
-    expect(bandierina(new Date(2027, 5, 4))).toBe(7700);
+    expect(bandierina(new Date(2027, 5, 4))).toBe(7200);
     expect(bandierina(new Date(2026, 10, 15))).toBe(0);
   });
 
