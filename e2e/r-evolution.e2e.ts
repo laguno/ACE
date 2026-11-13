@@ -1,11 +1,28 @@
 import { expect, test } from '@playwright/test';
 import { finto } from './finto';
 
-// Sprint 2: la voce R-Evolution compare nella barra da periodo.r_evolution_da.
-const dati = () => ({
+// Sprint 2: la voce R-Evolution compare nella barra da quando i genitori la accendono
+// (impostazione r_evolution_da).
+const ACCESA = [{ chiave: 'r_evolution_da', valore: '2027-01-07' }];
+const dati = (impostazioni: Record<string, unknown>[] = ACCESA) => ({
+  impostazioni,
   partite: [
-    { id: 'p1', data: '2027-01-16', avversaria: 'Volley Bibbiano', set_nostri: 3, set_loro: 1 },
-    { id: 'p2', data: '2027-01-09', avversaria: 'Pallavolo Montecchio', set_nostri: 2, set_loro: 3 },
+    { id: 'p3', data: '2027-01-17', avversaria: 'Foxes Volley', set_nostri: 3, set_loro: 0, approvata_il: null },
+    { id: 'p1', data: '2027-01-16', avversaria: 'Volley Bibbiano', set_nostri: 3, set_loro: 1, approvata_il: '2027-01-16T20:00:00Z' },
+    { id: 'p2', data: '2027-01-09', avversaria: 'Pallavolo Montecchio', set_nostri: 2, set_loro: 3, approvata_il: '2027-01-09T20:00:00Z' },
+  ],
+  classifiche: [
+    {
+      cid: 93436,
+      campionato: 'Under 13',
+      girone: 'U13 Femminile girone C',
+      squadra: '13R-EVOLUT. POLO DIGITALE',
+      aggiornata_il: '2027-01-18T05:15:00Z',
+      righe: [
+        { pos: 1, squadra: '13R-EVOLUT. POLO DIGITALE', punti: 12, giocate: 4, vinte: 4, perse: 0, set_fatti: 12, set_subiti: 0 },
+        { pos: 2, squadra: 'DENTI ALBINETANA PANTHERS', punti: 8, giocate: 4, vinte: 3, perse: 1, set_fatti: 9, set_subiti: 6 },
+      ],
+    },
   ],
   serate: [],
   movimenti_passi: [
@@ -16,21 +33,52 @@ const dati = () => ({
   impegni_famiglia: [],
 });
 
-test('R-Evolution: partite con il risultato e passi presi in campo', async ({ page }) => {
+test('R-Evolution: classifica, partite con il risultato e passi presi in campo', async ({ page }) => {
   await page.clock.setFixedTime(new Date('2027-01-18T10:00:00+01:00'));
   await finto(page, dati());
   await page.goto('/');
   await page.getByRole('button', { name: 'R-Evolution' }).click();
   await expect(page.getByRole('heading', { name: 'In campo' })).toBeVisible();
+  await expect(page.getByText('+25 passi presi in campo.')).toBeVisible();
+
+  const classifica = page.locator('.carta', { has: page.getByRole('heading', { name: 'Classifica Under 13' }) });
+  await expect(classifica.getByRole('row', { name: /13R-EVOLUT\. POLO DIGITALE/ })).toHaveClass(/lani/);
+  await expect(classifica.getByRole('row', { name: /DENTI ALBINETANA/ })).not.toHaveClass(/lani/);
+  await expect(classifica.getByText('U13 Femminile girone C, dal portale FIPAV. Aggiornata il 18 gennaio.')).toBeVisible();
+
   await expect(page.getByText('Volley Bibbiano')).toBeVisible();
   await expect(page.getByText('3-1')).toHaveClass(/vinta/);
   await expect(page.getByText('2-3')).toHaveClass(/persa/);
+  // quella da approvare si vede ma non conta tra le giocate
+  await expect(page.getByText('17 gennaio, da approvare')).toBeVisible();
+  await expect(page.locator('.numeri dd').first()).toHaveText('2');
   await page.screenshot({ path: 'e2e/risultati/r-evolution.png', fullPage: true });
 });
 
-test('R-Evolution: prima di gennaio la voce non c’è', async ({ page }) => {
-  await page.clock.setFixedTime(new Date('2026-12-14T10:00:00+01:00'));
-  await finto(page, dati());
+test('R-Evolution: Lani segna la partita, va da approvare e non chiama i passi', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2027-01-23T21:00:00+01:00'));
+  const { t, chiamate } = await finto(page, { ...dati(), partite: [] });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'R-Evolution' }).click();
+  const carta = page.locator('.carta', { has: page.getByRole('heading', { name: 'Segna la partita' }) });
+  await carta.getByLabel('Contro').fill('Arbor Itarca');
+  await carta.getByLabel('Set nostri').selectOption('3');
+  await carta.getByLabel('Set loro').selectOption('3');
+  await carta.getByRole('button', { name: 'Manda da approvare' }).click();
+  await expect(page.getByRole('status')).toHaveText('Nella pallavolo non c’è il pareggio: controlla i set.');
+  await carta.getByLabel('Set loro').selectOption('2');
+  await carta.getByLabel('Sono entrata in campo').uncheck();
+  await carta.getByRole('button', { name: 'Manda da approvare' }).click();
+  await expect(page.getByRole('status')).toHaveText('Partita 3-2 segnata. I passi arrivano quando mamma o papà la approvano.');
+  expect(t.partite[0]).toMatchObject({ data: '2027-01-23', avversaria: 'Arbor Itarca', set_nostri: 3, set_loro: 2, in_campo: false });
+  expect(t.partite[0].approvata_il).toBeUndefined();
+  await expect(page.getByText('23 gennaio, da approvare')).toBeVisible();
+  expect(chiamate).toEqual([]);
+});
+
+test('R-Evolution spenta: la voce non c’è', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2027-01-18T10:00:00+01:00'));
+  await finto(page, dati([]));
   await page.goto('/');
   await expect(page.getByRole('button', { name: 'Astra' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'R-Evolution' })).toHaveCount(0);
