@@ -36,6 +36,8 @@ export function SegnaPartita({ client, avvisa, passi, quandoSegnata }: { client:
   const oggi = R.giornoRoma(new Date());
   // giorno proposto: l'ultima partita di Lani nel calendario di famiglia negli ultimi 7 giorni, se c'è
   const [giorno, setGiorno] = useState(R.iso(oggi));
+  // e l'avversaria dal titolo dell'evento ("Partita Lani: FOXES VOLLEY vs U14R-EVOLUTION")
+  const [proposta, setProposta] = useState('');
   useEffect(() => {
     const da = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate() - 7);
     client
@@ -46,7 +48,9 @@ export function SegnaPartita({ client, avvisa, passi, quandoSegnata }: { client:
       .order('inizio', { ascending: false })
       .then(({ data }) => {
         const p = (data ?? []).find((i: { titolo: string }) => C.tipoImpegno(i.titolo) === 'partita');
-        if (p) setGiorno(R.iso(R.giornoRoma(p.inizio)));
+        if (!p) return;
+        setGiorno(R.iso(R.giornoRoma(p.inizio)));
+        setProposta(C.avversariaDelTitolo(p.titolo) ?? '');
       });
   }, [client]);
 
@@ -95,7 +99,7 @@ export function SegnaPartita({ client, avvisa, passi, quandoSegnata }: { client:
         </label>
         <label>
           Contro
-          <input name="avversaria" maxLength={60} required autoComplete="off" />
+          <input key={proposta} name="avversaria" defaultValue={proposta} maxLength={60} required autoComplete="off" />
         </label>
         <div className="griglia">
           <SceltaSet nome="nostri" etichetta={genitore ? 'Set di Lani' : 'Set nostri'} valore={3} />

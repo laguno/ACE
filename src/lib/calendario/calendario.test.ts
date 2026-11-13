@@ -49,3 +49,12 @@ describe('chiusura e momento della giornata', async () => {
     expect(momento('21:00', null)).toBe('pomeriggio');
   });
 });
+
+it("avversaria dal titolo della partita: la squadra che non è R-Evolution", async () => {
+  const { avversariaDelTitolo: a } = await import('./index');
+  expect(a('Partita Lani: FOXES VOLLEY vs U14R-EVOLUTION')).toBe('FOXES VOLLEY');
+  expect(a('Partita Lani: U14R-EVOLUTION vs ARBOR ITARCA')).toBe('ARBOR ITARCA');
+  expect(a('Partita Lani U13: VOLLEY SCANDIANO ROSSA vs 13R-EVOLUT. POLO DIGITALE')).toBe('VOLLEY SCANDIANO ROSSA');
+  expect(a('Partita Lani')).toBeNull();
+  expect(a('Partita Lani: FOXES vs PANTHERS')).toBeNull();
+});

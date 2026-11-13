@@ -107,3 +107,12 @@ test("annuncio il giorno dell'accensione: Vediamo porta su R-Evolution", async (
   await page.getByRole('button', { name: 'Vediamo' }).click();
   await expect(page.getByRole('heading', { name: 'In campo' })).toBeVisible();
 });
+
+test('segna la partita: giorno e avversaria proposti dal calendario di famiglia', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2027-01-18T10:00:00+01:00'));
+  await finto(page, { ...dati(), impegni_famiglia: [{ titolo: 'Partita Lani: FOXES VOLLEY vs U14R-EVOLUTION', inizio: '2027-01-16T17:45:00Z' }] });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'R-Evolution' }).click();
+  await expect(page.getByLabel('Contro')).toHaveValue('FOXES VOLLEY');
+  await expect(page.getByLabel('Giorno')).toHaveValue('2027-01-16');
+});

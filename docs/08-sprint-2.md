@@ -49,7 +49,7 @@ Simulazione Monte Carlo, stesso criterio di docs/01 (cima con impegno 70/75/80/9
 ## Da fare, in ordine
 
 1. Prova della barra a 5 voci sui telefoni veri.
-2. **Partite dal calendario**: avversaria proposta dal titolo dell'evento, quando si sa come sono scritti.
+2. ~~Partite dal calendario~~ fatto il 13/11: "Segna la partita" propone giorno e avversaria dall'ultima partita del calendario ("Partita Lani U13: CASA vs OSPITI", `avversariaDelTitolo` in `src/lib/calendario`). Partita corretta dopo l'approvazione: l'app non lo permette (si correggono solo quelle da approvare), quindi i passi non vanno mai stornati da lì.
 3. **Fase successiva dei campionati**: come cambiare girone senza toccare il config (es. CId in Impostazioni).
 4. **Pagina "La squadra"**, automatica con gli avatar.
 5. **Livello bonus della selezione**, selezioni e raduni: rimandati.
