@@ -4,7 +4,7 @@
 
 ## Dove siamo
 
-**Sprint 1 costruito**: tutte le 8 tappe unite a `main` (produzione su `ace-passino.vercel.app`). Manca solo la prova completa in famiglia sui dispositivi veri. Il gioco parte il 23/11/2026 (`periodo.inizio`): prima di allora niente passi di voti e note, popup, figurine né chiavi.
+**Sprint 1 costruito**: tutte le 8 tappe unite a `main` (produzione su `ace-passino.vercel.app`). Manca solo la prova completa in famiglia sui dispositivi veri. Il gioco parte lunedì 16/11/2026 (`periodo.inizio`, anticipato dal 23/11 il 13/11; Lani usa l'app dal 13/11): prima di allora niente passi di voti e note, popup, figurine né chiavi.
 
 - Nuvola: `sync-nuvola` alle 14:30 e 19:30 (cron `0003`): compiti, verifiche, voti, note, lezioni; passi di voti e note dal 23/11.
 - Calendario di famiglia: `sync-calendario` ogni ora (cron `0007`), 14 giorni, ricorrenze espanse, "privato" escluso.
@@ -45,7 +45,7 @@ Ramo `decisioni` unito a `main` e in produzione, con il backup e i comandi lanci
 | 7/11 | signore | Fogli da firmare: Lani segna "L'ho dato" (`dato_il`), i passi arrivano con la conferma del genitore |
 | 7/11 | signore | Config: `video_frazione_minima_vista` 0.95 (regola del 95% di Jarvis) |
 | 7/11 | Jarvis | Schema `0001` approvato con correzione: ore delle spunte di Lani messe dal server (`timbra_ora`), `flashcard_giri.iniziato_il` |
-| 8/11 | signore | Lani non prova l'app prima: sorpresa ad app finita. Le prove sui dispositivi le fanno i genitori |
+| 13/11 | signore | Lani riceve l'app il 13/11 (prima prova sul vivo); il gioco parte lunedì 16/11, non più il 23 (una settimana in più su 28, circa +4% di passi) |
 | 8/11 | signore | Il lunedì Lani va a scuola con la borsa di pallavolo (pulmino Revolution da scuola) e la cartellina di tecnologia; niente "diario e astuccio" fisso |
 | 8/11 | signore | Claude lavora da solo con prove automatiche; può pubblicare funzioni e applicare migrazioni (permesso aggiunto) |
 | 9/11 | Jarvis + signore | Riservatezza di `popup_coda` e figurine: va bene così |
