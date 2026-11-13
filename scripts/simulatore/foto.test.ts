@@ -3,13 +3,17 @@
 // caricata due volte, la chiamata ripetuta, la foto cancellata da un genitore e rifatta.
 import type { PGlite } from '@electric-sql/pglite';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { expect, test } from 'vitest';
+import { expect, onTestFinished, test } from 'vitest';
 import * as R from '../../src/lib/regole';
 import { creaGestori, eseguiPassi } from '../../supabase/functions/_shared/passi.ts';
 import { creaDatabase, LANI, PAPA } from '../supabase-finto.mjs';
 import { client } from './database.ts';
 
 test('foto: +2 una volta per richiesta, solo se la foto è di Lani', { timeout: 60_000 }, async () => {
+  // le foto si caricano adesso (now() di PGlite): il gioco qui è già iniziato
+  const inizio = R.CONFIG.periodo.inizio;
+  R.CONFIG.periodo.inizio = '2000-01-01';
+  onTestFinished(() => void (R.CONFIG.periodo.inizio = inizio));
   const { db: pg, come } = (await creaDatabase()) as { db: PGlite; come: (uid: string | null, sql: string) => Promise<{ rows: Record<string, unknown>[] }> };
   const db = client(pg) as unknown as SupabaseClient;
   const gestori = creaGestori(db);

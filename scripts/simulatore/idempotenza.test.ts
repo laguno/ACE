@@ -59,3 +59,15 @@ test('due giri di fila dei cron: il database resta identico', { timeout: 60_000 
   expect(await contaChiavi(s, SETTIMANA)).toMatchObject({ gia: true });
   expect(LANI).toBeTruthy();
 });
+
+test('prima dell’inizio del gioco le spunte non danno passi', { timeout: 60_000 }, async () => {
+  const { db, come } = await creaDatabase();
+  const s = client(db) as never;
+  const g = R.giorno(R.CONFIG.periodo.inizio);
+  g.setDate(g.getDate() - 2);
+  const prima = R.iso(g);
+  const id = '00000000-0000-0000-0000-000000000200';
+  await come(null, `insert into compiti (id, testo, scadenza, fatto_il) values ('${id}', 'Es.', '${prima}', '${prima}T07:00:00+01:00')`);
+  expect(await eseguiPassi(s, creaGestori(s), 'compito', id)).toMatchObject({ passi: 0 });
+  expect(Number((await come(null, 'select count(*) n from movimenti_passi')).rows[0].n)).toBe(0);
+});

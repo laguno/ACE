@@ -71,6 +71,7 @@ export function creaGestori(db: SupabaseClient) {
 
   async function registra(motivo: string, riferimento: string, passi: number, g: Date, datoDa?: string): Promise<Esito> {
     if (passi === 0) return niente('non dà passi');
+    if (R.iso(g) < R.CONFIG.periodo.inizio) return niente('prima dell’inizio del gioco');
     const { data, error } = await db.rpc('registra_passi', {
       p_motivo: motivo,
       p_riferimento: riferimento,
