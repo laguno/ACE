@@ -27,6 +27,12 @@ export type Profilo = {
   impegno: (d: Date, settimana: number) => number;
   /** Spunta compiti non fatti, si fa stornare, prova caselle in più. */
   furbetta?: boolean;
+  /** Giorno in cui i genitori accendono R-Evolution; null = spenta. Se manca: periodo.r_evolution_prevista. */
+  rEvolutionDa?: string | null;
+  /** Probabilità che una partita la passi tutta in panchina (default 0, come la tabella di docs/08). */
+  panchina?: number;
+  /** Probabilità di una partita infrasettimanale in una settimana (default INFRASETTIMANALI). */
+  infrasettimanali?: number;
 };
 
 const crisi = (d: Date) => {
@@ -62,6 +68,10 @@ class Invariante extends Error {}
 
 const MATERIE = ['italiano', 'matematica', 'inglese', 'scienze', 'storia', 'tecnologia'];
 const VOCI = ['scrivania', 'lavastoviglie', 'letto', 'vestiti'];
+/** Ultima partita del campionato simulato (sabato), come la tabella di docs/08. */
+const FINE_PARTITE = '2027-05-20';
+/** Probabilità di una partita infrasettimanale (mercoledì) in una settimana: "spesso", dice il signore (13/11). */
+const INFRASETTIMANALI = 0.5;
 const ALBUM = manifest.avatar.filter((a) => a.personaggio !== 'allenatore');
 const TONO = new Map(manifest.avatar.map((a) => [a.id, a.tono]));
 const piu = (d: Date, n: number) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
@@ -87,10 +97,18 @@ export async function simula(profilo: Profilo, orologio: (t: Date) => void, da =
   // ---- preparazione: materie, premi, allenamenti (martedì e giovedì) e partite (sabato) per tutto l'anno
   for (const m of MATERIE) await pg.query(`insert into materie (id, nome, abbreviazione) values ($1, $2, $3) on conflict do nothing`, [m, m[0].toUpperCase() + m.slice(1), m.slice(0, 3).toUpperCase()]);
   await pg.exec(`update forzieri set premio = 'Premio ' || n`);
+  const accesa = profilo.rEvolutionDa === undefined ? R.CONFIG.periodo.r_evolution_prevista : profilo.rEvolutionDa;
+  if (accesa) await pg.query(`insert into impostazioni (chiave, valore) values ($1, to_jsonb($2::text))`, [R.CHIAVE_R_EVOLUTION, accesa]);
+  // partite: ogni sabato e, alcune settimane, anche il mercoledì sera
+  const partite = new Set<string>();
+  const giornoDiPartita = (d: Date) => partite.has(R.iso(d));
   for (let d = piu(R.giorno(da), -1); R.iso(d) <= a; d = piu(d, 1)) {
     const g = d.getDay();
     if (g === 2 || g === 4) await pg.query(`insert into impegni_famiglia (id, inizio, titolo) values ($1, $2, 'Allenamento Lani')`, [`all-${R.iso(d)}`, alle(d, '18:00').toISOString()]);
-    if (g === 6 && R.iso(d) < '2027-05-20') await pg.query(`insert into impegni_famiglia (id, inizio, titolo) values ($1, $2, 'Partita Lani')`, [`par-${R.iso(d)}`, alle(d, '16:00').toISOString()]);
+    if (R.iso(d) < FINE_PARTITE && (g === 6 || (g === 3 && caso(profilo.infrasettimanali ?? INFRASETTIMANALI)))) {
+      partite.add(R.iso(d));
+      await pg.query(`insert into impegni_famiglia (id, inizio, titolo) values ($1, $2, 'Partita Lani')`, [`par-${R.iso(d)}`, alle(d, g === 6 ? '16:00' : '20:00').toISOString()]);
+    }
   }
 
   const giorni: Giorno[] = [];
@@ -109,6 +127,15 @@ export async function simula(profilo: Profilo, orologio: (t: Date) => void, da =
     const imp = profilo.impegno(d, settimana);
     const scuola = R.giornoDiScuola(d);
     const domaniScuola = R.giornoDiScuola(R.prossimoGiornoDiScuola(d)) && R.iso(R.prossimoGiornoDiScuola(d)) === R.iso(piu(d, 1));
+
+    // ---- mattina presto: dieci minuti di allenamento (R-Evolution accesa, tutti i giorni)
+    if (R.rEvolutionAttiva(d, accesa) && caso(imp)) {
+      orologio(alle(d, '07:00'));
+      await pg.query(`insert into serate (data, dieci_minuti_da) values ($1, now())`, [oggi]);
+      orologio(new Date(alle(d, '07:00').getTime() + R.CONFIG.dieci_minuti.secondi * 1000));
+      await pg.query(`update serate set dieci_minuti_il = now() where data = $1`, [oggi]);
+      await passi('dieci_minuti', oggi);
+    }
 
     // ---- mattina: Nuvola porta compiti, verifiche, voti e note
     orologio(alle(d, '07:30'));
@@ -203,6 +230,18 @@ export async function simula(profilo: Profilo, orologio: (t: Date) => void, da =
       } else if (caso(imp)) await pg.query(`update fogli_firma set dato_il = now() where id = $1`, [f.id]);
     }
 
+    // ---- partita (sabato o mercoledì), metà vinte; approvata in giornata (l'ora non cambia i passi)
+    if (giornoDiPartita(d) && R.rEvolutionAttiva(d, accesa)) {
+      orologio(alle(d, '18:00'));
+      const vinta = caso(0.5);
+      const perdente = Math.floor(rng() * 3);
+      const { rows } = await pg.query<{ id: string }>(
+        `insert into partite (data, avversaria, set_nostri, set_loro, in_campo, dato_da, approvata_il, approvata_da) values ($1, 'Avversaria', $2, $3, $4, $5, now(), $5) returning id`,
+        [oggi, vinta ? 3 : perdente, vinta ? perdente : 3, !caso(profilo.panchina ?? 0), PAPA],
+      );
+      await passi('partita', rows[0].id);
+    }
+
     // ---- sera: gesti, qualche sgridata, cartella e borsa
     orologio(alle(d, '19:00'));
     // i gesti li notano i genitori; con la furbetta ogni gesto arriva due volte (doppio tocco)
@@ -222,7 +261,11 @@ export async function simula(profilo: Profilo, orologio: (t: Date) => void, da =
     const cartella = domaniScuola && caso(imp);
     const borsa = C.serveBorsa(borsaDomani) && caso(imp);
     if (cartella || borsa) {
-      await pg.query(`insert into serate (data, cartella_il, borsa_il) values ($1, ${cartella ? 'now()' : 'null'}, ${borsa ? 'now()' : 'null'})`, [oggi]);
+      // la riga c'è già se al mattino ha fatto i dieci minuti
+      await pg.query(
+        `insert into serate (data, cartella_il, borsa_il) values ($1, ${cartella ? 'now()' : 'null'}, ${borsa ? 'now()' : 'null'}) on conflict (data) do update set cartella_il = excluded.cartella_il, borsa_il = excluded.borsa_il`,
+        [oggi],
+      );
       await passi('serata', oggi);
     }
 
@@ -250,14 +293,22 @@ export async function simula(profilo: Profilo, orologio: (t: Date) => void, da =
       if (s.chiavi !== attese || s.chiavi < 0 || s.chiavi > 3 || (s.note > 0 && s.chiavi > 1)) ferma(d, `chiavi della settimana ${s.inizio} incoerenti (${s.chiavi} invece di ${attese})`);
     }
     const pos = R.posizione(saldo);
+    // I forzieri vanno solo avanti (forzieri.ts): se dopo l'apertura i passi scendono (storno, nota),
+    // il forziere resta aperto (deciso dal signore il 13/11). Si controlla quindi la tappa più alta
+    // raggiunta finora, non quella di stasera. Con più movimenti nello stesso istante vale il massimo possibile.
+    const picco = R.posizione(
+      await una<number>(
+        `select coalesce(max(s), 0)::int as v from (select sum(round(passi * moltiplicatore)) over (order by creato_il, passi desc, id) as s from movimenti_passi) x`,
+      ),
+    );
     const chiaviTot = await una<number>(`select chiavi::int as v from chiavi_totali`);
     for (const f of (await pg.query<{ n: number; stato: string }>(`select n, stato::text from forzieri`)).rows) {
       const conf = R.CONFIG.forzieri[f.n - 1];
       if (f.stato === 'aperto' && !aperti.has(f.n)) {
         aperti.add(f.n);
-        if (pos.tappeFatte < conf.tappa || chiaviTot < conf.chiavi) ferma(d, `forziere ${f.n} aperto con tappa ${pos.tappeFatte}/${conf.tappa} e chiavi ${chiaviTot}/${conf.chiavi}`);
+        if (picco.tappeFatte < conf.tappa || chiaviTot < conf.chiavi) ferma(d, `forziere ${f.n} aperto con tappa ${picco.tappeFatte}/${conf.tappa} e chiavi ${chiaviTot}/${conf.chiavi}`);
       }
-      if (f.stato === 'enigma' && pos.tappeFatte < conf.tappa - 1) ferma(d, `enigma del forziere ${f.n} comparso prima di una tappa dal forziere`);
+      if (f.stato === 'enigma' && picco.tappeFatte < conf.tappa - 1) ferma(d, `enigma del forziere ${f.n} comparso prima di una tappa dal forziere`);
     }
     for (const f of (await come(LANI, `select n, stato::text, premio from forzieri_lani`)).rows as { n: number; stato: string; premio: string | null }[])
       if (f.premio && !['aperto', 'consegnato'].includes(f.stato)) ferma(d, `Lani vede il premio del forziere ${f.n} chiuso`);
