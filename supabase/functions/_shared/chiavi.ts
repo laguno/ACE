@@ -21,7 +21,7 @@ export async function contaChiavi(db: SupabaseClient, lun: Date) {
   const { data: gia } = await db.from('settimane').select('chiavi').eq('inizio', da).maybeSingle();
   if (gia?.chiavi != null) return { settimana: da, gia: true, chiavi: gia.chiavi };
 
-  const [compiti, fogli, sessioni, movimenti, note, impegni, prima] = await Promise.all([
+  const [compiti, fogli, sessioni, movimenti, note, impegni, prima, accesa] = await Promise.all([
     db.from('compiti').select('scadenza').gte('scadenza', da).lte('scadenza', a),
     db.from('fogli_firma').select('id').or(`and(scadenza.gte.${da},scadenza.lte.${a}),and(consegnato_il.gte.${da},consegnato_il.lte.${a}T23:59:59)`),
     db.from('sessioni_ripasso').select('id').gte('data_prevista', da).lte('data_prevista', a),
@@ -29,7 +29,10 @@ export async function contaChiavi(db: SupabaseClient, lun: Date) {
     db.from('note').select('tipo').gte('data', da).lte('data', a).in('tipo', ['disciplinare', 'didattica']),
     db.from('impegni_famiglia').select('titolo, inizio').gte('inizio', lun.toISOString()).lt('inizio', piu(dom, 2).toISOString()),
     db.from('movimenti_passi').select('passi, moltiplicatore').lt('giorno', da),
+    db.from('impostazioni').select('valore').eq('chiave', R.CHIAVE_R_EVOLUTION).maybeSingle(),
   ]);
+  // R-Evolution la accendono i genitori: da quel giorno i dieci minuti contano e la bandierina pesa di più
+  const rEvolutionDa = typeof accesa.data?.valore === 'string' ? accesa.data.valore : null;
 
   const giorni = Array.from({ length: 7 }, (_, i) => piu(lun, i));
   const sportIl = new Set(
@@ -43,7 +46,7 @@ export async function contaChiavi(db: SupabaseClient, lun: Date) {
     sereBorsa: giorni.filter((d) => sportIl.has(R.iso(piu(d, 1)))).length,
     fogli: ok(fogli, 'fogli').length,
     sessioni: ok(sessioni, 'sessioni').length,
-    sereDieciMinuti: giorni.filter((d) => R.rEvolutionAttiva(d)).length,
+    sereDieciMinuti: giorni.filter((d) => R.rEvolutionAttiva(d, rEvolutionDa)).length,
     movimenti: ok(movimenti, 'movimenti'),
     note: ok(note, 'note').length,
   });
@@ -51,7 +54,7 @@ export async function contaChiavi(db: SupabaseClient, lun: Date) {
 
   // rimonta: indietro di più di una tappa e mezza rispetto alla bandierina di lunedì
   const passiPrima = ok(prima, 'saldo').reduce((s, m) => s + Math.round(m.passi * Number(m.moltiplicatore)), 0);
-  const molt = R.moltiplicatoreRimonta(passiPrima, R.bandierina(lun), chiavi);
+  const molt = R.moltiplicatoreRimonta(passiPrima, R.bandierina(lun, undefined, R.inizioREvolution(rEvolutionDa)), chiavi);
   if (molt > 1) {
     const { error } = await db.from('movimenti_passi').update({ moltiplicatore: molt }).gte('giorno', da).lte('giorno', a).gt('passi', 0);
     if (error) throw new Error(`rimonta: ${error.message}`);

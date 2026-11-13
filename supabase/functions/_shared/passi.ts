@@ -57,6 +57,13 @@ export function creaGestori(db: SupabaseClient) {
     return data as { giorno: string } | null;
   }
 
+  /** Giorno in cui i genitori hanno acceso R-Evolution (impostazioni), null se spenta. */
+  async function rEvolutionDa(): Promise<string | null> {
+    const { data, error } = await db.from('impostazioni').select('valore').eq('chiave', R.CHIAVE_R_EVOLUTION).maybeSingle();
+    if (error) throw error;
+    return typeof data?.valore === 'string' ? data.valore : null;
+  }
+
   async function chiaviGiaDate(g: Date): Promise<boolean> {
     const { data, error } = await db.from('settimane').select('chiavi').eq('inizio', R.iso(R.lunedi(g))).maybeSingle();
     if (error) throw error;
@@ -135,9 +142,8 @@ export function creaGestori(db: SupabaseClient) {
       return registra('compito_rifatto', id, passi, g);
     },
 
-    // id = data della serata ('YYYY-MM-DD'): cartella, borsa e dieci minuti (da R-Evolution).
-    // Ognuna vale solo se spuntata quella sera; registra_passi è idempotente, quindi si
-    // può richiamare dopo ogni spunta.
+    // id = data della serata ('YYYY-MM-DD'): cartella e borsa. Ognuna vale solo se spuntata
+    // quella sera; registra_passi è idempotente, quindi si può richiamare dopo ogni spunta.
     async serata(id) {
       const s = await riga('serate', 'data', id);
       const g = R.giorno(s.data);
@@ -147,11 +153,20 @@ export function creaGestori(db: SupabaseClient) {
         passi += (await registra('cartella', `serata:${s.data}`, P.obbligatori.cartella, g)).passi;
       if (quellaSera(s.borsa_il) && (await borsaServe(g)))
         passi += (await registra('borsa', `serata:${s.data}`, P.obbligatori.borsa, g)).passi;
-      const dieciDa = s.dieci_minuti_da ? new Date(s.dieci_minuti_da) : null;
-      const dieciIl = s.dieci_minuti_il ? new Date(s.dieci_minuti_il) : null;
-      if (quellaSera(s.dieci_minuti_il) && R.rEvolutionAttiva(g) && R.dieciMinutiValidi(dieciDa, dieciIl))
-        passi += (await registra('dieci_minuti', `serata:${s.data}`, P.obbligatori.dieci_minuti, g)).passi;
       return passi ? { passi, motivo: 'serata' } : niente('niente di nuovo');
+    },
+
+    // Dieci minuti del mattino, id = data ('YYYY-MM-DD'). Le ore stanno sulla riga di serate di
+    // quel giorno (colonne dieci_minuti_*, le timbra il server): valgono solo da R-Evolution accesa,
+    // avviati nella finestra del mattino e con il timer arrivato in fondo.
+    async dieci_minuti(id) {
+      const s = await riga('serate', 'data', id);
+      const g = R.giorno(s.data);
+      const da = s.dieci_minuti_da ? new Date(s.dieci_minuti_da) : null;
+      const il = s.dieci_minuti_il ? new Date(s.dieci_minuti_il) : null;
+      if (!R.rEvolutionAttiva(g, await rEvolutionDa())) return niente('R-Evolution spenta');
+      if (!da || R.iso(R.giornoRoma(da)) !== s.data || !R.dieciMinutiValidi(da, il)) return niente('dieci minuti non validi');
+      return registra('dieci_minuti', `dieci_minuti:${s.data}`, P.obbligatori.dieci_minuti, g);
     },
 
     async foglio(id) {
@@ -256,15 +271,18 @@ export function creaGestori(db: SupabaseClient) {
       return esito;
     },
 
-    // Partita segnata da un genitore: +giocata e, se vinta, +vinta_in_piu (due movimenti, così un
-    // risultato corretto da persa a vinta aggiunge solo la parte che manca).
-    // ponytail: da vinta a persa i passi restano; se capita, storno a mano dall'area genitori.
+    // Partita segnata da Lani e approvata da un genitore: +giocata e, se vinta, +vinta_in_piu
+    // (meno se è rimasta in panchina; due movimenti, così un risultato corretto da persa a vinta
+    // aggiunge solo la parte che manca). Firmati dal genitore che l'ha approvata.
+    // ponytail: corretta dopo l'approvazione (da vinta a persa) i passi restano; storno a mano.
     async partita(id) {
       const p = await riga('partite', 'id', id);
       const g = R.giorno(p.data);
-      if (!R.rEvolutionAttiva(g)) return niente('prima di R-Evolution');
-      const { giocata, vinta } = R.passiPartita(p.set_nostri, p.set_loro);
-      const presi = (await registra('partita', id, giocata, g, p.dato_da)).passi + (await registra('partita_vinta', id, vinta, g, p.dato_da)).passi;
+      if (!p.approvata_il) return niente('da approvare');
+      if (!R.rEvolutionAttiva(g, await rEvolutionDa())) return niente('R-Evolution spenta');
+      const { giocata, vinta } = R.passiPartita(p.set_nostri, p.set_loro, p.in_campo);
+      const firma = p.approvata_da ?? p.dato_da;
+      const presi = (await registra('partita', id, giocata, g, firma)).passi + (await registra('partita_vinta', id, vinta, g, firma)).passi;
       if (!presi) return niente('già registrata');
       const risultato = `${p.set_nostri}-${p.set_loro}`;
       await accoda(db, `partita:${id}:${vinta ? 'vinta' : 'persa'}`, vinta ? 'partita_vinta' : 'partita_persa', { risultato, passi: giocata + vinta });

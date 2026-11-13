@@ -331,27 +331,63 @@ describe('foto di un compito richiesta da ACE', () => {
 });
 
 describe('dieci minuti (sprint 2)', async () => {
-  const { rEvolutionAttiva, dieciMinutiValidi, esercizioDelGiorno } = await import('./index');
-  const da = CONFIG.periodo.r_evolution_da;
+  const { rEvolutionAttiva, inizioREvolution, dieciMinutiValidi, dentroFinestraDieciMinuti, esercizioDelGiorno, passiPartita } = await import('./index');
   const giorno = (s: string) => new Date(s + 'T12:00:00');
-  it('valgono dal giorno di R-Evolution', () => {
-    const prima = giorno(da);
-    prima.setDate(prima.getDate() - 1);
-    expect(rEvolutionAttiva(prima)).toBe(false);
-    expect(rEvolutionAttiva(giorno(da))).toBe(true);
+  const MENU = [
+    { id: 'plank', nome: 'Plank', tipo: 'forza_riflessi' },
+    { id: 'corpo-libero', nome: 'Squat', tipo: 'forza_riflessi' },
+    { id: 'visore', nome: 'Visore', tipo: 'forza_riflessi' },
+    { id: 'respiro', nome: 'Respiro', tipo: 'recupero' },
+  ];
+  it('valgono da quando i genitori accendono R-Evolution, spenta mai', () => {
+    expect(rEvolutionAttiva(giorno('2026-11-22'), '2026-11-23')).toBe(false);
+    expect(rEvolutionAttiva(giorno('2026-11-23'), '2026-11-23')).toBe(true);
+    expect(rEvolutionAttiva(giorno('2027-05-01'), null)).toBe(false);
+    // la bandierina usa il giorno vero se accesa, altrimenti quello previsto nel config
+    expect(inizioREvolution('2026-11-23')).toBe('2026-11-23');
+    expect(inizioREvolution(null)).toBe(CONFIG.periodo.r_evolution_prevista);
   });
-  it('solo se il timer arriva in fondo', () => {
-    const avvio = new Date('2027-01-10T20:00:00');
-    const dopo = (s: number) => new Date(avvio.getTime() + s * 1000);
-    expect(dieciMinutiValidi(avvio, dopo(CONFIG.dieci_minuti.secondi))).toBe(true);
-    expect(dieciMinutiValidi(avvio, dopo(CONFIG.dieci_minuti.secondi - 1))).toBe(false);
-    expect(dieciMinutiValidi(null, dopo(CONFIG.dieci_minuti.secondi))).toBe(false);
+  it('si avviano al mattino, nella finestra del config (ora di Roma)', () => {
+    const { da, a } = CONFIG.dieci_minuti.finestra;
+    expect([da, a]).toEqual(['06:00', '13:00']);
+    expect(dentroFinestraDieciMinuti(new Date('2026-11-24T05:59:00+01:00'))).toBe(false);
+    expect(dentroFinestraDieciMinuti(new Date('2026-11-24T06:00:00+01:00'))).toBe(true);
+    expect(dentroFinestraDieciMinuti(new Date('2026-11-24T12:59:00+01:00'))).toBe(true);
+    expect(dentroFinestraDieciMinuti(new Date('2026-11-24T13:00:00+01:00'))).toBe(false);
+    expect(dentroFinestraDieciMinuti(new Date('2026-11-24T20:00:00+01:00'))).toBe(false);
   });
-  it('recupero nei giorni di pallavolo, forza e riflessi negli altri, a rotazione', () => {
+  it('solo se avviati nella finestra, il timer arriva in fondo e la spunta è dello stesso giorno', () => {
+    const s = CONFIG.dieci_minuti.secondi;
+    const dopo = (t: Date, sec: number) => new Date(t.getTime() + sec * 1000);
+    const mattina = new Date('2027-01-11T07:00:00+01:00');
+    expect(dieciMinutiValidi(mattina, dopo(mattina, s))).toBe(true);
+    expect(dieciMinutiValidi(mattina, dopo(mattina, s - 1))).toBe(false);
+    expect(dieciMinutiValidi(null, dopo(mattina, s))).toBe(false);
+    // avviati alle 12:55 e finiti dopo le 13: valgono (conta l'avvio)
+    const tardi = new Date('2027-01-11T12:55:00+01:00');
+    expect(dieciMinutiValidi(tardi, dopo(tardi, s))).toBe(true);
+    // la sera no
+    const sera = new Date('2027-01-11T20:00:00+01:00');
+    expect(dieciMinutiValidi(sera, dopo(sera, s))).toBe(false);
+    // spunta il giorno dopo: no
+    expect(dieciMinutiValidi(mattina, dopo(mattina, 86400))).toBe(false);
+  });
+  it('recupero nei giorni di pallavolo, forza e riflessi negli altri, a rotazione sul menu', () => {
     const g = giorno('2027-01-11');
-    expect(esercizioDelGiorno(g, true).tipo).toBe('recupero');
-    expect(esercizioDelGiorno(g, false).tipo).toBe('forza_riflessi');
-    const settimana = Array.from({ length: 7 }, (_, i) => esercizioDelGiorno(giorno(`2027-01-${11 + i}`), false).id);
+    expect(esercizioDelGiorno(g, true, MENU)?.tipo).toBe('recupero');
+    expect(esercizioDelGiorno(g, false, MENU)?.tipo).toBe('forza_riflessi');
+    const settimana = Array.from({ length: 7 }, (_, i) => esercizioDelGiorno(giorno(`2027-01-${11 + i}`), false, MENU)?.id);
     expect(new Set(settimana).size).toBeGreaterThan(1);
+    // nessun esercizio di quel tipo: si sceglie tra tutti; menu vuoto: niente
+    expect(esercizioDelGiorno(g, true, MENU.slice(0, 1))?.id).toBe('plank');
+    expect(esercizioDelGiorno(g, true, [])).toBeUndefined();
+  });
+  it('partite: in campo +10 e +15 se vinta, tutta in panchina +5 e +5', () => {
+    const p = CONFIG.passi.partite;
+    expect([p.giocata, p.vinta_in_piu, p.panchina, p.panchina_vinta_in_piu]).toEqual([10, 15, 5, 5]);
+    expect(passiPartita(3, 1)).toEqual({ giocata: 10, vinta: 15 });
+    expect(passiPartita(1, 3)).toEqual({ giocata: 10, vinta: 0 });
+    expect(passiPartita(3, 0, false)).toEqual({ giocata: 5, vinta: 5 });
+    expect(passiPartita(0, 3, false)).toEqual({ giocata: 5, vinta: 0 });
   });
 });

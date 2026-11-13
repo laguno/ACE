@@ -212,7 +212,7 @@ function pesoGiorno(d: Date, rEvolutionDa: string): number {
 export function bandierina(
   oggi: Date,
   totale: number = CONFIG.percorso.totale_passi,
-  rEvolutionDa: string = CONFIG.periodo.r_evolution_da,
+  rEvolutionDa: string = CONFIG.periodo.r_evolution_prevista,
 ): number {
   const inizio = new Date(CONFIG.periodo.inizio + 'T00:00:00');
   const fine = new Date(CONFIG.periodo.fine + 'T00:00:00');
@@ -421,32 +421,71 @@ export function prossimaRevisione(intervallo: number, esito: Esito, oggi: Date):
 
 // ---------------------------------------------------------------- dieci minuti (sprint 2)
 
-export type EsercizioDieciMinuti = (typeof CONFIG.dieci_minuti.menu)[number];
+/** Menu dei dieci minuti: tabella esercizi_dieci_minuti, la cambiano i genitori. */
+export type EsercizioDieciMinuti = { id: string; nome: string; tipo: string };
 
-/** Dieci minuti e partite valgono (passi e chiavi) dal giorno in cui arriva R-Evolution. */
-export function rEvolutionAttiva(g: Date): boolean {
-  return iso(g) >= CONFIG.periodo.r_evolution_da;
+/** Impostazione (tabella impostazioni) in cui i genitori salvano il giorno di accensione di R-Evolution. */
+export const CHIAVE_R_EVOLUTION = 'r_evolution_da';
+
+/**
+ * R-Evolution non ha una data fissa: la accendono i genitori (impostazione r_evolution_da,
+ * 'YYYY-MM-DD'). Spenta (null) niente voce nella barra, niente dieci minuti, niente passi dalle partite.
+ */
+export function rEvolutionAttiva(g: Date, accesaDa: string | null | undefined): boolean {
+  return !!accesaDa && iso(g) >= accesaDa;
 }
 
-/** Valgono solo se il timer è arrivato in fondo: tra avvio e spunta almeno i secondi del config. */
-export function dieciMinutiValidi(da: Date | null, il: Date | null): boolean {
-  return !!da && !!il && il.getTime() - da.getTime() >= CONFIG.dieci_minuti.secondi * 1000;
+/** Giorno da cui la bandierina pesa i giorni di R-Evolution: quello vero se accesa, se no quello previsto. */
+export function inizioREvolution(accesaDa: string | null | undefined): string {
+  return accesaDa ?? CONFIG.periodo.r_evolution_prevista;
+}
+
+const oraRomana = (t: Date) =>
+  new Intl.DateTimeFormat('it-IT', { timeZone: 'Europe/Rome', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(t);
+
+/** Si possono avviare adesso? Solo al mattino, nella finestra del config (ora di Roma). */
+export function dentroFinestraDieciMinuti(t: Date): boolean {
+  const ora = oraRomana(t);
+  return ora >= CONFIG.dieci_minuti.finestra.da && ora < CONFIG.dieci_minuti.finestra.a;
 }
 
 /**
- * Esercizio proposto per la sera: recupero nei giorni di pallavolo, forza e riflessi negli altri,
- * a rotazione sul giorno dell'anno così non è sempre lo stesso. Lani può sceglierne un altro.
+ * Valgono solo se avviati dentro la finestra del mattino, con il timer arrivato in fondo (tra avvio
+ * e spunta almeno i secondi del config) e spuntati lo stesso giorno.
  */
-export function esercizioDelGiorno(g: Date, pallavolo: boolean): EsercizioDieciMinuti {
+export function dieciMinutiValidi(da: Date | null, il: Date | null): boolean {
+  return (
+    !!da &&
+    !!il &&
+    dentroFinestraDieciMinuti(da) &&
+    iso(giornoRoma(da)) === iso(giornoRoma(il)) &&
+    il.getTime() - da.getTime() >= CONFIG.dieci_minuti.secondi * 1000
+  );
+}
+
+/**
+ * Esercizio proposto per il giorno: recupero nei giorni di pallavolo, forza e riflessi negli altri,
+ * a rotazione sul giorno dell'anno così non è sempre lo stesso. Lani può sceglierne un altro.
+ * Se nel menu non c'è nessun esercizio di quel tipo si sceglie tra tutti; menu vuoto: undefined.
+ */
+export function esercizioDelGiorno<E extends EsercizioDieciMinuti>(g: Date, pallavolo: boolean, menu: E[]): E | undefined {
   const tipo = pallavolo ? 'recupero' : 'forza_riflessi';
-  const scelta = CONFIG.dieci_minuti.menu.filter((e) => e.tipo === tipo);
+  const delTipo = menu.filter((e) => e.tipo === tipo);
+  const scelta = delTipo.length ? delTipo : menu;
   const giornoAnno = Math.round((Date.UTC(g.getFullYear(), g.getMonth(), g.getDate()) - Date.UTC(g.getFullYear(), 0, 1)) / 86400000);
   return scelta[giornoAnno % scelta.length];
 }
 
-/** Partita (da R-Evolution): passi per averla giocata e, se vinta, quelli in più. */
-export function passiPartita(setNostri: number, setLoro: number): { giocata: number; vinta: number } {
-  return { giocata: P.partite.giocata, vinta: setNostri > setLoro ? P.partite.vinta_in_piu : 0 };
+/**
+ * Partita (da R-Evolution): passi per esserci stata e, se vinta, quelli in più.
+ * Tutta la gara in panchina vale meno (passi.partite.panchina_*), ma vale.
+ */
+export function passiPartita(setNostri: number, setLoro: number, inCampo = true): { giocata: number; vinta: number } {
+  const p = P.partite;
+  const vinta = setNostri > setLoro;
+  return inCampo
+    ? { giocata: p.giocata, vinta: vinta ? p.vinta_in_piu : 0 }
+    : { giocata: p.panchina, vinta: vinta ? p.panchina_vinta_in_piu : 0 };
 }
 
 // ---------------------------------------------------------------- conteggio della settimana

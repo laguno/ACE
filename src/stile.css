@@ -667,6 +667,19 @@ body:has(.avvio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom))
 /* Dieci minuti (sprint 2): il timer grande al centro della carta */
 .schermo .carta p.timer { margin: 8px 0 12px; text-align: center; font: 800 56px/1 'Baloo 2', Nunito, sans-serif; font-variant-numeric: tabular-nums; color: var(--testo); }
 .dieci-minuti .principale { margin-top: 12px; }
+.schermo.dopo { margin-top: 12px; }
+
+/* partite (sprint 2): spunta "in campo" su una riga, bersaglio di 44 px */
+.modulo label.riga-spunta { display: flex; align-items: center; gap: 12px; min-height: 44px; color: var(--testo); font-weight: 700; }
+.modulo label.riga-spunta input { width: 24px; height: 24px; min-height: 0; padding: 0; accent-color: var(--accento); }
+.partita-da-approvare { padding-top: 12px; border-top: 2px dashed var(--lilla); }
+
+/* classifiche FIPAV (sprint 2): la riga di Lani in fucsia */
+.classifica { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+.classifica th { font: 800 12px Nunito, sans-serif; color: var(--testo-2); text-align: right; padding: 4px; }
+.classifica td { text-align: right; padding: 8px 4px; border-top: 2px dashed var(--lilla); }
+.classifica th:nth-child(2), .classifica td:nth-child(2) { text-align: left; overflow-wrap: anywhere; }
+.classifica tr.lani td { color: var(--accento-premuto); font-weight: 800; }
 
 /* R-Evolution (sprint 2) */
 .r-evolution .numeri { grid-template-columns: repeat(2, 1fr); }

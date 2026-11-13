@@ -339,16 +339,40 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
-                },"partite": {
+                },"classifiche": {
                   Row: {
-                    "avversaria": string,"creato_il": string,"data": string,"dato_da": string,"id": string,"set_loro": number,"set_nostri": number
+                    "aggiornata_il": string,"campionato": string,"cid": number,"girone": string,"righe": Json,"squadra": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "avversaria": string,"creato_il"?: string,"data"?: string,"dato_da"?: string,"id"?: string,"set_loro": number,"set_nostri": number
+                    "aggiornata_il"?: string,"campionato": string,"cid": number,"girone": string,"righe"?: Json,"squadra": string
                   }
                   Update: {
-                    "avversaria"?: string,"creato_il"?: string,"data"?: string,"dato_da"?: string,"id"?: string,"set_loro"?: number,"set_nostri"?: number
+                    "aggiornata_il"?: string,"campionato"?: string,"cid"?: number,"girone"?: string,"righe"?: Json,"squadra"?: string
+                  }
+                  Relationships: []
+                },"esercizi_dieci_minuti": {
+                  Row: {
+                    "creato_il": string,"id": string,"nome": string,"tipo": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "creato_il"?: string,"id"?: string,"nome": string,"tipo": string
+                  }
+                  Update: {
+                    "creato_il"?: string,"id"?: string,"nome"?: string,"tipo"?: string
+                  }
+                  Relationships: []
+                },"partite": {
+                  Row: {
+                    "approvata_da": string | null,"approvata_il": string | null,"avversaria": string,"creato_il": string,"data": string,"dato_da": string,"id": string,"in_campo": boolean,"set_loro": number,"set_nostri": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "approvata_da"?: string | null,"approvata_il"?: string | null,"avversaria": string,"creato_il"?: string,"data"?: string,"dato_da"?: string,"id"?: string,"in_campo"?: boolean,"set_loro": number,"set_nostri": number
+                  }
+                  Update: {
+                    "approvata_da"?: string | null,"approvata_il"?: string | null,"avversaria"?: string,"creato_il"?: string,"data"?: string,"dato_da"?: string,"id"?: string,"in_campo"?: boolean,"set_loro"?: number,"set_nostri"?: number
                   }
                   Relationships: []
                 },"pin_genitori": {

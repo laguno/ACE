@@ -1,30 +1,43 @@
 import { useEffect, useState } from 'react';
 import * as R from './lib/regole';
+import { stessaSquadra, type RigaClassifica } from './lib/classifiche';
 import { Attesa, Testata } from './kit';
 import { MESI } from './spunte';
 import { supabase } from './supabase';
+import { SegnaPartita } from './Partita';
 
-// R-Evolution (sprint 2, docs/03): le partite con il risultato e i dieci minuti del mese.
-// Si vede da periodo.r_evolution_da. La squadra, le classifiche e il forziere d'oro arrivano dopo
-// (docs/08-sprint-2.md).
+// R-Evolution (sprint 2, docs/03): partite segnate da Lani (passi dopo l'approvazione di un
+// genitore), dieci minuti del mese e classifiche dei campionati dal portale FIPAV (funzione
+// "classifiche"). Si vede da quando i genitori accendono R-Evolution. La squadra e il forziere
+// d'oro arrivano dopo (docs/08-sprint-2.md).
 
-type Partita = { id: string; data: string; avversaria: string; set_nostri: number; set_loro: number };
+type Partita = { id: string; data: string; avversaria: string; set_nostri: number; set_loro: number; approvata_il: string | null };
+type Classifica = { cid: number; campionato: string; girone: string; squadra: string; righe: RigaClassifica[]; aggiornata_il: string };
 
 export default function REvolution() {
   const oggi = R.giornoRoma(new Date());
   const inizioMese = new Date(oggi.getFullYear(), oggi.getMonth(), 1);
-  const [d, setD] = useState<{ partite: Partita[]; dieci: number; passiCampo: number }>();
+  const [d, setD] = useState<{ partite: Partita[]; dieci: number; passiCampo: number; classifiche: Classifica[] }>();
   const [errore, setErrore] = useState('');
+  const [avviso, setAvviso] = useState('');
 
-  useEffect(() => {
+  const carica = () =>
     Promise.all([
-      supabase.from('partite').select('id, data, avversaria, set_nostri, set_loro').order('data', { ascending: false }).limit(20),
+      supabase.from('partite').select('id, data, avversaria, set_nostri, set_loro, approvata_il').order('data', { ascending: false }).limit(20),
       supabase.from('serate').select('data', { count: 'exact', head: true }).gte('data', R.iso(inizioMese)).not('dieci_minuti_il', 'is', null),
       supabase.from('movimenti_passi').select('passi').in('motivo', ['partita', 'partita_vinta', 'dieci_minuti']),
-    ]).then(([p, s, m]) => {
+      supabase.from('classifiche').select('cid, campionato, girone, squadra, righe, aggiornata_il').order('campionato'),
+    ]).then(([p, s, m, c]) => {
       if (p.error) return setErrore('Non riesco a leggere le partite. Riprova tra poco.');
-      setD({ partite: p.data ?? [], dieci: s.count ?? 0, passiCampo: (m.data ?? []).reduce((a, x) => a + x.passi, 0) });
+      setD({
+        partite: (p.data ?? []) as Partita[],
+        dieci: s.count ?? 0,
+        passiCampo: (m.data ?? []).reduce((a, x) => a + x.passi, 0),
+        classifiche: (c.data ?? []) as Classifica[],
+      });
     });
+  useEffect(() => {
+    carica();
   }, [R.iso(oggi)]);
 
   if (errore)
@@ -35,7 +48,8 @@ export default function REvolution() {
     );
   if (!d) return <Attesa />;
 
-  const vinte = d.partite.filter((p) => p.set_nostri > p.set_loro).length;
+  const giocate = d.partite.filter((p) => p.approvata_il);
+  const vinte = giocate.filter((p) => p.set_nostri > p.set_loro).length;
   return (
     <section className="schermo r-evolution">
       <Testata sfondo="rosa" posa="lani-divisa" sopra="R-Evolution" titolo="In campo" riga={<p className="conto">+{d.passiCampo} passi presi in campo.</p>} />
@@ -43,7 +57,7 @@ export default function REvolution() {
       <dl className="numeri">
         <div>
           <dt>Partite</dt>
-          <dd>{d.partite.length}</dd>
+          <dd>{giocate.length}</dd>
           <dt>{vinte === 1 ? 'una vinta' : `${vinte} vinte`}</dt>
         </div>
         <div>
@@ -53,15 +67,53 @@ export default function REvolution() {
         </div>
       </dl>
 
+      {d.classifiche.map((c) => (
+        <div className="carta" key={c.cid}>
+          <div className="testa-carta">
+            <h2>Classifica {c.campionato}</h2>
+          </div>
+          <table className="classifica">
+            <thead>
+              <tr>
+                <th scope="col">
+                  <abbr title="Posizione">Pos</abbr>
+                </th>
+                <th scope="col">Squadra</th>
+                <th scope="col">
+                  <abbr title="Punti">Pt</abbr>
+                </th>
+                <th scope="col">
+                  <abbr title="Partite giocate">G</abbr>
+                </th>
+                <th scope="col">
+                  <abbr title="Partite vinte">V</abbr>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {c.righe.map((r) => (
+                <tr key={r.pos + r.squadra} className={stessaSquadra(r.squadra, c.squadra) ? 'lani' : undefined}>
+                  <td>{r.pos}</td>
+                  <td>{r.squadra}</td>
+                  <td>{r.punti}</td>
+                  <td>{r.giocate}</td>
+                  <td>{r.vinte}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="nota">
+            {c.girone}, dal portale FIPAV. Aggiornata il {new Date(c.aggiornata_il).getDate()} {MESI[new Date(c.aggiornata_il).getMonth()]}.
+          </p>
+        </div>
+      ))}
+
       <div className="carta">
         <div className="testa-carta">
           <h2>Partite</h2>
-          <span className="valore">
-            +{R.CONFIG.passi.partite.giocata}, vinta +{R.CONFIG.passi.partite.giocata + R.CONFIG.passi.partite.vinta_in_piu}
-          </span>
         </div>
         {d.partite.length === 0 ? (
-          <p>Ancora nessuna partita segnata. La segnano mamma o papà dopo la gara.</p>
+          <p>Ancora nessuna partita segnata. Dopo la gara la segni qui sotto.</p>
         ) : (
           <ul className="partite">
             {d.partite.map((p) => {
@@ -73,6 +125,7 @@ export default function REvolution() {
                     {p.avversaria}
                     <small>
                       {g.getDate()} {MESI[g.getMonth()]}
+                      {!p.approvata_il && ', da approvare'}
                     </small>
                   </span>
                   <b className={vinta ? 'vinta' : 'persa'}>
@@ -84,6 +137,13 @@ export default function REvolution() {
           </ul>
         )}
       </div>
+
+      {avviso && (
+        <p className="nota" role="status">
+          {avviso}
+        </p>
+      )}
+      <SegnaPartita client={supabase} avvisa={setAvviso} quandoSegnata={carica} />
     </section>
   );
 }

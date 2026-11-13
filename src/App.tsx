@@ -12,6 +12,7 @@ import * as R from './lib/regole';
 import { Attesa } from './kit';
 import { rinnovaIscrizione } from './notifiche';
 import { CHIAVE_SESSIONE, supabase, type Profilo } from './supabase';
+import { useREvolutionDa } from './accensione';
 
 // L'app si apre su Oggi o Sera: le altre schermate si caricano al primo tocco (il service worker
 // le tiene già in memoria, anche senza rete).
@@ -22,9 +23,9 @@ const REvolution = lazy(() => import('./REvolution'));
 const Figurina = lazy(() => import('./Figurine').then((m) => ({ default: m.Figurina })));
 const Album = lazy(() => import('./Figurine').then((m) => ({ default: m.Album })));
 
-// R-Evolution (sprint 2) compare nella barra dal giorno periodo.r_evolution_da.
+// R-Evolution (sprint 2) compare nella barra da quando i genitori la accendono (Impostazioni).
 const TUTTE = ['Oggi', 'Studio', 'Sera', 'R-Evolution', 'Astra'] as const;
-const voci = () => TUTTE.filter((v) => v !== 'R-Evolution' || R.rEvolutionAttiva(R.giornoRoma(new Date())));
+const voci = (rEvolutionDa: string | null) => TUTTE.filter((v) => v !== 'R-Evolution' || R.rEvolutionAttiva(R.giornoRoma(new Date()), rEvolutionDa));
 // icone di servizio Phosphor (design/Stile.html): bold, la sezione attiva piena in fucsia scuro
 const ICONE = { Oggi: Sun, Studio: BookOpen, Sera: MoonStars, 'R-Evolution': Volleyball, Astra: Star };
 type Voce = (typeof TUTTE)[number] | 'Genitori' | 'Figurina' | 'Album';
@@ -130,6 +131,7 @@ export default function App() {
 /** Parte di Lani: si apre su Sera da un'ora prima della chiusura, altrimenti su Oggi. */
 function Lani() {
   const giornata = useGiornata();
+  const barra = voci(useREvolutionDa());
   const [accogli, setAccogli] = useState(daAccogliere);
   const [voce, setVoce] = useState<Voce>();
   // "Prova" del popup dell'enigma: Astra si apre sul forziere con il biglietto
@@ -172,8 +174,8 @@ function Lani() {
         </button>
       </main>
       <CodaPopup apriEnigma={(n) => (setForziere(n), setVoce('Astra'))} apriStudio={() => setVoce('Studio')} />
-      <nav className={`barra${voci().length > 4 ? ' cinque' : ''}`} aria-label="Sezioni">
-        {voci().map((v) => {
+      <nav className={`barra${barra.length > 4 ? ' cinque' : ''}`} aria-label="Sezioni">
+        {barra.map((v) => {
           const attiva = v === voce || (v === 'Astra' && (voce === 'Figurina' || voce === 'Album'));
           const Icona = ICONE[v];
           return (

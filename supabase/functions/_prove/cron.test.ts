@@ -103,6 +103,30 @@ describe('sync-calendario', () => {
   });
 });
 
+describe('classifiche', () => {
+  const pagina = (squadra: string) =>
+    `<table class="tbl tbl-classifica"><tr><th>Pos.</th></tr><tr><td>1</td><td><img alt="">${squadra}</td><td>12</td><td>4</td><td>4</td><td>0</td><td>12</td><td>0</td><td>---</td></tr><tr><td>2</td><td>ALTRE</td><td>8</td><td>4</td><td>3</td><td>1</td><td>9</td><td>6</td><td>1,50</td></tr></table>`;
+  it('copia i due campionati dal portale e registra il giro', async () => {
+    const chiesti: string[] = [];
+    vi.stubGlobal('fetch', async (u: string) => {
+      chiesti.push(String(u));
+      return new Response(pagina(String(u).endsWith('93436') ? '13R-EVOLUT. POLO DIGITALE' : 'U14R-EVOLUTION'));
+    });
+    const f = await carica('classifiche');
+    expect((await json(await f(richiesta({}, { cron: true })))).corpo).toMatchObject({ esito: 'ok', 'Under 13': 2, 'Under 14': 2 });
+    expect(chiesti).toEqual(['https://reggioemilia.portalefipav.net/classifica.aspx?CId=93436', 'https://reggioemilia.portalefipav.net/classifica.aspx?CId=93399']);
+    expect(await valore(`select righe->0->>'squadra' from classifiche where cid = 93436`)).toBe('13R-EVOLUT. POLO DIGITALE');
+    expect(await valore(`select esito from sync_log where fonte = 'classifiche'`)).toBe('ok');
+  });
+  it('pagina cambiata: errore, la classifica di prima resta, Lani non la lancia', async () => {
+    vi.stubGlobal('fetch', async () => new Response('<html>manutenzione</html>'));
+    const f = await carica('classifiche');
+    expect((await f(richiesta({}, { cron: true }))).status).toBe(502);
+    expect(await valore(`select count(*)::int from classifiche`)).toBe(0);
+    expect((await f(richiesta({}, { gettone: 'gettone-lani' }))).status).toBe(401);
+  });
+});
+
 describe('enigma', () => {
   const USCITA = { enigma: 'Rotonda e calda, con il pomodoro sopra,\nla mangi a fette: è...', soluzione: 'pizza / pizza margherita', aiutino: 'Si cuoce nel forno.', parola: 'PIZZA' };
   beforeEach(() => stato.banco!.come(null, `update forzieri set premio = 'Pizza con le amiche' where n = 1`));

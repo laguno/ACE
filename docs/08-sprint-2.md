@@ -28,15 +28,17 @@
 7. **Tutor di matematica** passo per passo: progetto a sé (IA con suggerimenti, mai la soluzione), da scrivere prima su carta col signore.
 8. Raccolta completa dei video; versi dei personaggi.
 
-## Decisioni del signore che servono
+## Decisioni del signore (13/11)
 
-- **Menu dei dieci minuti**: va bene la bozza? Va fatto vedere all'allenatrice o al preparatore (docs/01). Niente salti in più.
-- **Data di R-Evolution**: resta il 7 gennaio o si anticipa a dicembre con il percorso alternativo da 7.600 passi (`percorso.alternativa_r_evolution_dicembre`)? Se resta gennaio, alla taratura di dicembre vedere la simulazione (docs/simulazione: con le sole fonti dello sprint 1 la cima non arriva).
-- **Voce R-Evolution nella barra** prima di gennaio: nascosta (com'è ora) o "In arrivo"?
-- **Partite**: le segna sempre un genitore (com'è ora) o si fidano del calendario e chiedono solo il risultato? Una partita "non giocata" (in panchina tutta la gara) vale +10?
-- **Classifiche**: da dove? (sito della federazione, inserimento a mano, nessuna).
-- **La squadra**: rosa con numeri e ruoli (la dà Lani); permesso dell'allenatore per l'avatar (già disegnato); nome della squadra.
-- **Passi della strada verso la selezione** (giornate di selezione, raduni): numeri da mettere nel config, oggi non ci sono.
+- **Nessuna data**: R-Evolution si accende con un **interruttore dei genitori** in Impostazioni (forse già la settimana dopo il 13/11). Prima dell'accensione tutto resta nascosto e senza passi.
+- **Percorso**: con l'avvio anticipato va **ricalcolato** (simulazione), poi lo approva il signore.
+- **Dieci minuti al mattino**, non la sera: si avviano **dalle 6:00 alle 13:00**, tutti i giorni.
+- **Menu dei dieci minuti**: la bozza resta come partenza; da ora lo cambiano i genitori in Impostazioni.
+- **Partite**: le **segna Lani**; un genitore **corregge** il punteggio se serve e **approva** (passi solo dopo l'approvazione) oppure **rifiuta** (la partita sparisce).
+- **Panchina** tutta la gara: **5 passi, +5 se vinta** (giocata resta +10, +15 se vinta).
+- **Classifiche** dal portale FIPAV Reggio Emilia: **U13 Femminile girone C** ("13R-EVOLUT. POLO DIGITALE", CId 93436) e **U14 Femminile girone A** ("U14R-EVOLUTION", CId 93399). Una volta al giorno. Se passano alla fase dopo, cambia il girone: come gestirlo è da decidere.
+- **Allenatore**: niente altri permessi da chiedere. **La squadra**: si fa più avanti, automatica, insieme agli avatar.
+- **Selezioni e raduni**: rimandati, per ora non si vedono.
 
 ## Prima di unire a `main`
 

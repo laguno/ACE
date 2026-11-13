@@ -3,7 +3,8 @@
   "periodo": {
     "inizio": "2026-11-16",
     "fine": "2027-06-04",
-    "r_evolution_da": "2027-01-07"
+    "r_evolution_prevista": "2027-01-07",
+    "nota_r_evolution": "R-Evolution non ha una data: la accendono i genitori in Impostazioni (impostazione r_evolution_da). r_evolution_prevista serve solo alla bandierina finché non è accesa."
   },
   "percorso": {
     "totale_passi": 7200,
@@ -182,7 +183,9 @@
     },
     "partite": {
       "giocata": 10,
-      "vinta_in_piu": 15
+      "vinta_in_piu": 15,
+      "panchina": 5,
+      "panchina_vinta_in_piu": 5
     },
     "enigma_risolto": 20,
     "nota_merito": 50,
@@ -241,14 +244,16 @@
     "non_ripetere_prima_di_giorni": 30
   },
   "dieci_minuti": {
-    "nota": "Sprint 2 (bozza del 13/11, da approvare dal signore): menu da docs/01, da far vedere all'allenatrice. Valgono dal giorno periodo.r_evolution_da. Recupero nei giorni di pallavolo, forza e riflessi negli altri.",
+    "nota": "Sprint 2 (decisi dal signore il 13/11): al mattino, si avviano dalle 6:00 alle 13:00 tutti i giorni, da quando R-Evolution è accesa. Il menu sta nella tabella esercizi_dieci_minuti (lo cambiano i genitori in Impostazioni). Recupero nei giorni di pallavolo, forza e riflessi negli altri.",
     "secondi": 600,
-    "menu": [
-      { "id": "plank", "nome": "Plank e varianti", "tipo": "forza_riflessi" },
-      { "id": "corpo-libero", "nome": "Squat e affondi a corpo libero", "tipo": "forza_riflessi" },
-      { "id": "visore", "nome": "Riflessi con il visore", "tipo": "forza_riflessi" },
-      { "id": "mobilita", "nome": "Mobilità e allungamento", "tipo": "recupero" },
-      { "id": "respiro", "nome": "Respirazione guidata", "tipo": "recupero" }
+    "finestra": { "da": "06:00", "a": "13:00" }
+  },
+  "classifiche": {
+    "nota": "Sprint 2: classifiche dal portale FIPAV Reggio Emilia, lette una volta al giorno dalla funzione classifiche. Stagione 2026/27. Se la squadra passa alla fase dopo cambia il girone (CId): per ora si cambia qui.",
+    "portale": "https://reggioemilia.portalefipav.net/classifica.aspx?CId=",
+    "campionati": [
+      { "nome": "Under 13", "girone": "U13 Femminile girone C", "cid": 93436, "squadra": "13R-EVOLUT. POLO DIGITALE" },
+      { "nome": "Under 14", "girone": "U14 Femminile girone A", "cid": 93399, "squadra": "U14R-EVOLUTION" }
     ]
   },
   "calendario": {
