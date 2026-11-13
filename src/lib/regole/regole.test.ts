@@ -110,7 +110,7 @@ describe('bandierina e rimonta', () => {
     expect(giornoDiScuola(new Date(2026, 11, 25))).toBe(false);
     expect(bandierina(new Date(2026, 11, 23))).toBe(bandierina(new Date(2027, 0, 6)));
     expect(bandierina(new Date(2027, 5, 4))).toBe(7200);
-    expect(bandierina(new Date(2026, 10, 22))).toBe(0);
+    expect(bandierina(new Date(2026, 10, 15))).toBe(0);
   });
 
   it('rimonta ×1,25 solo se indietro di oltre una tappa e mezza e con almeno una chiave', () => {
