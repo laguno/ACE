@@ -87,7 +87,7 @@ Fatto il 10/11 sera (in produzione, `f881a41`): tabella "Dopo" compilata; testat
 
 **Fino al 23/11 (signore, con Claude se serve):**
 4. Genitori: controllare orari e materiale nelle Impostazioni.
-5. **Prova in famiglia**, prima su Android Chrome (Motorola di Lani: Home, push, tema scuro, scorrimento fino in fondo), poi l'iPad. Lista in `docs/07-installazione.md`.
+5. **Prova in famiglia**, prima su Android Chrome (Samsung di Lani: Home, push, tema scuro, scorrimento fino in fondo), poi l'iPad. Lista in `docs/07-installazione.md`.
 
 **Dal 23/11 (controlli sul vivo):**
 6. Primi passi, popup e figurine; enigmi v4 sull'app vera quando Lani arriva al primo forziere (il 7 è il cruciverba: guardare che la griglia resti allineata sul telefono). Il 29/11 alle 21:30 le prime chiavi (`sync_log` fonte chiavi).

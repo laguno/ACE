@@ -9,11 +9,13 @@ ACE non passa dall'App Store: è un'app web che si aggiunge alla schermata Home.
 3. Aprire ACE dall'icona sulla Home ed entrare con il proprio accesso.
 4. Quando ACE chiede di inviare notifiche, rispondere **Consenti**. Su iPhone le notifiche arrivano **solo** se ACE è aperta dall'icona della Home (iOS 16.4 o successivo).
 
-## Android (telefono di Lani, Motorola)
+## Android (telefono di Lani, Samsung; il Motorola è del signore)
 
-1. Aprire l'indirizzo con **Chrome**: compare "Installa app" (oppure menu ⋮ → **Installa app**).
-2. Aprire ACE dall'icona sulla Home ed entrare.
+1. Aprire l'indirizzo con **Chrome**, non con Samsung Internet: compare "Installa app" (oppure menu ⋮ → **Installa app**). Non "Aggiungi a schermata Home", che fa solo un collegamento a Chrome.
+2. Aprire ACE dall'icona sulla Home ed entrare. In Impostazioni → App deve comparire "ACE".
 3. Quando ACE chiede di inviare notifiche, rispondere **Consenti**. Se non arrivano: Impostazioni → App → ACE (o Chrome) → Notifiche attive.
+4. Samsung, perché le notifiche arrivino con l'app chiusa: Impostazioni → App → ACE e Chrome → Batteria → **Senza restrizioni**; e in Assistenza dispositivo → Batteria → Limiti utilizzo in background, ACE e Chrome non devono stare tra le app in sospensione.
+5. Family Link (dal telefono del genitore): Lani → Controlli → Limiti delle app → ACE → **Sempre consentita**. Se Chrome è su "solo siti approvati", approvare `ace-passino.vercel.app`.
 
 ## Accessi
 
@@ -42,7 +44,7 @@ Prima il telefono Android di Lani, poi l'iPad. La fanno i genitori (Lani vede l'
 - [ ] Toccando la notifica si apre ACE.
 - [ ] Con l'app chiusa la notifica arriva lo stesso.
 
-**Tema scuro di sistema acceso** (Impostazioni → Display → Tema scuro)
+**Tema scuro di sistema acceso** (Samsung: Impostazioni → Schermo → Modalità scura)
 - [ ] Le schermate restano chiare e leggibili: niente testi scuri su fondo scuro, niente colori invertiti.
 - [ ] Gli avatar mantengono il contorno bianco, senza riquadri strani.
 

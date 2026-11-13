@@ -103,7 +103,7 @@ Tutti decisi dal signore il 10/11; quelli da fare sono in produzione dal 10/11.
 
 ## 6. Rischi aperti prima del 23/11
 
-1. **Prova in famiglia non ancora fatta** sui dispositivi veri (Motorola di Lani, poi iPad): lista in `docs/07-installazione.md`.
+1. **Prova in famiglia non ancora fatta** sui dispositivi veri (Samsung di Lani, poi iPad): lista in `docs/07-installazione.md`.
 2. **Provati solo con dati finti**: `spiega`, borsa, enigma, foto e push. Serve un accesso di Lani sull'app vera.
 3. **Protezione delle password trapelate spenta** in Supabase Auth: la accende il signore (unico avviso di sicurezza non voluto).
 4. **Obiettivi non raggiunti**: Lighthouse 86-89 invece di 90 (scelta del signore); Impeccable 32/40 e 17/20 invece di 34 e 18.
