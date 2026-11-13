@@ -62,7 +62,7 @@ Ogni tappa si chiude con test verdi e una prova sul telefono.
 - Nessuna credenziale nel codice o nel client; segreti solo in Supabase/Vercel.
 - Ogni testo mostrato a Lani rispetta il copione (lunghezza, tono, niente emoji, numeri veri).
 - Funziona su iPhone (Safari, aggiunta alla Home) e su iPad; notifiche provate.
-- Dopo due settimane d'uso: taratura con `scripts/simula_passi.py`.
+- Dopo due settimane d'uso: taratura con `npm run simula` (simulatore vero).
 
 ## Questioni aperte
 

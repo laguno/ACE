@@ -45,7 +45,7 @@ ACE è un'app ad uso **solo familiare** per Leilani (Lani), 12 anni, seconda med
 - `npm test`: test delle regole.
 - `npm run prova:schema`: applica le migrazioni su PGlite e prova la sicurezza (cosa può fare Lani).
 - `npm run icone`: rigenera le icone della PWA in `public/icone/`.
-- `npm run simula`: simulazione Monte Carlo del percorso (Python 3), per la taratura.
+- `npm run simula`: taratura del percorso col simulatore vero, più anni simulati per impegno (`TOTALI`, `SEMI`, `ACCESA`; risultati in `docs/simulazione/taratura.md`).
 
 ## Fine sessione
 

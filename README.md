@@ -17,7 +17,7 @@ Uso solo familiare. Repository privato.
 | `supabase/migrations/` | Schema del database con le regole di accesso |
 | `public/assets/` | 67 avatar, 20 oggetti, 5 sfondi in WebP |
 | `design/` | Bozze delle schermate esportate dal canvas di design |
-| `scripts/simula_passi.py` | Simulazione del percorso per la taratura |
+| `scripts/simulatore/` | Simulatore dell'anno col codice vero (`simula:anno`) e taratura del percorso (`simula`) |
 
 ## Stato (7 novembre 2026)
 

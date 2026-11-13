@@ -11,7 +11,7 @@
     "test": "vitest run",
     "icone": "node scripts/icone.mjs",
     "avatar:piccoli": "node scripts/avatar-piccoli.mjs",
-    "simula": "python3 scripts/simula_passi.py 7700 130",
+    "simula": "set TARATURA=1&& vitest run scripts/simulatore/taratura",
     "prova:schema": "node scripts/prova-schema.mjs",
     "prova:schermate": "playwright test",
     "confronto": "set CONFRONTO=1&& playwright test confronto",

@@ -121,7 +121,7 @@ Altri debiti: `spiega`, borsa, enigma, foto e push provati solo con le prove (se
 - Nuvola: `/alunni` dà più schede; si usa anno più recente e id più alto (10928). Compiti, voti e lezioni non hanno id: chiavi costruite in `src/lib/nuvola`.
 - Supabase rifiuta UPDATE e DELETE senza WHERE anche dentro le funzioni (safeupdate); PGlite no.
 - Dati di prova sul database vero: ripulirli sempre (oggi `movimenti_passi`, spunte e `serate` sono a zero).
-- Python non è installato su questo PC: `npm run simula` usa la copia in Node (`scripts/simula_passi.mjs`).
+- `npm run simula` è la taratura col simulatore vero (`scripts/simulatore/taratura.test.ts`): il modello semplificato in Python/Node è stato tolto il 13/11 perché sovrastimava di circa 900 passi.
 - Revisione del codice prima di unire: `ocr delegate preview --from origin/main --to <ramo>` e `ocr delegate rule <file>` (Open Code Review, installato globale), la revisione la fa Claude.
 - Tipi del database: `npx supabase gen types typescript --linked > src/tipi-database.ts` (dalla produzione, senza Docker); la cartella `supabase/.temp` del worktree è copiata da `app`.
 - Supabase locale (Docker): `npx supabase start` serve solo per `npm run tipi:db`; tenerlo spento (`npx supabase stop`), occupa memoria. I deploy e i `db push` li lancia il signore: il controllo automatico di Claude Code li blocca.

@@ -134,7 +134,7 @@ Forziere d'oro in R-Evolution, fuori dai 9: «convocata nella rappresentativa te
 
 ## Taratura
 
-Dopo due settimane d'uso si confrontano i passi reali con il modello (`scripts/simula_passi.py`) e si ritoccano i numeri in `data/config-gioco.json`. Risultati attesi con le regole attuali (R-Evolution a gennaio):
+Dopo due settimane d'uso si confrontano i passi reali con il simulatore vero (`npm run simula`, `npm run simula:anno`) e si ritoccano i numeri in `data/config-gioco.json`. Risultati attesi con le regole attuali (R-Evolution a gennaio):
 
 | Impegno | Arriva in cima | Quando |
 |---|---|---|
