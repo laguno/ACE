@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { finto } from './finto';
 
-// Lunedì 30 novembre 2026: Lani ha 300 passi (tappa 3 in corso, mancano 105 al forziere 1).
+// Lunedì 30 novembre 2026: Lani ha 300 passi (tappa 3 in corso, mancano 125 al forziere 1).
 const LUNEDI = new Date('2026-11-30T15:00:00+01:00');
 
 function dati(passi = 300, chiavi = 1) {
@@ -37,7 +37,7 @@ test('percorso: sei qui, forzieri, bandierina, chiavi della settimana', async ({
   await page.evaluate(() => window.scrollTo(0, 0));
   await expect(page.getByText('Ogni giorno, passino passino.')).toBeVisible();
   await expect(page.getByText('300 passi')).toBeAttached();
-  await expect(page.getByText('Sei qui: mancano 105')).toBeVisible();
+  await expect(page.getByText('Sei qui: mancano 125')).toBeVisible();
   await expect(page.locator('.tappa', { hasText: 'Sei qui' })).toContainText('Tappa 3');
   await expect(page.getByText('Il calendario è qui')).toBeVisible();
   await expect(page.getByLabel("Chiavi dell'ultima settimana: 1 su 3")).toBeVisible();
@@ -82,7 +82,7 @@ test('biglietto con griglia: blocco a larghezza fissa dentro i 360 px, aiutino d
 
 test('arrivata senza chiavi: lucchetto', async ({ page }) => {
   await page.clock.setFixedTime(LUNEDI);
-  await finto(page, dati(420, 1));
+  await finto(page, dati(425, 1));
   await page.goto('/');
   await page.getByRole('button', { name: 'Astra' }).click();
   await page.getByRole('button', { name: 'Forziere 1' }).click();

@@ -60,3 +60,7 @@ Simulazione Monte Carlo, stesso criterio di docs/01 (cima con impegno 70/75/80/9
 - Il signore applica `0029`-`0033` (0033 è il cron delle classifiche) e pubblica le funzioni `passi`, `chiavi` e `classifiche` (quest'ultima con `verify_jwt = false`, già in `config.toml`).
 - Rigenerare `src/tipi-database.ts` (oggi ritoccato a mano per `serate`, `partite`, `esercizi_dieci_minuti`, `classifiche`).
 - Poi accendere R-Evolution da Impostazioni.
+
+## Ultimo giro di prove
+
+13/11 sera, macchina tornata veloce, tutto in parallelo: `tsc` ok, `eslint` ok, `npm test` 287 (+1 saltata), `prova:schema` 273, `build` ok, `npx playwright test` 150 passate e 22 saltate (confronto e lighthouse, solo a richiesta). Corretta `e2e/astra.e2e.ts`: col percorso a 7.700 il forziere 1 è a 425 passi (prima 405).
