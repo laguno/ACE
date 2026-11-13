@@ -14,6 +14,9 @@ import { supabase } from './supabase';
 type Stato = { da: string | null; il: string | null; esercizio: string | null };
 
 const SECONDI = R.CONFIG.dieci_minuti.secondi;
+// l'avvio lo timbra il server, il timer gira sull'orologio del telefono: qualche secondo in più
+// perché un telefono un po' avanti non faccia spuntare prima del tempo misurato dal server
+const MARGINE = 5;
 const FINESTRA = R.CONFIG.dieci_minuti.finestra;
 const mmss = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 
@@ -50,7 +53,7 @@ export function DieciMinuti({ oggi }: { oggi: Date }) {
   const proposto = R.esercizioDelGiorno(oggi, pallavolo, menu);
   const esercizio = menu.find((e) => e.id === (stato.esercizio ?? scelta)) ?? proposto;
   const nome = (esercizio?.nome ?? 'allenamento').toLowerCase();
-  const mancano = stato.da ? Math.max(0, SECONDI - Math.floor((ora - new Date(stato.da).getTime()) / 1000)) : SECONDI;
+  const mancano = stato.da ? Math.max(0, SECONDI + MARGINE - Math.floor((ora - new Date(stato.da).getTime()) / 1000)) : SECONDI;
   // prima di avviarli: solo nella finestra del mattino e con un menu
   if (!stato.da && (!R.dentroFinestraDieciMinuti(new Date()) || !proposto)) return null;
 
@@ -71,7 +74,7 @@ export function DieciMinuti({ oggi }: { oggi: Date }) {
     const { error } = await supabase.from('serate').update({ dieci_minuti_il: adesso() }).eq('data', data);
     if (error) return setErrore('Spunta non salvata. Riprova.');
     setStato((s) => s && { ...s, il: adesso() });
-    await passi('dieci_minuti', data);
+    if (!(await passi('dieci_minuti', data))) setErrore("Questa volta non li ho potuti contare: l'ora del telefono non torna. Domani si riprova.");
   }
 
   return (
@@ -83,14 +86,15 @@ export function DieciMinuti({ oggi }: { oggi: Date }) {
       {errore && <p role="alert">{errore}</p>}
 
       {stato.il ? (
+        !errore &&
         <p className="nota accento">
           <Check size={16} weight="bold" aria-hidden /> Fatto: {nome}. Bart approva.
         </p>
       ) : stato.da ? (
         <>
           <p className="nota">Oggi: {nome}.</p>
-          <p className="timer" role="timer" aria-live="off" aria-label={`Mancano ${mmss(mancano)}`}>
-            {mmss(mancano)}
+          <p className="timer" role="timer" aria-live="off" aria-label={`Mancano ${mmss(Math.min(mancano, SECONDI))}`}>
+            {mmss(Math.min(mancano, SECONDI))}
           </p>
           <button className="principale largo" disabled={mancano > 0} onClick={fatto}>
             {mancano > 0 ? 'Vai fino in fondo' : 'Fatto'}

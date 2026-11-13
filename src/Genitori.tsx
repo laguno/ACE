@@ -661,14 +661,15 @@ function Impostazioni({ client, avvisa }: Props) {
  * nella barra e i dieci minuti, le partite danno passi e la bandierina pesa di più i giorni dopo.
  */
 function InterruttoreREvolution({ client, avvisa }: Pick<Props, 'client' | 'avvisa'>) {
-  const [da, setDa] = useState<string | null>();
+  // undefined: in lettura; 'errore': lettura fallita (niente pulsante, sennò si riscrive la data vera)
+  const [da, setDa] = useState<string | null | 'errore'>();
   const carica = () =>
     client
       .from('impostazioni')
       .select('valore')
       .eq('chiave', R.CHIAVE_R_EVOLUTION)
       .maybeSingle()
-      .then(({ data }) => setDa(typeof data?.valore === 'string' ? data.valore : null));
+      .then(({ data, error }) => setDa(error ? 'errore' : typeof data?.valore === 'string' ? data.valore : null));
   useEffect(() => {
     carica();
   }, []);
@@ -685,6 +686,16 @@ function InterruttoreREvolution({ client, avvisa }: Pick<Props, 'client' | 'avvi
   }
 
   if (da === undefined) return null;
+  if (da === 'errore')
+    return (
+      <div className="carta modulo">
+        <h2>R-Evolution</h2>
+        <p role="alert">Non riesco a leggere se R-Evolution è accesa. Riprova tra poco.</p>
+        <button type="button" className="secondario" onClick={carica}>
+          Riprova
+        </button>
+      </div>
+    );
   const g = da ? R.giorno(da) : null;
   return (
     <div className="carta modulo">

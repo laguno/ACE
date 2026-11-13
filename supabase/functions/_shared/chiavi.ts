@@ -32,7 +32,8 @@ export async function contaChiavi(db: SupabaseClient, lun: Date) {
     db.from('impostazioni').select('valore').eq('chiave', R.CHIAVE_R_EVOLUTION).maybeSingle(),
   ]);
   // R-Evolution la accendono i genitori: da quel giorno i dieci minuti contano e la bandierina pesa di più
-  const rEvolutionDa = typeof accesa.data?.valore === 'string' ? accesa.data.valore : null;
+  const valore = ok(accesa, 'impostazioni')?.valore;
+  const rEvolutionDa = typeof valore === 'string' ? valore : null;
 
   const giorni = Array.from({ length: 7 }, (_, i) => piu(lun, i));
   const sportIl = new Set(

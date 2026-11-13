@@ -54,15 +54,20 @@ Simulazione Monte Carlo, stesso criterio di docs/01 (cima con impegno 70/75/80/9
 4. **Pagina "La squadra"**, automatica con gli avatar.
 5. **Livello bonus della selezione**, selezioni e raduni: rimandati.
 6. **Tutor di matematica**; raccolta video; versi dei personaggi.
+7. **Da decidere (signore): accensione dopo le 13.** Il giorno in cui R-Evolution si accende conta già i dieci minuti tra le cose possibili della settimana, anche se accesa dopo la finestra del mattino: +10 passi e +1 cosa che Lani non può fare, percentuale per le chiavi un po' più bassa. Alternative: contare dal giorno dopo se accesa dopo le 13, oppure lasciare così (si accende di mattina). Dalla revisione con Open Code Review del 13/11.
 
 ## Prima di unire a `main`
 
 - `npm test`, `npm run prova:schema`, `npx playwright test`, `npx tsc -p .`, `npm run build`.
 - Già in produzione dal 13/11 (main non le usa, la preview sì): migrazioni `0029`-`0033` e funzione `classifiche` (prima lettura FIPAV ok: U13 6 squadre, U14 4). In produzione `r_evolution_da` = 2026-11-13 (premuto sulla preview): main la ignora.
-- Insieme all'unione, non prima (altrimenti R-Evolution si vede in main): `0034` (l'annuncio finirebbe nella coda che legge anche main) e le funzioni `passi` e `chiavi` (con la riga accesa i dieci minuti conterebbero per le chiavi mentre main non li mostra). Poi Spegni e Accendi il giorno vero, così parte l'annuncio. Finché `passi` non è pubblicata, "Approva" di una partita sulla preview non dà passi.
+- Insieme all'unione, non prima (altrimenti R-Evolution si vede in main): `0034` (l'annuncio finirebbe nella coda che legge anche main), `0035` (firma e niente pareggi sulle partite, sicura anche prima) e le funzioni `passi` e `chiavi` (con la riga accesa i dieci minuti conterebbero per le chiavi mentre main non li mostra). Poi Spegni e Accendi il giorno vero, così parte l'annuncio. Finché `passi` non è pubblicata, "Approva" di una partita sulla preview non dà passi.
 - Rigenerare `src/tipi-database.ts` (oggi ritoccato a mano per `serate`, `partite`, `esercizi_dieci_minuti`, `classifiche`).
 - Poi accendere R-Evolution da Impostazioni.
 
 ## Ultimo giro di prove
 
 13/11 sera, macchina tornata veloce, tutto in parallelo: `tsc` ok, `eslint` ok, `npm test` 287 (+1 saltata), `prova:schema` 273, `build` ok, `npx playwright test` 150 passate e 22 saltate (confronto e lighthouse, solo a richiesta). Corretta `e2e/astra.e2e.ts`: col percorso a 7.700 il forziere 1 è a 425 passi (prima 405).
+
+## Revisione con Open Code Review (13/11)
+
+`ocr` 1.13.6 (`npm i -g @alibaba-group/open-code-review`) in modo delega, senza chiave: `ocr delegate preview --from origin/main --to sprint-2` e `ocr delegate rule <file>`, la revisione la fa Claude. 7 segnalazioni, 1-6 corrette: margine di 5 s sul timer dei dieci minuti e avviso se il server non li conta; lettura di `impostazioni` in `chiavi.ts` con controllo d'errore; bandierina di Astra dal giorno di accensione come sul server; interruttore dei genitori che a lettura fallita non mostra "Accendi"; `0035` (Lani segna partite solo a nome suo, niente pareggi). La 7 è in "Da fare".

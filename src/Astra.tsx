@@ -6,6 +6,7 @@ import { Biglietto } from './Biglietto';
 import { ImmaginePremio, immaginiPremi, type Immagine } from './ImmaginePremio';
 import * as R from './lib/regole';
 import { supabase } from './supabase';
+import { useREvolutionDa } from './accensione';
 
 // Astra — design/Main.html. Percorso di 27 tappe dalla terra alle stelle: Lani "sei qui",
 // forzieri ogni 3 tappe con passi e chiavi, bandierina del calendario, traguardo di Natale.
@@ -51,6 +52,8 @@ function curva(punti: { x: number; y: number }[]) {
 export default function Astra({ apri, forziere: aperto }: { apri: (pagina: 'Figurina' | 'Album') => void; forziere?: number }) {
   const [dati, setDati] = useState<{ passi: number; prima: number; chiavi: number; settimana: number | null; forzieri: Forziere[]; album: number }>();
   const [scelto, setScelto] = useState<number | undefined>(aperto);
+  // la bandierina parte dal giorno di accensione di R-Evolution, come quella del server (chiavi.ts)
+  const inizioRE = R.inizioREvolution(useREvolutionDa());
   useEffect(() => setScelto(aperto), [aperto]);
   useSfondo('panna');
 
@@ -91,8 +94,8 @@ export default function Astra({ apri, forziere: aperto }: { apri: (pagina: 'Figu
   const mondo = MONDI[nMondo];
   const qui = tappaDi(dati.passi);
   const oggi = R.giornoRoma(new Date());
-  const bandierina = tappaDi(R.bandierina(oggi));
-  const natale = tappaDi(R.bandierina(new Date(oggi.getFullYear(), 11, 23)));
+  const bandierina = tappaDi(R.bandierina(oggi, undefined, inizioRE));
+  const natale = tappaDi(R.bandierina(new Date(oggi.getFullYear(), 11, 23), undefined, inizioRE));
   const forziere = (n: number) => dati.forzieri.find((f) => f.n === n);
   const prossimo = R.CONFIG.forzieri.find((c) => !['aperto', 'consegnato'].includes(forziere(c.n)?.stato ?? 'chiuso'));
 

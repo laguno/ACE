@@ -44,6 +44,8 @@ verifica('dieci minuti: Lani sceglie l\'esercizio', (await val(null, `select die
 // partite (sprint 2): le segna Lani da approvare, le approva e corregge un genitore
 await fallisce('partita: Lani non se la segna già approvata', LANI, `insert into partite (avversaria, set_nostri, set_loro, approvata_il) values ('Foxes', 3, 0, now())`);
 await fallisce('partita: Lani non la segna di un mese fa', LANI, `insert into partite (data, avversaria, set_nostri, set_loro) values (oggi() - 30, 'Foxes', 3, 0)`);
+await fallisce('partita: Lani non la segna a nome di un genitore', LANI, `insert into partite (avversaria, set_nostri, set_loro, dato_da) values ('Foxes', 3, 0, '${PAPA}')`);
+await fallisce('partita: niente pareggi', PAPA, `insert into partite (avversaria, set_nostri, set_loro) values ('Foxes', 2, 2)`);
 await come(LANI, `insert into partite (avversaria, set_nostri, set_loro, in_campo) values ('Foxes', 3, 1, false)`);
 verifica('partita: Lani la segna da approvare', (await val(null, `select count(*)::int from partite where approvata_il is null and not in_campo`)) === 1);
 await come(LANI, `update partite set approvata_il = now(), set_loro = 0`);
