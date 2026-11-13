@@ -339,6 +339,18 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"partite": {
+                  Row: {
+                    "avversaria": string,"creato_il": string,"data": string,"dato_da": string,"id": string,"set_loro": number,"set_nostri": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "avversaria": string,"creato_il"?: string,"data"?: string,"dato_da"?: string,"id"?: string,"set_loro": number,"set_nostri": number
+                  }
+                  Update: {
+                    "avversaria"?: string,"creato_il"?: string,"data"?: string,"dato_da"?: string,"id"?: string,"set_loro"?: number,"set_nostri"?: number
+                  }
+                  Relationships: []
                 },"pin_genitori": {
                   Row: {
                     "bloccato_fino": string | null,"errori": number,"hash": string,"id": boolean

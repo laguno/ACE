@@ -5,7 +5,7 @@ ACE è un'app ad uso **solo familiare** per Leilani (Lani), 12 anni, seconda med
 ## Leggere prima di scrivere codice
 
 0. HANDOFF.md: leggilo per primo, sempre.
-1. `docs/06-sprint-1.md`: cosa si costruisce ora, in che ordine, criteri di fatto.
+1. `docs/06-sprint-1.md`: cosa si costruisce ora, in che ordine, criteri di fatto. Sprint 2 (R-Evolution): `docs/08-sprint-2.md`, branch `sprint-2`.
 2. `docs/02-regole-di-gioco.md` + `data/config-gioco.json`: regole e numeri (fonte autorevole).
 3. `docs/03-schermate.md` + `design/*.html`: schermate e stile.
 4. `docs/05-copione.md`: ogni testo che vede Lani, con posa e verso.

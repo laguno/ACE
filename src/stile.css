@@ -65,7 +65,8 @@ main { position: relative; width: min(100%, 430px); margin: 0 auto; padding: 16p
   width: min(100% - 28px, 402px);
   height: 66px;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
   gap: 4px;
   padding: 6px;
   border-radius: 32px;
@@ -666,3 +667,20 @@ body:has(.avvio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom))
 /* Dieci minuti (sprint 2): il timer grande al centro della carta */
 .schermo .carta p.timer { margin: 8px 0 12px; text-align: center; font: 800 56px/1 'Baloo 2', Nunito, sans-serif; font-variant-numeric: tabular-nums; color: var(--testo); }
 .dieci-minuti .principale { margin-top: 12px; }
+
+/* R-Evolution (sprint 2) */
+.r-evolution .numeri { grid-template-columns: repeat(2, 1fr); }
+.partite { list-style: none; margin: 0; padding: 0; display: grid; }
+.partite li { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 10px 0; border-top: 2px dashed var(--lilla); }
+.partite li:first-child { border-top: 0; }
+.partite span { display: flex; flex-direction: column; gap: 2px; font-weight: 800; }
+.partite small { font: 700 13px Nunito, sans-serif; color: var(--testo-2); }
+.partite b { font: 800 22px 'Baloo 2', Nunito, sans-serif; color: var(--testo-2); }
+.partite b.vinta { color: var(--accento); }
+/* cinque voci (R-Evolution): etichette su una riga; sotto i 380 px "R-Evo" (il nome intero resta in aria-label) */
+.barra.cinque button { white-space: nowrap; letter-spacing: -0.2px; }
+.barra .corto { display: none; }
+@media (max-width: 379px) {
+  .barra .lungo { display: none; }
+  .barra .corto { display: inline; }
+}

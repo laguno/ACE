@@ -1,5 +1,6 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import * as C from './lib/calendario';
 import * as R from './lib/regole';
 
 // Sprint 2: un genitore segna la partita di Lani con il risultato in set. I passi (giocata, vinta
@@ -11,6 +12,22 @@ const SET = [0, 1, 2, 3];
 
 export function SegnaPartita({ client, passi, avvisa }: Props) {
   const [lavoro, setLavoro] = useState(false);
+  const oggi = R.giornoRoma(new Date());
+  // giorno proposto: l'ultima partita di Lani nel calendario di famiglia negli ultimi 7 giorni, se c'è
+  const [giorno, setGiorno] = useState(R.iso(oggi));
+  useEffect(() => {
+    const da = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate() - 7);
+    client
+      .from('impegni_famiglia')
+      .select('titolo, inizio')
+      .gte('inizio', da.toISOString())
+      .lte('inizio', new Date().toISOString())
+      .order('inizio', { ascending: false })
+      .then(({ data }) => {
+        const p = (data ?? []).find((i: { titolo: string }) => C.tipoImpegno(i.titolo) === 'partita');
+        if (p) setGiorno(R.iso(R.giornoRoma(p.inizio)));
+      });
+  }, [client]);
   const { giocata, vinta_in_piu } = R.CONFIG.passi.partite;
 
   async function salva(e: FormEvent<HTMLFormElement>) {
@@ -42,7 +59,7 @@ export function SegnaPartita({ client, passi, avvisa }: Props) {
       <form className="modulo" onSubmit={salva}>
         <label>
           Giorno
-          <input name="data" type="date" defaultValue={R.iso(R.giornoRoma(new Date()))} required />
+          <input name="data" type="date" value={giorno} onChange={(e) => setGiorno(e.target.value)} required />
         </label>
         <label>
           Contro
