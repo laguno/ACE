@@ -58,7 +58,8 @@ Simulazione Monte Carlo, stesso criterio di docs/01 (cima con impegno 70/75/80/9
 ## Prima di unire a `main`
 
 - `npm test`, `npm run prova:schema`, `npx playwright test`, `npx tsc -p .`, `npm run build`.
-- Il signore applica `0029`-`0034` (0033 è il cron delle classifiche, 0034 l'annuncio) e pubblica le funzioni `passi`, `chiavi` e `classifiche` (quest'ultima con `verify_jwt = false`, già in `config.toml`).
+- Già in produzione dal 13/11 (main non le usa, la preview sì): migrazioni `0029`-`0033` e funzione `classifiche` (prima lettura FIPAV ok: U13 6 squadre, U14 4). In produzione `r_evolution_da` = 2026-11-13 (premuto sulla preview): main la ignora.
+- Insieme all'unione, non prima (altrimenti R-Evolution si vede in main): `0034` (l'annuncio finirebbe nella coda che legge anche main) e le funzioni `passi` e `chiavi` (con la riga accesa i dieci minuti conterebbero per le chiavi mentre main non li mostra). Poi Spegni e Accendi il giorno vero, così parte l'annuncio. Finché `passi` non è pubblicata, "Approva" di una partita sulla preview non dà passi.
 - Rigenerare `src/tipi-database.ts` (oggi ritoccato a mano per `serate`, `partite`, `esercizi_dieci_minuti`, `classifiche`).
 - Poi accendere R-Evolution da Impostazioni.
 
