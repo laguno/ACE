@@ -25,6 +25,7 @@
 - **Flash card**: chi le farma (furbetta) arriva in cima prima di chi fa l'80%, e nessun numero lo corregge (1 passo a giro o 2 giri al giorno riducono il distacco ma non lo tolgono). Decisione del signore: aspettare i dati veri e decidere alla taratura di dicembre. La strada è dare passi solo dopo una prova (3 carte rifatte come domanda).
 - Forziere aperto che resta aperto anche se poi i passi scendono: confermato dal signore; corretto il controllo del simulatore che lo segnava come errore. Astra: il forziere sulla tappa di Lani usciva dallo schermo a 360 px nella metà sinistra del sentiero, ora sale sopra di lei.
 - Da fare dopo: misurare gli esiti veri (serate chiuse, aperture, ripasso prima delle verifiche, media) oltre ai passi; controllo che funzioni pubblicate e schema di produzione coincidano con `main`.
+- **Dopo lunedì 16/11 (deciso dal signore): ambiente di prova.** Non un utente di test (il database è di una sola bambina: un altro utente mescolerebbe passi e popup con quelli di Lani), ma un secondo progetto Supabase "ace-prova" con le stesse migrazioni e funzioni, la preview di Vercel collegata a quello invece che alla produzione, dati finti generati dal simulatore (Lani in un punto qualunque dell'anno), e ogni pubblicazione prima lì e poi in produzione. Il signore crea il progetto e mette le chiavi in Vercel.
 
 ## Sessione precedente (13 novembre 2026, sprint 2)
 
