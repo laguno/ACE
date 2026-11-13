@@ -423,8 +423,8 @@ export function prossimaRevisione(intervallo: number, esito: Esito, oggi: Date):
 
 export type EsercizioDieciMinuti = (typeof CONFIG.dieci_minuti.menu)[number];
 
-/** I dieci minuti valgono (passi e chiavi) dal giorno in cui arriva R-Evolution. */
-export function dieciMinutiAttivi(g: Date): boolean {
+/** Dieci minuti e partite valgono (passi e chiavi) dal giorno in cui arriva R-Evolution. */
+export function rEvolutionAttiva(g: Date): boolean {
   return iso(g) >= CONFIG.periodo.r_evolution_da;
 }
 
@@ -442,6 +442,11 @@ export function esercizioDelGiorno(g: Date, pallavolo: boolean): EsercizioDieciM
   const scelta = CONFIG.dieci_minuti.menu.filter((e) => e.tipo === tipo);
   const giornoAnno = Math.round((Date.UTC(g.getFullYear(), g.getMonth(), g.getDate()) - Date.UTC(g.getFullYear(), 0, 1)) / 86400000);
   return scelta[giornoAnno % scelta.length];
+}
+
+/** Partita (da R-Evolution): passi per averla giocata e, se vinta, quelli in più. */
+export function passiPartita(setNostri: number, setLoro: number): { giocata: number; vinta: number } {
+  return { giocata: P.partite.giocata, vinta: setNostri > setLoro ? P.partite.vinta_in_piu : 0 };
 }
 
 // ---------------------------------------------------------------- conteggio della settimana

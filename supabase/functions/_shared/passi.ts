@@ -149,7 +149,7 @@ export function creaGestori(db: SupabaseClient) {
         passi += (await registra('borsa', `serata:${s.data}`, P.obbligatori.borsa, g)).passi;
       const dieciDa = s.dieci_minuti_da ? new Date(s.dieci_minuti_da) : null;
       const dieciIl = s.dieci_minuti_il ? new Date(s.dieci_minuti_il) : null;
-      if (quellaSera(s.dieci_minuti_il) && R.dieciMinutiAttivi(g) && R.dieciMinutiValidi(dieciDa, dieciIl))
+      if (quellaSera(s.dieci_minuti_il) && R.rEvolutionAttiva(g) && R.dieciMinutiValidi(dieciDa, dieciIl))
         passi += (await registra('dieci_minuti', `serata:${s.data}`, P.obbligatori.dieci_minuti, g)).passi;
       return passi ? { passi, motivo: 'serata' } : niente('niente di nuovo');
     },
@@ -254,6 +254,21 @@ export function creaGestori(db: SupabaseClient) {
         await accoda(db, `gesto:${id}`, /mamma/i.test(chi.nome) ? 'gesto_mamma' : 'gesto_papa', { passi: esito.passi, cosa: COSA_GESTO[ge.voce] ?? ge.voce });
       }
       return esito;
+    },
+
+    // Partita segnata da un genitore: +giocata e, se vinta, +vinta_in_piu (due movimenti, così un
+    // risultato corretto da persa a vinta aggiunge solo la parte che manca).
+    // ponytail: da vinta a persa i passi restano; se capita, storno a mano dall'area genitori.
+    async partita(id) {
+      const p = await riga('partite', 'id', id);
+      const g = R.giorno(p.data);
+      if (!R.rEvolutionAttiva(g)) return niente('prima di R-Evolution');
+      const { giocata, vinta } = R.passiPartita(p.set_nostri, p.set_loro);
+      const presi = (await registra('partita', id, giocata, g, p.dato_da)).passi + (await registra('partita_vinta', id, vinta, g, p.dato_da)).passi;
+      if (!presi) return niente('già registrata');
+      const risultato = `${p.set_nostri}-${p.set_loro}`;
+      await accoda(db, `partita:${id}:${vinta ? 'vinta' : 'persa'}`, vinta ? 'partita_vinta' : 'partita_persa', { risultato, passi: giocata + vinta });
+      return { passi: presi, motivo: 'partita' };
     },
 
     async sgridata(id) {

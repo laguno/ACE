@@ -35,6 +35,9 @@ export const POPUP = {
   bagno_2: { priorita: 1, posa: 'lady-offesa', titolo: 'Di nuovo il bagno', testo: 'Perfino Lady si rifiuta di entrarci. {passi}.' },
   bagno_3: { priorita: 1, posa: 'leo-sbuffa', titolo: 'Ancora il bagno', testo: 'Leo non entra in bagno dopo di te, puzzolona. {passi}.' },
   antisportivo: { priorita: 1, posa: 'papa-arrabbiato', titolo: 'In campo', testo: 'Così non si gioca: {passi}. Il rispetto vale più di un punto.' },
+  // R-Evolution (sprint 2): partite segnate dai genitori
+  partita_vinta: { priorita: 4, posa: 'papa-festeggia', titolo: 'Partita vinta', testo: 'Vinta {risultato}! +{passi}. Papà ha già la felpa viola addosso.' },
+  partita_persa: { priorita: 4, posa: 'lani-partita-persa', titolo: 'Partita persa', testo: 'Persa {risultato}. +{passi} per averla giocata. Si riparte al prossimo allenamento.' },
   balla: { priorita: 1, posa: 'mamma-arrabbiata', titolo: 'Balla scoperta', testo: '{cosa}. {passi}. Con la verità si perde sempre meno.' },
   // Astra
   tappa: { priorita: 3, posa: 'lani-contenta', titolo: 'Tappa raggiunta', testo: 'Tappa {tappa}! Alla prossima: {mancano_passi:un passo:# passi}.' },

@@ -190,7 +190,7 @@ const inserisce = async (uid, t, ruolo) => {
 };
 // foto_pagine e serate: Lani inserisce solo a condizioni (file vero, data vicina), provate sopra e sotto
 const LANI_INSERISCE = ['errori_client', 'flashcard_giri', 'push_iscrizioni', 'quiz_tentativi', 'umore', 'video_visti'];
-const GENITORE_INSERISCE = [...LANI_INSERISCE, 'foto_pagine', 'serate', 'compiti', 'fogli_firma', 'forzieri', 'frasi', 'gesti_casa', 'impostazioni', 'sgridate'];
+const GENITORE_INSERISCE = [...LANI_INSERISCE, 'foto_pagine', 'serate', 'compiti', 'fogli_firma', 'forzieri', 'frasi', 'gesti_casa', 'impostazioni', 'partite', 'sgridate'];
 for (const t of tabelle) {
   verifica(`anon non inserisce in ${t}`, !(await inserisce(null, t, 'anon')));
   verifica(`anon non legge ${t}`, await come(null, `select * from ${t}`, 'anon').then((r) => r.rows.length === 0, () => true));

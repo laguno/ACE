@@ -116,3 +116,25 @@ test('Stato di ACE: sincronizzazioni, chiavi ed errori (filone H)', async ({ pag
   await expect(page.getByRole('heading', { name: 'Errori degli ultimi 7 giorni: 1' })).toBeVisible();
   await expect(page.getByText('Rete assente')).toBeVisible();
 });
+
+test('partita (sprint 2): da R-Evolution un genitore la segna e chiama i passi', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2027-01-16T19:00:00+01:00'));
+  const { t, chiamate } = await finto(page, { ...dati(), partite: [] }, { passi: { passi: 25 } });
+  await page.goto('/');
+  const carta = page.locator('.carta', { has: page.getByRole('heading', { name: 'Partita' }) });
+  await carta.getByLabel('Contro').fill('Volley Bibbiano');
+  await carta.getByLabel('Set di Lani').selectOption('3');
+  await carta.getByLabel('Set loro').selectOption('1');
+  await carta.getByRole('button', { name: 'Segna la partita' }).click();
+  await expect(page.getByRole('status')).toContainText('Partita 3-1 con Volley Bibbiano');
+  expect(t.partite[0]).toMatchObject({ data: '2027-01-16', avversaria: 'Volley Bibbiano', set_nostri: 3, set_loro: 1 });
+  await expect.poll(() => chiamate.map((c) => c.tipo)).toEqual(['partita']);
+  await page.screenshot({ path: 'e2e/risultati/genitori-partita.png', fullPage: true });
+});
+
+test('partita: prima di R-Evolution non si vede', async ({ page }) => {
+  await finto(page, dati());
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: 'La settimana di Lani' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Partita' })).toHaveCount(0);
+});

@@ -331,14 +331,14 @@ describe('foto di un compito richiesta da ACE', () => {
 });
 
 describe('dieci minuti (sprint 2)', async () => {
-  const { dieciMinutiAttivi, dieciMinutiValidi, esercizioDelGiorno } = await import('./index');
+  const { rEvolutionAttiva, dieciMinutiValidi, esercizioDelGiorno } = await import('./index');
   const da = CONFIG.periodo.r_evolution_da;
   const giorno = (s: string) => new Date(s + 'T12:00:00');
   it('valgono dal giorno di R-Evolution', () => {
     const prima = giorno(da);
     prima.setDate(prima.getDate() - 1);
-    expect(dieciMinutiAttivi(prima)).toBe(false);
-    expect(dieciMinutiAttivi(giorno(da))).toBe(true);
+    expect(rEvolutionAttiva(prima)).toBe(false);
+    expect(rEvolutionAttiva(giorno(da))).toBe(true);
   });
   it('solo se il timer arriva in fondo', () => {
     const avvio = new Date('2027-01-10T20:00:00');

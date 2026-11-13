@@ -171,7 +171,7 @@ export default function Sera() {
   const sport = impegni.find((i) => C.tipoImpegno(i.titolo) !== 'famiglia');
   const famiglia = impegni.find((i) => C.tipoImpegno(i.titolo) === 'famiglia');
   const conBorsa = !!sport;
-  const conDieci = R.dieciMinutiAttivi(oggi);
+  const conDieci = R.rEvolutionAttiva(oggi);
   // venerdì e sabato con partita il giorno dopo: chiusura breve con la sola borsa (decisione 8/11)
   const soloBorsa = !conCartella && C.partitaTra(impegni);
   const visti = soloBorsa ? [] : compiti;
