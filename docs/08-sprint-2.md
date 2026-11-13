@@ -39,8 +39,8 @@ Taratura col simulatore vero (`npm run simula`, stesso codice delle funzioni su 
 |---|---|---|---|---|---|
 | 6.800 | 40 | 100 | 100 | 100 | 19/5 |
 | 7.000 | 20 | 60 | 100 | 100 | 25/5 |
-| **7.200** | 10 | 30 | 80 | 100 | 27/5 |
-| 7.400 | 0 | 10 | 60 | 100 | 22/5 |
+| **7.200** | 10 | 30 | 80 | 100 | 29/5 |
+| 7.400 | 0 | 10 | 60 | 100 | 4/6 |
 | 7.700 | 0 | 0 | 0 | 100 | – |
 
 **Deciso: `totale_passi` 7.200**, tappe da 120 a 410, forzieri a 395, 890, 1.490, 2.190, 2.990, 3.890, 4.895, 6.000, 7.200; `r_evolution_prevista` = 16/11. La furbetta (70%, farma le flash card) arriva in cima con ogni totale e prima dell'80%: da guardare con i dati veri alla taratura di dicembre (decisione del signore: non toccare le flash card prima).
