@@ -381,6 +381,7 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .tappe .forziere { position: absolute; top: -50px; margin: 0; padding: 0; border: 0; background: none; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 76px; min-height: 64px; color: var(--testo-2); font: inherit; }
 .tappe .forziere.destra { left: 34px; right: auto; }
 .tappe .forziere.sinistra { right: 34px; left: auto; }
+.tappe .forziere.sopra { top: -154px; }
 .tappe .forziere small { padding: 2px 9px; border-radius: 999px; background: var(--bianco); box-shadow: var(--ombra-etichetta); font: 800 14px 'Baloo 2', Nunito, sans-serif; color: var(--testo); white-space: nowrap; }
 .forziere.enigma img { filter: drop-shadow(0 0 8px var(--burro)); }
 .album-fluttuante { position: fixed; z-index: 4; right: max(16px, calc((100% - 430px) / 2 + 16px)); bottom: calc(92px + env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 6px; min-height: 48px; padding: 0 16px 0 10px; border-radius: 999px; background: var(--bianco); border: 3px solid var(--rosa-bordo); box-shadow: var(--ombra-alta); color: var(--testo); font: 800 14px Nunito, sans-serif; }

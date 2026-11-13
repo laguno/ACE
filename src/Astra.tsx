@@ -196,7 +196,8 @@ export default function Astra({ apri, forziere: aperto }: { apri: (pagina: 'Figu
                 </p>
               )}
               {conf && (
-                <button className={`forziere ${fz?.stato ?? 'chiuso'} ${aDestra !== (t === qui) ? 'destra' : 'sinistra'}`} onClick={() => setScelto(conf.n)} aria-label={`Forziere ${conf.n}: ${SOGLIE[conf.tappa - 1].toLocaleString('it-IT')} · ${conf.chiavi} chiavi`}>
+                // dalla parte con più spazio; sulla tappa di Lani sale sopra di lei (dall'altra parte, a 360 px, usciva dallo schermo)
+                <button className={`forziere ${fz?.stato ?? 'chiuso'} ${aDestra ? 'destra' : 'sinistra'}${t === qui ? ' sopra' : ''}`} onClick={() => setScelto(conf.n)} aria-label={`Forziere ${conf.n}: ${SOGLIE[conf.tappa - 1].toLocaleString('it-IT')} · ${conf.chiavi} chiavi`}>
                   <img
                     src={img('oggetti', conf.n === 9 ? 'forziere-cima' : ['aperto', 'consegnato'].includes(fz?.stato ?? '') ? 'forziere-aperto' : 'forziere-chiuso')}
                     alt=""
