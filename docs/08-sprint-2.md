@@ -28,6 +28,7 @@
 | Classifiche | `src/lib/classifiche` (lettura della pagina, con test), funzione `classifiche`, tabella `classifiche` (0032), cron 0033 alle 6:15, riga in Stato | Schermata R-Evolution: una carta per campionato, riga di Lani in fucsia, data di aggiornamento. Errore: avviso ai genitori, resta la classifica di prima. |
 | Schermata R-Evolution | `src/REvolution.tsx` | Classifiche, partite (quelle da approvare segnate così e non contate), dieci minuti del mese, modulo per segnare la partita. |
 | Simulazione | `scripts/simula_passi.mjs` (porting in Node di `simula_passi.py`) | Vedi proposta del percorso. |
+| Annuncio | `r_evolution_accesa` in `src/lib/copione`, trigger `annuncia_r_evolution` (0034) su `impostazioni`, pulsante "Vediamo" in `src/Popup.tsx` | All'accensione il server accoda il popup (i genitori non scrivono `popup_coda`), uno per giorno di accensione. Testo uguale nel copione e nella migrazione (test). Se la riga `r_evolution_da` c'è già prima di 0034, niente popup: spegnere e riaccendere. |
 | Prove | `regole.test.ts`, `classifiche.test.ts`, `cron.test.ts` (classifiche), `scripts/simulatore/dieci-minuti.test.ts`, `e2e/dieci-minuti`, `e2e/r-evolution`, `e2e/genitori`, `prova:schema` (partite, menu) | Esito dell'ultimo giro in fondo. |
 
 ## Percorso: 7.700 passi (approvato dal signore il 13/11, nel config)
@@ -47,7 +48,7 @@ Simulazione Monte Carlo, stesso criterio di docs/01 (cima con impegno 70/75/80/9
 
 ## Da fare, in ordine
 
-1. **Popup di annuncio** il giorno dell'accensione (copione da scrivere) e prova della barra a 5 voci sui telefoni veri.
+1. Prova della barra a 5 voci sui telefoni veri.
 2. **Partite dal calendario**: avversaria proposta dal titolo dell'evento, quando si sa come sono scritti.
 3. **Fase successiva dei campionati**: come cambiare girone senza toccare il config (es. CId in Impostazioni).
 4. **Pagina "La squadra"**, automatica con gli avatar.
@@ -57,7 +58,7 @@ Simulazione Monte Carlo, stesso criterio di docs/01 (cima con impegno 70/75/80/9
 ## Prima di unire a `main`
 
 - `npm test`, `npm run prova:schema`, `npx playwright test`, `npx tsc -p .`, `npm run build`.
-- Il signore applica `0029`-`0033` (0033 è il cron delle classifiche) e pubblica le funzioni `passi`, `chiavi` e `classifiche` (quest'ultima con `verify_jwt = false`, già in `config.toml`).
+- Il signore applica `0029`-`0034` (0033 è il cron delle classifiche, 0034 l'annuncio) e pubblica le funzioni `passi`, `chiavi` e `classifiche` (quest'ultima con `verify_jwt = false`, già in `config.toml`).
 - Rigenerare `src/tipi-database.ts` (oggi ritoccato a mano per `serate`, `partite`, `esercizi_dieci_minuti`, `classifiche`).
 - Poi accendere R-Evolution da Impostazioni.
 

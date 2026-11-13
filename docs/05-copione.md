@@ -171,6 +171,12 @@ Linea dura, come deciso: il rimprovero arriva subito, dice quanto è costato e c
 | Riscatto: sette giorni di cartella completa dopo una nota | papa-pollice | "Sette giorni di cartella completa dopo la nota. Papà se n'è accorto." | fischio | 0 (è un riconoscimento) |
 | Bagno, terza volta nella settimana | leo-sbuffa | "Leo non entra in bagno dopo di te, puzzolona. −1." | sbuffo | −1 |
 
+**Annuncio di R-Evolution** (signore, 13/11). Il giorno in cui un genitore accende R-Evolution, alla prima apertura di Lani (trigger di 0034).
+
+| Situazione | Posa | Titolo | Testo | Pulsante | Passi |
+|---|---|---|---|---|---|
+| R-Evolution accesa | lani-divisa | Arriva R-Evolution | "Da oggi anche la pallavolo fa camminare Astra: dieci minuti al mattino, le tue partite e le classifiche del campionato." | Vediamo (apre R-Evolution) | 0 |
+
 **Bastone, aggiunte del 7 novembre.** Li segna un genitore; parte subito il popup e si sblocca la figurina della serie nera.
 
 | Situazione | Posa | Testo | Verso | Passi |

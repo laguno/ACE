@@ -65,7 +65,7 @@ const GRUPPI: [string, K.ChiavePopup[]][] = [
   ['Voti sotto il 6', ['voto_insufficiente', 'voto_insufficiente_ancora']],
   ['Rimproveri', ['nota_disciplinare', 'nota_terza_dimenticanza', 'bagno_papa', 'bagno_mamma', 'bagno_2', 'bagno_3', 'antisportivo', 'balla']],
   ['Nota di merito', ['nota_merito']],
-  ['Partite (sprint 2)', ['partita_vinta', 'partita_persa']],
+  ['R-Evolution (sprint 2)', ['r_evolution_accesa', 'partita_vinta', 'partita_persa']],
   ['Tappe', ['tappa', 'cima']],
   ['Forzieri', ['forziere_aperto']],
   ['Lucchetto', ['forziere_lucchetto']],

@@ -23,7 +23,7 @@ function tono(p: Popup): 'festa' | 'lucchetto' | 'bastone' | 'enigma' | 'calmo' 
   if (p.priorita === 1) return 'bastone';
   if (p.situazione === 'forziere_lucchetto') return 'lucchetto';
   if (p.situazione === 'enigma_comparso') return 'enigma';
-  if (['forziere_aperto', 'cima', 'tappa', 'chiavi_3', 'voto_9', 'voto_recupero', 'voto_migliorato', 'nota_merito'].includes(p.situazione)) return 'festa';
+  if (['forziere_aperto', 'cima', 'tappa', 'chiavi_3', 'voto_9', 'voto_recupero', 'r_evolution_accesa', 'voto_migliorato', 'nota_merito'].includes(p.situazione)) return 'festa';
   return 'calmo';
 }
 const CON_CORIANDOLI = ['forziere_aperto', 'cima'];
@@ -59,6 +59,7 @@ const PULSANTI: Record<string, string> = {
   voto_insufficiente_ancora: 'Vediamo il piano',
   serie_nera: 'Ci riprovo',
   figurina_nera: 'Ci riprovo',
+  r_evolution_accesa: 'Vediamo',
 };
 /** I pulsanti "il piano" portano a Studio, dove c'è il ripasso. */
 const AL_PIANO = (p: Popup) => /piano$/.test(pulsante(p));
@@ -67,7 +68,7 @@ const forziereDi = (p: Popup) => Number(String(p.chiave ?? '').split(':')[1]) ||
 const FILA_MASSIMA = 12;
 
 /** La coda dei popup di Lani; apriEnigma porta su Astra al biglietto (pulsante "Prova"). */
-export default function CodaPopup({ apriEnigma, apriStudio }: { apriEnigma?: (n: number) => void; apriStudio?: () => void }) {
+export default function CodaPopup({ apriEnigma, apriStudio, apriREvolution }: { apriEnigma?: (n: number) => void; apriStudio?: () => void; apriREvolution?: () => void }) {
   const [p, setP] = useState<Popup>();
 
   useEffect(() => {
@@ -110,7 +111,9 @@ export default function CodaPopup({ apriEnigma, apriStudio }: { apriEnigma?: (n:
       ? () => (chiudi(), apriEnigma(n))
       : AL_PIANO(p) && apriStudio
         ? () => (chiudi(), apriStudio())
-        : undefined;
+        : p.situazione === 'r_evolution_accesa' && apriREvolution
+          ? () => (chiudi(), apriREvolution())
+          : undefined;
   return <PopupVista p={p} chiudi={chiudi} azione={azione} />;
 }
 

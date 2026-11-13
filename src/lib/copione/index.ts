@@ -36,6 +36,8 @@ export const POPUP = {
   bagno_3: { priorita: 1, posa: 'leo-sbuffa', titolo: 'Ancora il bagno', testo: 'Leo non entra in bagno dopo di te, puzzolona. {passi}.' },
   antisportivo: { priorita: 1, posa: 'papa-arrabbiato', titolo: 'In campo', testo: 'Così non si gioca: {passi}. Il rispetto vale più di un punto.' },
   // R-Evolution (sprint 2): partite segnate dai genitori
+  // annuncio il giorno dell'accensione (signore, 13/11); lo accoda il trigger di 0034: stesso testo, lo controlla il test
+  r_evolution_accesa: { priorita: 4, posa: 'lani-divisa', titolo: 'Arriva R-Evolution', testo: 'Da oggi anche la pallavolo fa camminare Astra: dieci minuti al mattino, le tue partite e le classifiche del campionato.' },
   partita_vinta: { priorita: 4, posa: 'papa-festeggia', titolo: 'Partita vinta', testo: 'Vinta {risultato}! +{passi}. Papà ha già la felpa viola addosso.' },
   partita_persa: { priorita: 4, posa: 'lani-partita-persa', titolo: 'Partita persa', testo: 'Persa {risultato}. +{passi} per averla giocata. Si riparte al prossimo allenamento.' },
   balla: { priorita: 1, posa: 'mamma-arrabbiata', titolo: 'Balla scoperta', testo: '{cosa}. {passi}. Con la verità si perde sempre meno.' },

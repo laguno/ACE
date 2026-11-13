@@ -94,3 +94,16 @@ test('barra a cinque voci: a 360 px nessuna etichetta esce dal suo pulsante', as
   for (const b of await voci.all()) expect(await b.evaluate((e) => e.scrollWidth <= e.clientWidth)).toBe(true);
   await page.locator('.barra').screenshot({ path: 'e2e/risultati/barra-360.png' });
 });
+
+test("annuncio il giorno dell'accensione: Vediamo porta su R-Evolution", async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2027-01-07T16:00:00+01:00'));
+  const d = dati();
+  await finto(page, {
+    ...d,
+    popup_coda: [{ id: 'a1', chiave: 'r_evolution:2027-01-07', priorita: 4, situazione: 'r_evolution_accesa', posa: 'lani-divisa', titolo: 'Arriva R-Evolution', testo: 'Da oggi anche la pallavolo fa camminare Astra: dieci minuti al mattino, le tue partite e le classifiche del campionato.', figurina: null, mostrato_il: null, creato_il: '2027-01-07T15:00:00Z' }],
+  });
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: 'Arriva R-Evolution' })).toBeVisible();
+  await page.getByRole('button', { name: 'Vediamo' }).click();
+  await expect(page.getByRole('heading', { name: 'In campo' })).toBeVisible();
+});

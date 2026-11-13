@@ -61,6 +61,15 @@ verifica('menu dei dieci minuti: il genitore aggiunge', (await val(null, `select
 await fallisce('menu dei dieci minuti: tipo sconosciuto', PAPA, `insert into esercizi_dieci_minuti (nome, tipo) values ('Salti', 'salti')`);
 await come(PAPA, `delete from esercizi_dieci_minuti where nome = 'Corda'`);
 verifica('menu dei dieci minuti: il genitore toglie', (await val(null, `select count(*)::int from esercizi_dieci_minuti`)) === 5);
+// annuncio di R-Evolution (0034): l'accensione del genitore accoda il popup, una volta per giorno
+await come(PAPA, `insert into impostazioni (chiave, valore) values ('r_evolution_da', '"2026-11-23"')`);
+await come(PAPA, `delete from impostazioni where chiave = 'r_evolution_da'`);
+await come(PAPA, `insert into impostazioni (chiave, valore) values ('r_evolution_da', '"2026-11-23"')`);
+verifica('R-Evolution accesa: un solo annuncio per Lani', (await val(LANI, `select count(*)::int from popup_coda where chiave = 'r_evolution:2026-11-23' and situazione = 'r_evolution_accesa'`)) === 1);
+await fallisce('R-Evolution: Lani non chiama il trigger', LANI, `select annuncia_r_evolution()`);
+await come(null, `delete from impostazioni where chiave = 'r_evolution_da'`);
+await come(null, `delete from popup_coda where chiave = 'r_evolution:2026-11-23'`);
+
 await come(LANI, `insert into flashcard_giri (iniziato_il, fatto_il, carte, sapevo, quasi, non_sapevo) values (now() - interval '2 minutes', '2020-01-01', 10, 5, 3, 2)`);
 verifica('giro di flash card: fine con l\'ora del server', (await val(null, `select fatto_il > now() - interval '1 minute' from flashcard_giri`)) === true);
 await fallisce('giro di flash card senza inizio rifiutato', LANI, `insert into flashcard_giri (carte, sapevo, quasi, non_sapevo) values (10, 5, 3, 2)`);

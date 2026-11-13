@@ -173,7 +173,7 @@ function Lani() {
           Genitori
         </button>
       </main>
-      <CodaPopup apriEnigma={(n) => (setForziere(n), setVoce('Astra'))} apriStudio={() => setVoce('Studio')} />
+      <CodaPopup apriEnigma={(n) => (setForziere(n), setVoce('Astra'))} apriStudio={() => setVoce('Studio')} apriREvolution={() => setVoce('R-Evolution')} />
       <nav className={`barra${barra.length > 4 ? ' cinque' : ''}`} aria-label="Sezioni">
         {barra.map((v) => {
           const attiva = v === voce || (v === 'Astra' && (voce === 'Figurina' || voce === 'Album'));

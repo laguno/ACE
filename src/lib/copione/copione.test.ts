@@ -80,3 +80,10 @@ function riempita(k: ChiaveNotifica) {
   // senza troncare: il testo pieno deve già stare nei 60 caratteri
   return riempi(NOTIFICHE[k], ESEMPIO).replace('Educazione civica', 'Ed. civica').length;
 }
+
+it("annuncio di R-Evolution: il trigger di 0034 accoda lo stesso testo del copione", async () => {
+  const { readFileSync } = await import('node:fs');
+  const sql = readFileSync('supabase/migrations/0034_annuncio_r_evolution.sql', 'utf8');
+  const p = POPUP.r_evolution_accesa;
+  for (const s of [p.posa, p.titolo, p.testo, `, ${p.priorita}, 'r_evolution_accesa'`]) expect(sql).toContain(s);
+});
