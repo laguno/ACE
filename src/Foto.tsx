@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { Camera } from '@phosphor-icons/react';
+import { Camera, Images } from '@phosphor-icons/react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { erroreDi, MESSAGGI, misure, scegli, type ErroreFoto, type Pronta } from './lib/foto';
 
 // Da fotografare: pagine chieste da ACE (sincronizzazione di Nuvola). Le foto vanno nel bucket
-// privato foto-pagine; la funzione "passi" chiude la richiesta e dà i passi a Lani se la foto è sua.
+// privato foto-pagine; con "Ho finito" la funzione "passi" chiude la richiesta e dà i passi a Lani se la foto è sua.
 // Solo pagine del libro di carta: niente e-book degli editori.
 
 export type RichiestaFoto = { id: string; motivo: string; materia_id: string | null; pagine: string; materie?: { nome: string } | null };
@@ -34,57 +34,128 @@ class Rifiutata extends Error {
   }
 }
 
+type Scatto = { percorso: string; url: string };
+
 /**
- * Carica le foto di una richiesta e chiede i passi. Restituisce i passi presi (0 per i genitori).
- * Prima prepara tutte le foto: se una non va, non si carica niente. Se il caricamento si
- * interrompe a metà, le foto già salvate restano e la richiesta resta aperta: si riprova.
+ * Carica alcune foto di una richiesta (aperta). Prima le prepara tutte: se una non va, non si
+ * carica niente. Le foto salvate restano anche se Lani esce a metà: la richiesta si chiude e i
+ * passi arrivano solo con "Ho finito" (chiudi).
  */
-async function caricaFoto(client: SupabaseClient, r: RichiestaFoto, file: File[]): Promise<number> {
+async function caricaFoto(client: SupabaseClient, r: RichiestaFoto, file: File[]): Promise<Scatto[]> {
   const pronte: Pronta[] = [];
   for (const f of file) {
     const p = scegli(f, await rimpicciolisci(f));
     if (typeof p === 'string') throw new Rifiutata(p);
     pronte.push(p);
   }
+  const fatti: Scatto[] = [];
   for (const [i, p] of pronte.entries()) {
     const percorso = `${r.id}/${Date.now()}-${i}.${p.estensione}`;
     const su = await client.storage.from('foto-pagine').upload(percorso, p.blob, { contentType: p.tipo });
     if (su.error) throw su.error;
     const { error } = await client.from('foto_pagine').insert({ richiesta_id: r.id, materia_id: r.materia_id, pagine: r.pagine, percorso_storage: percorso });
     if (error) throw error;
+    fatti.push({ percorso, url: URL.createObjectURL(p.blob) });
   }
+  return fatti;
+}
+
+/** "Ho finito": la funzione "passi" chiude la richiesta e dà i passi (una volta per richiesta, 0 ai genitori). */
+async function chiudi(client: SupabaseClient, r: RichiestaFoto): Promise<number> {
   const { data, error } = await client.functions.invoke('passi', { body: { tipo: 'foto', id: r.id } });
   if (error) throw error;
   return (data?.passi as number) ?? 0;
 }
 
+/** Foto già salvate per la richiesta (uscita a metà), con l'anteprima firmata. */
+async function giaSalvate(client: SupabaseClient, r: RichiestaFoto): Promise<Scatto[]> {
+  const { data } = await client.from('foto_pagine').select('percorso_storage').eq('richiesta_id', r.id).order('caricata_il');
+  const percorsi = (data ?? []).map((f) => f.percorso_storage as string);
+  if (!percorsi.length) return [];
+  const firmati = await client.storage.from('foto-pagine').createSignedUrls(percorsi, 3600);
+  return percorsi.map((percorso, i) => ({ percorso, url: firmati.data?.[i]?.signedUrl ?? '' }));
+}
+
 export const descrizione = (r: RichiestaFoto) => `${r.materie?.nome ?? (r.motivo === 'verifica' ? 'Verifica' : 'Compito')}: pagine ${r.pagine}`;
 
-/** Pulsante "Fotografa": apre la fotocamera (una o più pagine) e carica. */
+/**
+ * Foto di una richiesta, una pagina alla volta: la fotocamera del telefono fa uno scatto per volta
+ * (Samsung), quindi la richiesta resta aperta con contatore e miniature, "Un'altra pagina"
+ * (fotocamera), "Dalla galleria" (più foto insieme) e "Ho finito", che chiude e dà i passi.
+ */
 export function Fotografa({ client, richiesta, etichetta = 'Fotografa', fatto }: { client: SupabaseClient; richiesta: RichiestaFoto; etichetta?: string; fatto: (passi: number) => void }) {
-  const input = useRef<HTMLInputElement>(null);
-  const [stato, setStato] = useState<'pronto' | 'carico' | ErroreFoto>('pronto');
-  async function scelte(lista: FileList | null) {
+  const camera = useRef<HTMLInputElement>(null);
+  const galleria = useRef<HTMLInputElement>(null);
+  const [scatti, setScatti] = useState<Scatto[]>([]);
+  const [stato, setStato] = useState<'pronto' | 'carico' | 'chiudo' | ErroreFoto>('pronto');
+  useEffect(() => {
+    let vivo = true;
+    giaSalvate(client, richiesta).then(
+      (s) => {
+        if (vivo && s.length) setScatti(s);
+      },
+      () => {},
+    );
+    return () => {
+      vivo = false;
+    };
+  }, [client, richiesta]);
+  async function scelte(input: HTMLInputElement) {
+    const lista = input.files;
     // fotocamera negata o scelta annullata: nessun file, non succede niente
     if (!lista?.length) return;
     setStato('carico');
     try {
-      fatto(await caricaFoto(client, richiesta, [...lista]));
+      const nuovi = await caricaFoto(client, richiesta, [...lista]);
+      setScatti((s) => [...s, ...nuovi]);
       setStato('pronto');
     } catch (e) {
       console.error('foto', e);
       setStato(e instanceof Rifiutata ? e.motivo : erroreDi(e, navigator.onLine));
+      // interrotto a metà: le foto già salvate restano, il contatore le mostra
+      giaSalvate(client, richiesta).then(setScatti, () => {});
     }
-    if (input.current) input.current.value = '';
+    input.value = '';
   }
+  async function finito() {
+    setStato('chiudo');
+    try {
+      fatto(await chiudi(client, richiesta));
+    } catch (e) {
+      console.error('foto', e);
+      setStato(erroreDi(e, navigator.onLine));
+    }
+  }
+  const occupato = stato === 'carico' || stato === 'chiudo';
+  const n = scatti.length;
   return (
     <span className="fotografa">
-      <input ref={input} type="file" accept="image/*" capture="environment" multiple hidden onChange={(e) => scelte(e.target.files)} aria-label={`Foto: ${descrizione(richiesta)}`} />
-      <button className="secondario compatto" disabled={stato === 'carico'} onClick={() => input.current?.click()}>
+      <input ref={camera} type="file" accept="image/*" capture="environment" hidden onChange={(e) => scelte(e.target)} aria-label={`Fotocamera: ${descrizione(richiesta)}`} />
+      <input ref={galleria} type="file" accept="image/*" multiple hidden onChange={(e) => scelte(e.target)} aria-label={`Galleria: ${descrizione(richiesta)}`} />
+      {n > 0 && (
+        <span className="scatti">
+          <small aria-live="polite">{n === 1 ? '1 pagina' : `${n} pagine`}</small>
+          <span className="miniature">
+            {scatti.map((s) => (
+              <img key={s.percorso} src={s.url} alt="" width={40} height={40} />
+            ))}
+          </span>
+        </span>
+      )}
+      <button className="secondario compatto" disabled={occupato} onClick={() => camera.current?.click()}>
         <Camera size={20} weight="bold" aria-hidden />
-        {stato === 'carico' ? 'Carico…' : etichetta}
+        {stato === 'carico' ? 'Carico…' : n > 0 ? "Un'altra pagina" : etichetta}
       </button>
-      {stato !== 'pronto' && stato !== 'carico' && <small role="alert">{MESSAGGI[stato]}</small>}
+      <button className="secondario compatto" disabled={occupato} onClick={() => galleria.current?.click()}>
+        <Images size={20} weight="bold" aria-hidden />
+        Dalla galleria
+      </button>
+      {n > 0 && (
+        <button className="compatto" disabled={occupato} onClick={finito}>
+          {stato === 'chiudo' ? 'Chiudo…' : 'Ho finito'}
+        </button>
+      )}
+      {stato !== 'pronto' && !occupato && <small role="alert">{MESSAGGI[stato]}</small>}
     </span>
   );
 }

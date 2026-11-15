@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { finto } from './finto';
 
 // Da fotografare: le richieste aperte nel Pomeriggio di Lani e nella settimana dei genitori.
-// "Fotografa" carica nel bucket, scrive foto_pagine e chiede i passi alla funzione (tipo foto).
+// Ogni scatto va nel bucket e in foto_pagine; "Ho finito" chiede i passi alla funzione (tipo foto).
 const RICHIESTA = { id: 'r1', motivo: 'compito', materia_id: 'italiano', pagine: '340–352', stato: 'aperta', creato_il: '2026-12-01T13:00:00Z' };
 // un JPEG minuscolo (1×1) per il campo file
 const JPEG = Buffer.from(
@@ -24,19 +24,54 @@ const base = () => ({
   saldo_passi: [{ passi: 0 }],
 });
 
-test('Lani: Fotografa nel pomeriggio, +2 e la richiesta sparisce', async ({ page }) => {
+test('Lani: più scatti uno alla volta, contatore, poi "Ho finito" dà +2 e chiude', async ({ page }) => {
   await page.clock.setFixedTime(new Date('2026-12-01T15:00:00+01:00'));
   const { t, chiamate } = await finto(page, base(), { passi: { passi: 2 } });
   await page.goto('/');
   const carta = page.locator('.carta', { has: page.getByRole('heading', { name: 'Da fotografare' }) });
   await expect(carta).toContainText('Italiano: pagine 340–352');
   await expect(carta).toContainText('+2 ciascuna');
-  await carta.getByLabel('Foto: Italiano: pagine 340–352').setInputFiles({ name: 'pagina.jpg', mimeType: 'image/jpeg', buffer: JPEG });
+  const camera = carta.getByLabel('Fotocamera: Italiano: pagine 340–352');
+  // come sul Samsung: la fotocamera restituisce uno scatto per volta
+  await camera.setInputFiles({ name: 'p1.jpg', mimeType: 'image/jpeg', buffer: JPEG });
+  await expect(carta).toContainText('1 pagina');
+  await expect(carta.locator('.miniature img')).toHaveCount(1);
+  expect(chiamate).toEqual([]);
+  await carta.getByRole('button', { name: "Un'altra pagina" }).isEnabled();
+  await camera.setInputFiles({ name: 'p2.jpg', mimeType: 'image/jpeg', buffer: JPEG });
+  await expect(carta).toContainText('2 pagine');
+  await carta.getByLabel('Galleria: Italiano: pagine 340–352').setInputFiles([
+    { name: 'p3.jpg', mimeType: 'image/jpeg', buffer: JPEG },
+    { name: 'p4.jpg', mimeType: 'image/jpeg', buffer: JPEG },
+  ]);
+  await expect(carta).toContainText('4 pagine');
+  await expect(carta.locator('.miniature img')).toHaveCount(4);
+  expect(t.foto_pagine).toHaveLength(4);
+  expect(chiamate).toEqual([]);
+  await carta.getByRole('button', { name: 'Ho finito' }).click();
   await expect(carta.getByRole('status')).toHaveText('Foto salvata: +2.');
   await expect(carta).not.toContainText('pagine 340–352');
   expect(t.caricate[0].percorso).toMatch(/^foto-pagine\/r1\/\d+-0\.jpg$/);
   expect(t.foto_pagine[0]).toMatchObject({ richiesta_id: 'r1', materia_id: 'italiano', pagine: '340–352' });
-  expect(chiamate).toContainEqual({ tipo: 'foto', id: 'r1' });
+  expect(chiamate).toEqual([{ tipo: 'foto', id: 'r1' }]);
+});
+
+test('Lani esce a metà: le foto restano e al ritorno si continua', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-12-01T15:00:00+01:00'));
+  const { chiamate } = await finto(page, {
+    ...base(),
+    foto_pagine: [
+      { id: 'f1', richiesta_id: 'r1', percorso_storage: 'r1/1-0.jpg', caricata_il: '2026-12-01T13:10:00Z' },
+      { id: 'f2', richiesta_id: 'r1', percorso_storage: 'r1/2-0.jpg', caricata_il: '2026-12-01T13:11:00Z' },
+    ],
+  });
+  await page.goto('/');
+  const carta = page.locator('.carta', { has: page.getByRole('heading', { name: 'Da fotografare' }) });
+  await expect(carta).toContainText('2 pagine');
+  await expect(carta.getByRole('button', { name: "Un'altra pagina" })).toBeVisible();
+  await carta.getByLabel('Fotocamera: Italiano: pagine 340–352').setInputFiles({ name: 'p3.jpg', mimeType: 'image/jpeg', buffer: JPEG });
+  await expect(carta).toContainText('3 pagine');
+  expect(chiamate).toEqual([]);
 });
 
 test('genitori: Da fotografare nella settimana', async ({ page }) => {
@@ -52,10 +87,12 @@ test('genitori: Da fotografare nella settimana', async ({ page }) => {
   await page.goto('/');
   const carta = page.locator('.carta', { has: page.getByRole('heading', { name: 'Da fotografare' }) });
   await expect(carta).toContainText('Per un compito');
-  await carta.getByLabel('Foto: Italiano: pagine 340–352').setInputFiles([
+  await carta.getByLabel('Galleria: Italiano: pagine 340–352').setInputFiles([
     { name: 'a.jpg', mimeType: 'image/jpeg', buffer: JPEG },
     { name: 'b.jpg', mimeType: 'image/jpeg', buffer: JPEG },
   ]);
+  await expect(carta).toContainText('2 pagine');
+  await carta.getByRole('button', { name: 'Ho finito' }).click();
   await expect(page.getByRole('status')).toContainText('Foto salvata: Italiano: pagine 340–352.');
   expect(t.caricate).toHaveLength(2);
   expect(t.foto_pagine).toHaveLength(2);

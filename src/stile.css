@@ -473,7 +473,10 @@ dialog.velo:focus { outline: none; }
 .lista-foto li > span:not(.riquadro) { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; font-weight: 800; }
 .lista-foto small { font: 700 13px Nunito, sans-serif; color: var(--testo-2); }
 .fotografa { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
-.fotografa .secondario.compatto { margin: 0; }
+.fotografa .compatto { margin: 0; }
+.fotografa .scatti { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.fotografa .miniature { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px; max-width: 176px; }
+.fotografa .miniature img { width: 40px; height: 40px; object-fit: cover; border-radius: 10px; background: var(--lilla); }
 .fotografa [role='alert'] { color: var(--accento-premuto); }
 /* frase del giorno: citazione corta in corsivo, l'autore sotto (Oggi, Sera, popup di tappa, lucchetto e cima) */
 .frase-giorno { margin: 8px 4px 0; text-align: center; }
