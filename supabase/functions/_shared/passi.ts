@@ -274,15 +274,21 @@ export function creaGestori(db: SupabaseClient) {
     // Partita segnata da Lani e approvata da un genitore: +giocata e, se vinta, +vinta_in_piu
     // (meno se è rimasta in panchina; due movimenti, così un risultato corretto da persa a vinta
     // aggiunge solo la parte che manca). Firmati dal genitore che l'ha approvata.
-    // ponytail: corretta dopo l'approvazione (da vinta a persa) i passi restano; storno a mano.
+    // Dal 15/11 anche la partita col risultato FIPAV: la crea il server, la "approva" la risposta di
+    // Lani al popup (in_campo). Un genitore che cambia in campo / panchina (correggi_partita) storna
+    // il giro di prima: il riferimento passa a id:1, id:2... così il giro nuovo si registra una volta.
+    // ponytail: corretta nei set dopo l'approvazione (da vinta a persa) i passi restano; storno a mano.
     async partita(id) {
       const p = await riga('partite', 'id', id);
       const g = R.giorno(p.data);
       if (!p.approvata_il) return niente('da approvare');
+      if (p.in_campo === null) return niente('aspetta la risposta di Lani');
       if (!R.rEvolutionAttiva(g, await rEvolutionDa())) return niente('R-Evolution spenta');
       const { giocata, vinta } = R.passiPartita(p.set_nostri, p.set_loro, p.in_campo);
       const firma = p.approvata_da ?? p.dato_da;
-      const presi = (await registra('partita', id, giocata, g, firma)).passi + (await registra('partita_vinta', id, vinta, g, firma)).passi;
+      const storni = await conta('movimenti_passi', (q) => q.eq('motivo', 'storno').like('riferimento', `partita:${id}%`));
+      const rif = storni ? `${id}:${storni}` : id;
+      const presi = (await registra('partita', rif, giocata, g, firma)).passi + (await registra('partita_vinta', rif, vinta, g, firma)).passi;
       if (!presi) return niente('già registrata');
       const risultato = `${p.set_nostri}-${p.set_loro}`;
       await accoda(db, `partita:${id}:${vinta ? 'vinta' : 'persa'}`, vinta ? 'partita_vinta' : 'partita_persa', { risultato, passi: giocata + vinta });

@@ -18,6 +18,15 @@
 - Grafica come le bozze (`design/*.html`) su Oggi, Pomeriggio, Sera, Astra, Figurina, Album, popup, Studio, Flash card e Quiz (Grafica 1-7b, tutto in `main`; flash card e quiz a tutto schermo, senza barra né "Genitori"). Kit in `src/kit.tsx`. Revisione UI applicata a tutte le schermate (anche Genitori): scala degli spazi 4/8/12/16/24/32, bordi 20/16/32, titoli 30/26/20/17, raggi 16/24/32/999, ombre `--ombra`, `--ombra-alta`, `--ombra-etichetta`. Foto di confronto con `npm run confronto` (in `docs/confronto/`). Niente config di Prettier: se serve, `--single-quote --print-width 180`.
 - Prove (13/11, ramo `sprint-2`): `npm test` 292, `npm run prova:schema` 277, `npx playwright test` 153 (22 saltate a richiesta, Supabase finto). Le foto di `npm run confronto` sono stabili (movimento ridotto): servono per i confronti prima e dopo; la Sera alterna due foto anche senza cambiamenti.
 
+## Sessione del 15/11 sera (prova in famiglia di Jarvis, regole approvate dal signore)
+
+- **In produzione** (main `a37fb7c`, pushato): foto a più scatti ("Ho finito" dà il +2), sprint 2 (0034, 0035, tutte le funzioni), **assenze** (0036; "Lani a casa" e "Sposta verifica" in Genitori Settimana; funzioni chiavi, notifiche, sync-nuvola, genera-studio, passi, enigma ripubblicate). Il testo del popup "Bentornata" è andato in produzione come proposta: da far approvare al signore. Il signore può spostare a mano le verifiche di geografia e spagnolo.
+- **Su main, solo in locale (non pushato, non pubblicato)**: R-Evolution, risultato automatico dalla FIPAV e prossima partita (docs/08, "Risultato automatico e prossima partita"). Migrazioni 0037 (`gare_fipav`, `partite.gara`, `rispondi_partita`, `correggi_partita`) e 0038 (cron `partite` ogni mezz'ora). Funzioni toccate: `classifiche`, `passi`. Testi per Lani in docs/05 (righe "proposta del 15/11"): popup "Com'è andata?" con "Sì" e "Sono rimasta in panchina", carta "Prossima partita", pillola in Oggi. **Attenzione**: finché 0037 non è in produzione, non pubblicare `classifiche` né `passi` da questo main, e non pushare main (Vercel pubblicherebbe la carta e il popup).
+- **Rami aperti**: `come-passi` (8904a4e, pagina "Come si fanno i passi", testi in docs/05 da approvare). Tocca Genitori.tsx, Astra.tsx, stile.css e docs/05 come le assenze, ora in main: aspettarsi conflitti all'unione.
+- Ancora da fare delle assenze: in Lani non si vedono "settimana prossima" (`recupero_vago`) e i compiti spostati; l'endpoint delle assenze di Nuvola non è verificato.
+- In produzione `r_evolution_da` = 2026-11-13 e nessuna riga `r_evolution:%` in `popup_coda`: il signore deve premere Spegni e poi Accendi in Genitori, Impostazioni.
+- Prove (15/11 sera, main locale): `npm test` 312, `npm run prova:schema` 298, `npx playwright test` 156 (22 saltate).
+
 ## Sessione del 13/11 sera (revisione profonda, ramo `sprint-2`)
 
 - **Domenica 15/11 sera il signore unisce e accende R-Evolution**: sequenza in `docs/08-sprint-2.md` (backup, unione, `db push`, **tutte** le funzioni, Spegni e Accendi). Le funzioni pubblicate potrebbero avere ancora l'inizio al 23/11 (cambiato il 13/11 senza ripubblicarle): ripubblicarle tutte lo sistema.

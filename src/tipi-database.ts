@@ -476,6 +476,45 @@ export type Database = {
         }
         Relationships: []
       }
+      gare_fipav: {
+        Row: {
+          cid: number
+          numero: number
+          giornata: number
+          inizio: string
+          casa: string
+          ospite: string
+          set_casa: number | null
+          set_ospite: number | null
+          stato: string
+          letta_il: string
+        }
+        Insert: {
+          cid: number
+          numero: number
+          giornata?: number
+          inizio: string
+          casa: string
+          ospite: string
+          set_casa?: number | null
+          set_ospite?: number | null
+          stato?: string
+          letta_il?: string
+        }
+        Update: {
+          cid?: number
+          numero?: number
+          giornata?: number
+          inizio?: string
+          casa?: string
+          ospite?: string
+          set_casa?: number | null
+          set_ospite?: number | null
+          stato?: string
+          letta_il?: string
+        }
+        Relationships: []
+      }
       gesti_casa: {
         Row: {
           creato_il: string
@@ -718,7 +757,9 @@ export type Database = {
           data: string
           dato_da: string
           id: string
-          in_campo: boolean
+          gara: number | null
+          gara_cid: number | null
+          in_campo: boolean | null
           set_loro: number
           set_nostri: number
         }
@@ -730,7 +771,9 @@ export type Database = {
           data?: string
           dato_da?: string
           id?: string
-          in_campo?: boolean
+          gara?: number | null
+          gara_cid?: number | null
+          in_campo?: boolean | null
           set_loro: number
           set_nostri: number
         }
@@ -742,11 +785,20 @@ export type Database = {
           data?: string
           dato_da?: string
           id?: string
-          in_campo?: boolean
+          gara?: number | null
+          gara_cid?: number | null
+          in_campo?: boolean | null
           set_loro?: number
           set_nostri?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "partite_gara_fk"
+            columns: ["gara_cid", "gara"]
+            isOneToOne: true
+            referencedRelation: "gare_fipav"
+            referencedColumns: ["cid", "numero"]
+          },
           {
             foreignKeyName: "partite_approvata_da_fkey"
             columns: ["approvata_da"]
@@ -1432,6 +1484,10 @@ export type Database = {
       controlla_pin: { Args: { p_pin: string }; Returns: string }
       e_famiglia: { Args: never; Returns: boolean }
       e_genitore: { Args: never; Returns: boolean }
+      correggi_partita: {
+        Args: { p_id: string; p_in_campo: boolean }
+        Returns: boolean
+      }
       frase_del_giorno: {
         Args: { p_momento: string }
         Returns: {
@@ -1441,7 +1497,7 @@ export type Database = {
       }
       imposta_pin: { Args: { p_pin: string }; Returns: undefined }
       lancia_chiavi: { Args: never; Returns: undefined }
-      lancia_classifiche: { Args: never; Returns: undefined }
+      lancia_classifiche: { Args: { p_corpo?: Json }; Returns: undefined }
       lancia_notifiche: { Args: never; Returns: undefined }
       lancia_sync_calendario: { Args: never; Returns: undefined }
       lancia_sync_nuvola: { Args: never; Returns: undefined }
@@ -1456,6 +1512,10 @@ export type Database = {
           p_riferimento: string
         }
         Returns: string
+      }
+      rispondi_partita: {
+        Args: { p_id: string; p_in_campo: boolean }
+        Returns: boolean
       }
       sposta_verifica: {
         Args: { p_data: string; p_id: string; p_vago?: boolean }

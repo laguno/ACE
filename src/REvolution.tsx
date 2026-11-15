@@ -5,6 +5,7 @@ import { Attesa, Testata } from './kit';
 import { MESI } from './spunte';
 import { supabase } from './supabase';
 import { SegnaPartita } from './Partita';
+import { CartaProssimaPartita } from './ProssimaPartita';
 
 // R-Evolution (sprint 2, docs/03): partite segnate da Lani (passi dopo l'approvazione di un
 // genitore), dieci minuti del mese e classifiche dei campionati dal portale FIPAV (funzione
@@ -53,6 +54,8 @@ export default function REvolution() {
   return (
     <section className="schermo r-evolution">
       <Testata sfondo="rosa" posa="lani-divisa" sopra="R-Evolution" titolo="In campo" riga={<p className="conto">+{d.passiCampo} passi presi in campo.</p>} />
+
+      <CartaProssimaPartita />
 
       <dl className="numeri">
         <div>

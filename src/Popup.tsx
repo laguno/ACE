@@ -60,7 +60,9 @@ const PULSANTI: Record<string, string> = {
   serie_nera: 'Ci riprovo',
   figurina_nera: 'Ci riprovo',
   r_evolution_accesa: 'Vediamo',
+  partita_com_e_andata: 'Sì', // l'altro pulsante: PANCHINA (proposta del 15/11, da approvare)
 };
+const PANCHINA = 'Sono rimasta in panchina';
 /** I pulsanti "il piano" portano a Studio, dove c'è il ripasso. */
 const AL_PIANO = (p: Popup) => /piano$/.test(pulsante(p));
 /** Numero del forziere dalla chiave dell'evento ("forziere:3:enigma"). */
@@ -106,6 +108,18 @@ export default function CodaPopup({ apriEnigma, apriStudio, apriREvolution }: { 
     setP(undefined);
   };
   const n = forziereDi(p);
+  if (p.situazione === 'partita_com_e_andata') {
+    // risultato FIPAV (docs/08): la risposta di Lani approva la partita e fa i passi. Senza risposta
+    // (Esc, errore) il popup non si segna visto: torna alla prossima apertura.
+    const id = p.chiave?.split(':')[1] ?? '';
+    const rispondi = (inCampo: boolean) => async () => {
+      const { error } = await supabase.rpc('rispondi_partita', { p_id: id, p_in_campo: inCampo });
+      if (error) return setP(undefined);
+      await supabase.functions.invoke('passi', { body: { tipo: 'partita', id } });
+      chiudi();
+    };
+    return <PopupVista p={p} chiudi={() => setP(undefined)} azione={rispondi(true)} altra={{ etichetta: PANCHINA, fai: rispondi(false) }} />;
+  }
   const azione =
     p.situazione === 'enigma_comparso' && apriEnigma && n
       ? () => (chiudi(), apriEnigma(n))
@@ -118,7 +132,7 @@ export default function CodaPopup({ apriEnigma, apriStudio, apriREvolution }: { 
 }
 
 /** Il popup com'è davvero: lo usano la coda di Lani e la Vetrina dei genitori (che non scrive niente). */
-export function PopupVista({ p, chiudi, azione }: { p: Popup; chiudi: () => void; azione?: () => void }) {
+export function PopupVista({ p, chiudi, azione, altra }: { p: Popup; chiudi: () => void; azione?: () => void; altra?: { etichetta: string; fai: () => void } }) {
   const t = tono(p);
   const src = immagine(p.posa);
   const malus = t === 'bastone' ? p.testo.match(/[−-]\d+/)?.[0] : undefined;
@@ -158,6 +172,11 @@ export function PopupVista({ p, chiudi, azione }: { p: Popup; chiudi: () => void
         <button className="principale largo" onClick={azione ?? chiudi}>
           {pulsante(p)}
         </button>
+        {(altra || p.situazione === 'partita_com_e_andata') && (
+          <button className="secondario largo" onClick={altra?.fai ?? chiudi}>
+            {altra?.etichetta ?? PANCHINA}
+          </button>
+        )}
         {p.figurina && <p className="riga-figurina">{p.figurina}</p>}
       </div>
     </dialog>

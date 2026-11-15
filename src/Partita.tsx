@@ -10,7 +10,8 @@ import * as R from './lib/regole';
 
 type Avvisa = (s: string) => void;
 type Passi = (tipo: string, id: string) => Promise<number>;
-export type PartitaDaApprovare = { id: string; data: string; avversaria: string; set_nostri: number; set_loro: number; in_campo: boolean };
+export type PartitaDaApprovare = { id: string; data: string; avversaria: string; set_nostri: number; set_loro: number; in_campo: boolean | null };
+type PartitaFipav = PartitaDaApprovare & { approvata_il: string };
 
 const SET = [0, 1, 2, 3];
 const P = R.CONFIG.passi.partite;
@@ -123,13 +124,27 @@ export function SegnaPartita({ client, avvisa, passi, quandoSegnata }: { client:
 /** Area genitori: partite segnate da Lani, da correggere se serve e approvare, oppure rifiutare. */
 export function PartiteDaApprovare({ client, passi, avvisa }: { client: SupabaseClient; passi: Passi; avvisa: Avvisa }) {
   const [partite, setPartite] = useState<PartitaDaApprovare[]>([]);
-  const carica = () =>
+  const [fipav, setFipav] = useState<PartitaFipav[]>([]);
+  const carica = () => {
+    // col risultato FIPAV la partita la approva Lani rispondendo al popup (docs/08): qui solo se non
+    // ha risposto in 3 giorni (il popup scade)
+    const scaduto = new Date(Date.now() - 3 * 86_400_000).toISOString();
     client
       .from('partite')
       .select('id, data, avversaria, set_nostri, set_loro, in_campo')
       .is('approvata_il', null)
+      .or(`in_campo.not.is.null,creato_il.lt.${scaduto}`)
       .order('data')
       .then(({ data }) => setPartite((data ?? []) as PartitaDaApprovare[]));
+    client
+      .from('partite')
+      .select('id, data, avversaria, set_nostri, set_loro, in_campo, approvata_il')
+      .not('gara', 'is', null)
+      .not('approvata_il', 'is', null)
+      .gte('data', R.iso(new Date(Date.now() - 14 * 86_400_000)))
+      .order('data', { ascending: false })
+      .then(({ data }) => setFipav((data ?? []) as PartitaFipav[]));
+  };
   useEffect(() => {
     carica();
   }, [client]);
@@ -148,14 +163,43 @@ export function PartiteDaApprovare({ client, passi, avvisa }: { client: Supabase
     avvisa(`Partita ${riga.set_nostri}-${riga.set_loro} con ${p.avversaria} approvata: +${presi} passi.`);
     carica();
   }
+  // come per le spunte: storno dei passi dati e giro nuovo (correggi_partita, 0037)
+  async function correggi(p: PartitaFipav) {
+    const { data, error } = await client.rpc('correggi_partita', { p_id: p.id, p_in_campo: !p.in_campo });
+    if (error || !data) return avvisa('Non si può più correggere: le chiavi di quella settimana sono già date.');
+    const presi = await passi('partita', p.id);
+    avvisa(`Partita con ${p.avversaria} corretta: ${p.in_campo ? 'in panchina' : 'in campo'}, +${presi} passi.`);
+    carica();
+  }
   async function rifiuta(p: PartitaDaApprovare) {
     const { error } = await client.from('partite').delete().eq('id', p.id);
     avvisa(error ? 'Partita non tolta. Riprova.' : `Partita con ${p.avversaria} rifiutata.`);
     carica();
   }
 
-  if (!partite.length) return null;
+  if (!partite.length && !fipav.length) return null;
   return (
+    <>
+    {fipav.length > 0 && (
+      <div className="carta">
+        <h2>Partite dalla FIPAV</h2>
+        <p className="nota">Risultato ufficiale; in campo o in panchina l'ha detto Lani. Se non torna, correggete.</p>
+        <ul className="lista-semplice">
+          {fipav.map((p) => {
+            const g = R.giorno(p.data);
+            return (
+              <li key={p.id}>
+                <b>{p.avversaria}</b>, {g.getDate()}/{g.getMonth() + 1}, {p.set_nostri}-{p.set_loro}, {p.in_campo ? 'in campo' : 'in panchina'}{' '}
+                <button type="button" className="secondario" onClick={() => correggi(p)}>
+                  {p.in_campo ? 'Era in panchina' : 'Era in campo'}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    )}
+    {partite.length > 0 && (
     <div className="carta">
       <h2>Partite da approvare</h2>
       <p className="nota">Le ha segnate Lani. Correggete i set se serve, poi approvate: i passi arrivano adesso.</p>
@@ -171,7 +215,7 @@ export function PartiteDaApprovare({ client, passi, avvisa }: { client: Supabase
               <SceltaSet nome="loro" etichetta="Set loro" valore={p.set_loro} />
             </div>
             <label className="riga-spunta">
-              <input name="in_campo" type="checkbox" defaultChecked={p.in_campo} />
+              <input name="in_campo" type="checkbox" defaultChecked={p.in_campo ?? true} />
               Lani è entrata in campo
             </label>
             <div className="griglia">
@@ -184,5 +228,7 @@ export function PartiteDaApprovare({ client, passi, avvisa }: { client: Supabase
         );
       })}
     </div>
+    )}
+    </>
   );
 }

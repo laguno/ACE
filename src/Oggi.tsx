@@ -12,6 +12,7 @@ import { GIORNI, MESI, RigaCompito, SELECT_COMPITI, adesso, maiuscola, spuntaCom
 import { attivaNotifiche, notifichePossibili } from './notifiche';
 import { supabase } from './supabase';
 import { DieciMinuti } from './DieciMinuti';
+import { PillolaPartita } from './ProssimaPartita';
 import { useREvolutionDa } from './accensione';
 
 // Oggi — design/Oggi.html (mattina) e design/Pomeriggio.html (pomeriggio).
@@ -51,6 +52,7 @@ export default function Oggi({ apri = () => {} }: { apri?: Apri }) {
       )}
       {R.rEvolutionAttiva(oggi, rEvolutionDa) && (
         <section className="schermo dopo">
+          <PillolaPartita />
           <DieciMinuti oggi={oggi} />
         </section>
       )}

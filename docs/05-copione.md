@@ -217,6 +217,9 @@ Sul percorso la famiglia fa il tifo dal bordo. Ogni messaggio dice dove si trova
 | Nuova figurina comune | (la posa sbloccata) | Riga in fondo al popup: "Nuova figurina: {nome}. Album {n}/64." | clic |
 | Figurina della serie nera | (la posa sbloccata) | "Sette giorni fatti bene: figurina nera sbloccata, {nome}." | — |
 | Album completo | tutte | "Album completo: 64 su 64." | festa grande |
+| Risultato FIPAV arrivato (proposta del 15/11, da approvare) | lani-divisa | Titolo "Com'è andata?". "R-Evolution {noi}, {avversaria} {loro}. Sei entrata in campo?" Pulsanti: "Sì" e "Sono rimasta in panchina". | — |
+| Prossima partita, carta in R-Evolution (proposta del 15/11, da approvare) | — | "Prossima partita", "{avversaria}, in casa / in trasferta", "{Giorno} {g}/{m} alle {ora}, tra {n} giorni" (domani; il giorno stesso "tra {n} ore", nell'ultima ora "tra poco"). | — |
+| Pillola in Oggi (proposta del 15/11, da approvare) | — | Il giorno prima "Domani partita · {ora}", il giorno stesso "Oggi partita · tra {n} ore". Niente conto alla rovescia dei secondi. | — |
 | Partita vinta | papa-festeggia | "Vinta {risultato}! +25. Papà ha già la felpa viola addosso." | esultanza |
 | Partita persa | lani-partita-persa | "Persa {risultato}. +10 per averla giocata. Si riparte al prossimo allenamento." | — |
 | Settimana storta o insufficienza: Leo fa il tifo | leo-gamer | "Leo dice che al prossimo livello vinci tu. E lui di livelli se ne intende." | risatina |

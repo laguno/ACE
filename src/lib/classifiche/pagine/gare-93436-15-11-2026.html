@@ -1,0 +1,906 @@
+<!--
+CId=93436
+StId=2488
+-->
+
+<!DOCTYPE html>
+<html>
+<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><link href="/js/jquery/jquery-ui.css" type="text/css" rel="stylesheet" /><link href="/css/base.min.css" type="text/css" rel="stylesheet" /><link rel="stylesheet" type="text/css" href="/css/modal-menu.css" /><link rel="stylesheet" type="text/css" href="/js/lightslider/css/lightslider.css" /><link rel="stylesheet" type="text/css" href="/js/slicknav/slicknav.css" /><link rel="stylesheet" type="text/css" href="/js/slicknav/slicknav-style.css" /><link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.ashx" />
+
+    <script src="/js/jquery/jquery-3.1.0.min.js"></script>
+    <script src="/js/jquery/jquery-ui.js"></script>
+    <script type="text/javascript">
+        jQuery.noConflict();
+    </script>
+    <script src="/js/mootools-core-1.5.1.js" type="text/javascript"></script>
+    <script src="/js/mootools-more-1.5.1.js" type="text/javascript"></script>
+    <!--[if (gte IE 6)&(lte IE 8)]>
+      <script type="text/javascript" src="/js/selectivizr.js?nocache=20141120a"></script>
+    <![endif]-->
+    <script type="text/javascript" src="/js/checkform.js?nocache=20160616a"></script>
+    <script type="text/javascript" src="/js/jsManager.js?nocache=20160708a"></script>
+    <script type="text/javascript" src="/js/slideshow.js?nocache=20141120a"></script>
+    <script type="text/javascript" src="/js/MenuMatic_0.68.4.js?nocache=20160616a"></script>
+    <script type="text/javascript" src="/js/cerabox/cerabox.min.js?nocache=20141120a"></script>
+    <script type="text/javascript" src="/js/mediabox/mediaboxAdvanced.js?nocaches=2023"></script>
+    <script type="text/javascript" src="/js/DatePicker/DatePickerFull.js?nocache=20141120a"></script>
+    <script type="text/javascript" src="/js/lightslider/js/lightslider.js"></script>
+    <script type="text/javascript" src="/js/slicknav/jquery.slicknav.min.js"></script>
+    
+    <script type="text/javascript">
+        Locale.use('it-IT');
+
+        window.addEvent('load', function () {
+            equalize('#layout-area2, #layout-area3, #layout-area4');
+            equalize('#layout-area3 .col');
+            $$('.popup-image').cerabox({ group: false, displayTitle: false });
+
+            jQuery('.cerabox-close').click(function () {
+                jQuery('body').css('overflow','')
+            })
+            //console.log('');
+
+
+          
+          getMyBingMaps();
+
+        });
+        window.addEvent('domready', function () {
+            paginazioneBoxAfter();
+
+        });
+        function paginazioneBoxAfter() {
+            $$('.box-file-multipli').cerabox({ group: false, displayTitle: true, mobileView: false });
+            $$('.box-page-ricerca-multipli').cerabox({ group: false, displayTitle: true, mobileView: false });
+            $$('.box-rassegna-multipli').cerabox({ group: false, displayTitle: true, mobileView: false });
+            $$('.aps-cer').cerabox({ group: false, displayTitle: true, mobileView: false });
+        }
+
+    </script>
+
+
+
+    
+    <script type="text/javascript">
+        function Stagione(SId) {
+            CaricaPaginaGet('/risultati-classifiche.aspx?act=settimana', 'SId=' + SId, 'lbSettimana');
+            CaricaPaginaGet('/risultati-classifiche.aspx?act=campionato', 'SId=' + SId, 'lbCampionato', 'Campionato(' + SId + ', \'\');');
+        }
+        function Campionato(SId, CId) {
+            CaricaPaginaGet('/risultati-classifiche.aspx?act=societa', 'SId=' + SId + '&CId=' + CId, 'lbSocieta');
+        }
+        function EsportaXls(ff) {
+            var pp = window.open('about:blank', 'popXls');
+            ff.target = 'popXls';
+            var xAction = ff.action;
+            ff.action = 'esporta-risultati.aspx';
+            ff.submit();
+            ff.target = '';
+            ff.action = xAction;
+            pp.focus();
+        }
+    </script>
+<link href="/files/2217/0/Css/1247/stile.css" type="text/css" rel="stylesheet" /><meta property="og:title" content="FIPAV Reggio Emilia - Pagine Pubbliche | Risultati e classifiche" /><meta property="og:type" content="article" /><meta property="og:url" content="https://reggioemilia.portalefipav.net/risultati-classifiche.aspx?StId=2488&amp;DataDa=&amp;StatoGara=&amp;CId=93436&amp;SId=&amp;PId=13810&amp;btFiltro=CERCA" /><meta property="og:image" content="http://reggioemilia.portalefipav.net/files/2217/Logo/" /><meta property="og:site_name" content="FIPAV Reggio Emilia - Pagine Pubbliche" /><meta property="og:description" content="" /><meta property="fb:app_id" content="576743645751508" /><title>
+	FIPAV Reggio Emilia - Pagine Pubbliche | Risultati e classifiche
+</title></head>
+<body>
+    
+	
+<div id="layout-container" class=" desktop clsP_13810">
+	<div id="layout-area1" style="width:100%">
+		<div class="col col-4">
+			
+<div id="BoxId_34331" name="BoxId_34331" class="box box-4">
+	<div class=""style="background: transparent;"><div class="box-menu-back"><div class="box-menu menu-horizontal" id="box_menu_hor_34331" style="height: 45px;"></div></div>
+
+<script type="text/javascript">
+//<![CDATA[
+if(document.getElementById('nav')){var myMenu = new MenuMatic({ matchWidthMode: true, hideDelay: 200, stretchMainMenu:true });$('box_menu_hor_34331').setStyle('height','');}
+// ]]>
+</script>
+	</div>
+</div>
+		</div>
+	</div>
+	<div id="layout-area-corpo">
+	<div id="layout-area3" style="width:100%">
+		<div class="col col-4">
+	<h1>Risultati e classifiche delle gare</h1>
+<div id="BoxId_34332" class="box box-4">
+	<div class="box-padding">
+	<form id="filtro" method="get" action="/risultati-classifiche.aspx">
+		<input type="hidden" name="ComitatoId" value="109">
+		<label>
+			Stagione sportiva:<br />
+			<select name="StId" tabindex="1" class="input-select" onchange="Stagione(this.options[this.selectedIndex].value)">
+				<option value="2488" selected="selected">Stagione Sportiva 2026 / 2027</option>
+				<option value="2370">Stagione Sportiva 2025 / 2026</option>
+				<option value="2252">Stagione Sportiva 2024 / 2025</option>
+				<option value="2134">Stagione Sportiva 2023 / 2024</option>
+				<option value="2016">Stagione Sportiva 2022 / 2023</option>
+				<option value="1897">Stagione Sportiva 2021 / 2022</option>
+				<option value="1778">Stagione Sportiva 2020 / 2021</option>
+				<option value="1659">Stagione Sportiva 2019 / 2020</option>
+				<option value="1540">Stagione Sportiva 2018 / 2019</option>
+				<option value="1421">Stagione Sportiva 2017 / 2018</option>
+				<option value="1302">Stagione Sportiva 2016 / 2017</option>
+				<option value="1183">Stagione Sportiva 2015 / 2016</option>
+				<option value="1064">Stagione Sportiva 2014 / 2015</option>
+				<option value="945">Stagione Sportiva 2013 / 2014</option>
+				<option value="826">Stagione Sportiva 2012 / 2013</option>
+				<option value="708">Stagione Sportiva 2011 / 2012</option>
+				<option value="538">Stagione Sportiva 2010 / 2011</option>
+				<option value="537">Stagione Sportiva 2009 / 2010</option>
+				<option value="536">Stagione Sportiva 2008 / 2009</option>
+				<option value="535">Stagione Sportiva 2007 / 2008</option>
+				<option value="534">Stagione Sportiva 2006 / 2007</option>
+				<option value="533">Stagione Sportiva 2005 / 2006</option>
+			</select>
+		</label>
+		<label id="lbSettimana">
+			Settimana: <br />
+			<select name="DataDa" class="input-select" tabindex="2">
+				<option value="">Tutte le date..</option>
+				<option value="01/07/2026">dal 01/07/2026 al 05/07/2026</option>
+				<option value="06/07/2026">dal 06/07/2026 al 12/07/2026</option>
+				<option value="13/07/2026">dal 13/07/2026 al 19/07/2026</option>
+				<option value="20/07/2026">dal 20/07/2026 al 26/07/2026</option>
+				<option value="27/07/2026">dal 27/07/2026 al 02/08/2026</option>
+				<option value="03/08/2026">dal 03/08/2026 al 09/08/2026</option>
+				<option value="10/08/2026">dal 10/08/2026 al 16/08/2026</option>
+				<option value="17/08/2026">dal 17/08/2026 al 23/08/2026</option>
+				<option value="24/08/2026">dal 24/08/2026 al 30/08/2026</option>
+				<option value="31/08/2026">dal 31/08/2026 al 06/09/2026</option>
+				<option value="07/09/2026">dal 07/09/2026 al 13/09/2026</option>
+				<option value="14/09/2026">dal 14/09/2026 al 20/09/2026</option>
+				<option value="21/09/2026">dal 21/09/2026 al 27/09/2026</option>
+				<option value="28/09/2026">dal 28/09/2026 al 04/10/2026</option>
+				<option value="05/10/2026">dal 05/10/2026 al 11/10/2026</option>
+				<option value="12/10/2026">dal 12/10/2026 al 18/10/2026</option>
+				<option value="19/10/2026">dal 19/10/2026 al 25/10/2026</option>
+				<option value="26/10/2026">dal 26/10/2026 al 01/11/2026</option>
+				<option value="02/11/2026">dal 02/11/2026 al 08/11/2026</option>
+				<option value="09/11/2026">dal 09/11/2026 al 15/11/2026</option>
+				<option value="16/11/2026">dal 16/11/2026 al 22/11/2026</option>
+				<option value="23/11/2026">dal 23/11/2026 al 29/11/2026</option>
+				<option value="30/11/2026">dal 30/11/2026 al 06/12/2026</option>
+				<option value="07/12/2026">dal 07/12/2026 al 13/12/2026</option>
+				<option value="14/12/2026">dal 14/12/2026 al 20/12/2026</option>
+				<option value="21/12/2026">dal 21/12/2026 al 27/12/2026</option>
+				<option value="28/12/2026">dal 28/12/2026 al 03/01/2027</option>
+				<option value="04/01/2027">dal 04/01/2027 al 10/01/2027</option>
+				<option value="11/01/2027">dal 11/01/2027 al 17/01/2027</option>
+				<option value="18/01/2027">dal 18/01/2027 al 24/01/2027</option>
+				<option value="25/01/2027">dal 25/01/2027 al 31/01/2027</option>
+				<option value="01/02/2027">dal 01/02/2027 al 07/02/2027</option>
+				<option value="08/02/2027">dal 08/02/2027 al 14/02/2027</option>
+				<option value="15/02/2027">dal 15/02/2027 al 21/02/2027</option>
+				<option value="22/02/2027">dal 22/02/2027 al 28/02/2027</option>
+				<option value="01/03/2027">dal 01/03/2027 al 07/03/2027</option>
+				<option value="08/03/2027">dal 08/03/2027 al 14/03/2027</option>
+				<option value="15/03/2027">dal 15/03/2027 al 21/03/2027</option>
+				<option value="22/03/2027">dal 22/03/2027 al 28/03/2027</option>
+				<option value="29/03/2027">dal 29/03/2027 al 04/04/2027</option>
+				<option value="05/04/2027">dal 05/04/2027 al 11/04/2027</option>
+				<option value="12/04/2027">dal 12/04/2027 al 18/04/2027</option>
+				<option value="19/04/2027">dal 19/04/2027 al 25/04/2027</option>
+				<option value="26/04/2027">dal 26/04/2027 al 02/05/2027</option>
+				<option value="03/05/2027">dal 03/05/2027 al 09/05/2027</option>
+				<option value="10/05/2027">dal 10/05/2027 al 16/05/2027</option>
+				<option value="17/05/2027">dal 17/05/2027 al 23/05/2027</option>
+				<option value="24/05/2027">dal 24/05/2027 al 30/05/2027</option>
+				<option value="31/05/2027">dal 31/05/2027 al 06/06/2027</option>
+				<option value="07/06/2027">dal 07/06/2027 al 13/06/2027</option>
+				<option value="14/06/2027">dal 14/06/2027 al 20/06/2027</option>
+				<option value="21/06/2027">dal 21/06/2027 al 27/06/2027</option>
+				<option value="28/06/2027">dal 28/06/2027 al 30/06/2027</option>
+			</select>
+		</label>
+		<label class="size-0_5">
+			Stato gara:<br />
+			<select name="StatoGara" class="input-select-0_5" tabindex="3">
+				<option value="">Tutti..</option>
+				<option value="1">Disputate</option>
+				<option value="0">Da disputare</option>
+			</select>
+		</label>
+		<label id="lbCampionato" class="size-3">
+			Campionato:<br />
+			<select name="CId" class="input-select-3" tabindex="4" onchange="Campionato(2488, this.options[this.selectedIndex].value)">
+					<option value="">Tutti i campionati..</option>
+				</optgroup>
+				<optgroup label="PRIMA DIVISIONE MASCHILE">
+					<option value="93503">PRIMA DIVISIONE MASCHILE GIRONE A</option>
+					<option value="93504">PRIMA DIVISIONE MASCHILE GIRONE B</option>
+				</optgroup>
+				<optgroup label="PRIMA DIVISIONE FEMMINILE">
+					<option value="93038">PRIMA DIVISIONE FEMMINILE</option>
+				</optgroup>
+				<optgroup label="SECONDA DIVISIONE FEMMINILE">
+					<option value="93414">SECONDA DIVISIONE FEMMINILE GIRONE A</option>
+					<option value="93413">SECONDA DIVISIONE FEMMINILE GIRONE B</option>
+				</optgroup>
+				<optgroup label="TERZA DIVISIONE FEMMINILE">
+					<option value="93296">TERZA DIVISIONE FEMMINILE GIRONE A</option>
+					<option value="93297">TERZA DIVISIONE FEMMINILE GIRONE B</option>
+				</optgroup>
+				<optgroup label="CAMPIONATO UNDER 13 FEMMINILE">
+					<option value="93434">U13 FEMMINILE GIRONE A</option>
+					<option value="93435">U13 FEMMINILE GIRONE B</option>
+					<option value="93436" selected="selected">U13 FEMMINILE GIRONE C</option>
+				</optgroup>
+				<optgroup label="CAMPIONATO UNDER 14 FEMMINILE">
+					<option value="93399">U14 FEMMINILE GIRONE A</option>
+					<option value="93400">U14 FEMMINILE GIRONE B</option>
+					<option value="93401">U14 FEMMINILE GIRONE C</option>
+				</optgroup>
+				<optgroup label="CAMPIONATO UNDER 15 FEMMINILE">
+					<option value="93394">U15 FEMMINILE GIRONE A</option>
+					<option value="93395">U15 FEMMINILE GIRONE B</option>
+					<option value="93396">U15 FEMMINILE GIRONE C</option>
+					<option value="93397">U15 FEMMINILE GIRONE D</option>
+				</optgroup>
+				<optgroup label="CAMPIONATO UNDER 15 MASCHILE">
+					<option value="93439">U15 MASCHILE</option>
+				</optgroup>
+				<optgroup label="CAMPIONATO UNDER 17 FEMMINILE">
+					<option value="93302">U17 FEMMINILE GIRONE A</option>
+					<option value="93303">U17 FEMMINILE GIRONE B</option>
+					<option value="93304">U17 FEMMINILE GIRONE C</option>
+					<option value="93305">U17 FEMMINILE GIRONE D</option>
+				</optgroup>
+				<optgroup label="CAMPIONATO UNDER 17 MASCHILE">
+					<option value="94048">U17 MASCHILE RE   PR   PC</option>
+				</optgroup>
+				<optgroup label="CAMPIONATO UNDER 19 FEMMINILE">
+					<option value="93298">U19 FEMMINILE GIRONE A</option>
+					<option value="93664">U19 FEMMINILE GIRONE B</option>
+					<option value="93300">U19 FEMMINILE GIRONE C</option>
+				</optgroup>
+				<optgroup label="CAMPIONATO UNDER 19 MASCHILE">
+					<option value="94061">U19 MASCHILE RE PC</option>
+				</optgroup>
+				<optgroup label="TORNEI AUTORIZZATI FIPAV N - R - T">
+					<option value="92834">TORNEI AUTORIZZATI FIPAV N - R - T</option>
+				</optgroup>
+				<optgroup label="CAMPIONATI NAZIONALI">
+					<option value="92463">CAMPIONATI NAZIONALI</option>
+				</optgroup>
+				<optgroup label="TROFEO LIMPIA 2026">
+					<option value="93675">TROFEO LIMPIA SERIE DF 2026</option>
+				</optgroup>
+				<optgroup label="TORNEO MORSTOFOLINI">
+					<option value="93635">TORNEO MORSTOFOLINI GIRONE A</option>
+					<option value="93636">TORNEO MORSTOFOLINI GIRONE B</option>
+					<option value="93637">TORNEO MORSTOFOLINI SEMIFINALI</option>
+					<option value="93638">TORNEO MORSTOFOLINI FINALE 5°/6° POSTO</option>
+					<option value="93639">TORNEO MORSTOFOLINI FINALE 3°/4° POSTO</option>
+					<option value="93640">TORNEO MORSTOFOLINI FINALE 1°/2° POSTO</option>
+				</optgroup>
+				<optgroup label="RUBIERA START CUP U15F">
+					<option value="93730">RUBIERA START CUP U15F GIRONE A</option>
+					<option value="93740">RUBIERA START CUP U15F GIRONE B</option>
+					<option value="93741">RUBIERA START CUP U15F GIRONE 5°/7° POSTO</option>
+					<option value="93742">RUBIERA START CUP U15F SEMIFINALI</option>
+					<option value="93743">RUBIERA START CUP U15F FINALE 3°/4° POSTO</option>
+					<option value="93744">RUBIERA START CUP U15F FINALE 1°/2° POSTO</option>
+				</optgroup>
+				<optgroup label="TORNEO QUINTAVALLA">
+					<option value="92959">TORNEO QUINTAVALLA GIRONE A</option>
+					<option value="92960">TORNEO QUINTAVALLA GIRONE B</option>
+					<option value="92961">TORNEO QUINTAVALLA GIRONE C</option>
+					<option value="92962">TORNEO QUINTAVALLA GIRONE D</option>
+					<option value="92963">TORNEO QUINTAVALLA GIRONE E</option>
+					<option value="92964">TORNEO QUINTAVALLA GIRONE F (7°-10°)</option>
+					<option value="92965">TORNEO QUINTAVALLA SEMIFINALI</option>
+					<option value="92967">TORNEO QUINTAVALLA FINALE 5°-6° POSTO</option>
+					<option value="92968">TORNEO QUINTAVALLA FINALE 3°-4° POSTO</option>
+					<option value="92969">TORNEO QUINTAVALLA FINALE 1°-2° POSTO</option>
+			</select>
+		</label>
+		<label id="lbSocieta" class="size-2">
+			Società:<br />
+			<select name="SId" class="input-select-2" tabindex="5">
+					<option value="">Tutte le societ&agrave;..</option>
+					<option value="4812">A.S.D. ROSTA VOLLEY TEAM</option>
+					<option value="4774">ASD POLISPORTIVA ALBINETANA</option>
+					<option value="4825">CENTRO VOLLEY REGGIANO ASD</option>
+					<option value="4802">U.S. ARBOR</option>
+					<option value="4833">U.S. RUBIERESE VOLLEY SSDRL</option>
+					<option value="4840">VOLLEY SCANDIANO</option>
+			</select>
+		</label>
+		<label class="size-0_5">
+			&nbsp;<br />
+			<input type="hidden" name="PId" value="13810" />
+			<input type="submit" name="btFiltro" value="CERCA" class="button bt-search" style="width:100px;" />
+		</label>
+		<label class="size-0_5">
+			&nbsp;<br />
+			<input type="button" name="btXls" onclick="EsportaXls(this.form);" value="Esporta" class="button bt-excel" style="width:100px;" />
+		</label>
+	</form>
+<table class="tbl tbl-risultati">
+	<caption>U13 FEMMINILE GIRONE C<a style="margin-left:10px;" target="_blank" title="Aggiungi calendario gare a Google Calendar" href="https://www.portalefipav.net/CalendarioGare.asp?c=2D182D30342234223C30241228607D786F7F6B" class="link_calendar"><img style="width:20px;" src="/img/icone/calendar.png" alt="calendario"></a></caption>
+	<thead>
+		<tr>
+			<th style="width:40px;">Gara</th>
+			<th style="width:20px;" title="Giornata">G</th>
+			<th style="width:90px;">Data / ora</th>
+			<th style="width:320px;">Squadra casa</th>
+			<th style="width:320px;">Squadra ospite</th>
+			<th style="width:50px;" title="Risultato">Risul.</th>
+			<th class="isMobile">Dettagli</th>
+			<th style="width:40px;">&nbsp;</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td style="text-align:center">1220</td>
+			<td style="text-align:center">1</td>
+			<td style="text-align:center">17/10/26 18:30</td>
+			<td title="VOLLEY SCANDIANO"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4840/Loghi/LogoS4840.png" alt="">VOLLEY SCANDIANO  ROSSA</td>
+			<td title="U.S. ARBOR"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4802/Loghi/LogoS4802.jpg" alt="">ARBOR ITARCA</td>
+			<td style="text-align:center" class="risultato" id="Risultato_131640598">3 - 0</td>
+			<td class="risultato-dettagli isMobile" id="Parziali_131640598"><span class="parziali">25-22</span><span class="parziali">25-9</span><span class="parziali">25-11</span></td>
+			<td style="text-align:center">
+				<span id="StatoGara_131640598"><img src="/img/statogara/stato5.png" class="tips ris-img" alt="statogara" title="gara omologata" /></span>
+				<img src="/img/info_16.png" class="tips ris-img" alt="info" title="
+&lt;p&gt;&lt;b&gt;Pal. ITI Gobetti&lt;/b&gt;&lt;br /&gt; SCANDIANO RE&lt;br /&gt;Via Repubblica, 43&lt;/p&gt;&lt;p class=&quot;designazione&quot;&gt;&lt;b&gt;Designazioni&lt;/b&gt;&lt;br&gt;1&#176; arbitro&lt;/p&gt;" />
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align:center">1221</td>
+			<td style="text-align:center">1</td>
+			<td style="text-align:center">16/10/26 18:30</td>
+			<td title="A.S.D. ROSTA VOLLEY TEAM"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4812/Loghi/LogoS4812.jpg" alt="">FORTLAN DIBI MENTANI </td>
+			<td title="CENTRO VOLLEY REGGIANO ASD"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4825/Loghi/LogoS4825.jpg" alt="">13R-EVOLUT. POLO DIGITALE</td>
+			<td style="text-align:center" class="risultato" id="Risultato_131640599">0 - 3</td>
+			<td class="risultato-dettagli isMobile" id="Parziali_131640599"><span class="parziali">6-25</span><span class="parziali">8-25</span><span class="parziali">5-25</span></td>
+			<td style="text-align:center">
+				<span id="StatoGara_131640599"><img src="/img/statogara/stato5.png" class="tips ris-img" alt="statogara" title="gara omologata" /></span>
+				<img src="/img/info_16.png" class="tips ris-img" alt="info" title="
+&lt;p&gt;&lt;b&gt;Pal. Sandro Pertini A&lt;/b&gt;&lt;br /&gt; REGGIO NELL&#39;EMILIA RE&lt;br /&gt;Via Medaglie D&#39;Oro della Resistenza, 4&lt;/p&gt;&lt;p class=&quot;designazione&quot;&gt;&lt;b&gt;Designazioni&lt;/b&gt;&lt;br&gt;1&#176; arbitro&lt;/p&gt;" />
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align:center">1222</td>
+			<td style="text-align:center">1</td>
+			<td style="text-align:center">20/10/26 18:30</td>
+			<td title="U.S. RUBIERESE VOLLEY SSDRL"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4833/Loghi/LogoS4833.png" alt="">RUBIERESE U13</td>
+			<td title="ASD POLISPORTIVA ALBINETANA"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4774/Loghi/LogoS4774.jpg" alt="">DENTI ALBINETANA PANTHERS</td>
+			<td style="text-align:center" class="risultato" id="Risultato_131640600">2 - 3</td>
+			<td class="risultato-dettagli isMobile" id="Parziali_131640600"><span class="parziali">21-25</span><span class="parziali">25-22</span><span class="parziali">18-25</span><span class="parziali">26-24</span><span class="parziali">14-16</span></td>
+			<td style="text-align:center">
+				<span id="StatoGara_131640600"><img src="/img/statogara/stato5.png" class="tips ris-img" alt="statogara" title="gara omologata" /></span>
+				<img src="/img/info_16.png" class="tips ris-img" alt="info" title="
+&lt;p&gt;&lt;b&gt;Pal. Sc. Elem. Marco Polo Campo A&lt;/b&gt;&lt;br /&gt; RUBIERA RE&lt;br /&gt;Via Ondina Valla, 5&lt;/p&gt;&lt;p class=&quot;designazione&quot;&gt;&lt;b&gt;Designazioni&lt;/b&gt;&lt;br&gt;1&#176; arbitro&lt;/p&gt;" />
+			</td>
+		</tr>
+		<tr class="dispari">
+			<td style="text-align:center">1223</td>
+			<td style="text-align:center">2</td>
+			<td style="text-align:center">29/10/26 18:30</td>
+			<td title="U.S. ARBOR"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4802/Loghi/LogoS4802.jpg" alt="">ARBOR ITARCA</td>
+			<td title="A.S.D. ROSTA VOLLEY TEAM"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4812/Loghi/LogoS4812.jpg" alt="">FORTLAN DIBI MENTANI </td>
+			<td style="text-align:center" class="risultato" id="Risultato_131640601">3 - 1</td>
+			<td class="risultato-dettagli isMobile" id="Parziali_131640601"><span class="parziali">25-20</span><span class="parziali">25-16</span><span class="parziali">10-25</span><span class="parziali">25-12</span></td>
+			<td style="text-align:center">
+				<span id="StatoGara_131640601"><img src="/img/statogara/stato5.png" class="tips ris-img" alt="statogara" title="gara omologata" /></span>
+				<img src="/img/info_16.png" class="tips ris-img" alt="info" title="
+&lt;p&gt;&lt;b&gt;Pal. Liceo Classico Ariosto&lt;/b&gt;&lt;br /&gt; REGGIO NELL&#39;EMILIA RE&lt;br /&gt;Via Gazzata&lt;/p&gt;&lt;p class=&quot;designazione&quot;&gt;&lt;b&gt;Designazioni&lt;/b&gt;&lt;br&gt;1&#176; arbitro&lt;/p&gt;" />
+			</td>
+		</tr>
+		<tr class="dispari">
+			<td style="text-align:center">1224</td>
+			<td style="text-align:center">2</td>
+			<td style="text-align:center">25/10/26 10:00</td>
+			<td title="CENTRO VOLLEY REGGIANO ASD"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4825/Loghi/LogoS4825.jpg" alt="">13R-EVOLUT. POLO DIGITALE</td>
+			<td title="U.S. RUBIERESE VOLLEY SSDRL"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4833/Loghi/LogoS4833.png" alt="">RUBIERESE U13</td>
+			<td style="text-align:center" class="risultato" id="Risultato_131640602">3 - 0</td>
+			<td class="risultato-dettagli isMobile" id="Parziali_131640602"><span class="parziali">25-22</span><span class="parziali">25-21</span><span class="parziali">25-18</span></td>
+			<td style="text-align:center">
+				<span id="StatoGara_131640602"><img src="/img/statogara/stato5.png" class="tips ris-img" alt="statogara" title="gara omologata" /></span>
+				<img src="/img/info_16.png" class="tips ris-img" alt="info" title="
+&lt;p&gt;&lt;b&gt;Pal. Nuova Rivalta Campo A&lt;/b&gt;&lt;br /&gt;Rivalta REGGIO NELL&#39;EMILIA RE&lt;br /&gt;Via Pascal&lt;/p&gt;&lt;p class=&quot;designazione&quot;&gt;&lt;b&gt;Designazioni&lt;/b&gt;&lt;br&gt;1&#176; arbitro&lt;/p&gt;" />
+			</td>
+		</tr>
+		<tr class="dispari">
+			<td style="text-align:center">1225</td>
+			<td style="text-align:center">2</td>
+			<td style="text-align:center">24/10/26 15:00</td>
+			<td title="ASD POLISPORTIVA ALBINETANA"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4774/Loghi/LogoS4774.jpg" alt="">DENTI ALBINETANA PANTHERS</td>
+			<td title="VOLLEY SCANDIANO"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4840/Loghi/LogoS4840.png" alt="">VOLLEY SCANDIANO  ROSSA</td>
+			<td style="text-align:center" class="risultato" id="Risultato_131640603">3 - 1</td>
+			<td class="risultato-dettagli isMobile" id="Parziali_131640603"><span class="parziali">25-22</span><span class="parziali">19-25</span><span class="parziali">25-19</span><span class="parziali">25-21</span></td>
+			<td style="text-align:center">
+				<span id="StatoGara_131640603"><img src="/img/statogara/stato5.png" class="tips ris-img" alt="statogara" title="gara omologata" /></span>
+				<img src="/img/info_16.png" class="tips ris-img" alt="info" title="
+&lt;p&gt;&lt;b&gt;Pal. Scolastica Borzano&lt;/b&gt;&lt;br /&gt;Borzano ALBINEA RE&lt;br /&gt;Via Vaglie 7&lt;/p&gt;&lt;p class=&quot;designazione&quot;&gt;&lt;b&gt;Designazioni&lt;/b&gt;&lt;br&gt;1&#176; arbitro&lt;/p&gt;" />
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align:center">1226</td>
+			<td style="text-align:center">3</td>
+			<td style="text-align:center">24/11/26 18:15</td>
+			<td title="U.S. RUBIERESE VOLLEY SSDRL"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4833/Loghi/LogoS4833.png" alt="">RUBIERESE U13</td>
+			<td title="U.S. ARBOR"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4802/Loghi/LogoS4802.jpg" alt="">ARBOR ITARCA</td>
+			<td style="text-align:center" class="risultato" id="Risultato_131640604">-</td>
+			<td class="risultato-dettagli isMobile" id="Parziali_131640604">&nbsp;</td>
+			<td style="text-align:center">
+				<span id="StatoGara_131640604"><img src="/img/statogara/stato0.png" class="tips ris-img" alt="statogara" title="da disputare" /></span>
+				<img src="/img/info_16.png" class="tips ris-img" alt="info" title="
+&lt;p&gt;&lt;b&gt;Pal. Sc. Elem. Marco Polo Campo A&lt;/b&gt;&lt;br /&gt; RUBIERA RE&lt;br /&gt;Via Ondina Valla, 5&lt;/p&gt;" />
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align:center">1227</td>
+			<td style="text-align:center">3</td>
+			<td style="text-align:center">30/10/26 18:30</td>
+			<td title="A.S.D. ROSTA VOLLEY TEAM"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4812/Loghi/LogoS4812.jpg" alt="">FORTLAN DIBI MENTANI </td>
+			<td title="VOLLEY SCANDIANO"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4840/Loghi/LogoS4840.png" alt="">VOLLEY SCANDIANO  ROSSA</td>
+			<td style="text-align:center" class="risultato" id="Risultato_131640605">0 - 3</td>
+			<td class="risultato-dettagli isMobile" id="Parziali_131640605"><span class="parziali">10-25</span><span class="parziali">9-25</span><span class="parziali">4-25</span></td>
+			<td style="text-align:center">
+				<span id="StatoGara_131640605"><img src="/img/statogara/stato5.png" class="tips ris-img" alt="statogara" title="gara omologata" /></span>
+				<img src="/img/info_16.png" class="tips ris-img" alt="info" title="
+&lt;p&gt;&lt;b&gt;Pal. Sandro Pertini A&lt;/b&gt;&lt;br /&gt; REGGIO NELL&#39;EMILIA RE&lt;br /&gt;Via Medaglie D&#39;Oro della Resistenza, 4&lt;/p&gt;&lt;p class=&quot;designazione&quot;&gt;&lt;b&gt;Designazioni&lt;/b&gt;&lt;br&gt;1&#176; arbitro&lt;/p&gt;" />
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align:center">1228</td>
+			<td style="text-align:center">3</td>
+			<td style="text-align:center">31/10/26 15:00</td>
+			<td title="ASD POLISPORTIVA ALBINETANA"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4774/Loghi/LogoS4774.jpg" alt="">DENTI ALBINETANA PANTHERS</td>
+			<td title="CENTRO VOLLEY REGGIANO ASD"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4825/Loghi/LogoS4825.jpg" alt="">13R-EVOLUT. POLO DIGITALE</td>
+			<td style="text-align:center" class="risultato" id="Risultato_131640606">0 - 3</td>
+			<td class="risultato-dettagli isMobile" id="Parziali_131640606"><span class="parziali">12-25</span><span class="parziali">20-25</span><span class="parziali">17-25</span></td>
+			<td style="text-align:center">
+				<span id="StatoGara_131640606"><img src="/img/statogara/stato5.png" class="tips ris-img" alt="statogara" title="gara omologata" /></span>
+				<img src="/img/info_16.png" class="tips ris-img" alt="info" title="
+&lt;p&gt;&lt;b&gt;Pal. Scolastica Borzano&lt;/b&gt;&lt;br /&gt;Borzano ALBINEA RE&lt;br /&gt;Via Vaglie 7&lt;/p&gt;&lt;p class=&quot;designazione&quot;&gt;&lt;b&gt;Designazioni&lt;/b&gt;&lt;br&gt;1&#176; arbitro&lt;/p&gt;" />
+			</td>
+		</tr>
+		<tr class="dispari">
+			<td style="text-align:center">1229</td>
+			<td style="text-align:center">4</td>
+			<td style="text-align:center">05/11/26 18:00</td>
+			<td title="U.S. ARBOR"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4802/Loghi/LogoS4802.jpg" alt="">ARBOR ITARCA</td>
+			<td title="CENTRO VOLLEY REGGIANO ASD"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4825/Loghi/LogoS4825.jpg" alt="">13R-EVOLUT. POLO DIGITALE</td>
+			<td style="text-align:center" class="risultato" id="Risultato_131640607">0 - 3</td>
+			<td class="risultato-dettagli isMobile" id="Parziali_131640607"><span class="parziali">5-25</span><span class="parziali">11-25</span><span class="parziali">22-25</span></td>
+			<td style="text-align:center">
+				<span id="StatoGara_131640607"><img src="/img/statogara/stato5.png" class="tips ris-img" alt="statogara" title="gara omologata" /></span>
+				<img src="/img/info_16.png" class="tips ris-img" alt="info" title="
+&lt;p&gt;&lt;b&gt;Pal. Liceo Classico Ariosto&lt;/b&gt;&lt;br /&gt; REGGIO NELL&#39;EMILIA RE&lt;br /&gt;Via Gazzata&lt;/p&gt;&lt;p class=&quot;designazione&quot;&gt;&lt;b&gt;Designazioni&lt;/b&gt;&lt;br&gt;1&#176; arbitro&lt;/p&gt;" />
+			</td>
+		</tr>
+		<tr class="dispari">
+			<td style="text-align:center">1230</td>
+			<td style="text-align:center">4</td>
+			<td style="text-align:center">07/11/26 18:30</td>
+			<td title="VOLLEY SCANDIANO"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4840/Loghi/LogoS4840.png" alt="">VOLLEY SCANDIANO  ROSSA</td>
+			<td title="U.S. RUBIERESE VOLLEY SSDRL"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4833/Loghi/LogoS4833.png" alt="">RUBIERESE U13</td>
+			<td style="text-align:center" class="risultato" id="Risultato_131640608">0 - 3</td>
+			<td class="risultato-dettagli isMobile" id="Parziali_131640608"><span class="parziali">23-25</span><span class="parziali">16-25</span><span class="parziali">20-25</span></td>
+			<td style="text-align:center">
+				<span id="StatoGara_131640608"><img src="/img/statogara/stato5.png" class="tips ris-img" alt="statogara" title="gara omologata" /></span>
+				<img src="/img/info_16.png" class="tips ris-img" alt="info" title="
+&lt;p&gt;&lt;b&gt;Pal. ITI Gobetti&lt;/b&gt;&lt;br /&gt; SCANDIANO RE&lt;br /&gt;Via Repubblica, 43&lt;/p&gt;&lt;p class=&quot;designazione&quot;&gt;&lt;b&gt;Designazioni&lt;/b&gt;&lt;br&gt;1&#176; arbitro&lt;/p&gt;" />
+			</td>
+		</tr>
+		<tr class="dispari">
+			<td style="text-align:center">1231</td>
+			<td style="text-align:center">4</td>
+			<td style="text-align:center">07/11/26 15:30</td>
+			<td title="A.S.D. ROSTA VOLLEY TEAM"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4812/Loghi/LogoS4812.jpg" alt="">FORTLAN DIBI MENTANI </td>
+			<td title="ASD POLISPORTIVA ALBINETANA"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4774/Loghi/LogoS4774.jpg" alt="">DENTI ALBINETANA PANTHERS</td>
+			<td style="text-align:center" class="risultato" id="Risultato_131640609">0 - 3</td>
+			<td class="risultato-dettagli isMobile" id="Parziali_131640609"><span class="parziali">6-25</span><span class="parziali">10-25</span><span class="parziali">9-25</span></td>
+			<td style="text-align:center">
+				<span id="StatoGara_131640609"><img src="/img/statogara/stato5.png" class="tips ris-img" alt="statogara" title="gara omologata" /></span>
+				<img src="/img/info_16.png" class="tips ris-img" alt="info" title="
+&lt;p&gt;&lt;b&gt;Pal. Sandro Pertini A&lt;/b&gt;&lt;br /&gt; REGGIO NELL&#39;EMILIA RE&lt;br /&gt;Via Medaglie D&#39;Oro della Resistenza, 4&lt;/p&gt;&lt;p class=&quot;designazione&quot;&gt;&lt;b&gt;Designazioni&lt;/b&gt;&lt;br&gt;1&#176; arbitro&lt;/p&gt;" />
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align:center">1232</td>
+			<td style="text-align:center">5</td>
+			<td style="text-align:center">14/11/26 18:30</td>
+			<td title="VOLLEY SCANDIANO"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4840/Loghi/LogoS4840.png" alt="">VOLLEY SCANDIANO  ROSSA</td>
+			<td title="CENTRO VOLLEY REGGIANO ASD"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4825/Loghi/LogoS4825.jpg" alt="">13R-EVOLUT. POLO DIGITALE</td>
+			<td style="text-align:center" class="risultato" id="Risultato_131640610">0 - 3</td>
+			<td class="risultato-dettagli isMobile" id="Parziali_131640610"><span class="parziali">12-25</span><span class="parziali">16-25</span><span class="parziali">19-25</span></td>
+			<td style="text-align:center">
+				<span id="StatoGara_131640610"><img src="/img/statogara/stato1.png" class="tips ris-img" alt="statogara" title="risultato ufficioso" /></span>
+				<img src="/img/info_16.png" class="tips ris-img" alt="info" title="
+&lt;p&gt;&lt;b&gt;Pal. ITI Gobetti&lt;/b&gt;&lt;br /&gt; SCANDIANO RE&lt;br /&gt;Via Repubblica, 43&lt;/p&gt;&lt;p class=&quot;designazione&quot;&gt;&lt;b&gt;Designazioni&lt;/b&gt;&lt;br&gt;1&#176; arbitro&lt;/p&gt;" />
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align:center">1233</td>
+			<td style="text-align:center">5</td>
+			<td style="text-align:center">13/11/26 18:30</td>
+			<td title="U.S. RUBIERESE VOLLEY SSDRL"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4833/Loghi/LogoS4833.png" alt="">RUBIERESE U13</td>
+			<td title="A.S.D. ROSTA VOLLEY TEAM"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4812/Loghi/LogoS4812.jpg" alt="">FORTLAN DIBI MENTANI </td>
+			<td style="text-align:center" class="risultato" id="Risultato_131640611">3 - 0</td>
+			<td class="risultato-dettagli isMobile" id="Parziali_131640611"><span class="parziali">25-8</span><span class="parziali">25-10</span><span class="parziali">25-11</span></td>
+			<td style="text-align:center">
+				<span id="StatoGara_131640611"><img src="/img/statogara/stato1.png" class="tips ris-img" alt="statogara" title="risultato ufficioso" /></span>
+				<img src="/img/info_16.png" class="tips ris-img" alt="info" title="
+&lt;p&gt;&lt;b&gt;Pal. Sc. Elem. Marco Polo Campo A&lt;/b&gt;&lt;br /&gt; RUBIERA RE&lt;br /&gt;Via Ondina Valla, 5&lt;/p&gt;&lt;p class=&quot;designazione&quot;&gt;&lt;b&gt;Designazioni&lt;/b&gt;&lt;br&gt;1&#176; arbitro&lt;br&gt;2&#176; arbitro&lt;/p&gt;" />
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align:center">1234</td>
+			<td style="text-align:center">5</td>
+			<td style="text-align:center">14/11/26 15:00</td>
+			<td title="ASD POLISPORTIVA ALBINETANA"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4774/Loghi/LogoS4774.jpg" alt="">DENTI ALBINETANA PANTHERS</td>
+			<td title="U.S. ARBOR"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4802/Loghi/LogoS4802.jpg" alt="">ARBOR ITARCA</td>
+			<td style="text-align:center" class="risultato" id="Risultato_131640612">3 - 0</td>
+			<td class="risultato-dettagli isMobile" id="Parziali_131640612"><span class="parziali">25-17</span><span class="parziali">25-8</span><span class="parziali">25-16</span></td>
+			<td style="text-align:center">
+				<span id="StatoGara_131640612"><img src="/img/statogara/stato1.png" class="tips ris-img" alt="statogara" title="risultato ufficioso" /></span>
+				<img src="/img/info_16.png" class="tips ris-img" alt="info" title="
+&lt;p&gt;&lt;b&gt;Pal. Scolastica Borzano&lt;/b&gt;&lt;br /&gt;Borzano ALBINEA RE&lt;br /&gt;Via Vaglie 7&lt;/p&gt;&lt;p class=&quot;designazione&quot;&gt;&lt;b&gt;Designazioni&lt;/b&gt;&lt;br&gt;1&#176; arbitro&lt;/p&gt;" />
+			</td>
+		</tr>
+		<tr class="dispari">
+			<td style="text-align:center">1235</td>
+			<td style="text-align:center">6</td>
+			<td style="text-align:center">16/11/26 18:45</td>
+			<td title="U.S. ARBOR"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4802/Loghi/LogoS4802.jpg" alt="">ARBOR ITARCA</td>
+			<td title="VOLLEY SCANDIANO"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4840/Loghi/LogoS4840.png" alt="">VOLLEY SCANDIANO  ROSSA</td>
+			<td style="text-align:center" class="risultato" id="Risultato_131640613">-</td>
+			<td class="risultato-dettagli isMobile" id="Parziali_131640613">&nbsp;</td>
+			<td style="text-align:center">
+				<span id="StatoGara_131640613"><img src="/img/statogara/statodesignata.png" class="tips ris-img" alt="statogara" title="da disputare&lt;br /&gt;Arbitro designato&lt;br&gt;1&#176; arbitro" /></span>
+				<img src="/img/info_16.png" class="tips ris-img" alt="info" title="
+&lt;p&gt;&lt;b&gt;Pal.Pasubio&lt;/b&gt;&lt;br /&gt; REGGIO NELL&#39;EMILIA RE&lt;br /&gt;Via Monte Pasubio&lt;/p&gt;&lt;p class=&quot;designazione&quot;&gt;&lt;b&gt;Designazioni&lt;/b&gt;&lt;br&gt;1&#176; arbitro&lt;/p&gt;" />
+			</td>
+		</tr>
+		<tr class="dispari">
+			<td style="text-align:center">1236</td>
+			<td style="text-align:center">6</td>
+			<td style="text-align:center">13/12/26 09:00</td>
+			<td title="CENTRO VOLLEY REGGIANO ASD"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4825/Loghi/LogoS4825.jpg" alt="">13R-EVOLUT. POLO DIGITALE</td>
+			<td title="A.S.D. ROSTA VOLLEY TEAM"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4812/Loghi/LogoS4812.jpg" alt="">FORTLAN DIBI MENTANI </td>
+			<td style="text-align:center" class="risultato" id="Risultato_131640614">-</td>
+			<td class="risultato-dettagli isMobile" id="Parziali_131640614">&nbsp;</td>
+			<td style="text-align:center">
+				<span id="StatoGara_131640614"><img src="/img/statogara/stato0.png" class="tips ris-img" alt="statogara" title="da disputare" /></span>
+				<img src="/img/info_16.png" class="tips ris-img" alt="info" title="
+&lt;p&gt;&lt;b&gt;Pal. Sandro Pertini A&lt;/b&gt;&lt;br /&gt; REGGIO NELL&#39;EMILIA RE&lt;br /&gt;Via Medaglie D&#39;Oro della Resistenza, 4&lt;/p&gt;" />
+			</td>
+		</tr>
+		<tr class="dispari">
+			<td style="text-align:center">1237</td>
+			<td style="text-align:center">6</td>
+			<td style="text-align:center">19/11/26 17:30</td>
+			<td title="ASD POLISPORTIVA ALBINETANA"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4774/Loghi/LogoS4774.jpg" alt="">DENTI ALBINETANA PANTHERS</td>
+			<td title="U.S. RUBIERESE VOLLEY SSDRL"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4833/Loghi/LogoS4833.png" alt="">RUBIERESE U13</td>
+			<td style="text-align:center" class="risultato" id="Risultato_131640615">-</td>
+			<td class="risultato-dettagli isMobile" id="Parziali_131640615">&nbsp;</td>
+			<td style="text-align:center">
+				<span id="StatoGara_131640615"><img src="/img/statogara/stato0.png" class="tips ris-img" alt="statogara" title="da disputare" /></span>
+				<img src="/img/info_16.png" class="tips ris-img" alt="info" title="
+&lt;p&gt;&lt;b&gt;Pal. Scolastica Borzano&lt;/b&gt;&lt;br /&gt;Borzano ALBINEA RE&lt;br /&gt;Via Vaglie 7&lt;/p&gt;" />
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align:center">1238</td>
+			<td style="text-align:center">7</td>
+			<td style="text-align:center">27/11/26 18:30</td>
+			<td title="A.S.D. ROSTA VOLLEY TEAM"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4812/Loghi/LogoS4812.jpg" alt="">FORTLAN DIBI MENTANI </td>
+			<td title="U.S. ARBOR"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4802/Loghi/LogoS4802.jpg" alt="">ARBOR ITARCA</td>
+			<td style="text-align:center" class="risultato" id="Risultato_131640616">-</td>
+			<td class="risultato-dettagli isMobile" id="Parziali_131640616">&nbsp;</td>
+			<td style="text-align:center">
+				<span id="StatoGara_131640616"><img src="/img/statogara/stato0.png" class="tips ris-img" alt="statogara" title="da disputare" /></span>
+				<img src="/img/info_16.png" class="tips ris-img" alt="info" title="
+&lt;p&gt;&lt;b&gt;Pal. Sandro Pertini A&lt;/b&gt;&lt;br /&gt; REGGIO NELL&#39;EMILIA RE&lt;br /&gt;Via Medaglie D&#39;Oro della Resistenza, 4&lt;/p&gt;" />
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align:center">1239</td>
+			<td style="text-align:center">7</td>
+			<td style="text-align:center">29/11/26 16:00</td>
+			<td title="U.S. RUBIERESE VOLLEY SSDRL"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4833/Loghi/LogoS4833.png" alt="">RUBIERESE U13</td>
+			<td title="CENTRO VOLLEY REGGIANO ASD"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4825/Loghi/LogoS4825.jpg" alt="">13R-EVOLUT. POLO DIGITALE</td>
+			<td style="text-align:center" class="risultato" id="Risultato_131640617">-</td>
+			<td class="risultato-dettagli isMobile" id="Parziali_131640617">&nbsp;</td>
+			<td style="text-align:center">
+				<span id="StatoGara_131640617"><img src="/img/statogara/stato0.png" class="tips ris-img" alt="statogara" title="da disputare" /></span>
+				<img src="/img/info_16.png" class="tips ris-img" alt="info" title="
+&lt;p&gt;&lt;b&gt;Palazzetto Dello Sport Bursi Campo B&lt;/b&gt;&lt;br /&gt; RUBIERA RE&lt;br /&gt;Via Aldo Moro, 1&lt;/p&gt;" />
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align:center">1240</td>
+			<td style="text-align:center">7</td>
+			<td style="text-align:center">28/11/26 18:30</td>
+			<td title="VOLLEY SCANDIANO"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4840/Loghi/LogoS4840.png" alt="">VOLLEY SCANDIANO  ROSSA</td>
+			<td title="ASD POLISPORTIVA ALBINETANA"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4774/Loghi/LogoS4774.jpg" alt="">DENTI ALBINETANA PANTHERS</td>
+			<td style="text-align:center" class="risultato" id="Risultato_131640618">-</td>
+			<td class="risultato-dettagli isMobile" id="Parziali_131640618">&nbsp;</td>
+			<td style="text-align:center">
+				<span id="StatoGara_131640618"><img src="/img/statogara/stato0.png" class="tips ris-img" alt="statogara" title="da disputare" /></span>
+				<img src="/img/info_16.png" class="tips ris-img" alt="info" title="
+&lt;p&gt;&lt;b&gt;Pal. ITI Gobetti&lt;/b&gt;&lt;br /&gt; SCANDIANO RE&lt;br /&gt;Via Repubblica, 43&lt;/p&gt;" />
+			</td>
+		</tr>
+		<tr class="dispari">
+			<td style="text-align:center">1241</td>
+			<td style="text-align:center">8</td>
+			<td style="text-align:center">03/12/26 18:30</td>
+			<td title="U.S. ARBOR"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4802/Loghi/LogoS4802.jpg" alt="">ARBOR ITARCA</td>
+			<td title="U.S. RUBIERESE VOLLEY SSDRL"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4833/Loghi/LogoS4833.png" alt="">RUBIERESE U13</td>
+			<td style="text-align:center" class="risultato" id="Risultato_131640619">-</td>
+			<td class="risultato-dettagli isMobile" id="Parziali_131640619">&nbsp;</td>
+			<td style="text-align:center">
+				<span id="StatoGara_131640619"><img src="/img/statogara/stato0.png" class="tips ris-img" alt="statogara" title="da disputare" /></span>
+				<img src="/img/info_16.png" class="tips ris-img" alt="info" title="
+&lt;p&gt;&lt;b&gt;Pal. Liceo Classico Ariosto&lt;/b&gt;&lt;br /&gt; REGGIO NELL&#39;EMILIA RE&lt;br /&gt;Via Gazzata&lt;/p&gt;" />
+			</td>
+		</tr>
+		<tr class="dispari">
+			<td style="text-align:center">1242</td>
+			<td style="text-align:center">8</td>
+			<td style="text-align:center">05/12/26 18:30</td>
+			<td title="VOLLEY SCANDIANO"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4840/Loghi/LogoS4840.png" alt="">VOLLEY SCANDIANO  ROSSA</td>
+			<td title="A.S.D. ROSTA VOLLEY TEAM"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4812/Loghi/LogoS4812.jpg" alt="">FORTLAN DIBI MENTANI </td>
+			<td style="text-align:center" class="risultato" id="Risultato_131640620">-</td>
+			<td class="risultato-dettagli isMobile" id="Parziali_131640620">&nbsp;</td>
+			<td style="text-align:center">
+				<span id="StatoGara_131640620"><img src="/img/statogara/stato0.png" class="tips ris-img" alt="statogara" title="da disputare" /></span>
+				<img src="/img/info_16.png" class="tips ris-img" alt="info" title="
+&lt;p&gt;&lt;b&gt;Pal. ITI Gobetti&lt;/b&gt;&lt;br /&gt; SCANDIANO RE&lt;br /&gt;Via Repubblica, 43&lt;/p&gt;" />
+			</td>
+		</tr>
+		<tr class="dispari">
+			<td style="text-align:center">1243</td>
+			<td style="text-align:center">8</td>
+			<td style="text-align:center">06/12/26 10:00</td>
+			<td title="CENTRO VOLLEY REGGIANO ASD"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4825/Loghi/LogoS4825.jpg" alt="">13R-EVOLUT. POLO DIGITALE</td>
+			<td title="ASD POLISPORTIVA ALBINETANA"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4774/Loghi/LogoS4774.jpg" alt="">DENTI ALBINETANA PANTHERS</td>
+			<td style="text-align:center" class="risultato" id="Risultato_131640621">-</td>
+			<td class="risultato-dettagli isMobile" id="Parziali_131640621">&nbsp;</td>
+			<td style="text-align:center">
+				<span id="StatoGara_131640621"><img src="/img/statogara/stato0.png" class="tips ris-img" alt="statogara" title="da disputare" /></span>
+				<img src="/img/info_16.png" class="tips ris-img" alt="info" title="
+&lt;p&gt;&lt;b&gt;Pal. Nuova Rivalta Campo A&lt;/b&gt;&lt;br /&gt;Rivalta REGGIO NELL&#39;EMILIA RE&lt;br /&gt;Via Pascal&lt;/p&gt;" />
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align:center">1244</td>
+			<td style="text-align:center">9</td>
+			<td style="text-align:center">12/12/26 18:00</td>
+			<td title="CENTRO VOLLEY REGGIANO ASD"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4825/Loghi/LogoS4825.jpg" alt="">13R-EVOLUT. POLO DIGITALE</td>
+			<td title="U.S. ARBOR"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4802/Loghi/LogoS4802.jpg" alt="">ARBOR ITARCA</td>
+			<td style="text-align:center" class="risultato" id="Risultato_131640622">-</td>
+			<td class="risultato-dettagli isMobile" id="Parziali_131640622">&nbsp;</td>
+			<td style="text-align:center">
+				<span id="StatoGara_131640622"><img src="/img/statogara/stato0.png" class="tips ris-img" alt="statogara" title="da disputare" /></span>
+				<img src="/img/info_16.png" class="tips ris-img" alt="info" title="
+&lt;p&gt;&lt;b&gt;Pal. ITC D&#39;Arzo&lt;/b&gt;&lt;br /&gt; MONTECCHIO EMILIA RE&lt;br /&gt;Via Strada per S. Ilario, 28&lt;/p&gt;" />
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align:center">1245</td>
+			<td style="text-align:center">9</td>
+			<td style="text-align:center">15/12/26 18:30</td>
+			<td title="U.S. RUBIERESE VOLLEY SSDRL"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4833/Loghi/LogoS4833.png" alt="">RUBIERESE U13</td>
+			<td title="VOLLEY SCANDIANO"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4840/Loghi/LogoS4840.png" alt="">VOLLEY SCANDIANO  ROSSA</td>
+			<td style="text-align:center" class="risultato" id="Risultato_131640623">-</td>
+			<td class="risultato-dettagli isMobile" id="Parziali_131640623">&nbsp;</td>
+			<td style="text-align:center">
+				<span id="StatoGara_131640623"><img src="/img/statogara/stato0.png" class="tips ris-img" alt="statogara" title="da disputare" /></span>
+				<img src="/img/info_16.png" class="tips ris-img" alt="info" title="
+&lt;p&gt;&lt;b&gt;Pal. Sc. Elem. Marco Polo Campo A&lt;/b&gt;&lt;br /&gt; RUBIERA RE&lt;br /&gt;Via Ondina Valla, 5&lt;/p&gt;" />
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align:center">1246</td>
+			<td style="text-align:center">9</td>
+			<td style="text-align:center">12/12/26 15:30</td>
+			<td title="ASD POLISPORTIVA ALBINETANA"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4774/Loghi/LogoS4774.jpg" alt="">DENTI ALBINETANA PANTHERS</td>
+			<td title="A.S.D. ROSTA VOLLEY TEAM"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4812/Loghi/LogoS4812.jpg" alt="">FORTLAN DIBI MENTANI </td>
+			<td style="text-align:center" class="risultato" id="Risultato_131640624">-</td>
+			<td class="risultato-dettagli isMobile" id="Parziali_131640624">&nbsp;</td>
+			<td style="text-align:center">
+				<span id="StatoGara_131640624"><img src="/img/statogara/stato0.png" class="tips ris-img" alt="statogara" title="da disputare" /></span>
+				<img src="/img/info_16.png" class="tips ris-img" alt="info" title="
+&lt;p&gt;&lt;b&gt;Pal. Scolastica Borzano&lt;/b&gt;&lt;br /&gt;Borzano ALBINEA RE&lt;br /&gt;Via Vaglie 7&lt;/p&gt;" />
+			</td>
+		</tr>
+		<tr class="dispari">
+			<td style="text-align:center">1247</td>
+			<td style="text-align:center">10</td>
+			<td style="text-align:center">20/12/26 10:00</td>
+			<td title="CENTRO VOLLEY REGGIANO ASD"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4825/Loghi/LogoS4825.jpg" alt="">13R-EVOLUT. POLO DIGITALE</td>
+			<td title="VOLLEY SCANDIANO"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4840/Loghi/LogoS4840.png" alt="">VOLLEY SCANDIANO  ROSSA</td>
+			<td style="text-align:center" class="risultato" id="Risultato_131640625">-</td>
+			<td class="risultato-dettagli isMobile" id="Parziali_131640625">&nbsp;</td>
+			<td style="text-align:center">
+				<span id="StatoGara_131640625"><img src="/img/statogara/stato0.png" class="tips ris-img" alt="statogara" title="da disputare" /></span>
+				<img src="/img/info_16.png" class="tips ris-img" alt="info" title="
+&lt;p&gt;&lt;b&gt;Pal. Nuova Rivalta Campo A&lt;/b&gt;&lt;br /&gt;Rivalta REGGIO NELL&#39;EMILIA RE&lt;br /&gt;Via Pascal&lt;/p&gt;" />
+			</td>
+		</tr>
+		<tr class="dispari">
+			<td style="text-align:center">1248</td>
+			<td style="text-align:center">10</td>
+			<td style="text-align:center">18/12/26 18:30</td>
+			<td title="A.S.D. ROSTA VOLLEY TEAM"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4812/Loghi/LogoS4812.jpg" alt="">FORTLAN DIBI MENTANI </td>
+			<td title="U.S. RUBIERESE VOLLEY SSDRL"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4833/Loghi/LogoS4833.png" alt="">RUBIERESE U13</td>
+			<td style="text-align:center" class="risultato" id="Risultato_131640626">-</td>
+			<td class="risultato-dettagli isMobile" id="Parziali_131640626">&nbsp;</td>
+			<td style="text-align:center">
+				<span id="StatoGara_131640626"><img src="/img/statogara/stato0.png" class="tips ris-img" alt="statogara" title="da disputare" /></span>
+				<img src="/img/info_16.png" class="tips ris-img" alt="info" title="
+&lt;p&gt;&lt;b&gt;Pal. Sandro Pertini A&lt;/b&gt;&lt;br /&gt; REGGIO NELL&#39;EMILIA RE&lt;br /&gt;Via Medaglie D&#39;Oro della Resistenza, 4&lt;/p&gt;" />
+			</td>
+		</tr>
+		<tr class="dispari">
+			<td style="text-align:center">1249</td>
+			<td style="text-align:center">10</td>
+			<td style="text-align:center">17/12/26 18:00</td>
+			<td title="U.S. ARBOR"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4802/Loghi/LogoS4802.jpg" alt="">ARBOR ITARCA</td>
+			<td title="ASD POLISPORTIVA ALBINETANA"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4774/Loghi/LogoS4774.jpg" alt="">DENTI ALBINETANA PANTHERS</td>
+			<td style="text-align:center" class="risultato" id="Risultato_131640627">-</td>
+			<td class="risultato-dettagli isMobile" id="Parziali_131640627">&nbsp;</td>
+			<td style="text-align:center">
+				<span id="StatoGara_131640627"><img src="/img/statogara/stato0.png" class="tips ris-img" alt="statogara" title="da disputare" /></span>
+				<img src="/img/info_16.png" class="tips ris-img" alt="info" title="
+&lt;p&gt;&lt;b&gt;Pal. Liceo Classico Ariosto&lt;/b&gt;&lt;br /&gt; REGGIO NELL&#39;EMILIA RE&lt;br /&gt;Via Gazzata&lt;/p&gt;" />
+			</td>
+		</tr>
+	</tbody>
+</table>
+<table class="tbl tbl-classifica">
+	<caption>
+		<div style="overflow:auto; margin: 0 0 5px"><select name="GaraGiornata" class="classifica-select-giornata" onchange="document.location.href='/risultati-classifiche.aspx?StId=2488&amp;DataDa=&amp;StatoGara=&amp;CId=93436&amp;SId=&amp;PId=13810&amp;btFiltro=CERCA&GG=' + this.options[this.selectedIndex].value;">
+		<option value="">Classifica all'ultima giornata..</option>
+<option value="1">Classifica alla giornata n&deg; 1</option>
+<option value="2">Classifica alla giornata n&deg; 2</option>
+<option value="3">Classifica alla giornata n&deg; 3</option>
+<option value="4">Classifica alla giornata n&deg; 4</option>
+<option value="5">Classifica alla giornata n&deg; 5</option>
+<option value="6">Classifica alla giornata n&deg; 6</option>
+<option value="7">Classifica alla giornata n&deg; 7</option>
+<option value="8">Classifica alla giornata n&deg; 8</option>
+<option value="9">Classifica alla giornata n&deg; 9</option>
+<option value="10">Classifica alla giornata n&deg; 10</option>
+</select></div>
+	</caption>
+		<thead>
+			<tr>
+<th style="width: 50px;" title="Posizione">Pos.</th>
+<th style="width: text-align:left;">Squadra</th>
+<th style="width: 70px;">Punti</th>
+<th style="width: 40px;" title="Partite Giocate">PG</th>
+<th style="width: 40px;" title="Partite Vinte">PV</th>
+<th style="width: 40px;" title="Partite Perse">PP</th>
+<th style="width: 40px;" title="Set Fatti">SF</th>
+<th style="width: 40px;" title="Set Subiti">SS</th>
+<th style="width: 40px;" title="Quoziente Set">QS</th>
+<th style="width: 40px;" title="Punti Fatti">PF</th>
+<th style="width: 40px;" title="Punti Subiti">PS</th>
+<th style="width: 40px;" title="Quoziente Punti">QP</th>
+<th style="width: 50px;" title="Penalit&agrave;">Penal.</th>
+</tr>
+</thead>
+			<tr>
+<td style="text-align:center">1</td>
+<td style="padding: 2px 4px;"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4825/Loghi/LogoS4825.jpg" alt="">13R-EVOLUT. POLO DIGITALE</td>
+<td style="text-align:center;font-weight: bold;">15</td>
+<td style="text-align:center;font-weight: bold;">5</td>
+<td style="text-align:center;font-weight: bold;">5</td>
+<td style="text-align:center;font-weight: bold;">0</td>
+<td style="text-align:center;font-weight: bold;">15</td>
+<td style="text-align:center;font-weight: bold;">0</td>
+<td style="text-align:center;font-weight: bold;">---</td>
+<td style="text-align:center;font-weight: bold;">375</td>
+<td style="text-align:center;font-weight: bold;">214</td>
+<td style="text-align:center;font-weight: bold;">1,75</td>
+<td style="text-align:center">0</td>
+</tr>
+			<tr>
+<td style="text-align:center">2</td>
+<td style="padding: 2px 4px;"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4774/Loghi/LogoS4774.jpg" alt="">DENTI ALBINETANA PANTHERS</td>
+<td style="text-align:center;font-weight: bold;">11</td>
+<td style="text-align:center;font-weight: bold;">5</td>
+<td style="text-align:center;font-weight: bold;">4</td>
+<td style="text-align:center;font-weight: bold;">1</td>
+<td style="text-align:center;font-weight: bold;">12</td>
+<td style="text-align:center;font-weight: bold;">6</td>
+<td style="text-align:center;font-weight: bold;">2,00</td>
+<td style="text-align:center;font-weight: bold;">405</td>
+<td style="text-align:center;font-weight: bold;">332</td>
+<td style="text-align:center;font-weight: bold;">1,22</td>
+<td style="text-align:center">0</td>
+</tr>
+			<tr>
+<td style="text-align:center">3</td>
+<td style="padding: 2px 4px;"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4833/Loghi/LogoS4833.png" alt="">RUBIERESE U13</td>
+<td style="text-align:center;font-weight: bold;">7</td>
+<td style="text-align:center;font-weight: bold;">4</td>
+<td style="text-align:center;font-weight: bold;">2</td>
+<td style="text-align:center;font-weight: bold;">2</td>
+<td style="text-align:center;font-weight: bold;">8</td>
+<td style="text-align:center;font-weight: bold;">6</td>
+<td style="text-align:center;font-weight: bold;">1,33</td>
+<td style="text-align:center;font-weight: bold;">315</td>
+<td style="text-align:center;font-weight: bold;">275</td>
+<td style="text-align:center;font-weight: bold;">1,15</td>
+<td style="text-align:center">0</td>
+</tr>
+			<tr>
+<td style="text-align:center">4</td>
+<td style="padding: 2px 4px;"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4840/Loghi/LogoS4840.png" alt="">VOLLEY SCANDIANO  ROSSA</td>
+<td style="text-align:center;font-weight: bold;">6</td>
+<td style="text-align:center;font-weight: bold;">5</td>
+<td style="text-align:center;font-weight: bold;">2</td>
+<td style="text-align:center;font-weight: bold;">3</td>
+<td style="text-align:center;font-weight: bold;">7</td>
+<td style="text-align:center;font-weight: bold;">9</td>
+<td style="text-align:center;font-weight: bold;">0,78</td>
+<td style="text-align:center;font-weight: bold;">343</td>
+<td style="text-align:center;font-weight: bold;">309</td>
+<td style="text-align:center;font-weight: bold;">1,11</td>
+<td style="text-align:center">0</td>
+</tr>
+			<tr>
+<td style="text-align:center">5</td>
+<td style="padding: 2px 4px;"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4802/Loghi/LogoS4802.jpg" alt="">ARBOR ITARCA</td>
+<td style="text-align:center;font-weight: bold;">3</td>
+<td style="text-align:center;font-weight: bold;">4</td>
+<td style="text-align:center;font-weight: bold;">1</td>
+<td style="text-align:center;font-weight: bold;">3</td>
+<td style="text-align:center;font-weight: bold;">3</td>
+<td style="text-align:center;font-weight: bold;">10</td>
+<td style="text-align:center;font-weight: bold;">0,30</td>
+<td style="text-align:center;font-weight: bold;">206</td>
+<td style="text-align:center;font-weight: bold;">298</td>
+<td style="text-align:center;font-weight: bold;">0,69</td>
+<td style="text-align:center">0</td>
+</tr>
+			<tr>
+<td style="text-align:center">6</td>
+<td style="padding: 2px 4px;"><img style="object-fit: contain;width: 40px;height: 40px;border: 1px solid #b7b7b7;padding: 3px;margin: 4px;" src="/mngArea/Societa/img/4812/Loghi/LogoS4812.jpg" alt="">FORTLAN DIBI MENTANI </td>
+<td style="text-align:center;font-weight: bold;">0</td>
+<td style="text-align:center;font-weight: bold;">5</td>
+<td style="text-align:center;font-weight: bold;">0</td>
+<td style="text-align:center;font-weight: bold;">5</td>
+<td style="text-align:center;font-weight: bold;">1</td>
+<td style="text-align:center;font-weight: bold;">15</td>
+<td style="text-align:center;font-weight: bold;">0,07</td>
+<td style="text-align:center;font-weight: bold;">169</td>
+<td style="text-align:center;font-weight: bold;">385</td>
+<td style="text-align:center;font-weight: bold;">0,44</td>
+<td style="text-align:center">0</td>
+</tr>
+</table>
+<script type="text/javascript">
+	window.addEvent('domready', function () {
+		var tip = new Tips('.tips', { className: 'risultati-tips' });
+		$$('.link_classifica').each(function(el){ el.addEvent('click', function(){ Apri('','', this.href, 'cla');return false; }); });
+	});
+</script>
+	</div>
+	</div>
+		</div>
+	</div>
+	</div>
+	<div id="layout-area5" style="width:100%">
+		<div class="col col-4">
+		</div>
+	</div>
+</div>
+
+    <p class="pw-credito" style="text-align:center;margin:5px auto 15px;font-size:11px;">Sito realizzato con <a href="https://www.powersport.it" target="_blank">PowerSPORT</a> - gestionale per societ&agrave; sportive</p>
+
+<!--Pagina generata in 00:00:00.3442911 secondi-->
+</body>
+</html>
+

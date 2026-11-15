@@ -106,18 +106,122 @@ describe('sync-calendario', () => {
 describe('classifiche', () => {
   const pagina = (squadra: string) =>
     `<table class="tbl tbl-classifica"><tr><th>Pos.</th></tr><tr><td>1</td><td><img alt="">${squadra}</td><td>12</td><td>4</td><td>4</td><td>0</td><td>12</td><td>0</td><td>---</td></tr><tr><td>2</td><td>ALTRE</td><td>8</td><td>4</td><td>3</td><td>1</td><td>9</td><td>6</td><td>1,50</td></tr></table>`;
-  it('copia i due campionati dal portale e registra il giro', async () => {
-    const chiesti: string[] = [];
+  // gare come le scrive risultati-classifiche.aspx (le pagine vere sono in src/lib/classifiche/pagine)
+  type RigaGara = [numero: number, quando: string, casa: string, ospite: string, risultato: string, stato: string];
+  const gare = (righe: RigaGara[]) =>
+    `<table class="tbl tbl-risultati"><tbody>${righe
+      .map(
+        ([n, q, casa, ospite, r, st]) =>
+          `<tr><td>${n}</td><td>1</td><td>${q}</td><td><img alt="">${casa}</td><td>${ospite}</td><td class="risultato">${r}</td><td></td><td><span><img src="/img/statogara/stato1.png" alt="statogara" title="${st}" /></span></td></tr>`,
+      )
+      .join('')}</tbody></table>`;
+  const U13 = '13R-EVOLUT. POLO DIGITALE';
+  const U14 = 'U14R-EVOLUTION';
+  const chiesti: string[] = [];
+  beforeEach(() => {
+    chiesti.length = 0;
+    const pagineGare: Record<string, string> = {
+      '93436': gare([
+        [1239, '29/11/26 16:00', 'RUBIERESE U13', U13, '1 - 3', 'risultato ufficioso'],
+        [1243, '06/12/26 10:00', U13, 'DENTI ALBINETANA PANTHERS', '-', 'da disputare'],
+      ]),
+      '93399': gare([[869, '28/11/26 16:00', U14, 'A.S.D. GAZZE CANOSSA', '-', 'da disputare']]),
+    };
     vi.stubGlobal('fetch', async (u: string) => {
       chiesti.push(String(u));
-      return new Response(pagina(String(u).endsWith('93436') ? '13R-EVOLUT. POLO DIGITALE' : 'U14R-EVOLUTION'));
+      const cid = String(u).split('CId=')[1];
+      return new Response(String(u).includes('risultati-classifiche') ? pagineGare[cid] : pagina(cid === '93436' ? U13 : U14));
     });
-    const f = await carica('classifiche');
-    expect((await json(await f(richiesta({}, { cron: true })))).corpo).toMatchObject({ esito: 'ok', 'Under 13': 2, 'Under 14': 2 });
-    expect(chiesti).toEqual(['https://reggioemilia.portalefipav.net/classifica.aspx?CId=93436', 'https://reggioemilia.portalefipav.net/classifica.aspx?CId=93399']);
-    expect(await valore(`select righe->0->>'squadra' from classifiche where cid = 93436`)).toBe('13R-EVOLUT. POLO DIGITALE');
+  });
+  const lancia = async (corpo = {}) => json(await (await carica('classifiche'))(richiesta(corpo, { cron: true })));
+  const convocata = (titolo = `Partita Lani U13: RUBIERESE U13 vs ${U13}`) =>
+    stato.banco!.come(null, `insert into impegni_famiglia (id, inizio, titolo) values ('g1', '2026-11-29T16:00:00+01:00', '${titolo}')`);
+
+  it('copia classifiche e gare dei due campionati e registra il giro', async () => {
+    alle('2026-11-24T06:15:00+01:00');
+    expect((await lancia()).corpo).toMatchObject({ esito: 'ok', 'Under 13': { classifica: 2, gare: 2 }, 'Under 14': { classifica: 2, gare: 1 } });
+    expect(chiesti.filter((u) => u.includes('classifica.aspx'))).toEqual([
+      'https://reggioemilia.portalefipav.net/classifica.aspx?CId=93436',
+      'https://reggioemilia.portalefipav.net/classifica.aspx?CId=93399',
+    ]);
+    expect(chiesti.some((u) => u.includes('esporta'))).toBe(false);
+    expect(await valore(`select righe->0->>'squadra' from classifiche where cid = 93436`)).toBe(U13);
+    expect(new Date(String(await valore(`select inizio from gare_fipav where numero = 869`))).toISOString()).toBe('2026-11-28T15:00:00.000Z');
     expect(await valore(`select esito from sync_log where fonte = 'classifiche'`)).toBe('ok');
   });
+
+  it('risultato ufficiale con Lani convocata: partita e popup, la risposta fa i passi, il genitore corregge', async () => {
+    const c = stato.banco!.come;
+    await c(null, `insert into impostazioni (chiave, valore) values ('r_evolution_da', '"2026-11-16"') on conflict (chiave) do update set valore = excluded.valore`);
+    await convocata();
+    alle('2026-11-29T06:15:00+01:00');
+    await lancia(); // la mattina della partita: gare lette, nessun risultato ancora da prendere per oggi
+    await c(null, `update gare_fipav set set_casa = null, set_ospite = null where numero = 1239`);
+    await c(null, `delete from partite`);
+    alle('2026-11-29T20:00:00+01:00');
+    expect((await lancia({ solo: 'partite' })).corpo).toMatchObject({ esito: 'ok', 'Under 13': { risultati: ['1239 popup'] } });
+    expect(await valore(`select set_nostri || '-' || set_loro || ' ' || coalesce(in_campo::text, 'senza risposta') from partite where gara = 1239`)).toBe('3-1 senza risposta');
+    const id = String(await valore(`select id from partite where gara = 1239`));
+    expect(await valore(`select titolo || ' ' || testo from popup_coda where chiave = 'partita_fipav:${id}'`)).toBe('Com’è andata? R-Evolution 3, RUBIERESE U13 1. Sei entrata in campo?');
+    // il giro dopo non la rifà
+    alle('2026-11-29T20:30:00+01:00');
+    await lancia();
+    expect(await valore(`select count(*)::int from partite`)).toBe(1);
+
+    const passi = await carica('passi');
+    const somma = async () => valore(`select coalesce(sum(passi), 0)::int from movimenti_passi where riferimento like '%${id}%'`);
+    await passi(richiesta({ tipo: 'partita', id }, { gettone: 'gettone-lani' }));
+    expect(await somma()).toBe(0); // senza risposta niente passi
+    await c(LANI, `select rispondi_partita('${id}', false)`);
+    await passi(richiesta({ tipo: 'partita', id }, { gettone: 'gettone-lani' }));
+    expect(await somma()).toBe(10); // panchina 5 + vinta 5, senza genitori
+    await c(LANI, `select rispondi_partita('${id}', true)`); // una risposta sola
+    expect(await valore(`select in_campo from partite where id = '${id}'`)).toBe(false);
+
+    await c(PAPA, `select correggi_partita('${id}', true)`);
+    await passi(richiesta({ tipo: 'partita', id }, { gettone: 'gettone-papa' }));
+    expect(await somma()).toBe(25); // in campo 10 + vinta 15
+    await c(PAPA, `select correggi_partita('${id}', false)`);
+    await passi(richiesta({ tipo: 'partita', id }, { gettone: 'gettone-papa' }));
+    expect(await somma()).toBe(10);
+  });
+
+  it('Lani assente, o la partita già segnata da lei: nessun popup', async () => {
+    await convocata(`[LANI ASSENTE] Partita U13: RUBIERESE U13 vs ${U13}`);
+    alle('2026-11-29T20:00:00+01:00');
+    await lancia();
+    expect(await valore(`select count(*)::int from partite`)).toBe(0);
+
+    await stato.banco!.come(null, `update impegni_famiglia set titolo = 'Partita Lani U13: RUBIERESE U13 vs ${U13}'`);
+    await stato.banco!.come(LANI, `insert into partite (data, avversaria, set_nostri, set_loro) values ('2026-11-29', 'RUBIERESE', 3, 1)`);
+    await lancia();
+    expect(await valore(`select count(*)::int || ' ' || max(gara) from partite`)).toBe('1 1239');
+    expect(await valore(`select count(*)::int from popup_coda where situazione = 'partita_com_e_andata'`)).toBe(0);
+  });
+
+  it('il giorno dopo le 6:15 niente più popup: la segna Lani come prima', async () => {
+    await convocata();
+    alle('2026-12-01T06:15:00+01:00');
+    await lancia();
+    expect(await valore(`select count(*)::int from partite`)).toBe(0);
+  });
+
+  it('ogni mezz’ora legge il portale solo da inizio + 2 ore, il giorno della partita', async () => {
+    alle('2026-11-24T06:15:00+01:00');
+    await lancia();
+    alle('2026-11-28T17:30:00+01:00'); // U14 alle 16:00: troppo presto
+    chiesti.length = 0;
+    expect((await lancia({ solo: 'partite' })).corpo).toEqual({ esito: 'niente da leggere' });
+    expect(chiesti).toEqual([]);
+    alle('2026-11-28T18:00:00+01:00');
+    await lancia({ solo: 'partite' });
+    expect(chiesti.map((u) => u.split('CId=')[1])).toEqual(['93399', '93399']); // solo l'U14: classifica e gare
+    alle('2026-11-29T00:10:00+01:00'); // dopo mezzanotte aspetta le 6:15
+    chiesti.length = 0;
+    await lancia({ solo: 'partite' });
+    expect(chiesti).toEqual([]);
+  });
+
   it('pagina cambiata: errore, la classifica di prima resta, Lani non la lancia', async () => {
     vi.stubGlobal('fetch', async () => new Response('<html>manutenzione</html>'));
     const f = await carica('classifiche');

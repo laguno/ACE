@@ -137,6 +137,7 @@ body:has(.studio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom)
 .indietro { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 4px; border: 0; background: none; color: var(--testo); font: 800 15px Nunito, sans-serif; }
 body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999px; background: var(--bianco); box-shadow: var(--ombra); }
 .pillola { margin: 0; padding: 10px 16px; border-radius: 999px; background: var(--rosa); color: var(--testo); font: 800 14px/1.35 Nunito, sans-serif; }
+.pillola-partita { display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; }
 .avanzamento { height: 12px; border-radius: 999px; background: var(--lilla); overflow: hidden; }
 .avanzamento span { display: block; height: 100%; background: var(--accento); border-radius: inherit; }
 .nota { margin: 0 0 4px; color: var(--testo-2); }

@@ -58,10 +58,25 @@ Storia: la mattina del 13/11 si era deciso 7.700 sulla tabella qui sotto, fatta 
 
 Decisione superata: `totale_passi` 7.700, 27 tappe `[130,140,155,165,180,190,200,215,225,235,250,260,275,285,295,310,320,335,345,355,370,380,395,405,415,430,440]`, e `periodo.r_evolution_prevista` = giorno di accensione. Va bene sia per il 23/11 sia per l'1/12. Nel config dal 13/11 (tolta la riserva da 7.600), `r_evolution_prevista` = 23/11; docs/02, docs/05 e `npm run simula` aggiornati. Con 7.200 e avvio a novembre il percorso diventa troppo facile. Regola di docs/02: si alzano **solo le tappe ancora da fare**. Se all'accensione Lani ha già passato delle tappe, quelle restano com'erano (125, 135, …) e la differenza va spalmata sulle successive.
 
+## Risultato automatico e prossima partita (regole del 15/11, approvate dal signore)
+
+Fatto il 15/11 su `main`, non pubblicato: i testi per Lani sono una proposta (docs/05, righe "proposta del 15/11").
+
+- **Da dove**: la pagina pubblica `risultati-classifiche.aspx` dello stesso portale delle classifiche, col filtro del campionato (il modulo "CERCA" della pagina, in GET; `classifiche.gare` nel config). Niente pagine di esportazione (`esporta-risultati.aspx`) né il link al calendario Google. Pagine vere salvate per i test in `src/lib/classifiche/pagine`.
+- **Quando**: alle 6:15 la funzione `classifiche` legge classifiche e gare di tutti e due i campionati (tabella `gare_fipav`). Il giorno della partita, da inizio + 2 ore a mezzanotte, il cron `partite` (0038, ogni mezz'ora) la rilancia con `{"solo":"partite"}`: legge il portale solo se c'è una partita di oggi senza risultato, altrimenti risponde "niente da leggere" senza scrivere il registro.
+- **Convocata o assente**: dal calendario di famiglia. Una partita di Lani quel giorno (`tipoImpegno` = partita) vuol dire convocata; "[LANI ASSENTE]" o niente nel calendario: nessuna partita creata.
+- **Risultato arrivato**: il server crea la partita (`partite.gara`, `in_campo` vuoto) e accoda "Com'è andata?". La risposta di Lani (`rispondi_partita`) è l'approvazione: i passi li calcola `passi` dal risultato ufficiale e dalla risposta, senza genitori. Se Lani l'aveva già segnata a mano quel giorno, la partita si lega alla gara e il popup non parte.
+- **Correzione**: in Genitori, "Partite dalla FIPAV" (ultimi 14 giorni), "Era in panchina" / "Era in campo". Come le spunte: storno dei passi dati e giro nuovo (`correggi_partita`, riferimento `id:1`, `id:2`...). Non dopo le chiavi di quella settimana.
+- **Senza risultato alle 6:15 del giorno dopo**: niente più popup, la segna Lani e la approvano i genitori come prima. Se Lani non risponde, il popup scade dopo 3 giorni e la partita compare tra quelle da approvare.
+- **Prossima partita**: carta in cima a R-Evolution (giorno, ora, avversaria, casa o trasferta, "tra N giorni", il giorno stesso "tra N ore") e pillola in Oggi il giorno prima e il giorno stesso, prima dell'inizio. Salta i giorni "[LANI ASSENTE]".
+- Limite noto (`ponytail` in `classifiche/index.ts`): la convocazione guarda solo se c'è una partita di Lani quel giorno, non quale campionato. Due partite nello stesso giorno non capitano.
+
+Da pubblicare, quando il signore approva i testi: `npx supabase db push --remote --yes --include-all` (0037, 0038), poi `classifiche` e `passi` (e Vercel col push di main).
+
 ## Da fare, in ordine
 
 1. Prova della barra a 5 voci sui telefoni veri.
-2. ~~Partite dal calendario~~ fatto il 13/11: "Segna la partita" propone giorno e avversaria dall'ultima partita del calendario ("Partita Lani U13: CASA vs OSPITI", `avversariaDelTitolo` in `src/lib/calendario`). Partita corretta dopo l'approvazione: l'app non lo permette (si correggono solo quelle da approvare), quindi i passi non vanno mai stornati da lì.
+2. ~~Partite dal calendario~~ fatto il 13/11: "Segna la partita" propone giorno e avversaria dall'ultima partita del calendario ("Partita Lani U13: CASA vs OSPITI", `avversariaDelTitolo` in `src/lib/calendario`). Partita corretta dopo l'approvazione: l'app non lo permette per i set; dal 15/11 in campo / panchina sì, solo per quelle col risultato FIPAV (sopra).
 3. **Fase successiva dei campionati**: come cambiare girone senza toccare il config (es. CId in Impostazioni).
 4. **Pagina "La squadra"**, automatica con gli avatar.
 5. **Livello bonus della selezione**, selezioni e raduni: rimandati.
