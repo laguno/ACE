@@ -60,7 +60,7 @@ const PULSANTI: Record<string, string> = {
   serie_nera: 'Ci riprovo',
   figurina_nera: 'Ci riprovo',
   r_evolution_accesa: 'Vediamo',
-  partita_com_e_andata: 'Sì', // l'altro pulsante: PANCHINA (proposta del 15/11, da approvare)
+  partita_com_e_andata: 'Sì', // l'altro pulsante: PANCHINA
 };
 const PANCHINA = 'Sono rimasta in panchina';
 /** I pulsanti "il piano" portano a Studio, dove c'è il ripasso. */

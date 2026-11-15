@@ -80,7 +80,7 @@ La mattina sono tre righe da leggere mentre fa colazione; il pomeriggio è un or
 | Pioggia o giornata grigia (solo come tocco grafico) | lani-pioggia | Nessun testo in più: cambia solo l'avatar del giorno | — |
 | Rientro dopo 2 o più giorni senza aprire l'app | lani-oops | "Bentornata. Ecco solo le cose di oggi: {n}." Nessuna predica sui giorni persi. | — |
 | Giorno di malattia o assenza (lo segnano i genitori) | lani-stanca | "Oggi riposo. I compiti li trovi domani, con calma." Gli obiettivi del giorno non contano. | — |
-| Rientro dopo l'assenza (primo giorno di scuola, popup del server; proposta del 15/11, da approvare) | lani-saluta | Titolo "Bentornata". "Che bello riaverti a scuola. I compiti dei giorni a casa sono già spostati: si riparte con calma." | — |
+| Rientro dopo l'assenza (primo giorno di scuola, popup del server; approvato il 15/11) | lani-saluta | Titolo "Bentornata". "Che bello riaverti a scuola. I compiti dei giorni a casa sono già spostati: si riparte con calma." | — |
 | Buongiorno da dicembre a febbraio | lani-inverno | Come il buongiorno normale; cambia solo la posa | — |
 | Buongiorno dopo una partita finita tardi | lani-assonnata | "Ieri partita fino a tardi. Oggi solo l'essenziale: {cosa}." | sbadiglio |
 | Striscia "In famiglia" (sotto il buongiorno, senza popup) | icona di chi è coinvolto (papa-passaggio, mamma-passaggio, nonno-passaggio) | "In famiglia: 19:30 cena dai nonni · sabato Leo al torneo di tennis" (massimo tre, dal calendario di famiglia) | — |
@@ -217,9 +217,9 @@ Sul percorso la famiglia fa il tifo dal bordo. Ogni messaggio dice dove si trova
 | Nuova figurina comune | (la posa sbloccata) | Riga in fondo al popup: "Nuova figurina: {nome}. Album {n}/64." | clic |
 | Figurina della serie nera | (la posa sbloccata) | "Sette giorni fatti bene: figurina nera sbloccata, {nome}." | — |
 | Album completo | tutte | "Album completo: 64 su 64." | festa grande |
-| Risultato FIPAV arrivato (proposta del 15/11, da approvare) | lani-divisa | Titolo "Com'è andata?". "R-Evolution {noi}, {avversaria} {loro}. Sei entrata in campo?" Pulsanti: "Sì" e "Sono rimasta in panchina". | — |
-| Prossima partita, carta in R-Evolution (proposta del 15/11, da approvare) | — | "Prossima partita", "{avversaria}, in casa / in trasferta", "{Giorno} {g}/{m} alle {ora}, tra {n} giorni" (domani; il giorno stesso "tra {n} ore", nell'ultima ora "tra poco"). | — |
-| Pillola in Oggi (proposta del 15/11, da approvare) | — | Il giorno prima "Domani partita · {ora}", il giorno stesso "Oggi partita · tra {n} ore". Niente conto alla rovescia dei secondi. | — |
+| Risultato FIPAV arrivato (approvato il 15/11) | lani-divisa | Titolo "Com'è andata?". "R-Evolution {noi}, {avversaria} {loro}. Sei entrata in campo?" Pulsanti: "Sì" e "Sono rimasta in panchina". | — |
+| Prossima partita, carta in R-Evolution (approvato il 15/11) | — | "Prossima partita", "{avversaria}, in casa / in trasferta", "{Giorno} {g}/{m} alle {ora}, tra {n} giorni" (domani; il giorno stesso "tra {n} ore", nell'ultima ora "tra poco"). | — |
+| Pillola in Oggi (approvato il 15/11) | — | Il giorno prima "Domani partita · {ora}", il giorno stesso "Oggi partita · tra {n} ore". Niente conto alla rovescia dei secondi. | — |
 | Partita vinta | papa-festeggia | "Vinta {risultato}! +25. Papà ha già la felpa viola addosso." | esultanza |
 | Partita persa | lani-partita-persa | "Persa {risultato}. +10 per averla giocata. Si riparte al prossimo allenamento." | — |
 | Settimana storta o insufficienza: Leo fa il tifo | leo-gamer | "Leo dice che al prossimo livello vinci tu. E lui di livelli se ne intende." | risatina |
@@ -236,7 +236,7 @@ Deciso dal signore il 6 novembre: i punti si chiamano **passi** e le stelle **ch
 |---|---|---|---|---|---|---|---|---|---|
 | Chiavi | 2 | 4 | 7 | 14 | 17 | 21 | 26 | 31 | 36 |
 
-- **La frase che spiega tutto**, detta da Lani in posa timida la prima volta che apre Astra e ripetuta nel popup del lucchetto: "I passi ti fanno camminare, le chiavi aprono i forzieri."
+- **La frase che spiega tutto**, detta da Lani in posa timida la prima volta che apre Astra e ripetuta nel popup del lucchetto: "I passi ti fanno camminare, le chiavi aprono i forzieri."
 - **Sotto le chiavi della settimana**, sulla testata di Astra (approvata dal signore il 10/11): "Hai {n} chiavi: il prossimo forziere ne vuole {m}."; se bastano "Hai {n} chiavi: bastano per il prossimo forziere."; a forzieri tutti aperti "Hai {n} chiavi.". {m} è il numero del primo forziere non ancora aperto, dalla tabella sopra.
 
 **Il mantra: "Ogni giorno, passino passino."** È la frase di famiglia e diventa la firma dell'app.
@@ -260,6 +260,22 @@ Deciso dal signore il 6 novembre: i punti si chiamano **passi** e le stelle **ch
 | Per aspera ad astra | motto latino | Solo alla cima |
 
 Prima di metterle nell'app va controllata ogni attribuzione: se un autore non è certo, si scrive "proverbio" o si toglie la frase. Si possono aggiungere frasi di pallavolisti e allenatori, ad esempio Julio Velasco, ma solo dopo averle verificate su una fonte.
+
+## Come si fanno i passi
+
+Testi approvati dal signore il 15/11.
+
+Pagina di Astra (pulsante "Come si fanno i passi" sotto il contapassi), raggiungibile anche dalla seconda schermata della prima accensione; nell'area Genitori, Altro, "Regole del gioco" è la versione completa (tutti i blocchi, dettagli aperti, R-Evolution sempre). Una riga per voce con il numero grande a destra; i dettagli dietro "Come funziona". I numeri {tra graffe} vengono da `data/config-gioco.json` (codice: `src/lib/regole/come-passi.ts`, prova che nessun numero è scritto a mano).
+
+| Blocco (avatar) | Riga sotto il titolo | Voci | Come funziona |
+|---|---|---|---|
+| Ogni giorno (lani-buongiorno) | | Compiti per domani fatti; Cartella pronta la sera; Borsa pronta per allenamento o partita; Foglio da firmare consegnato; Ripasso prima di una verifica; Foto delle pagine che ACE ti chiede | "Compiti fatti almeno {2} giorni prima: {13} invece di {10}. La serie in anticipo arriva al massimo a fine settimana." "Per la foto: +{2} una volta per richiesta, quante che siano le pagine." |
+| Studio in più (lani-concentrata) | "Solo dopo i compiti del giorno, al massimo {4} al giorno per tipo." | Giro di flash card; Video visto fino in fondo; Quiz al primo tentativo | "Ogni flash card si gira dopo {7} secondi." "Quiz: con almeno il {90%} giusto, 1° tentativo +{10}, … 4° tentativo e dopo +{1}; sotto, +{6}, …" |
+| Voti e traguardi (lani-festeggia) | | Voto da 9 o 10; Voto da 8; Voto da 7; Voto migliore del precedente, almeno 6; Sufficienza dopo un'insufficienza; Enigma del forziere risolto; Nota di merito | "Un voto basso non toglie passi: si guarda avanti con il piano." "Enigma: {3} tentativi." "Pagella del primo quadrimestre: +{100} con la media del 7, +{200} con il 7 e mezzo. Una materia che torna sufficiente: +{25}." |
+| R-Evolution (lani-divisa), solo se accesa | | Dieci minuti di allenamento; Partita giocata; Partita vinta, in più; In panchina tutta la partita | "I dieci minuti valgono solo finiti, dalle {06:00} alle {13:00}." "Vinta stando in panchina: +{5} in più." |
+| Gesti di casa (mamma-pollice) | "Li danno mamma e papà quando li notano, non si chiedono." | Scrivania, lavastoviglie, letto, vestiti | "Al massimo +{6} al giorno." |
+| Cosa fa perdere passi (papa-ci-pensiamo) | | Nota disciplinare; Tre note per dimenticanza; Bagno in disordine dopo la doccia; Gesto antisportivo in campo (solo con R-Evolution); Balla o imbroglio | "Il saldo non va mai sotto zero. Una spunta sbagliata tolta da mamma o papà non è un castigo: si torna com'era." |
+| Chiavi e forzieri (mazzo-chiavi) | "Ogni domenica sera, da zero a tre chiavi. Le chiavi aprono i forzieri." | Prima chiave: passi di ogni giorno {70%}; Seconda chiave: nessuna nota (zero note); Terza chiave: cose fatte {95%} | "Prima chiave con almeno il {70%} dei passi di ogni giorno; seconda se in più non ci sono note; terza con almeno il {95%} delle cose fatte." "Lo studio in più dà passi, non chiavi." "Forzieri: {2, 4, 7, …} chiavi." |
 
 ## Notifiche
 

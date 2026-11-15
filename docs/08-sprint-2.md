@@ -59,7 +59,7 @@ Storia: la mattina del 13/11 si era deciso 7.700 sulla tabella qui sotto, fatta 
 Decisione superata: `totale_passi` 7.700, 27 tappe `[130,140,155,165,180,190,200,215,225,235,250,260,275,285,295,310,320,335,345,355,370,380,395,405,415,430,440]`, e `periodo.r_evolution_prevista` = giorno di accensione. Va bene sia per il 23/11 sia per l'1/12. Nel config dal 13/11 (tolta la riserva da 7.600), `r_evolution_prevista` = 23/11; docs/02, docs/05 e `npm run simula` aggiornati. Con 7.200 e avvio a novembre il percorso diventa troppo facile. Regola di docs/02: si alzano **solo le tappe ancora da fare**. Se all'accensione Lani ha già passato delle tappe, quelle restano com'erano (125, 135, …) e la differenza va spalmata sulle successive.
 
 ## Risultato automatico e prossima partita (regole del 15/11, approvate dal signore)
-
+Fatto il 15/11 su `main`; testi per Lani approvati dal signore il 15/11 (docs/05).
 Fatto il 15/11 su `main`, non pubblicato: i testi per Lani sono una proposta (docs/05, righe "proposta del 15/11").
 
 - **Da dove**: la pagina pubblica `risultati-classifiche.aspx` dello stesso portale delle classifiche, col filtro del campionato (il modulo "CERCA" della pagina, in GET; `classifiche.gare` nel config). Niente pagine di esportazione (`esporta-risultati.aspx`) né il link al calendario Google. Pagine vere salvate per i test in `src/lib/classifiche/pagine`.

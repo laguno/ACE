@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { CaretRight, Eye, GearSix, Pulse } from '@phosphor-icons/react';
+import { BookOpen, CaretRight, Eye, GearSix, Pulse } from '@phosphor-icons/react';
 import { Attesa, Riquadro, Sticker } from './kit';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import * as R from './lib/regole';
@@ -12,12 +12,13 @@ import { FotoSalvate, Fotografa, SELECT_RICHIESTE, descrizione, type RichiestaFo
 import Stato from './Stato';
 import { PartiteDaApprovare, SegnaPartita } from './Partita';
 import { LaniACasa, SpostaVerifiche } from './Assenze';
+import ComePassi from './ComePassi';
 
 // Area genitori — design/Genitori.html. Tutto passa dal client del genitore (sul suo telefono la
 // sessione normale, sull'iPad di Lani quella a parte sbloccata con il PIN): la RLS lo riconosce
 // come genitore e la funzione "passi" decide i passi come per Lani.
 
-type Pagina = 'settimana' | 'premi' | 'correzioni' | 'fogli' | 'altro' | 'impostazioni' | 'stato' | 'vetrina';
+type Pagina = 'settimana' | 'premi' | 'correzioni' | 'fogli' | 'altro' | 'impostazioni' | 'stato' | 'vetrina' | 'regole';
 /** Quattro schede più "Altro" (Impostazioni, Stato e Vetrina stanno lì dentro). */
 const SCHEDE: [Pagina, string][] = [
   ['settimana', 'Settimana'],
@@ -35,6 +36,7 @@ const TITOLI: Record<Pagina, string> = {
   impostazioni: 'Impostazioni',
   stato: 'Stato di ACE',
   vetrina: 'Vetrina',
+  regole: 'Regole del gioco',
 };
 const VOCI_GESTI = [
   ['scrivania', 'Scrivania in ordine'],
@@ -111,6 +113,7 @@ export default function Genitori({ client, esci }: { client: SupabaseClient; esc
       {pagina === 'impostazioni' && <Impostazioni {...props} />}
       {pagina === 'stato' && <Stato client={client} />}
       {pagina === 'vetrina' && <Vetrina />}
+      {pagina === 'regole' && <ComePassi completa />}
       <button className="link esci" onClick={esci}>
         Esci dall'area genitori
       </button>
@@ -126,6 +129,7 @@ function Altro({ vai }: { vai: (p: Pagina) => void }) {
     ['impostazioni', 'Impostazioni', 'Orari, materiale, PIN', GearSix],
     ['stato', 'Stato di ACE', 'Sincronizzazioni, chiavi, errori', Pulse],
     ['vetrina', 'Vetrina', 'Popup, animazioni e notifiche, come li vede Lani', Eye],
+    ['regole', 'Regole del gioco', 'Tutti i passi, le chiavi e i forzieri', BookOpen],
   ];
   return (
     <div className="carta elenco">
