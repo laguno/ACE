@@ -50,7 +50,11 @@ async function vai(indirizzo: string, init: RequestInit = {}): Promise<{ url: UR
     const headers = new Headers(init.headers);
     const c = cookiePer(url);
     if (c) headers.set('Cookie', c);
-    const r = await fetch(url, { ...init, headers, redirect: 'manual' });
+    // senza limite una risposta appesa di Nuvola tiene la funzione ferma fino allo spegnimento
+    // (15/11, 19:30): riga di sync_log aperta, nessun errore, nessun avviso ai genitori
+    const r = await fetch(url, { ...init, headers, redirect: 'manual', signal: AbortSignal.timeout(20_000) }).catch((e) => {
+      throw e instanceof DOMException && e.name === 'TimeoutError' ? new Passo('Nuvola non risponde') : e;
+    });
     salvaCookie(url, r);
     const dove = r.headers.get('location');
     if (r.status < 300 || r.status >= 400 || !dove) return { url, r };
@@ -179,12 +183,35 @@ async function sincronizza() {
 }
 
 /**
+ * Richieste aperte di compiti o verifiche già passati (scadenza prima di oggi; con un'assenza
+ * scadenza e data sono già quelle spostate, trigger 0036): "scaduta", senza passi. Lo Storage
+ * accetta foto solo per le richieste aperte (0024), quindi dopo non si carica più.
+ */
+async function chiudiScadute(oggi: string) {
+  const { data: aperte, error } = await db.from('richieste_foto').select('id, compito_id, verifica_id').eq('stato', 'aperta');
+  if (error) throw new Passo(`richieste di foto: ${error.message}`);
+  const compiti = (aperte ?? []).map((x) => x.compito_id).filter(Boolean);
+  const verifiche = (aperte ?? []).map((x) => x.verifica_id).filter(Boolean);
+  const [c, v] = await Promise.all([
+    compiti.length ? db.from('compiti').select('id').in('id', compiti).lt('scadenza', oggi) : { data: [], error: null },
+    verifiche.length ? db.from('verifiche').select('id').in('id', verifiche).lt('data', oggi) : { data: [], error: null },
+  ]);
+  for (const x of [c, v]) if (x.error) throw new Passo(`richieste di foto: ${x.error.message}`);
+  const passati = new Set([...(c.data ?? []), ...(v.data ?? [])].map((x) => x.id));
+  const ids = (aperte ?? []).filter((x) => passati.has(x.compito_id) || passati.has(x.verifica_id)).map((x) => x.id);
+  if (!ids.length) return;
+  const { error: e } = await db.from('richieste_foto').update({ stato: 'scaduta' }).in('id', ids);
+  if (e) throw new Passo(`richieste di foto: ${e.message}`);
+}
+
+/**
  * Da fotografare: per ogni compito o verifica in arrivo con pagine scritte e mai fotografate (stessa
  * materia, stesse pagine) una richiesta, una sola volta; ai genitori un push per giro.
  * ponytail: con il solo argomento servirebbero le pagine probabili dalla mappa dei libri.
  */
 async function richiesteFoto() {
   const oggi = R.iso(R.giornoRoma(new Date()));
+  await chiudiScadute(oggi);
   const [c, v, r, f, m] = await Promise.all([
     db.from('compiti').select('id, materia_id, testo').gte('scadenza', oggi),
     db.from('verifiche').select('id, materia_id, argomento').gte('data', oggi),

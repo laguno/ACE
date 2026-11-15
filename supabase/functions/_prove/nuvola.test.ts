@@ -94,6 +94,26 @@ describe('sync-nuvola', () => {
     expect(await valore(`select coalesce(sum(passi), 0)::int from movimenti_passi`)).toBe(passi);
     expect(await valore(`select count(*)::int from compiti`)).toBe(1);
   });
+  it('richieste di foto di compiti passati: scadute senza passi; giro spento a metà chiuso come interrotto', async () => {
+    nuvolaFinta();
+    const f = await carica('sync-nuvola');
+    await stato.banco!.db.exec(`
+      insert into compiti (id, testo, scadenza) values ('00000000-0000-0000-0000-0000000000c1', 'pag. 10', '2026-11-20');
+      insert into richieste_foto (motivo, pagine, compito_id) values ('compito', 'pag. 10', '00000000-0000-0000-0000-0000000000c1');
+      insert into sync_log (fonte, iniziato_il) values ('nuvola', now() - interval '1 hour');`);
+    expect((await json(await f(richiesta({}, { cron: true })))).corpo.esito).toBe('ok');
+    expect(await valore(`select stato from richieste_foto where compito_id = '00000000-0000-0000-0000-0000000000c1'`)).toBe('scaduta');
+    expect(await valore(`select count(*)::int from richieste_foto where stato = 'aperta'`)).toBe(2); // quelle nuove del giro
+    expect(await valore(`select count(*)::int from movimenti_passi where motivo = 'foto'`)).toBe(0);
+    expect(await valore(`select count(*)::int from sync_log where esito = 'interrotta'`)).toBe(1);
+    expect(await valore(`select count(*)::int from sync_log where finito_il is null`)).toBe(0);
+  });
+  it('Nuvola non risponde: esito errore invece di restare appesa', async () => {
+    nuvolaFinta();
+    vi.stubGlobal('fetch', () => Promise.reject(new DOMException('tempo scaduto', 'TimeoutError')));
+    const f = await carica('sync-nuvola');
+    expect((await json(await f(richiesta({}, { cron: true })))).corpo).toMatchObject({ esito: 'errore', errore: 'Nuvola non risponde' });
+  });
   it('password sbagliata o Nuvola giù: esito errore con il passo, avviso ai genitori alla prima', async () => {
     nuvolaFinta({ password: 'sbagliata' });
     const f = await carica('sync-nuvola');

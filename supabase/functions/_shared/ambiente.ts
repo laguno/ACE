@@ -13,6 +13,9 @@ export const dbServizio = () => createClient(ambiente('SUPABASE_URL'), ambiente(
 
 /** Apre una riga di sync_log (cron e sincronizzazioni) e ne restituisce l'id. */
 export async function apriRegistro(db: ReturnType<typeof dbServizio>, fonte: string): Promise<string> {
+  // una riga rimasta aperta da più di 5 minuti è di un giro spento a metà: si chiude come interrotta
+  const prima = new Date(Date.now() - 5 * 60_000).toISOString();
+  await db.from('sync_log').update({ finito_il: new Date().toISOString(), esito: 'interrotta' }).eq('fonte', fonte).is('finito_il', null).lt('iniziato_il', prima);
   const { data, error } = await db.from('sync_log').insert({ fonte }).select('id').single();
   if (error || !data) throw new Error(`sync_log: ${error?.message ?? 'nessuna riga'}`);
   return data.id;
