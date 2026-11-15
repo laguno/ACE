@@ -122,6 +122,7 @@ describe('classifiche', () => {
     chiesti.length = 0;
     const pagineGare: Record<string, string> = {
       '93436': gare([
+        [1232, '14/11/26 18:30', 'VOLLEY SCANDIANO ROSSA', U13, '0 - 3', 'risultato ufficioso'],
         [1239, '29/11/26 16:00', 'RUBIERESE U13', U13, '1 - 3', 'risultato ufficioso'],
         [1243, '06/12/26 10:00', U13, 'DENTI ALBINETANA PANTHERS', '-', 'da disputare'],
       ]),
@@ -139,7 +140,7 @@ describe('classifiche', () => {
 
   it('copia classifiche e gare dei due campionati e registra il giro', async () => {
     alle('2026-11-24T06:15:00+01:00');
-    expect((await lancia()).corpo).toMatchObject({ esito: 'ok', 'Under 13': { classifica: 2, gare: 2 }, 'Under 14': { classifica: 2, gare: 1 } });
+    expect((await lancia()).corpo).toMatchObject({ esito: 'ok', 'Under 13': { classifica: 2, gare: 3 }, 'Under 14': { classifica: 2, gare: 1 } });
     expect(chiesti.filter((u) => u.includes('classifica.aspx'))).toEqual([
       'https://reggioemilia.portalefipav.net/classifica.aspx?CId=93436',
       'https://reggioemilia.portalefipav.net/classifica.aspx?CId=93399',
@@ -197,6 +198,13 @@ describe('classifiche', () => {
     await lancia();
     expect(await valore(`select count(*)::int || ' ' || max(gara) from partite`)).toBe('1 1239');
     expect(await valore(`select count(*)::int from popup_coda where situazione = 'partita_com_e_andata'`)).toBe(0);
+  });
+
+  it('partita prima dell’inizio del gioco: niente partita né popup', async () => {
+    await stato.banco!.come(null, `insert into impegni_famiglia (id, inizio, titolo) values ('g0', '2026-11-14T18:30:00+01:00', 'Partita Lani U13: VOLLEY SCANDIANO ROSSA vs ${U13}')`);
+    alle('2026-11-15T20:00:00+01:00');
+    await lancia();
+    expect(await valore(`select count(*)::int from partite`)).toBe(0);
   });
 
   it('il giorno dopo le 6:15 niente più popup: la segna Lani come prima', async () => {

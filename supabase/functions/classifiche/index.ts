@@ -69,6 +69,8 @@ async function risultato(c: Campionato, g: Gara): Promise<string | null> {
   const ieri = R.giornoRoma(new Date());
   ieri.setDate(ieri.getDate() - 1);
   if (giorno < R.iso(ieri)) return null;
+  // prima dell'inizio del gioco niente popup (accoda): la partita resterebbe senza risposta
+  if (giorno < R.CONFIG.periodo.inizio) return null;
 
   const { data: gia } = await db.from('partite').select('id').eq('gara_cid', c.cid).eq('gara', g.numero).maybeSingle();
   if (gia) return null;
