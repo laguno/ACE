@@ -392,3 +392,36 @@ describe('dieci minuti (sprint 2)', async () => {
     expect(passiPartita(0, 3, false)).toEqual({ giocata: 5, vinta: 0 });
   });
 });
+
+describe('assenze da scuola', () => {
+  const R2 = { aScuola: R.aScuola, prossimaLezione: R.prossimaLezione, cartellaConta, bandierina };
+  // orario finto: geografia il martedì e il venerdì, spagnolo il mercoledì
+  const orario = (g: number) => ({ 2: ['geografia'], 3: ['spagnolo'], 5: ['geografia'] })[g as 2 | 3 | 5] ?? [];
+
+  it('a casa: non è un giorno a scuola', () => {
+    expect(R2.aScuola(giorno('2026-11-24'))).toBe(true);
+    expect(R2.aScuola(giorno('2026-11-24'), ['2026-11-24'])).toBe(false);
+    expect(R2.aScuola(giorno('2026-11-28'))).toBe(false); // sabato
+  });
+
+  it('compito in scadenza nel giorno di assenza: alla lezione dopo della materia', () => {
+    // geografia per martedì 24, Lani a casa martedì: va a venerdì 27
+    expect(R.iso(R2.prossimaLezione('geografia', giorno('2026-11-24'), orario, ['2026-11-24']))).toBe('2026-11-27');
+    // a casa anche venerdì: martedì dopo
+    expect(R.iso(R2.prossimaLezione('geografia', giorno('2026-11-24'), orario, ['2026-11-24', '2026-11-27']))).toBe('2026-12-01');
+    // materia che non è nell'orario: primo giorno a scuola
+    expect(R.iso(R2.prossimaLezione('latino', giorno('2026-11-24'), orario, ['2026-11-25']))).toBe('2026-11-26');
+  });
+
+  it('cartella: la sera prima di un giorno a casa non conta', () => {
+    expect(R2.cartellaConta(giorno('2026-11-23'))).toBe(true);
+    expect(R2.cartellaConta(giorno('2026-11-23'), ['2026-11-24'])).toBe(false);
+  });
+
+  it('bandierina: non avanza nei giorni a casa e arriva lo stesso in cima', () => {
+    const lun = bandierina(giorno('2026-11-23'), undefined, undefined, ['2026-11-24']);
+    expect(bandierina(giorno('2026-11-24'), undefined, undefined, ['2026-11-24'])).toBe(lun);
+    expect(bandierina(giorno('2026-11-25'), undefined, undefined, ['2026-11-24'])).toBeGreaterThan(lun);
+    expect(bandierina(giorno('2027-06-04'), undefined, undefined, ['2026-11-24'])).toBe(7200);
+  });
+});

@@ -198,9 +198,40 @@ export function giornoDiScuola(d: Date): boolean {
   return !CONFIG.calendario.vacanze.some(([a, b]) => s >= a && s <= b);
 }
 
-/** Peso di un giorno per la bandierina: 0 se non c'è scuola. */
-function pesoGiorno(d: Date, rEvolutionDa: string): number {
-  if (!giornoDiScuola(d)) return 0;
+/**
+ * Giorni di assenza da scuola segnati dai genitori ('YYYY-MM-DD'). In quei giorni le cose
+ * obbligatorie escono dal calcolo delle chiavi e la bandierina non avanza (docs/02, Assenze).
+ */
+export type Assenze = ReadonlySet<string> | readonly string[];
+const assente = (d: Date, assenze: Assenze) => (Array.isArray(assenze) ? assenze.includes(iso(d)) : (assenze as ReadonlySet<string>).has(iso(d)));
+
+/** Lani a scuola quel giorno: giorno di scuola e nessuna assenza segnata. */
+export function aScuola(d: Date, assenze: Assenze = []): boolean {
+  return giornoDiScuola(d) && !assente(d, assenze);
+}
+
+/**
+ * Prossima lezione di una materia dopo il giorno dato, dall'orario (materie per giorno della
+ * settimana, 0 = domenica) e saltando vacanze e assenze. Serve a spostare i compiti in scadenza
+ * in un giorno di assenza. Senza la materia nell'orario: il primo giorno di scuola dopo.
+ */
+export function prossimaLezione(materia: string | null, dopo: Date, orario: (giornoSettimana: number) => string[], assenze: Assenze = []): Date {
+  const g = startOfDay(dopo);
+  for (let i = 0; i < 30; i++) {
+    g.setDate(g.getDate() + 1);
+    if (aScuola(g, assenze) && (!materia || orario(g.getDay()).includes(materia))) return g;
+  }
+  const primo = startOfDay(dopo);
+  for (let i = 0; i < 30; i++) {
+    primo.setDate(primo.getDate() + 1);
+    if (aScuola(primo, assenze)) return primo;
+  }
+  return primo;
+}
+
+/** Peso di un giorno per la bandierina: 0 se non c'è scuola o Lani è a casa. */
+function pesoGiorno(d: Date, rEvolutionDa: string, assenze: Assenze = []): number {
+  if (!aScuola(d, assenze)) return 0;
   const b = CONFIG.calendario.bandierina;
   return iso(d) >= rEvolutionDa ? b.peso_giorno_dopo_r_evolution : b.peso_giorno_prima_r_evolution;
 }
@@ -213,13 +244,14 @@ export function bandierina(
   oggi: Date,
   totale: number = CONFIG.percorso.totale_passi,
   rEvolutionDa: string = CONFIG.periodo.r_evolution_prevista,
+  assenze: Assenze = [],
 ): number {
   const inizio = new Date(CONFIG.periodo.inizio + 'T00:00:00');
   const fine = new Date(CONFIG.periodo.fine + 'T00:00:00');
   let fatto = 0;
   let tutto = 0;
   for (let d = new Date(inizio); d <= fine; d.setDate(d.getDate() + 1)) {
-    const w = pesoGiorno(d, rEvolutionDa);
+    const w = pesoGiorno(d, rEvolutionDa, assenze);
     tutto += w;
     if (d <= startOfDay(oggi)) fatto += w;
   }
@@ -325,11 +357,11 @@ export function riscattoFatto(esiti: boolean[]): boolean {
   return false;
 }
 
-/** Cartella: vale la sera prima di un giorno di scuola. */
-export function cartellaConta(sera: Date): boolean {
+/** Cartella: vale la sera prima di un giorno di scuola (non prima di un giorno di assenza). */
+export function cartellaConta(sera: Date, assenze: Assenze = []): boolean {
   const dopo = startOfDay(sera);
   dopo.setDate(dopo.getDate() + 1);
-  return giornoDiScuola(dopo);
+  return aScuola(dopo, assenze);
 }
 
 /** Sessione di ripasso: vale se fatta prima del giorno della verifica. */

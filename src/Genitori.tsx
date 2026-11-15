@@ -11,6 +11,7 @@ import { ImmaginePremio, immaginiPremi, type Immagine } from './ImmaginePremio';
 import { FotoSalvate, Fotografa, SELECT_RICHIESTE, descrizione, type RichiestaFoto } from './Foto';
 import Stato from './Stato';
 import { PartiteDaApprovare, SegnaPartita } from './Partita';
+import { LaniACasa, SpostaVerifiche } from './Assenze';
 
 // Area genitori — design/Genitori.html. Tutto passa dal client del genitore (sul suo telefono la
 // sessione normale, sull'iPad di Lani quella a parte sbloccata con il PIN): la RLS lo riconosce
@@ -307,6 +308,8 @@ function Settimana({ client, passi, avvisa }: Props) {
           <SegnaPartita client={client} passi={passi} avvisa={avvisa} />
         </>
       )}
+      <LaniACasa client={client} avvisa={avvisa} />
+      <SpostaVerifiche client={client} avvisa={avvisa} />
       <div className="carta">
         <h2>Da segnare, se serve</h2>
         <div className="griglia tre">

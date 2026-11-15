@@ -20,13 +20,16 @@ export async function riscatti(db: SupabaseClient, adesso = new Date()): Promise
 
   const ieri = dopo(R.giornoRoma(adesso), -1);
   const da = attesa.map((f) => f.in_attesa_di_riscatto_dal as string).sort()[0];
-  const [compiti, serate, sgridate, note] = await Promise.all([
+  const [compiti, serate, sgridate, note, assenti] = await Promise.all([
     db.from('compiti').select('scadenza, fatto_il').gt('scadenza', da).lte('scadenza', R.iso(ieri)),
     db.from('serate').select('data, cartella_il').gte('data', da).lte('data', R.iso(ieri)),
     db.from('sgridate').select('data').gt('data', da).lte('data', R.iso(ieri)),
     db.from('note').select('data, tipo').gt('data', da).lte('data', R.iso(ieri)),
+    db.from('assenze').select('giorno').gt('giorno', da).lte('giorno', R.iso(ieri)),
   ]);
-  for (const r of [compiti, serate, sgridate, note]) if (r.error) throw r.error;
+  for (const r of [compiti, serate, sgridate, note, assenti]) if (r.error) throw r.error;
+  // i giorni a casa non contano: né fatti bene né rotti, la fila continua (docs/02, Assenze)
+  const assenze = (assenti.data ?? []).map((x) => x.giorno as string);
 
   const bene = (d: Date) => {
     const g = R.iso(d);
@@ -45,7 +48,7 @@ export async function riscatti(db: SupabaseClient, adesso = new Date()): Promise
   const sbloccate: string[] = [];
   for (const f of attesa) {
     const esiti: boolean[] = [];
-    for (let d = dopo(R.giorno(f.in_attesa_di_riscatto_dal as string), 1); d <= ieri; d = dopo(d, 1)) if (R.giornoDiScuola(d)) esiti.push(bene(d));
+    for (let d = dopo(R.giorno(f.in_attesa_di_riscatto_dal as string), 1); d <= ieri; d = dopo(d, 1)) if (R.aScuola(d, assenze)) esiti.push(bene(d));
     if (!R.riscattoFatto(esiti)) continue;
     const { error: e1 } = await db.from('figurine').update({ sbloccata_il: adesso.toISOString() }).eq('posa', f.posa);
     if (e1) throw e1;

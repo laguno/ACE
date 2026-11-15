@@ -226,6 +226,7 @@
     ]
   },
   "calendario": {
+    "assenze": "Regole del 15/11/2026 (docs/02, Assenze): nei giorni segnati dai genitori le cose obbligatorie escono dal calcolo delle chiavi, la bandierina non avanza, i compiti passano alla lezione dopo. Nessun numero nuovo.",
     "giorni_scuola": "lunedì-venerdì",
     "vacanze": [
       [

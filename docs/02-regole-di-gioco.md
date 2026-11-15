@@ -112,6 +112,18 @@ Se a inizio settimana Lani è indietro di più di **una tappa e mezza** rispetto
 
 Mostra dove "dovrebbe" essere Lani a quella data. Avanza solo nei giorni di scuola, si ferma in vacanza, arriva in cima l'ultimo giorno di scuola (4 giugno 2027). Dopo l'arrivo di R-Evolution i giorni pesano 1,4 volte (più passi disponibili). Calendario in `config.calendario` (da verificare con quello dell'istituto).
 
+## Assenze da scuola
+
+Decise dal signore il 15/11/2026. I genitori segnano **"Lani a casa"** (Genitori, Settimana) per uno o più giorni di scuola; Lani non può segnarla.
+
+- **Chiavi**: le cose obbligatorie di quei giorni escono dal calcolo, né a favore né contro: compiti in scadenza, cartella della sera prima, ripasso previsto, dieci minuti. Quello che Lani fa lo stesso dà i passi di sempre.
+- **Compiti** in scadenza in un giorno di assenza: passano alla **lezione successiva di quella materia** (orario ricavato dalle lezioni di Nuvola delle ultime tre settimane, saltando vacanze e altri giorni a casa), con i passi pieni. La data spostata resta anche se Nuvola la riscrive.
+- **Verifiche** di quel giorno: diventano **"da recuperare"**; un genitore mette la nuova data, anche "settimana prossima" (lunedì della settimana dopo, segnata come data vaga), e il piano di ripasso si rifà. "Sposta verifica" vale anche senza assenza.
+- **Bandierina**: nei giorni a casa non avanza (arriva comunque in cima l'ultimo giorno).
+- **Niente notifiche né rimproveri** a Lani quel giorno; la serie nera non si rompe né avanza (il giorno non conta per il riscatto).
+- **Al rientro**, il primo giorno di scuola dopo l'assenza, popup "Bentornata" (docs/05).
+- **Assenze dal registro**: non ancora lette da Nuvola (nessun servizio delle assenze tra quelli mappati, da verificare con le credenziali); per ora le segnano i genitori.
+
 ## Forzieri ed enigma
 
 - **Stati**: chiuso → enigma visibile (quando manca l'ultima tappa) → aperto → consegnato.

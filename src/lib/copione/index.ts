@@ -53,8 +53,10 @@ export const POPUP = {
   chiavi_3: { priorita: 4, posa: 'leo-festeggia', titolo: 'Tre chiavi', testo: 'Tutto fatto. Leo non trova niente da prenderti in giro.' },
   // riscatto della serie nera: la posa del popup è quella della figurina sbloccata (_shared/riscatto.ts)
   figurina_nera: { priorita: 4, posa: 'papa-pollice', titolo: 'Riscatto fatto', testo: 'Sette giorni fatti bene: figurina nera sbloccata, {nome}.' },
+  // assenze: al rientro (proposta del 15/11, da approvare dal signore)
+  bentornata: { priorita: 4, posa: 'lani-saluta', titolo: 'Bentornata', testo: 'Che bello riaverti a scuola. I compiti dei giorni a casa sono già spostati: si riparte con calma.' },
   // studio
-  verifica_nuova: { priorita: 4, posa: 'lani-pensierosa', titolo: 'Verifica in arrivo', testo: '{materia}, {giorno}. Il piano è pronto: {n:una sessione:# sessioni} da 15 minuti.' },
+  verifica_nuova:{ priorita: 4, posa: 'lani-pensierosa', titolo: 'Verifica in arrivo', testo: '{materia}, {giorno}. Il piano è pronto: {n:una sessione:# sessioni} da 15 minuti.' },
   verifica_nuova_una: { priorita: 4, posa: 'lani-pensierosa', titolo: 'Verifica in arrivo', testo: '{materia}, {giorno}. Il piano è pronto: una sessione da 15 minuti.' },
 } satisfies Record<string, Riga>;
 

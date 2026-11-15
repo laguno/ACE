@@ -39,6 +39,12 @@ export type Database = {
   }
   public: {
     Tables: {
+      assenze: {
+        Row: { creata_il: string; giorno: string; segnata_da: string | null }
+        Insert: { creata_il?: string; giorno: string; segnata_da?: string | null }
+        Update: { creata_il?: string; giorno?: string; segnata_da?: string | null }
+        Relationships: []
+      }
       classifiche: {
         Row: {
           aggiornata_il: string
@@ -68,6 +74,7 @@ export type Database = {
       }
       compiti: {
         Row: {
+          scadenza_spostata: string | null
           assegnato_il: string | null
           corretto_da: string | null
           corretto_il: string | null
@@ -82,6 +89,7 @@ export type Database = {
           testo: string
         }
         Insert: {
+          scadenza_spostata?: string | null
           assegnato_il?: string | null
           corretto_da?: string | null
           corretto_il?: string | null
@@ -96,6 +104,7 @@ export type Database = {
           testo: string
         }
         Update: {
+          scadenza_spostata?: string | null
           assegnato_il?: string | null
           corretto_da?: string | null
           corretto_il?: string | null
@@ -1208,6 +1217,8 @@ export type Database = {
       }
       verifiche: {
         Row: {
+          data_spostata: string | null
+          recupero_vago: boolean
           argomento: string | null
           creato_il: string
           data: string
@@ -1218,6 +1229,8 @@ export type Database = {
           tipo: Database["public"]["Enums"]["tipo_verifica"]
         }
         Insert: {
+          data_spostata?: string | null
+          recupero_vago?: boolean
           argomento?: string | null
           creato_il?: string
           data: string
@@ -1228,6 +1241,8 @@ export type Database = {
           tipo?: Database["public"]["Enums"]["tipo_verifica"]
         }
         Update: {
+          data_spostata?: string | null
+          recupero_vago?: boolean
           argomento?: string | null
           creato_il?: string
           data?: string
@@ -1441,6 +1456,10 @@ export type Database = {
           p_riferimento: string
         }
         Returns: string
+      }
+      sposta_verifica: {
+        Args: { p_data: string; p_id: string; p_vago?: boolean }
+        Returns: undefined
       }
       storna_spunta: {
         Args: { p_motivo: string; p_riferimento: string }

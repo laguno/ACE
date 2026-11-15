@@ -222,7 +222,7 @@ const inserisce = async (uid, t, ruolo) => {
 // foto_pagine e serate: Lani inserisce solo a condizioni (file vero, data vicina), provate sopra e sotto
 // partite: Lani solo da approvare, provato sopra
 const LANI_INSERISCE = ['errori_client', 'flashcard_giri', 'partite', 'push_iscrizioni', 'quiz_tentativi', 'umore', 'video_visti'];
-const GENITORE_INSERISCE = [...LANI_INSERISCE, 'foto_pagine', 'serate', 'compiti', 'esercizi_dieci_minuti', 'fogli_firma', 'forzieri', 'frasi', 'gesti_casa', 'impostazioni', 'sgridate'];
+const GENITORE_INSERISCE = [...LANI_INSERISCE, 'assenze', 'foto_pagine', 'serate', 'compiti', 'esercizi_dieci_minuti', 'fogli_firma', 'forzieri', 'frasi', 'gesti_casa', 'impostazioni', 'sgridate'];
 for (const t of tabelle) {
   verifica(`anon non inserisce in ${t}`, !(await inserisce(null, t, 'anon')));
   verifica(`anon non legge ${t}`, await come(null, `select * from ${t}`, 'anon').then((r) => r.rows.length === 0, () => true));
@@ -235,7 +235,7 @@ for (const t of tabelle) {
 const larghe = (await come(null, `select tablename || ' ' || cmd || ' ' || policyname p from pg_policies where schemaname = 'public' and cmd in ('DELETE', 'ALL') and coalesce(qual, '') not like '%e_genitore()%' and policyname <> 'proprie'`)).rows;
 verifica('nessuna regola di cancellazione oltre ai genitori', larghe.length === 0 || (console.log(larghe), false));
 // funzioni chiamabili da un utente: solo queste (registra_passi, tenta_enigma... solo dal server)
-const FUNZIONI = ['controlla_pin', 'e_famiglia', 'e_genitore', 'frase_del_giorno', 'imposta_pin', 'oggi', 'storna_spunta', 'vedi_saldo', 'verifica_pin'];
+const FUNZIONI = ['controlla_pin', 'e_famiglia', 'e_genitore', 'frase_del_giorno', 'imposta_pin', 'oggi', 'sposta_verifica', 'storna_spunta', 'vedi_saldo', 'verifica_pin'];
 const chiamabili = (await come(null, `select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.prorettype <> 'trigger'::regtype and has_function_privilege('authenticated', p.oid, 'execute') order by 1`)).rows.map((r) => r.proname);
 verifica('funzioni chiamabili da Lani e genitori: solo quelle previste', JSON.stringify(chiamabili) === JSON.stringify(FUNZIONI) || (console.log(chiamabili), false));
 const perAnon = (await come(null, `select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.prorettype <> 'trigger'::regtype and has_function_privilege('anon', p.oid, 'execute')`)).rows;
@@ -293,6 +293,22 @@ await come(null, `update forzieri set stato = 'aperto' where n = 2`);
 await come(PAPA, `update forzieri set stato = 'consegnato', consegnato_il = now() where n = 2`);
 verifica('un genitore segna consegnato un forziere aperto', (await val(null, 'select stato from forzieri where n = 2')) === 'consegnato');
 verifica('un genitore non legge l\'hash del PIN', (await come(PAPA, 'select * from pin_genitori')).rows.length === 0);
+
+// assenze (0036): le segnano i genitori; date spostate che la sincronizzazione non riscrive
+await fallisce('Lani non segna un\'assenza', LANI, `insert into assenze (giorno) values ('2026-11-24')`);
+await come(PAPA, `insert into assenze (giorno) values ('2026-11-24')`);
+verifica('Lani legge le assenze', (await come(LANI, 'select * from assenze')).rows.length === 1);
+await come(null, `insert into verifiche (nuvola_id, tipo, data) values ('v-assenza', 'verifica', '2026-11-24')`);
+const VERIFICA = await val(null, `select id from verifiche where nuvola_id = 'v-assenza'`);
+await come(null, `insert into sessioni_ripasso (verifica_id, numero, data_prevista, tipo) values ('${VERIFICA}', 1, '2026-11-23', 'quiz')`);
+await fallisce('Lani non sposta una verifica', LANI, `select sposta_verifica('${VERIFICA}', '2026-12-01')`);
+await come(PAPA, `select sposta_verifica('${VERIFICA}', '2026-11-30', true)`);
+await come(null, `update verifiche set data = '2026-11-24' where id = '${VERIFICA}'`);
+verifica('la sincronizzazione non riporta indietro una verifica spostata', (await val(null, `select data::text from verifiche where id = '${VERIFICA}'`)) === '2026-11-30');
+verifica('spostata: via le sessioni non fatte', (await val(null, `select count(*)::int from sessioni_ripasso where verifica_id = '${VERIFICA}'`)) === 0);
+await come(null, `update compiti set scadenza_spostata = '2026-11-27' where id = '${COMPITO}'`);
+await come(null, `update compiti set scadenza = '2026-11-24' where id = '${COMPITO}'`);
+verifica('la sincronizzazione non riporta indietro un compito spostato', (await val(null, `select scadenza::text from compiti where id = '${COMPITO}'`)) === '2026-11-27');
 
 console.log(`\n${ok} ok, ${ko} no`);
 process.exit(ko ? 1 : 0);

@@ -73,6 +73,7 @@ const GRUPPI: [string, K.ChiavePopup[]][] = [
   ['Chiavi della domenica', ['chiavi_0', 'chiavi_1', 'chiavi_2', 'chiavi_3']],
   ['Riscatto', ['figurina_nera']],
   ['Verifiche', ['verifica_nuova', 'verifica_nuova_una']],
+  ['Assenze', ['bentornata']],
 ];
 // una riga nuova del copione non resta fuori dalla Vetrina
 const ELENCATE = new Set(GRUPPI.flatMap(([, c]) => c));

@@ -12,6 +12,12 @@ export async function accoda(db: SupabaseClient, evento: string, chiave: K.Chiav
   // prima dell'inizio del gioco niente popup né figurine: l'album parte da zero il primo giorno
   if (new Date().toISOString().slice(0, 10) < R.CONFIG.periodo.inizio) return;
   const p = K.componi(chiave, v);
+  const tono = manifest.avatar.find((a) => a.id === p.posa)?.tono;
+  if (tono === 'arrabbiato' || tono === 'dispettoso') {
+    // Lani a casa (assenza): niente rimproveri quel giorno (docs/02, Assenze)
+    const { data: assenza } = await db.from('assenze').select('giorno').eq('giorno', R.iso(R.giornoRoma(new Date()))).maybeSingle();
+    if (assenza) return;
+  }
   const { data, error } = await db
     .from('popup_coda')
     .upsert({ chiave: evento, situazione: chiave, ...p }, { onConflict: 'chiave', ignoreDuplicates: true })

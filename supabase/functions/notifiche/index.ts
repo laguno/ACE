@@ -1,13 +1,15 @@
 // Edge Function "notifiche": gira ogni 15 minuti (cron) e manda le notifiche push del copione
 // (docs/05, Notifiche): a Lani al massimo 3 al giorno (7:00, compiti nuovi del pomeriggio,
 // chiusura della sera) più un sollecito 45 minuti dopo la chiusura; ai genitori il riepilogo della
-// domenica. Mai rimproveri. Una per tipo al giorno: la chiave di notifiche_inviate lo garantisce.
+// domenica. Mai rimproveri. Nei giorni di assenza (Lani a casa) niente notifiche a Lani; al rientro
+// il popup "Bentornata" (docs/02, Assenze). Una per tipo al giorno: la chiave di notifiche_inviate lo garantisce.
 import { dbServizio, registraErroreServer } from '../_shared/ambiente.ts';
 import * as C from '../../../src/lib/calendario/index.ts';
 import * as K from '../../../src/lib/copione/index.ts';
 import * as R from '../../../src/lib/regole/index.ts';
 import { inviaPush } from '../_shared/push.ts';
 import { stessoSegreto } from '../_shared/accesso.ts';
+import { accoda } from '../_shared/popup.ts';
 
 const db = dbServizio();
 
@@ -27,6 +29,11 @@ async function turno() {
   const oggi = R.giornoRoma(adesso);
   const giorno = R.iso(oggi);
   const inviate: Record<string, number> = {};
+  const { data: assenza } = await db.from('assenze').select('giorno').eq('giorno', giorno).maybeSingle();
+  if (assenza) {
+    // a casa: niente notifiche a Lani; solo il riepilogo della domenica ai genitori, più sotto
+    if (!(oggi.getDay() === 0 && finestra(ora, '21:45'))) return { ora, a_casa: true, inviate };
+  }
 
   const impegniDi = async (d: Date) => {
     const { data } = await db.from('impegni_famiglia').select('titolo, inizio').gte('inizio', d.toISOString()).lt('inizio', piu(d, 1).toISOString());
@@ -34,7 +41,14 @@ async function turno() {
   };
 
   // 7:00: verifica e allenamento del giorno
-  if (finestra(ora, '07:00')) {
+  if (!assenza && finestra(ora, '07:00')) {
+    // rientro dopo l'assenza: l'ultimo giorno di scuola prima di oggi Lani era a casa
+    let prima = piu(oggi, -1);
+    while (!R.giornoDiScuola(prima)) prima = piu(prima, -1);
+    if (R.giornoDiScuola(oggi)) {
+      const { data: ieri } = await db.from('assenze').select('giorno').eq('giorno', R.iso(prima)).maybeSingle();
+      if (ieri) await accoda(db, `bentornata:${giorno}`, 'bentornata');
+    }
     const [{ data: verifiche }, impegni] = await Promise.all([
       db.from('verifiche').select('materie(abbreviazione)').eq('data', giorno),
       impegniDi(oggi),
@@ -52,7 +66,7 @@ async function turno() {
   }
 
   // 14:45, dopo la sincronizzazione delle 14:30: compiti nuovi per domani
-  if (finestra(ora, '14:45')) {
+  if (!assenza && finestra(ora, '14:45')) {
     const domani = R.iso(R.prossimoGiornoDiScuola(oggi));
     const { data: nuovi } = await db.from('compiti').select('testo, materie(abbreviazione)').eq('scadenza', domani).gte('creato_il', oggi.toISOString());
     if (nuovi?.length) {
@@ -67,7 +81,7 @@ async function turno() {
   // venerdì e sabato con partita il giorno dopo: chiusura breve con la sola borsa
   const soloBorsa = !R.cartellaConta(oggi) && C.partitaTra(await impegniDi(piu(oggi, 1)));
   const chiusura = C.oraChiusura(imp.ora_chiusura?.[oggi.getDay()] ?? null, await impegniDi(oggi), soloBorsa ? (imp.ora_chiusura_breve ?? null) : null);
-  if (chiusura) {
+  if (chiusura && !assenza) {
     if (finestra(ora, chiusura))
       inviate.chiusura = await manda('lani', 'chiusura', K.notifica(oggi.getDay() === 0 ? 'chiusura_domenica' : 'chiusura'), giorno);
     const minuti = R.CONFIG.notifiche.sollecito_dopo_minuti;

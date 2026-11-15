@@ -50,7 +50,7 @@ function curva(punti: { x: number; y: number }[]) {
 }
 
 export default function Astra({ apri, forziere: aperto }: { apri: (pagina: 'Figurina' | 'Album') => void; forziere?: number }) {
-  const [dati, setDati] = useState<{ passi: number; prima: number; chiavi: number; settimana: number | null; forzieri: Forziere[]; album: number }>();
+  const [dati, setDati] = useState<{ passi: number; prima: number; chiavi: number; settimana: number | null; forzieri: Forziere[]; album: number; assenze: string[] }>();
   const [scelto, setScelto] = useState<number | undefined>(aperto);
   // la bandierina parte dal giorno di accensione di R-Evolution, come quella del server (chiavi.ts)
   const inizioRE = R.inizioREvolution(useREvolutionDa());
@@ -58,12 +58,14 @@ export default function Astra({ apri, forziere: aperto }: { apri: (pagina: 'Figu
   useSfondo('panna');
 
   async function carica() {
-    const [s, c, w, f, a] = await Promise.all([
+    const [s, c, w, f, a, as] = await Promise.all([
       vediSaldo(),
       supabase.from('chiavi_totali').select('chiavi').maybeSingle(),
       supabase.from('settimane').select('chiavi').not('chiavi', 'is', null).order('inizio', { ascending: false }).limit(1),
       supabase.from('forzieri_lani').select('n, stato, enigma, premio, tentativi_enigma, enigma_risolto_il, aiutino').order('n'),
       supabase.from('figurine').select('posa', { count: 'exact', head: true }).not('sbloccata_il', 'is', null),
+      // giorni a casa: la bandierina non avanza (docs/02, Assenze)
+      supabase.from('assenze').select('giorno'),
     ]);
     setDati({
       passi: s.adesso,
@@ -72,6 +74,7 @@ export default function Astra({ apri, forziere: aperto }: { apri: (pagina: 'Figu
       settimana: w.data?.[0]?.chiavi ?? null,
       forzieri: (f.data ?? []) as Forziere[],
       album: a.count ?? 0,
+      assenze: (as.data ?? []).map((x) => x.giorno as string),
     });
   }
   useEffect(() => {
@@ -94,8 +97,8 @@ export default function Astra({ apri, forziere: aperto }: { apri: (pagina: 'Figu
   const mondo = MONDI[nMondo];
   const qui = tappaDi(dati.passi);
   const oggi = R.giornoRoma(new Date());
-  const bandierina = tappaDi(R.bandierina(oggi, undefined, inizioRE));
-  const natale = tappaDi(R.bandierina(new Date(oggi.getFullYear(), 11, 23), undefined, inizioRE));
+  const bandierina = tappaDi(R.bandierina(oggi, undefined, inizioRE, dati.assenze));
+  const natale = tappaDi(R.bandierina(new Date(oggi.getFullYear(), 11, 23), undefined, inizioRE, dati.assenze));
   const forziere = (n: number) => dati.forzieri.find((f) => f.n === n);
   const prossimo = R.CONFIG.forzieri.find((c) => !['aperto', 'consegnato'].includes(forziere(c.n)?.stato ?? 'chiuso'));
 

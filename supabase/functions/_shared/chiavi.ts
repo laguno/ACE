@@ -21,16 +21,20 @@ export async function contaChiavi(db: SupabaseClient, lun: Date) {
   const { data: gia } = await db.from('settimane').select('chiavi').eq('inizio', da).maybeSingle();
   if (gia?.chiavi != null) return { settimana: da, gia: true, chiavi: gia.chiavi };
 
-  const [compiti, fogli, sessioni, movimenti, note, impegni, prima, accesa] = await Promise.all([
+  const [compiti, fogli, sessioni, movimenti, note, impegni, prima, accesa, assenti] = await Promise.all([
     db.from('compiti').select('scadenza').gte('scadenza', da).lte('scadenza', a),
     db.from('fogli_firma').select('id').or(`and(scadenza.gte.${da},scadenza.lte.${a}),and(consegnato_il.gte.${da},consegnato_il.lte.${a}T23:59:59)`),
-    db.from('sessioni_ripasso').select('id').gte('data_prevista', da).lte('data_prevista', a),
+    db.from('sessioni_ripasso').select('data_prevista').gte('data_prevista', da).lte('data_prevista', a),
     db.from('movimenti_passi').select('id, motivo, passi').gte('giorno', da).lte('giorno', a),
     db.from('note').select('tipo').gte('data', da).lte('data', a).in('tipo', ['disciplinare', 'didattica']),
     db.from('impegni_famiglia').select('titolo, inizio').gte('inizio', lun.toISOString()).lt('inizio', piu(dom, 2).toISOString()),
     db.from('movimenti_passi').select('passi, moltiplicatore').lt('giorno', da),
     db.from('impostazioni').select('valore').eq('chiave', R.CHIAVE_R_EVOLUTION).maybeSingle(),
+    // assenze fino al lunedì dopo: la cartella di domenica sera non conta se lunedì Lani è a casa
+    db.from('assenze').select('giorno').gte('giorno', da).lte('giorno', R.iso(piu(dom, 1))),
   ]);
+  // giorni a casa (docs/02, Assenze): le cose obbligatorie di quei giorni escono dal calcolo
+  const assenze = new Set(ok(assenti, 'assenze').map((x) => x.giorno as string));
   // R-Evolution la accendono i genitori: da quel giorno i dieci minuti contano e la bandierina pesa di più
   const valore = ok(accesa, 'impostazioni')?.valore;
   const rEvolutionDa = typeof valore === 'string' ? valore : null;
@@ -42,12 +46,12 @@ export async function contaChiavi(db: SupabaseClient, lun: Date) {
       .map((i) => R.iso(R.giornoRoma(i.inizio))),
   );
   const conta = R.contaSettimana({
-    compiti: ok(compiti, 'compiti').filter((c) => R.giornoDiScuola(R.giorno(c.scadenza))).length,
-    sereCartella: giorni.filter((d) => R.cartellaConta(d)).length,
+    compiti: ok(compiti, 'compiti').filter((c) => R.aScuola(R.giorno(c.scadenza), assenze)).length,
+    sereCartella: giorni.filter((d) => R.cartellaConta(d, assenze)).length,
     sereBorsa: giorni.filter((d) => sportIl.has(R.iso(piu(d, 1)))).length,
     fogli: ok(fogli, 'fogli').length,
-    sessioni: ok(sessioni, 'sessioni').length,
-    sereDieciMinuti: giorni.filter((d) => R.rEvolutionAttiva(d, rEvolutionDa)).length,
+    sessioni: ok(sessioni, 'sessioni').filter((x) => !assenze.has(x.data_prevista)).length,
+    sereDieciMinuti: giorni.filter((d) => R.rEvolutionAttiva(d, rEvolutionDa) && !assenze.has(R.iso(d))).length,
     movimenti: ok(movimenti, 'movimenti'),
     note: ok(note, 'note').length,
   });
@@ -55,7 +59,7 @@ export async function contaChiavi(db: SupabaseClient, lun: Date) {
 
   // rimonta: indietro di più di una tappa e mezza rispetto alla bandierina di lunedì
   const passiPrima = ok(prima, 'saldo').reduce((s, m) => s + Math.round(m.passi * Number(m.moltiplicatore)), 0);
-  const molt = R.moltiplicatoreRimonta(passiPrima, R.bandierina(lun, undefined, R.inizioREvolution(rEvolutionDa)), chiavi);
+  const molt = R.moltiplicatoreRimonta(passiPrima, R.bandierina(lun, undefined, R.inizioREvolution(rEvolutionDa), await giorniAssenza(db)), chiavi);
   if (molt > 1) {
     const { error } = await db.from('movimenti_passi').update({ moltiplicatore: molt }).gte('giorno', da).lte('giorno', a).gt('passi', 0);
     if (error) throw new Error(`rimonta: ${error.message}`);
@@ -77,4 +81,9 @@ export async function contaChiavi(db: SupabaseClient, lun: Date) {
     cosa: chiavi === 1 ? 'una settimana senza note' : `${mancano} ${mancano === 1 ? 'cosa' : 'cose'} in più`,
   });
   return { settimana: da, chiavi, rimonta: molt > 1, ...conta, forzieri: await aggiornaForzieri(db) };
+}
+
+/** Tutti i giorni di assenza segnati (per la bandierina, che conta dall'inizio dell'anno). */
+export async function giorniAssenza(db: SupabaseClient): Promise<string[]> {
+  return ok(await db.from('assenze').select('giorno'), 'assenze').map((x) => x.giorno as string);
 }
