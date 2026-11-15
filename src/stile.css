@@ -320,7 +320,7 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .astra .mantra { margin: 2px 0 0; padding: 0; background: none; font: italic 800 13px Nunito, sans-serif; color: var(--accento); }
 .astra-figurina { flex: none; width: 60px; height: 60px; padding: 0; border: 0; background: none; }
 .astra-figurina img { width: 60px; height: 60px; object-fit: contain; }
-.astra-saldi { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 8px; border-top: 2px dashed var(--lilla); }
+.astra-saldi { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 4px 12px; padding-top: 8px; border-top: 2px dashed var(--lilla); }
 .chiavi-settimana { display: flex; align-items: center; gap: 8px; margin: 12px 0 0; }
 .chiavi-settimana small { font: 800 13px/1.2 Nunito, sans-serif; color: var(--testo-2); max-width: 90px; }
 .chiavi-settimana > span { display: flex; }
