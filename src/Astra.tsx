@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ImageSquare } from '@phosphor-icons/react';
 import { Attesa, useSfondo } from './kit';
 import { Contapassi, vediSaldo } from './Contapassi';
+import ComePassi from './ComePassi';
 import { Biglietto } from './Biglietto';
 import { ImmaginePremio, immaginiPremi, type Immagine } from './ImmaginePremio';
 import * as R from './lib/regole';
@@ -50,6 +51,7 @@ function curva(punti: { x: number; y: number }[]) {
 }
 
 export default function Astra({ apri, forziere: aperto }: { apri: (pagina: 'Figurina' | 'Album') => void; forziere?: number }) {
+  const [regole, setRegole] = useState(false);
   const [dati, setDati] = useState<{ passi: number; prima: number; chiavi: number; settimana: number | null; forzieri: Forziere[]; album: number }>();
   const [scelto, setScelto] = useState<number | undefined>(aperto);
   // la bandierina parte dal giorno di accensione di R-Evolution, come quella del server (chiavi.ts)
@@ -99,6 +101,7 @@ export default function Astra({ apri, forziere: aperto }: { apri: (pagina: 'Figu
   const forziere = (n: number) => dati.forzieri.find((f) => f.n === n);
   const prossimo = R.CONFIG.forzieri.find((c) => !['aperto', 'consegnato'].includes(forziere(c.n)?.stato ?? 'chiuso'));
 
+  if (regole) return <ComePassi chiudi={() => setRegole(false)} />;
   if (scelto) return <SchedaForziere f={forziere(scelto)} n={scelto} passi={dati.passi} chiavi={dati.chiavi} chiudi={() => (setScelto(undefined), carica())} />;
 
   const punti = SOGLIE.map((_, i) => punto(i + 1));
@@ -143,6 +146,9 @@ export default function Astra({ apri, forziere: aperto }: { apri: (pagina: 'Figu
             <img src={img('oggetti', 'passo')} alt="" width={30} height={30} />
             <Contapassi prima={dati.prima} adesso={dati.passi} />
           </span>
+          <button className="link come-passi-apri" onClick={() => setRegole(true)}>
+            Come si fanno i passi
+          </button>
         </div>
         {dati.settimana !== null && (
           <p className="nota astra-chiavi-totali">{fraseChiavi(dati.chiavi, prossimo?.chiavi)}</p>

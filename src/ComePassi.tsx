@@ -1,0 +1,49 @@
+import { ArrowLeft } from '@phosphor-icons/react';
+import { Sticker } from './kit';
+import { useREvolutionDa } from './accensione';
+import * as R from './lib/regole';
+import { blocchiPassi } from './lib/regole/come-passi';
+
+// "Come si fanno i passi": da Astra (pulsante vicino al contapassi) e dalla prima accensione.
+// Nell'area genitori la versione completa: tutti i blocchi, con i dettagli già aperti.
+// Numeri e testi da blocchiPassi (config); testi del copione, docs/05.
+
+export default function ComePassi({ chiudi, completa = false, indietro = 'Astra' }: { chiudi?: () => void; completa?: boolean; indietro?: string }) {
+  const accesaDa = useREvolutionDa();
+  const blocchi = blocchiPassi(R.CONFIG, { rEvolution: completa || accesaDa !== null });
+  return (
+    <section className="come-passi">
+      {chiudi && (
+        <button className="indietro" onClick={chiudi} aria-label={`Torna a ${indietro}`}>
+          <ArrowLeft size={20} weight="bold" aria-hidden /> {indietro}
+        </button>
+      )}
+      {!completa && <h1>Come si fanno i passi</h1>}
+      {blocchi.map((b) => (
+        <article key={b.id} className="carta blocco-passi">
+          <header>
+            <Sticker posa={b.posa} cartella={b.cartella} misura={56} />
+            <h2>{b.titolo}</h2>
+          </header>
+          {b.riga && <p className="nota">{b.riga}</p>}
+          <ul>
+            {b.voci.map((v) => (
+              <li key={v.testo}>
+                <span>{v.testo}</span>
+                <b className="valore">{v.valore}</b>
+              </li>
+            ))}
+          </ul>
+          {b.dettagli.length > 0 && (
+            <details open={completa}>
+              <summary>Come funziona</summary>
+              {b.dettagli.map((d) => (
+                <p key={d}>{d}</p>
+              ))}
+            </details>
+          )}
+        </article>
+      ))}
+    </section>
+  );
+}

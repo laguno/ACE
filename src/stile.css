@@ -701,3 +701,17 @@ body:has(.avvio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom))
   .barra .lungo { display: none; }
   .barra .corto { display: inline; }
 }
+
+/* Come si fanno i passi (Astra, prima accensione, regole dei genitori) */
+.come-passi { display: grid; gap: 16px; padding-bottom: 24px; }
+.come-passi h1 { margin: 0; }
+.blocco-passi header { display: flex; align-items: center; gap: 12px; }
+.blocco-passi h2 { margin: 0; }
+.blocco-passi ul { list-style: none; margin: 8px 0 0; padding: 0; }
+.blocco-passi li { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; border-top: 2px dashed var(--lilla); }
+.blocco-passi li:first-child { border-top: 0; }
+.blocco-passi .valore { flex: none; font: 800 22px Nunito, sans-serif; }
+.blocco-passi details { margin-top: 8px; }
+.blocco-passi summary { min-height: 44px; display: flex; align-items: center; font-weight: 800; cursor: pointer; }
+.blocco-passi details p { margin: 4px 0; color: var(--testo-2); }
+.come-passi-apri { min-height: 44px; }

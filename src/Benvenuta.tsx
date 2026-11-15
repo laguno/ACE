@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { attivaNotifiche, notifichePossibili } from './notifiche';
 import { Sticker, useSfondo } from './kit';
+import ComePassi from './ComePassi';
 
 // Prima accensione di Lani (design/Benvenuta.html): tre schermate, una volta per dispositivo.
 // Il ricordo sta nel localStorage del dispositivo: se si perde, la benvenuta torna, niente di grave.
@@ -22,6 +23,7 @@ const SCHERMATE = 3;
 export default function Benvenuta({ fine }: { fine: () => void }) {
   useSfondo('rosa');
   const [passo, setPasso] = useState(0);
+  const [regole, setRegole] = useState(false);
   const titolo = useRef<HTMLHeadingElement>(null);
   // il bottone premuto sparisce con la schermata: il fuoco va sul titolo nuovo, così il lettore di schermo riparte da lì
   useEffect(() => {
@@ -36,6 +38,13 @@ export default function Benvenuta({ fine }: { fine: () => void }) {
     fine();
   };
   const avanti = () => setPasso((p) => p + 1);
+
+  if (regole)
+    return (
+      <main className="benvenuta">
+        <ComePassi chiudi={() => setRegole(false)} indietro="Benvenuta" />
+      </main>
+    );
 
   return (
     <main className="benvenuta">
@@ -70,6 +79,9 @@ export default function Benvenuta({ fine }: { fine: () => void }) {
             <h1 ref={titolo} tabIndex={-1}>Passi e chiavi</h1>
             <p className="frase">I passi ti fanno camminare, le chiavi aprono i forzieri.</p>
             <p>Ogni cosa fatta dà passi. La domenica sera arrivano le chiavi della settimana, da 0 a 3. Nei forzieri ci sono i premi scelti da mamma e papà.</p>
+            <button className="link" onClick={() => setRegole(true)}>
+              Come si fanno i passi
+            </button>
           </div>
         </>
       )}

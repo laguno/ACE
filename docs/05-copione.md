@@ -257,6 +257,20 @@ Deciso dal signore il 6 novembre: i punti si chiamano **passi** e le stelle **ch
 
 Prima di metterle nell'app va controllata ogni attribuzione: se un autore non è certo, si scrive "proverbio" o si toglie la frase. Si possono aggiungere frasi di pallavolisti e allenatori, ad esempio Julio Velasco, ma solo dopo averle verificate su una fonte.
 
+## Come si fanno i passi (proposta del 15/11, da approvare dal signore)
+
+Pagina di Astra (pulsante "Come si fanno i passi" sotto il contapassi), raggiungibile anche dalla seconda schermata della prima accensione; nell'area Genitori, Altro, "Regole del gioco" è la versione completa (tutti i blocchi, dettagli aperti, R-Evolution sempre). Una riga per voce con il numero grande a destra; i dettagli dietro "Come funziona". I numeri {tra graffe} vengono da `data/config-gioco.json` (codice: `src/lib/regole/come-passi.ts`, prova che nessun numero è scritto a mano).
+
+| Blocco (avatar) | Riga sotto il titolo | Voci | Come funziona |
+|---|---|---|---|
+| Ogni giorno (lani-buongiorno) | | Compiti per domani fatti; Cartella pronta la sera; Borsa pronta per allenamento o partita; Foglio da firmare consegnato; Ripasso prima di una verifica; Foto delle pagine che ACE ti chiede | "Compiti fatti almeno {2} giorni prima: {13} invece di {10}. La serie in anticipo arriva al massimo a fine settimana." "Per la foto: +{2} una volta per richiesta, quante che siano le pagine." |
+| Studio in più (lani-concentrata) | "Solo dopo i compiti del giorno, al massimo {4} al giorno per tipo." | Giro di flash card; Video visto fino in fondo; Quiz al primo tentativo | "Ogni flash card si gira dopo {7} secondi." "Quiz: con almeno il {90%} giusto, 1° tentativo +{10}, … 4° tentativo e dopo +{1}; sotto, +{6}, …" |
+| Voti e traguardi (lani-festeggia) | | Voto da 9 o 10; Voto da 8; Voto da 7; Voto migliore del precedente, almeno 6; Sufficienza dopo un'insufficienza; Enigma del forziere risolto; Nota di merito | "Un voto basso non toglie passi: si guarda avanti con il piano." "Enigma: {3} tentativi." "Pagella del primo quadrimestre: +{100} con la media del 7, +{200} con il 7 e mezzo. Una materia che torna sufficiente: +{25}." |
+| R-Evolution (lani-divisa), solo se accesa | | Dieci minuti di allenamento; Partita giocata; Partita vinta, in più; In panchina tutta la partita | "I dieci minuti valgono solo finiti, dalle {06:00} alle {13:00}." "Vinta stando in panchina: +{5} in più." |
+| Gesti di casa (mamma-pollice) | "Li danno mamma e papà quando li notano, non si chiedono." | Scrivania, lavastoviglie, letto, vestiti | "Al massimo +{6} al giorno." |
+| Cosa fa perdere passi (papa-ci-pensiamo) | | Nota disciplinare; Tre note per dimenticanza; Bagno in disordine dopo la doccia; Gesto antisportivo in campo (solo con R-Evolution); Balla o imbroglio | "Il saldo non va mai sotto zero. Una spunta sbagliata tolta da mamma o papà non è un castigo: si torna com'era." |
+| Chiavi e forzieri (mazzo-chiavi) | "Ogni domenica sera, da zero a tre chiavi. Le chiavi aprono i forzieri." | Prima chiave: passi di ogni giorno {70%}; Seconda chiave: nessuna nota (zero note); Terza chiave: cose fatte {95%} | "Prima chiave con almeno il {70%} dei passi di ogni giorno; seconda se in più non ci sono note; terza con almeno il {95%} delle cose fatte." "Lo studio in più dà passi, non chiavi." "Forzieri: {2, 4, 7, …} chiavi." |
+
 ## Notifiche
 
 Le notifiche sono al massimo tre al giorno più un sollecito, sotto i 60 caratteri, con l'icona del personaggio. Il titolo è sempre "ACE".
