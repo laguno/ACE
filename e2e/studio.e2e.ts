@@ -107,3 +107,26 @@ test('carte del giorno e avviso dei compiti', async ({ page }) => {
   await expect(page.locator('.studio-verifica').first().getByText('Finiti i compiti, flash card e quiz valgono passi')).toBeVisible();
   await expect(page.getByText('2 da ripassare oggi', { exact: false })).toBeVisible();
 });
+
+test('assenze: la verifica del giorno a casa è da recuperare, quella spostata a "settimana prossima" non ha giorno', async ({ page }) => {
+  await page.clock.install({ time: MARTEDI });
+  const d = dati();
+  await finto(page, {
+    ...d,
+    materie: [...d.materie, { id: 'spagnolo', nome: 'Spagnolo' }, { id: 'geografia', nome: 'Geografia' }],
+    assenze: [{ giorno: '2026-11-09' }],
+    verifiche: [
+      ...d.verifiche.map((v) => ({ ...v, recupero_vago: false, data_spostata: null })),
+      { id: 'v2', data: '2026-11-09', tipo: 'verifica', argomento: null, materia_id: 'spagnolo', recupero_vago: false, data_spostata: null },
+      { id: 'v3', data: '2026-11-16', tipo: 'verifica', argomento: null, materia_id: 'geografia', recupero_vago: true, data_spostata: '2026-11-16' },
+    ],
+  });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Studio' }).click();
+  const carta = (m: string) => page.locator('.studio-verifica', { has: page.getByRole('heading', { name: m }) });
+  await expect(carta('Spagnolo')).toContainText('da recuperare');
+  await expect(carta('Spagnolo')).toContainText('Era lunedì 9 novembre, eri a casa');
+  await expect(carta('Geografia')).toContainText('settimana prossima');
+  await expect(carta('Geografia')).toContainText('Settimana prossima, il giorno lo dice la prof');
+  await expect(carta('Matematica')).toContainText('fra 2 giorni');
+});

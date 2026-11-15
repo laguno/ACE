@@ -4,20 +4,23 @@ import { supabase } from './supabase';
 
 // Pezzi comuni a Oggi e Sera: la spunta di un compito e il suo aspetto.
 
-export type Compito = { id: string; testo: string; fatto_il: string | null; materie: { nome: string } | null };
+export type Compito = { id: string; testo: string; fatto_il: string | null; scadenza_spostata?: string | null; materie: { nome: string } | null };
 
 export const GIORNI = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'];
 export const MESI = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
 export const maiuscola = (s: string) => s.replace(/^./, (c) => c.toUpperCase());
 export const adesso = () => new Date().toISOString();
 
-export const SELECT_COMPITI = 'id, testo, fatto_il, materie(nome)';
+export const SELECT_COMPITI = 'id, testo, fatto_il, scadenza_spostata, materie(nome)';
 
 /** La funzione "passi" decide i passi dallo stato del database; restituisce quanti ne ha dati. */
 export async function passi(tipo: string, id: string): Promise<number> {
   const { data } = await supabase.functions.invoke('passi', { body: { tipo, id } });
   return data?.passi ?? 0;
 }
+
+/** Compito spostato dai genitori alla lezione dopo un giorno a casa (docs/02, Assenze). */
+const SPOSTATO = 'Spostato: eri a casa';
 
 export function RigaCompito({ c, numero, nota, onSpunta, onAiuto, onAnnulla }: {
   c: Compito;
@@ -41,7 +44,7 @@ export function RigaCompito({ c, numero, nota, onSpunta, onAiuto, onAnnulla }: {
         )}
         <span>
           <b>{c.materie?.nome ?? 'Compito'}</b>: {c.testo}
-          {nota && <small className="nota-riga">{nota}</small>}
+          {(nota ?? (c.scadenza_spostata && SPOSTATO)) && <small className="nota-riga">{nota ?? SPOSTATO}</small>}
         </span>
       </label>
       {onAnnulla && (

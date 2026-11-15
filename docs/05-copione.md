@@ -81,6 +81,8 @@ La mattina sono tre righe da leggere mentre fa colazione; il pomeriggio è un or
 | Rientro dopo 2 o più giorni senza aprire l'app | lani-oops | "Bentornata. Ecco solo le cose di oggi: {n}." Nessuna predica sui giorni persi. | — |
 | Giorno di malattia o assenza (lo segnano i genitori) | lani-stanca | "Oggi riposo. I compiti li trovi domani, con calma." Gli obiettivi del giorno non contano. | — |
 | Rientro dopo l'assenza (primo giorno di scuola, popup del server; approvato il 15/11) | lani-saluta | Titolo "Bentornata". "Che bello riaverti a scuola. I compiti dei giorni a casa sono già spostati: si riparte con calma." | — |
+| Studio, verifica caduta in un giorno a casa e non ancora spostata (da approvare) | — | Al posto di "fra {n} giorni": "da recuperare"; sotto: "Era {giorno} {g} {mese}, eri a casa". Con "settimana prossima" dei genitori: "settimana prossima" e "Settimana prossima, il giorno lo dice la prof". | — |
+| Compito spostato alla lezione dopo un giorno a casa (da approvare) | — | Riga piccola sotto il compito: "Spostato: eri a casa". | — |
 | Buongiorno da dicembre a febbraio | lani-inverno | Come il buongiorno normale; cambia solo la posa | — |
 | Buongiorno dopo una partita finita tardi | lani-assonnata | "Ieri partita fino a tardi. Oggi solo l'essenziale: {cosa}." | sbadiglio |
 | Striscia "In famiglia" (sotto il buongiorno, senza popup) | icona di chi è coinvolto (papa-passaggio, mamma-passaggio, nonno-passaggio) | "In famiglia: 19:30 cena dai nonni · sabato Leo al torneo di tennis" (massimo tre, dal calendario di famiglia) | — |

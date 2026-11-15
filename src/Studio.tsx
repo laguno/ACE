@@ -22,6 +22,9 @@ type Verifica = {
   tipo: string;
   argomento: string | null;
   pagine_probabili: string | null;
+  recupero_vago: boolean;
+  /** caduta in un giorno a casa e non ancora spostata dai genitori (docs/02, Assenze) */
+  daRecuperare?: boolean;
   materie: { nome: string } | null;
   sessioni_ripasso: Sessione[];
   quiz: { id: string; domande: Domanda[] }[];
@@ -50,18 +53,24 @@ export default function Studio() {
 
   async function carica() {
     const domani = R.iso(R.prossimoGiornoDiScuola(R.giornoRoma(new Date())));
-    const [v, c, k, n] = await Promise.all([
-      supabase
-        .from('verifiche')
-        .select('id, data, tipo, argomento, pagine_probabili, materie(nome), sessioni_ripasso(id, numero, data_prevista, tipo, fatta_il), quiz(id, domande)')
-        .gte('data', oggi)
-        .order('data')
-        .limit(6),
+    const sel = 'id, data, tipo, argomento, pagine_probabili, recupero_vago, materie(nome), sessioni_ripasso(id, numero, data_prevista, tipo, fatta_il), quiz(id, domande)';
+    const { data: casa } = await supabase.from('assenze').select('giorno').lt('giorno', oggi);
+    const [v, r, c, k, n] = await Promise.all([
+      supabase.from('verifiche').select(sel).gte('data', oggi).order('data').limit(6),
+      casa?.length
+        ? supabase
+            .from('verifiche')
+            .select(sel)
+            .in('data', casa.map((x) => x.giorno))
+            .is('data_spostata', null)
+        : { data: [] },
       supabase.from('flashcard').select(SELECT_CARTA).lte('prossima_revisione', oggi).eq('segnalata_sbagliata', false).order('prossima_revisione').limit(CARTE_PER_GIRO),
       supabase.from('compiti').select('id', { count: 'exact', head: true }).eq('scadenza', domani).is('fatto_il', null),
       supabase.from('flashcard').select('id', { count: 'exact', head: true }).eq('segnalata_sbagliata', false),
     ]);
-    setVerifiche((v.data ?? []) as unknown as Verifica[]);
+    // prima quelle da recuperare: la data la decidono mamma e papà con la prof
+    const recuperare = ((r.data ?? []) as unknown as Verifica[]).map((x) => ({ ...x, daRecuperare: true }));
+    setVerifiche([...recuperare, ...((v.data ?? []) as unknown as Verifica[])]);
     setCarteDelGiorno((c.data ?? []) as Carta[]);
     setCompitiAperti(k.count ?? 0);
     setCarteTotali(n.count ?? 0);
@@ -124,10 +133,14 @@ export default function Studio() {
           <div className="carta studio-verifica" key={v.id}>
             <div className="testa-carta">
               <h2>{materia}</h2>
-              <span className="valore">{fra === 0 ? 'oggi' : fra === 1 ? 'domani' : `fra ${fra} giorni`}</span>
+              <span className="valore">{v.daRecuperare ? 'da recuperare' : v.recupero_vago ? 'settimana prossima' : fra === 0 ? 'oggi' : fra === 1 ? 'domani' : `fra ${fra} giorni`}</span>
             </div>
             <p className="data-verifica">
-              {maiuscola(GIORNI[g.getDay()])} {g.getDate()} {MESI[g.getMonth()]}
+              {v.daRecuperare
+                ? `Era ${GIORNI[g.getDay()]} ${g.getDate()} ${MESI[g.getMonth()]}, eri a casa`
+                : v.recupero_vago
+                  ? 'Settimana prossima, il giorno lo dice la prof'
+                  : `${maiuscola(GIORNI[g.getDay()])} ${g.getDate()} ${MESI[g.getMonth()]}`}
               {v.tipo === 'interrogazione' ? ' · interrogazione' : ''}
             </p>
             {argomento && argomento !== materia && <p>{argomento}</p>}
