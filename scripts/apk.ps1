@@ -4,7 +4,7 @@
 # Keystore e APK stanno fuori dal repository: C:\progetti\ace\chiavi\ e C:\progetti\ace\apk\.
 $ErrorActionPreference = 'Stop'
 $env:JAVA_HOME = 'C:\Program Files\Java\jdk-21.0.10'
-$env:ANDROID_HOME = "$env:LOCALAPPDATA\Android\Sdk"
+$env:ANDROID_HOME = 'C:\progetti\ace\android-sdk'
 $chiave = 'C:\progetti\ace\chiavi\ace-release.jks'
 $uscita = 'C:\progetti\ace\apk'
 $app = Split-Path $PSScriptRoot -Parent
