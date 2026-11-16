@@ -43,6 +43,8 @@ test('percorso: sei qui, forzieri, bandierina, chiavi della settimana', async ({
   await expect(page.getByLabel("Chiavi dell'ultima settimana: 1 su 3")).toBeVisible();
   await expect(page.getByText('Hai 1 chiave: il prossimo forziere ne vuole 2.')).toBeAttached();
   await expect(page.getByRole('button', { name: /Forziere \d/ })).toHaveCount(9);
+  // l'etichetta dice cosa sono i due numeri, e il nome per i lettori di schermo la contiene
+  await expect(page.getByRole('button', { name: /^Forziere 1: [\d.]+ passi, 2 chiavi$/ })).toContainText(/[\d.]+ passi, 2 chiavi/);
   await page.screenshot({ path: 'e2e/risultati/astra.png' });
   // "mancano N" si tocca: apre Come si fanno i passi
   await page.getByRole('button', { name: /Sei qui: mancano 95/ }).click();
