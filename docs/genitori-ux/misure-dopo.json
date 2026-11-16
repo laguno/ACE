@@ -3,7 +3,7 @@
   "larghezze": {
     "360": {
       "01-oggi": {
-        "altezzaPagina": 987,
+        "altezzaPagina": 1031,
         "axe": [],
         "piccoli": [],
         "senzaEtichetta": [],
@@ -17,10 +17,10 @@
         "overflowX": 0,
         "carte": 3,
         "sezioni": 5,
-        "pulsanti": 10
+        "pulsanti": 9
       },
       "02-dai-passi": {
-        "altezzaPagina": 987,
+        "altezzaPagina": 1031,
         "axe": [],
         "piccoli": [],
         "senzaEtichetta": [],
@@ -34,10 +34,10 @@
         "overflowX": 0,
         "carte": 3,
         "sezioni": 6,
-        "pulsanti": 15
+        "pulsanti": 14
       },
       "03-segna-balla": {
-        "altezzaPagina": 987,
+        "altezzaPagina": 1031,
         "axe": [],
         "piccoli": [],
         "senzaEtichetta": [],
@@ -53,10 +53,10 @@
         "overflowX": 0,
         "carte": 3,
         "sezioni": 6,
-        "pulsanti": 15
+        "pulsanti": 13
       },
       "04-partita": {
-        "altezzaPagina": 987,
+        "altezzaPagina": 1031,
         "axe": [],
         "piccoli": [],
         "senzaEtichetta": [],
@@ -72,10 +72,10 @@
         "overflowX": 0,
         "carte": 3,
         "sezioni": 6,
-        "pulsanti": 17
+        "pulsanti": 16
       },
       "05-settimana": {
-        "altezzaPagina": 1130,
+        "altezzaPagina": 1029,
         "axe": [],
         "piccoli": [],
         "senzaEtichetta": [],
@@ -87,8 +87,8 @@
           "pickerDiSistema": 0
         },
         "overflowX": 0,
-        "carte": 5,
-        "sezioni": 9,
+        "carte": 3,
+        "sezioni": 5,
         "pulsanti": 17
       },
       "06-forzieri": {
@@ -184,7 +184,7 @@
     },
     "390": {
       "01-oggi": {
-        "altezzaPagina": 948,
+        "altezzaPagina": 1015,
         "axe": [],
         "piccoli": [],
         "senzaEtichetta": [],
@@ -198,10 +198,10 @@
         "overflowX": 0,
         "carte": 3,
         "sezioni": 5,
-        "pulsanti": 10
+        "pulsanti": 9
       },
       "02-dai-passi": {
-        "altezzaPagina": 948,
+        "altezzaPagina": 1015,
         "axe": [],
         "piccoli": [],
         "senzaEtichetta": [],
@@ -215,10 +215,10 @@
         "overflowX": 0,
         "carte": 3,
         "sezioni": 6,
-        "pulsanti": 15
+        "pulsanti": 14
       },
       "03-segna-balla": {
-        "altezzaPagina": 948,
+        "altezzaPagina": 1015,
         "axe": [],
         "piccoli": [],
         "senzaEtichetta": [],
@@ -234,10 +234,10 @@
         "overflowX": 0,
         "carte": 3,
         "sezioni": 6,
-        "pulsanti": 15
+        "pulsanti": 13
       },
       "04-partita": {
-        "altezzaPagina": 948,
+        "altezzaPagina": 1015,
         "axe": [],
         "piccoli": [],
         "senzaEtichetta": [],
@@ -253,10 +253,10 @@
         "overflowX": 0,
         "carte": 3,
         "sezioni": 6,
-        "pulsanti": 17
+        "pulsanti": 16
       },
       "05-settimana": {
-        "altezzaPagina": 1130,
+        "altezzaPagina": 1029,
         "axe": [],
         "piccoli": [],
         "senzaEtichetta": [],
@@ -268,8 +268,8 @@
           "pickerDiSistema": 0
         },
         "overflowX": 0,
-        "carte": 5,
-        "sezioni": 9,
+        "carte": 3,
+        "sezioni": 5,
         "pulsanti": 17
       },
       "06-forzieri": {
