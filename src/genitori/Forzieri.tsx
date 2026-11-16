@@ -33,15 +33,17 @@ export default function Forzieri({ client, avvisa }: Props) {
     carica();
   }, []);
 
-  async function salva(e: FormEvent<HTMLFormElement>, n: number) {
+  function salva(e: FormEvent<HTMLFormElement>, n: number) {
     e.preventDefault();
     const premio = String(new FormData(e.currentTarget).get('premio')).trim();
-    if (!premio) return;
+    if (premio) scrivi(premio, n);
+  }
+  async function scrivi(premio: string, n: number) {
     setLavoro(true);
     const { error } = await client.from('forzieri').update({ premio }).eq('n', n);
     if (error) {
       setLavoro(false);
-      return avvisa('Premio non salvato. Riprova.');
+      return avvisa(`${nome(n)}: premio non salvato.`, () => scrivi(premio, n));
     }
     const { data, error: e2 } = await client.functions.invoke('enigma', { body: { azione: 'genera', n } });
     setLavoro(false);
@@ -65,6 +67,7 @@ export default function Forzieri({ client, avvisa }: Props) {
   if (!forzieri) return <Attesa />;
   const senza = forzieri.filter((f) => !f.premio).length;
   const prossimo = forzieri.find((f) => !f.premio)?.n;
+  const altri = forzieri.filter((x) => !x.premio && x.n !== prossimo);
   const f = forzieri.find((x) => x.n === aperto);
 
   if (f) {
@@ -121,35 +124,42 @@ export default function Forzieri({ client, avvisa }: Props) {
       <p className="ga-nota">
         {senza ? `${senza} ${senza === 1 ? 'forziere' : 'forzieri'} senza premio. ` : ''}I primi piccoli, poi sempre più importanti; la cima legata alla pagella di giugno. Lani non vede i premi finché non apre il forziere.
       </p>
-      <Elenco etichetta="Forzieri">
-        {forzieri.map((x) => {
-          const conf = R.forziere(x.n);
-          return (
-            <Riga
-              key={x.n}
-              colore={x.stato === 'aperto' ? 'burro' : x.n === prossimo ? 'rosa' : 'lilla'}
-              icona={<TreasureChest size={20} weight="bold" aria-hidden />}
-              titolo={`${x.n === 9 ? 'Cima' : x.n} · ${x.premio ?? 'Da scegliere'}`}
-              sotto={`Tappa ${conf.tappa}, ${conf.chiavi} chiavi · ${x.n === prossimo ? 'il prossimo da scegliere' : stato(x)}`}
-              vai={() => setAperto(x.n)}
-              azione={
-                x.stato === 'aperto' ? (
-                  <button type="button" className="ga-btn" onClick={() => setConsegna(x.n)}>
-                    Consegnato
-                  </button>
-                ) : x.n === prossimo ? (
-                  <button type="button" className="ga-btn pieno" onClick={() => setAperto(x.n)}>
-                    Scegli
-                  </button>
-                ) : undefined
-              }
-            />
-          );
-        })}
-      </Elenco>
+      <Elenco etichetta="Forzieri">{forzieri.filter((x) => x.premio || x.n === prossimo).map(riga)}</Elenco>
+      {/* quelli ancora da scegliere dopo il prossimo: uguali tra loro, chiusi in fondo */}
+      {altri.length > 0 && (
+        <details className="ga-chiusa">
+          <summary>Altri {altri.length} da scegliere</summary>
+          <Elenco etichetta="Altri forzieri">{altri.map(riga)}</Elenco>
+        </details>
+      )}
       {consegna && <Consegna n={consegna} conferma={consegnato} chiudi={() => setConsegna(undefined)} />}
     </>
   );
+
+  function riga(x: Forziere) {
+    const conf = R.forziere(x.n);
+    return (
+      <Riga
+        key={x.n}
+        colore={x.stato === 'aperto' ? 'burro' : x.n === prossimo ? 'rosa' : 'lilla'}
+        icona={<TreasureChest size={20} weight="bold" aria-hidden />}
+        titolo={`${x.n === 9 ? 'Cima' : x.n} · ${x.premio ?? 'Da scegliere'}`}
+        sotto={`Tappa ${conf.tappa}, ${conf.chiavi} chiavi · ${x.n === prossimo ? 'il prossimo da scegliere' : stato(x)}`}
+        vai={() => setAperto(x.n)}
+        azione={
+          x.stato === 'aperto' ? (
+            <button type="button" className="ga-btn" onClick={() => setConsegna(x.n)}>
+              Consegnato
+            </button>
+          ) : x.n === prossimo ? (
+            <button type="button" className="ga-btn pieno" onClick={() => setAperto(x.n)}>
+              Scegli
+            </button>
+          ) : undefined
+        }
+      />
+    );
+  }
 }
 
 function Consegna({ n, conferma, chiudi }: { n: number; conferma: (n: number) => void; chiudi: () => void }) {

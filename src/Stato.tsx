@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { Attesa } from './kit';
+import { Attesa, Elenco, Riga } from './kit';
 import { GIORNI, MESI } from './spunte';
 import { prossimo } from './lib/calendario';
 
@@ -40,49 +40,72 @@ export default function Stato({ client }: { client: SupabaseClient }) {
   if (!s) return <Attesa />;
 
   const ultimo = (fonte: string) => s.giri.find((g) => g.fonte === fonte);
+  // dopo un giro non riuscito: cosa fare (di solito niente, il cron riprova da solo)
+  const consiglio = (fonte: string) => {
+    const [a, b] = s.giri.filter((g) => g.fonte === fonte);
+    if (!a) return 'Parte da sola al primo giro.';
+    if (a.esito === 'ok' || a.esito === null) return null;
+    return b && b.esito !== 'ok' && b.esito !== null ? 'Due giri di fila non riusciti: guardate gli errori qui sotto e segnalatelo.' : 'Ci riprova da sola al prossimo giro: di solito basta.';
+  };
   const riga = (nome: string, fonte: string, orari?: string[]) => {
     const g = ultimo(fonte);
     const ok = g?.esito === 'ok';
+    const cosa = consiglio(fonte);
     return (
-      <li key={fonte}>
-        <b>{nome}</b>
-        <span className={ok ? 'stato-ok' : 'stato-ko'}>{!g ? 'mai sincronizzato' : g.esito === null ? `in corso da ${quando(g.iniziato_il)}` : `${ok ? 'ok' : 'non riuscita'}, ${quando(g.iniziato_il)}`}</span>
-        {orari && <small>Prossima: {prossimo(orari)}</small>}
-      </li>
+      <Riga
+        key={fonte}
+        titolo={nome}
+        sotto={
+          <>
+            <span className={ok ? 'stato-ok' : 'stato-ko'}>{!g ? 'mai sincronizzato' : g.esito === null ? `in corso da ${quando(g.iniziato_il)}` : `${ok ? 'ok' : 'non riuscita'}, ${quando(g.iniziato_il)}`}</span>
+            {orari && <span className="stato-riga">Prossima: {prossimo(orari)}</span>}
+            {cosa && <span className="stato-riga">{cosa}</span>}
+          </>
+        }
+      />
     );
   };
 
   return (
     <>
-      <div className="carta">
-        <h2>Sincronizzazioni</h2>
-        <ul className="stato-elenco">
+      <section className="ga-sezione" aria-labelledby="stato-giri">
+        <h2 id="stato-giri">Sincronizzazioni</h2>
+        <Elenco>
           {riga('Nuvola', 'nuvola', PROSSIMI[0][1])}
           {riga('Calendario', 'calendario', PROSSIMI[1][1])}
           {riga('Classifiche FIPAV', 'classifiche', PROSSIMI[2][1])}
-          <li>
-            <b>Chiavi della domenica</b>
-            <span>{s.chiavi ? `${s.chiavi.chiavi} ${s.chiavi.chiavi === 1 ? 'chiave' : 'chiavi'} nella settimana dal ${Number(s.chiavi.inizio.slice(8))}` : 'ancora nessuna settimana contata'}</span>
-            <small>Prossime: domenica alle 21:30</small>
-          </li>
-        </ul>
-      </div>
-      <div className="carta">
-        <h2>Errori degli ultimi 7 giorni: {s.erroriSettimana}</h2>
+          <Riga
+            titolo="Chiavi della domenica"
+            sotto={
+              <>
+                {s.chiavi ? `${s.chiavi.chiavi} ${s.chiavi.chiavi === 1 ? 'chiave' : 'chiavi'} nella settimana dal ${Number(s.chiavi.inizio.slice(8))}` : 'ancora nessuna settimana contata'}
+                <span className="stato-riga">Prossime: domenica alle 21:30</span>
+              </>
+            }
+          />
+        </Elenco>
+      </section>
+      <section className="ga-sezione" aria-labelledby="stato-errori">
+        <h2 id="stato-errori">Errori degli ultimi 7 giorni: {s.erroriSettimana}</h2>
         {s.errori.length === 0 ? (
-          <p className="nota">Nessun errore registrato.</p>
+          <p className="ga-nota">Nessun errore registrato.</p>
         ) : (
-          <ul className="stato-elenco">
+          <Elenco>
             {s.errori.map((e) => (
-              <li key={e.creato_il + e.messaggio}>
-                <b>{e.dove ?? (e.origine === 'funzione' ? 'Server' : 'App')}</b>
-                <span>{e.messaggio}</span>
-                <small>{quando(e.creato_il)}</small>
-              </li>
+              <Riga
+                key={e.creato_il + e.messaggio}
+                titolo={e.dove ?? (e.origine === 'funzione' ? 'Server' : 'App')}
+                sotto={
+                  <>
+                    {e.messaggio}
+                    <span className="stato-riga">{quando(e.creato_il)}</span>
+                  </>
+                }
+              />
             ))}
-          </ul>
+          </Elenco>
         )}
-      </div>
+      </section>
     </>
   );
 }

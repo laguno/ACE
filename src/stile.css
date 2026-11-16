@@ -842,3 +842,4 @@ dialog.ga-velo::backdrop { background: transparent; }
 .ga details.ga-chiusa { padding: 0; background: none; }
 .ga details.ga-chiusa > summary { padding: 0 4px; font: 800 18px 'Baloo 2', Nunito, sans-serif; }
 .ga details.ga-chiusa[open] > summary { margin-bottom: 8px; }
+.stato-riga { display: block; }
