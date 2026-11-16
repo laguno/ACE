@@ -1,6 +1,6 @@
 # Installazione in famiglia
 
-ACE non passa dall'App Store: è un'app web che si aggiunge alla schermata Home.
+ACE non passa dagli store: su iPhone e iPad è un'app web aggiunta alla schermata Home, su Android un APK di famiglia.
 
 ## iPhone e iPad (Lani e genitori)
 
@@ -9,13 +9,30 @@ ACE non passa dall'App Store: è un'app web che si aggiunge alla schermata Home.
 3. Aprire ACE dall'icona sulla Home ed entrare con il proprio accesso.
 4. Quando ACE chiede di inviare notifiche, rispondere **Consenti**. Su iPhone le notifiche arrivano **solo** se ACE è aperta dall'icona della Home (iOS 16.4 o successivo).
 
-## Android (telefono di Lani, Samsung; il Motorola è del signore)
+## Android: l'APK di ACE (telefono di Lani, Samsung; anche i telefoni dei genitori)
 
-1. Aprire l'indirizzo con **Chrome**, non con Samsung Internet: compare "Installa app" (oppure menu ⋮ → **Installa app**). Non "Aggiungi a schermata Home", che fa solo un collegamento a Chrome.
-2. Aprire ACE dall'icona sulla Home ed entrare. In Impostazioni → App deve comparire "ACE".
-3. Quando ACE chiede di inviare notifiche, rispondere **Consenti**. Se non arrivano: Impostazioni → App → ACE (o Chrome) → Notifiche attive.
-4. Samsung, perché le notifiche arrivino con l'app chiusa: Impostazioni → App → ACE e Chrome → Batteria → **Senza restrizioni**; e in Assistenza dispositivo → Batteria → Limiti utilizzo in background, ACE e Chrome non devono stare tra le app in sospensione.
-5. Family Link (dal telefono del genitore): Lani → Controlli → Limiti delle app → ACE → **Sempre consentita**. Se Chrome è su "solo siti approvati", approvare `ace-passino.vercel.app`.
+Perché un APK e non "Installa app" di Chrome: in Family Link un'app installata da Chrome conta il tempo su Chrome, e Chrome dovrebbe restare "sempre consentito", cioè internet senza limiti. L'APK è un'app vera (`it.messori.ace`) che apre ACE da sola, a tutto schermo, e si aggiorna da sola.
+
+**Prima su un telefono dei genitori**, con la lista "Prova del guscio" qui sotto; solo dopo su quello di Lani, la sera dopo le 21 o il giorno dopo.
+
+1. Copiare l'APK (`C:\progetti\ace\apk\ace-<versione>.apk`) sul telefono: cavo USB nella cartella Download, oppure Google Drive del genitore.
+2. **Family Link** (dal telefono del genitore): Lani → Controlli → Limiti dei contenuti → (Google Play / App) → **App da origini sconosciute: attivo**, solo per l'installazione. Le **Opzioni sviluppatore** restano spente.
+3. Sul telefono di Lani: app Archivio (I miei file) → Download → toccare l'APK → consentire l'installazione da quella app → **Installa**. Play Protect può avvisare che l'app non è conosciuta: "Installa comunque".
+4. **Subito dopo**, in Family Link: App da origini sconosciute **spento**.
+5. Aprire ACE ed entrare con l'accesso di Lani (una volta sola: la sessione resta aperta come oggi).
+6. Toccare "Attiva i promemoria" e rispondere **Consenti**. Alla prima foto di una pagina, consentire la **fotocamera**.
+7. Impostazioni → App → ACE → Batteria → **Senza restrizioni**; Assistenza dispositivo → Batteria → Limiti utilizzo in background: ACE non deve stare tra le app in sospensione.
+8. Togliere l'icona vecchia di ACE installata da Chrome: tenere premuta l'icona → Disinstalla (toglie solo il collegamento, i dati stanno su Supabase). Se ci sono due icone ACE, la vecchia è quella che in Impostazioni → App risulta "Chrome" o non compare come app.
+9. Family Link: Lani → Limiti delle app → **ACE: Sempre consentita**; **Chrome: limite normale** (non più sempre consentito).
+
+**Prova del guscio** (telefono del genitore, poi di Lani)
+- [ ] ACE si apre a tutto schermo con lo splash rosa, la barra di stato rosa con le icone chiare, niente barra di Chrome; il telefono girato resta in verticale.
+- [ ] Chiudere ACE del tutto (anche dalle app recenti) e riaprirla: si resta dentro.
+- [ ] Foto a più scatti: "Un'altra pagina" (chiede la fotocamera la prima volta), "Dalla galleria" con più foto, "Ho finito": le pagine arrivano.
+- [ ] Notifica di prova via FCM (la manda Claude dal server): arriva anche con ACE chiusa, con l'icona piccola del pallone.
+- [ ] Toccando la notifica si apre ACE.
+
+Senza APK (o per l'altro telefono Android dei genitori) resta il modo di prima: Chrome → menu ⋮ → **Installa app**, notifiche via browser.
 
 ## Accessi
 

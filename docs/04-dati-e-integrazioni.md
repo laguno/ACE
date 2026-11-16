@@ -41,7 +41,7 @@ YouTube IFrame Player API con `controls=0`, eventi di stato e tempo: il video va
 
 ## Notifiche push
 
-Web Push con chiavi VAPID; su iPhone funzionano solo con ACE aggiunta alla schermata Home (iOS 16.4+). Pianificazione lato server (cron), limiti del copione: 3 al giorno + 1 sollecito, ≤ 60 caratteri.
+Web Push con chiavi VAPID per i browser e l'iPad; Firebase Cloud Messaging per l'APK Android (segreto `FCM_SERVICE_ACCOUNT`, `push_iscrizioni.tipo` = `web` o `fcm`, docs/07). Su iPhone funzionano solo con ACE aggiunta alla schermata Home (iOS 16.4+). Pianificazione lato server (cron), limiti del copione: 3 al giorno + 1 sollecito, ≤ 60 caratteri.
 
 ## Accessi
 

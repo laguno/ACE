@@ -901,25 +901,28 @@ export type Database = {
       }
       push_iscrizioni: {
         Row: {
-          chiavi: Json
+          chiavi: Json | null
           creato_il: string
           endpoint: string
           id: string
           profilo_id: string
+          tipo: string
         }
         Insert: {
-          chiavi: Json
+          chiavi?: Json | null
           creato_il?: string
           endpoint: string
           id?: string
           profilo_id?: string
+          tipo?: string
         }
         Update: {
-          chiavi?: Json
+          chiavi?: Json | null
           creato_il?: string
           endpoint?: string
           id?: string
           profilo_id?: string
+          tipo?: string
         }
         Relationships: [
           {

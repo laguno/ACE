@@ -1,3 +1,5 @@
+import { Capacitor } from '@capacitor/core';
+import { PushNotifications } from '@capacitor/push-notifications';
 import { supabase } from './supabase';
 
 // Iscrizione alle notifiche push (Web Push). La chiave VAPID pubblica è fatta per stare nel client;
@@ -6,7 +8,25 @@ import { supabase } from './supabase';
 const CHIAVE_PUBBLICA = 'BB4oXSiIZWa9eWn89UTk5LhUAI8y2B1sgiQBSX5c_lnzH0UtFcKfNbWrX3EyRCi_j84e6LRVkaT2ALfSmdJGQTc';
 
 const pushNelBrowser = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
-export const notifichePossibili = () => pushNelBrowser() && Notification.permission === 'default';
+// Guscio Android (capacitor.config.ts): niente Web Push nella WebView, si usa Firebase Cloud Messaging.
+// Il gettone FCM va in push_iscrizioni con tipo 'fcm'; l'invio è in supabase/functions/_shared/push.ts.
+const nelGuscio = () => Capacitor.isNativePlatform();
+const RISPOSTA_GUSCIO = 'ace-notifiche-guscio';
+const leggi = () => { try { return localStorage.getItem(RISPOSTA_GUSCIO); } catch { return null; } };
+const scrivi = (v: string) => { try { localStorage.setItem(RISPOSTA_GUSCIO, v); } catch { /* resta da chiedere */ } };
+
+export const notifichePossibili = () => (nelGuscio() ? leggi() === null : pushNelBrowser() && Notification.permission === 'default');
+
+/** Gettone FCM del dispositivo (arriva con l'evento registration) salvato sul server. */
+async function iscriviGuscio(): Promise<boolean> {
+  const gettone = await new Promise<string>((ok, ko) => {
+    PushNotifications.addListener('registration', (t) => ok(t.value));
+    PushNotifications.addListener('registrationError', (e) => ko(new Error(e.error)));
+    PushNotifications.register().catch(ko);
+  }).finally(() => PushNotifications.removeAllListeners());
+  const { error } = await supabase.from('push_iscrizioni').upsert({ endpoint: gettone, tipo: 'fcm', chiavi: null }, { onConflict: 'endpoint' });
+  return !error;
+}
 
 function chiaveBinaria(b64: string) {
   const s = atob(b64.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat((4 - (b64.length % 4)) % 4));
@@ -24,6 +44,11 @@ async function iscrivi(): Promise<boolean> {
 }
 
 export async function attivaNotifiche(): Promise<boolean> {
+  if (nelGuscio()) {
+    const { receive } = await PushNotifications.requestPermissions();
+    scrivi(receive);
+    return receive === 'granted' && iscriviGuscio();
+  }
   if ((await Notification.requestPermission()) !== 'granted') return false;
   return iscrivi();
 }
@@ -34,5 +59,9 @@ export async function attivaNotifiche(): Promise<boolean> {
  * in supabase/functions/_shared/push.ts): così una cancellata per sbaglio torna alla prossima apertura.
  */
 export async function rinnovaIscrizione() {
+  if (nelGuscio()) {
+    if ((await PushNotifications.checkPermissions()).receive === 'granted') await iscriviGuscio();
+    return;
+  }
   if (pushNelBrowser() && Notification.permission === 'granted') await iscrivi();
 }

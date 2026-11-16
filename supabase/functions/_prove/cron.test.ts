@@ -77,6 +77,35 @@ describe('notifiche', () => {
     expect((await json(await f(richiesta({}, { cron: true })))).corpo.inviate).toMatchObject({ genitori_riepilogo: 1 });
     expect(await valore(`select count(*)::int from push_iscrizioni where endpoint like '%scaduto%'`)).toBe(0);
   });
+  it('guscio Android: la stessa notifica via FCM con il gettone Google firmato; gettone morto (404) cancellato', async () => {
+    const { generateKeyPairSync, createVerify } = await import('node:crypto');
+    const { privateKey, publicKey } = generateKeyPairSync('rsa', { modulusLength: 2048 });
+    stato.banco!.env = { ...stato.banco!.env, FCM_SERVICE_ACCOUNT: JSON.stringify({ project_id: 'ace-prova', client_email: 'sa@ace-prova.test', private_key: privateKey.export({ type: 'pkcs8', format: 'pem' }) }) };
+    const c = stato.banco!.come;
+    await c(null, `insert into push_iscrizioni (profilo_id, endpoint, tipo) values ('${LANI}', 'gettone-telefono', 'fcm'), ('${LANI}', 'gettone-morto', 'fcm')`);
+    await c(null, `insert into impegni_famiglia (id, inizio, titolo) values ('p1', '2026-11-24T18:00:00+01:00', 'Partita Lani: FOXES')`);
+    const fcm: { token: string; title: string }[] = [];
+    let firmaBuona = false;
+    vi.stubGlobal('fetch', async (u: string, o: RequestInit) => {
+      if (String(u) === 'https://oauth2.googleapis.com/token') {
+        const [h, p, s] = new URLSearchParams(String(o.body)).get('assertion')!.split('.');
+        firmaBuona = createVerify('RSA-SHA256').update(`${h}.${p}`).verify(publicKey, Buffer.from(s, 'base64url'));
+        return Response.json({ access_token: 'accesso-google' });
+      }
+      expect(String(u)).toBe('https://fcm.googleapis.com/v1/projects/ace-prova/messages:send');
+      expect((o.headers as Record<string, string>).authorization).toBe('Bearer accesso-google');
+      const m = JSON.parse(String(o.body)).message;
+      if (m.token === 'gettone-morto') return new Response('{}', { status: 404 });
+      fcm.push({ token: m.token, title: m.notification.title });
+      return Response.json({ name: 'ok' });
+    });
+    const f = await carica('notifiche');
+    expect((await json(await f(richiesta({}, { cron: true })))).corpo.inviate).toEqual({ mattina: 2 });
+    expect(firmaBuona).toBe(true);
+    expect(fcm.map((x) => x.token)).toEqual(['gettone-telefono']);
+    expect(inviate.map((i) => i.endpoint)).toEqual(['https://push.test/lani']);
+    expect(await valore(`select count(*)::int from push_iscrizioni where tipo = 'fcm'`)).toBe(1);
+  });
 });
 
 const ICS = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nBEGIN:VEVENT\r\nUID:all-1\r\nDTSTART:20261124T163000Z\r\nSUMMARY:Allenamento Lani\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:p\r\nDTSTART:20261125T100000Z\r\nSUMMARY:Visita privata\r\nEND:VEVENT\r\nEND:VCALENDAR`;
