@@ -28,7 +28,7 @@ ACE è un'app ad uso **solo familiare** per Leilani (Lani), 12 anni, seconda med
 - **Credenziali** (Nuvola, API, calendario) solo come segreti di Supabase/Vercel, inseriti dal signore. Non chiederle in chat, non scriverle nel codice, non metterle nel client.
 - **Non entrare nelle piattaforme degli e-book** degli editori e non copiarne il testo. Le pagine arrivano dalle foto del libro di carta.
 - **Privacy**: repository privato; niente foto reali di familiari (le sorgenti stanno in `_fuori-app/` sul computer del signore, fuori dal repo); nessuna foto delle compagne di squadra.
-- **Copione**: popup con titolo ≤ 4 parole e testo ≤ 25 parole, un popup per apertura, niente emoji, numeri veri, lodare il gesto e non la persona, rimprovero sul fatto con la cosa da fare subito, nessun rimprovero dei genitori dopo le 21:00, mai rimproveri nelle notifiche (≤ 3 al giorno + 1 sollecito, ≤ 60 caratteri).
+- **Copione**: popup con titolo ≤ 4 parole e testo ≤ 25 parole, un popup per apertura, niente emoji (sola eccezione, decisa il 16/11: la schermata R-Evolution, con `Emoji` di `kit.tsx`; mai in popup e notifiche), numeri veri, lodare il gesto e non la persona, rimprovero sul fatto con la cosa da fare subito, nessun rimprovero dei genitori dopo le 21:00, mai rimproveri nelle notifiche (≤ 3 al giorno + 1 sollecito, ≤ 60 caratteri).
 - **Tono verso Lani**: italiano di casa, "tu", mai parole da adulti, mai umiliare. I voti brutti non si sgridano: si guarda avanti con il piano.
 
 ## Come lavorare
