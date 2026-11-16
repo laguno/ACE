@@ -28,8 +28,8 @@ Perché un APK e non "Installa app" di Chrome: in Family Link un'app installata 
 **Prova del guscio** (telefono del genitore, poi di Lani)
 - [ ] ACE si apre a tutto schermo con lo splash rosa, la barra di stato rosa con le icone chiare, niente barra di Chrome; il telefono girato resta in verticale.
 - [ ] Chiudere ACE del tutto (anche dalle app recenti) e riaprirla: si resta dentro.
-- [ ] Foto a più scatti: "Un'altra pagina" (chiede la fotocamera la prima volta), "Dalla galleria" con più foto, "Ho finito": le pagine arrivano.
-- [ ] Notifica di prova via FCM (la manda Claude dal server): arriva anche con ACE chiusa, con l'icona piccola del pallone.
+- [ ] Solo sul telefono di Lani (il flusso foto sta nel suo Oggi): foto a più scatti, "Un'altra pagina" (chiede la fotocamera la prima volta), "Dalla galleria" con più foto, "Ho finito": le pagine arrivano.
+- [ ] Notifica di prova via FCM (la manda Claude dal server): arriva anche con ACE chiusa, con l'icona piccola delle due impronte (dalla 1.2).
 - [ ] Toccando la notifica si apre ACE.
 
 Senza APK (o per l'altro telefono Android dei genitori) resta il modo di prima: Chrome → menu ⋮ → **Installa app**, notifiche via browser.
