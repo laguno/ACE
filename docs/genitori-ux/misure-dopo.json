@@ -145,24 +145,24 @@
         "pulsanti": 14
       },
       "09-sera": {
-        "altezzaPagina": 2639,
+        "altezzaPagina": 895,
         "axe": [],
         "piccoli": [],
         "senzaEtichetta": [],
         "campi": {
-          "totale": 14,
+          "totale": 2,
           "perTipo": {
-            "time": 7,
-            "textarea": 7
+            "time": 1,
+            "textarea": 1
           },
           "senzaStile": 0,
           "senzaStilePerTipo": {},
-          "pickerDiSistema": 7
+          "pickerDiSistema": 1
         },
         "overflowX": 0,
         "carte": 1,
         "sezioni": 2,
-        "pulsanti": 6
+        "pulsanti": 13
       },
       "10-stato": {
         "altezzaPagina": 922,
@@ -326,24 +326,24 @@
         "pulsanti": 14
       },
       "09-sera": {
-        "altezzaPagina": 2639,
+        "altezzaPagina": 895,
         "axe": [],
         "piccoli": [],
         "senzaEtichetta": [],
         "campi": {
-          "totale": 14,
+          "totale": 2,
           "perTipo": {
-            "time": 7,
-            "textarea": 7
+            "time": 1,
+            "textarea": 1
           },
           "senzaStile": 0,
           "senzaStilePerTipo": {},
-          "pickerDiSistema": 7
+          "pickerDiSistema": 1
         },
         "overflowX": 0,
         "carte": 1,
         "sezioni": 2,
-        "pulsanti": 6
+        "pulsanti": 13
       },
       "10-stato": {
         "altezzaPagina": 922,
