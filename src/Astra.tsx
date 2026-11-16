@@ -3,6 +3,7 @@ import { ImageSquare } from '@phosphor-icons/react';
 import { Attesa, useSfondo } from './kit';
 import { Contapassi, vediSaldo } from './Contapassi';
 import ComePassi from './ComePassi';
+import { sfondi as SFONDI } from '../data/manifest.json';
 import { Biglietto } from './Biglietto';
 import { ImmaginePremio, immaginiPremi, type Immagine } from './ImmaginePremio';
 import * as R from './lib/regole';
@@ -22,6 +23,24 @@ const MONDI = [
   { nome: 'Lo spazio', sfondo: 'sfondo-4-spazio' },
 ];
 const img = (cartella: string, id: string) => `/assets/${cartella}/${id}.webp`;
+
+// Scelta dello sfondo (revisione del 16/11, da approvare): Lani gira tra gli sfondi del catalogo fino al
+// mondo dove è arrivata (i mondi dopo restano una sorpresa). Resta sul dispositivo, e vale finché è in
+// quel mondo: al mondo nuovo vede lo sfondo nuovo. Per toglierla: questo blocco e il bottone "Cambia sfondo".
+const CHIAVE_SFONDO = 'ace-sfondo';
+const sfondiFinoA = (nMondo: number) => SFONDI.map((s) => s.id).filter((id) => Number(id.split('-')[1]) <= nMondo + 1);
+function useSfondoScelto(nMondo: number, predefinito: string) {
+  const [salvato, setSalvato] = useState(() => localStorage.getItem(CHIAVE_SFONDO));
+  const scelte = sfondiFinoA(nMondo);
+  const [mondo, id] = (salvato ?? '').split(':');
+  const ora = Number(mondo) === nMondo && scelte.includes(id) ? id : predefinito;
+  const cambia = () => {
+    const prossimo = `${nMondo}:${scelte[(scelte.indexOf(ora) + 1) % scelte.length]}`;
+    localStorage.setItem(CHIAVE_SFONDO, prossimo);
+    setSalvato(prossimo);
+  };
+  return { ora, cambia, piuDiUno: scelte.length > 1 };
+}
 const SOGLIE = R.soglieTappe();
 const tappaDi = (passi: number) => Math.min(SOGLIE.length, R.posizione(passi).tappeFatte + 1);
 
@@ -54,6 +73,8 @@ export default function Astra({ apri, forziere: aperto }: { apri: (pagina: 'Figu
   const [regole, setRegole] = useState(false);
   const [dati, setDati] = useState<{ passi: number; prima: number; chiavi: number; settimana: number | null; forzieri: Forziere[]; album: number; assenze: string[] }>();
   const [scelto, setScelto] = useState<number | undefined>(aperto);
+  const nMondoOra = R.mondo(R.posizione(dati?.passi ?? 0).tappeFatte);
+  const sfondo = useSfondoScelto(nMondoOra, MONDI[nMondoOra].sfondo);
   // la bandierina parte dal giorno di accensione di R-Evolution, come quella del server (chiavi.ts)
   const inizioRE = R.inizioREvolution(useREvolutionDa());
   useEffect(() => setScelto(aperto), [aperto]);
@@ -115,7 +136,7 @@ export default function Astra({ apri, forziere: aperto }: { apri: (pagina: 'Figu
   return (
     <section className="astra">
       <Compatta />
-      <div className="astra-sfondo" style={{ backgroundImage: `url(${img('sfondi', mondo.sfondo)})` }} aria-hidden />
+      <div className="astra-sfondo" style={{ backgroundImage: `url(${img('sfondi', sfondo.ora)})` }} aria-hidden />
       <header className="carta astra-testata">
         <div className="astra-titolo">
           <span>
@@ -152,6 +173,11 @@ export default function Astra({ apri, forziere: aperto }: { apri: (pagina: 'Figu
           <button className="link come-passi-apri" onClick={() => setRegole(true)}>
             Come si fanno i passi
           </button>
+          {sfondo.piuDiUno && (
+            <button className="link come-passi-apri" onClick={sfondo.cambia}>
+              Cambia sfondo
+            </button>
+          )}
         </div>
         {dati.settimana !== null && (
           <p className="nota astra-chiavi-totali">{fraseChiavi(dati.chiavi, prossimo?.chiavi)}</p>

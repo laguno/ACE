@@ -46,6 +46,16 @@ test('percorso: sei qui, forzieri, bandierina, chiavi della settimana', async ({
   // l'etichetta dice cosa sono i due numeri, e il nome per i lettori di schermo la contiene
   await expect(page.getByRole('button', { name: /^Forziere 1: [\d.]+ passi, 2 chiavi$/ })).toContainText(/[\d.]+ passi, 2 chiavi/);
   await page.screenshot({ path: 'e2e/risultati/astra.png' });
+  // lo sfondo si cambia tra quelli del mondo raggiunto, e resta sul dispositivo
+  const sfondo = page.locator('.astra-sfondo');
+  await expect(sfondo).toHaveAttribute('style', /sfondo-1-colline\.webp/);
+  await page.getByRole('button', { name: 'Cambia sfondo' }).click();
+  await expect(sfondo).toHaveAttribute('style', /sfondo-1-colline-alt\.webp/);
+  await page.reload();
+  await page.getByRole('button', { name: 'Astra' }).click();
+  await expect(sfondo).toHaveAttribute('style', /sfondo-1-colline-alt\.webp/);
+  await page.getByRole('button', { name: 'Cambia sfondo' }).click();
+  await expect(sfondo).toHaveAttribute('style', /sfondo-1-colline\.webp/);
   // "mancano N" si tocca: apre Come si fanno i passi
   await page.getByRole('button', { name: /Sei qui: mancano 95/ }).click();
   await expect(page.getByRole('heading', { name: 'Come si fanno i passi' })).toBeVisible();
