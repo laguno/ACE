@@ -34,14 +34,13 @@ export function RigaCompito({ c, numero, nota, onSpunta, onAiuto, onAnnulla }: {
 }) {
   return (
     <li className={onAiuto || onAnnulla ? 'con-aiuto' : undefined}>
-      <label className={numero !== undefined ? 'numerata' : undefined}>
+      <label className="numerata">
         <input type="checkbox" checked={!!c.fatto_il} disabled={!!c.fatto_il} onChange={onSpunta} />
-        {/* nel pomeriggio il numero dell'ordine fa da casella (bozza Pomeriggio): con la spunta diventa ✓ */}
-        {numero !== undefined && (
-          <span className="bollino" aria-hidden>
-            {c.fatto_il ? <Check size={18} weight="bold" /> : numero}
-          </span>
-        )}
+        {/* un solo bersaglio per Pomeriggio e Sera: il cerchio fa da casella, con la spunta diventa ✓;
+            nel pomeriggio dentro c'è il numero dell'ordine */}
+        <span className="bollino" aria-hidden>
+          {c.fatto_il ? <Check size={18} weight="bold" /> : numero}
+        </span>
         <span>
           <b>{c.materie?.nome ?? 'Compito'}</b>: {c.testo}
           {(nota ?? (c.scadenza_spostata && SPOSTATO)) && <small className="nota-riga">{nota ?? SPOSTATO}</small>}

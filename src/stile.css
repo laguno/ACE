@@ -207,17 +207,16 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .chiavi { display: flex; gap: 2px; }
 .collegamento { display: flex; align-items: center; gap: 4px; min-height: 44px; border: 0; background: none; color: var(--accento); font: 800 14px Nunito, sans-serif; }
 .piccola { display: flex; gap: 8px; align-items: flex-start; font-size: 13px !important; }
-/* pomeriggio: il numero dell'ordine fa da casella */
+/* una sola spunta per Pomeriggio e Sera (RigaCompito): un cerchio col bordo, che si capisce che si tocca;
+   nel pomeriggio dentro c'è il numero dell'ordine, con la spunta diventa pieno con ✓ */
 .spunte { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
 .spunte label { display: flex; gap: 12px; align-items: flex-start; min-height: 44px; padding: 8px 0; }
-.spunte input[type='checkbox'] { flex: none; width: 28px; height: 28px; margin: 0; accent-color: var(--accento); }
-.spunte input:checked + span { color: var(--testo-2); text-decoration: line-through; }
 .ordine li { padding: 8px 0; border-bottom: 2px dashed var(--lilla); }
 .ordine li:last-child { border-bottom: 0; }
 .ordine label { font-size: 15px; line-height: 1.35; }
 .numerata { position: relative; align-items: center !important; }
 .numerata input[type='checkbox'] { position: absolute; left: 0; top: 50%; translate: 0 -50%; width: 44px; height: 44px; opacity: 0; margin: 0; cursor: pointer; }
-.bollino { flex: none; width: 34px; height: 34px; margin: 5px; border-radius: 50%; display: grid; place-items: center; background: var(--rosa); color: var(--accento); font: 800 17px 'Baloo 2', Nunito, sans-serif; }
+.bollino { flex: none; width: 34px; height: 34px; margin: 5px; border-radius: 50%; display: grid; place-items: center; background: var(--bianco); border: 2px solid var(--accento); color: var(--accento); font: 800 17px 'Baloo 2', Nunito, sans-serif; }
 .numerata input:checked ~ .bollino { background: var(--accento); color: var(--bianco); }
 .numerata input:focus-visible ~ .bollino { outline: 3px solid var(--accento); outline-offset: 2px; }
 .numerata input:checked ~ span:last-child { color: var(--testo-2); text-decoration: line-through; }
@@ -247,17 +246,7 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .testata .avanzamento span { background: var(--fucsia); }
 .testata .conto { margin: 4px 0 0; font: 800 13px/1.35 Nunito, sans-serif; color: var(--testo); }
 .sera .spunte label { min-height: 44px; padding: 4px 0; gap: 12px; align-items: center; font-size: 14px; }
-.sera .spunte input:checked + span { text-decoration-color: var(--lilla-medio); }
-.sera .spunte input[type='checkbox'] {
-  appearance: none; -webkit-appearance: none; display: grid; place-items: center;
-  width: 22px; height: 22px; margin: 0; border: 2px solid var(--testo-2); border-radius: 6px; background: var(--bianco);
-}
-.sera .spunte input[type='checkbox']:checked {
-  border-color: var(--fucsia); background: var(--fucsia)
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
-    center / 18px no-repeat;
-}
-.sera .spunte input[type='checkbox']:focus-visible { outline: 3px solid var(--accento); outline-offset: 2px; }
+.sera .numerata input:checked ~ span:last-child { text-decoration-color: var(--lilla-medio); }
 .con-lady { position: relative; padding: 8px 100px 8px 12px; border-radius: 16px; background: var(--rosa); font: 800 13px/1.35 Nunito, sans-serif; min-height: 64px; display: flex; align-items: center; }
 .lady-sticker { position: absolute; right: -10px; bottom: -14px; }
 .pastiglie { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 12px 8px; }
