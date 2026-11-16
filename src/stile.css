@@ -91,11 +91,30 @@ body:has(.studio) .barra, body:has(.studio, .schermo-studio) .link-genitori { di
 body:has(.studio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
 
 /* Testata delle schermate: testo a sinistra, avatar sticker che sborda a destra */
-.testata { display: grid; grid-template-columns: 1fr auto; align-items: start; margin: 0 -16px 0 0; min-height: 170px; }
-.testata-testo { display: flex; flex-direction: column; gap: 4px; padding: 14px 0 12px 4px; }
+.testata { display: grid; grid-template-columns: 1fr auto; align-items: start; margin: 0 -16px 0 0; min-height: 150px; }
+.testata-testo { display: flex; flex-direction: column; gap: 4px; padding: 8px 0 8px 4px; }
 .testata h1 { margin: 0; font-size: 30px; line-height: 1.05; }
 .testata .riga, .testata .riga p { margin: 0; font-size: 15px; line-height: 1.4; color: var(--testo-2); }
-.testata-avatar { margin: -6px 0 -20px -24px; }
+.testata-avatar { margin: -6px 0 -20px -24px; max-width: 150px; max-height: 150px; }
+/* Testata compatta allo scorrere: resta in alto, il titolo e l'avatar rimpiccioliscono, il resto svanisce.
+   Solo CSS, solo transform e opacity: il posto che occupa non cambia, quindi la pagina non salta. Non prende
+   i tocchi (dentro non c'è niente da toccare). Senza animation-timeline, o col movimento ridotto, resta
+   com'è e scorre via con la pagina. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: scroll()) {
+    .testata { position: sticky; top: 0; z-index: 3; pointer-events: none; }
+    .testata::before { content: ''; position: absolute; z-index: -1; inset: 0 0 auto -16px; height: 64px; border-radius: 0 0 24px 24px; background: var(--panna); box-shadow: var(--ombra); opacity: 0; }
+    .testata::before, .testata h1, .testata .sopratitolo, .testata .riga, .testata-avatar { animation: linear both; animation-timeline: scroll(); }
+    .testata .sopratitolo, .testata .riga { animation-name: testata-svanisce; animation-range: 0 40px; }
+    .testata::before { animation-name: testata-compare; animation-range: 40px 96px; }
+    .testata h1 { transform-origin: 0 0; animation-name: testata-titolo; animation-range: 16px 96px; }
+    .testata-avatar { transform-origin: 100% 0; animation-name: testata-avatar; animation-range: 16px 96px; }
+  }
+}
+@keyframes testata-svanisce { to { opacity: 0; } }
+@keyframes testata-compare { to { opacity: 1; } }
+@keyframes testata-titolo { to { transform: translateY(-20px) scale(0.67); } }
+@keyframes testata-avatar { to { transform: translate(-12px, 12px) scale(0.37); } }
 .sopratitolo { margin: 0; min-height: 44px; display: flex; align-items: center; color: var(--testo-2); }
 .testata .sopratitolo { min-height: 0; display: block; margin: 0; font: 800 14px Nunito, sans-serif; color: var(--testo-2); }
 .sticker { display: block; object-fit: contain; pointer-events: none; user-select: none; }
@@ -222,7 +241,7 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .riga-pallini .secondario.compatto { align-self: auto; }
 
 /* Sera (bozza Domani) */
-.sera .testata { min-height: 150px; }
+.sera .testata { min-height: 132px; }
 .sera .testata-avatar { width: 140px; height: 140px; }
 .testata .avanzamento { width: 100%; max-width: 236px; height: 14px; margin-top: 4px; background: var(--bianco); border: 2px solid var(--lilla-bordo); box-sizing: content-box; }
 .testata .avanzamento span { background: var(--fucsia); }
@@ -588,7 +607,7 @@ body:has(.avvio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom))
 .pillola-oro .numero { margin-left: auto; padding-left: 8px; font: 800 24px/1 'Baloo 2', Nunito, sans-serif; color: var(--accento); white-space: nowrap; }
 .riga-chiavi .collegamento { align-self: flex-end; }
 /* Pomeriggio: testata più bassa (ripasso e carte salgono), cerchi della stessa misura, "Inizia da qui" più quieto */
-.pomeriggio .testata { min-height: 150px; }
+.pomeriggio .testata { min-height: 132px; }
 .bollino { width: 44px; height: 44px; margin: 0; }
 .nota-riga { color: var(--testo-2); }
 .ordine label { padding: 0; }
