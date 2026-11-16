@@ -730,6 +730,8 @@ body:has(.avvio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom))
 .ga-sezione > h2 { display: flex; align-items: baseline; gap: 8px; font-size: 18px; }
 .ga-conta { padding: 1px 8px; border-radius: 999px; background: var(--accento); color: var(--su-colore); font: 800 13px Nunito, sans-serif; }
 .ga-nota { margin: 0; font-size: 14px; color: var(--testo-2); }
+.ga-da-dirle { padding: 10px 14px; border-radius: 20px; background: var(--burro-chiaro); color: var(--testo); }
+.ga-da-dirle b { display: block; }
 .ga-pillola { position: fixed; z-index: 9; left: 50%; bottom: calc(84px + env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(100% - 32px, 398px); display: flex; align-items: center; gap: 12px; margin: 0; padding: 12px 16px; min-height: 48px; border-radius: 16px; background: var(--testo); color: var(--su-colore); font-weight: 700; box-shadow: var(--ombra-alta); }
 
 /* bottoni: pieno (uno per schermata), bordato, tenue */

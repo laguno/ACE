@@ -5,7 +5,7 @@ import { Attesa, AreaTesto, Elenco, Foglio, Riga, Vuoto } from '../kit';
 import { Fotografa, SELECT_RICHIESTE, descrizione, type RichiestaFoto } from '../Foto';
 import { CampiRisultato, approvaPartita, partiteDaApprovare, rifiutaPartita, type PartitaDaApprovare } from '../Partita';
 import { FoglioAssenza, FoglioSposta, caricaVerifiche, daRecuperare, giorniDiScuola, type Verifica } from '../Assenze';
-import { BALLA_MAX, FRASI_BALLA, SGRIDATE, VOCI_GESTI, bello, meno, notaBalla, oraRoma, type Props } from './comune';
+import { BALLA_MAX, FRASI_BALLA, SGRIDATE, VOCI_GESTI, bello, meno, notaBalla, oraRoma, piu, type Props } from './comune';
 
 // Oggi (si apre qui): cosa c'è da fare per i genitori, le due azioni di ogni giorno, Lani in tre righe.
 
@@ -23,6 +23,8 @@ type Dati = {
   passiOggi: number;
   serata: { chiusa_il: string | null } | null;
   chiusura: string | null;
+  /** quando Lani ha chiuso la serata di ieri, se l'ha chiusa: il fatto vero per "Una cosa da dirle oggi" */
+  ieriChiusa: string | null;
 };
 
 export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: (n: number) => void }) {
@@ -31,7 +33,7 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
   const [foglio, setFoglio] = useState<'passi' | 'segna' | 'casa' | { partita: PartitaDaApprovare } | { forziere: number } | { verifica: Verifica } | { firma: Foglio_ }>();
 
   async function carica() {
-    const [pa, re, fo, rf, fz, ve, gm, gc, mp, se, im] = await Promise.all([
+    const [pa, re, fo, rf, fz, ve, gm, gc, mp, se, im, ie] = await Promise.all([
       partiteDaApprovare(client),
       client.from('impostazioni').select('valore').eq('chiave', R.CHIAVE_R_EVOLUTION).maybeSingle(),
       client.from('fogli_firma').select('id, titolo, scadenza').not('dato_il', 'is', null).is('consegnato_il', null).order('scadenza'),
@@ -43,6 +45,7 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
       client.from('movimenti_passi').select('passi').eq('giorno', oggi),
       client.from('serate').select('chiusa_il').eq('data', oggi).maybeSingle(),
       client.from('impostazioni').select('valore').eq('chiave', 'ora_chiusura').maybeSingle(),
+      client.from('serate').select('chiusa_il').eq('data', R.iso(piu(R.giorno(oggi), -1))).maybeSingle(),
     ]);
     const mov = gm.data ?? [];
     // gesti dati oggi e non annullati (storno "gesto:<id>")
@@ -61,6 +64,7 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
       passiOggi: (mp.data ?? []).reduce((a, m) => a + m.passi, 0),
       serata: se.data ?? null,
       chiusura: (im.data?.valore as Record<string, string> | undefined)?.[R.giorno(oggi).getDay()] ?? null,
+      ieriChiusa: ie.data?.chiusa_il ?? null,
     };
     setD(nuovi);
     conta(daFare(nuovi).length);
@@ -216,6 +220,14 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
             <dd>{prossima ? `${prossima.materie?.nome ?? 'Verifica'}, ${bello(prossima.data)}` : 'nessuna'}</dd>
           </div>
         </dl>
+        {/* una riga da un fatto vero di ieri, che loda il gesto e non la persona; senza il fatto non compare
+            (revisione del 16/11, testo da approvare) */}
+        {d.ieriChiusa && (
+          <p className="ga-nota ga-da-dirle">
+            <b>Una cosa da dirle oggi</b>
+            Ieri sera ha chiuso tutto alle {oraRoma(new Date(d.ieriChiusa))}. Per esempio: «Ho visto che ieri sera hai chiuso tutto.»
+          </p>
+        )}
         {chiediCasa && (
           <button type="button" className="ga-domanda" onClick={() => setFoglio('casa')}>
             Lani è a casa oggi?
