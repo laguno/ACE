@@ -10,7 +10,7 @@ import { oraAdesso, useGiornata } from './giornata';
 import * as C from './lib/calendario';
 import * as R from './lib/regole';
 import { Attesa } from './kit';
-import { rinnovaIscrizione } from './notifiche';
+import { attivaNotifiche, guscio, notifichePossibili, rinnovaIscrizione } from './notifiche';
 import { CHIAVE_SESSIONE, supabase, type Profilo } from './supabase';
 import { useREvolutionDa } from './accensione';
 
@@ -99,6 +99,8 @@ export default function App() {
         if (error) return;
         setProfilo(data as Profilo | null);
         localStorage.setItem(PROFILO, JSON.stringify(data));
+        // i genitori non hanno la carta "Attiva i promemoria" di Oggi: nell'APK il permesso si chiede qui
+        if (data?.ruolo === 'genitore' && notifichePossibili() && guscio()) attivaNotifiche().catch(() => {});
       });
   }, [uid]);
 

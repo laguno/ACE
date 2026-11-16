@@ -10,12 +10,12 @@ const CHIAVE_PUBBLICA = 'BB4oXSiIZWa9eWn89UTk5LhUAI8y2B1sgiQBSX5c_lnzH0UtFcKfNbW
 const pushNelBrowser = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
 // Guscio Android (capacitor.config.ts): niente Web Push nella WebView, si usa Firebase Cloud Messaging.
 // Il gettone FCM va in push_iscrizioni con tipo 'fcm'; l'invio è in supabase/functions/_shared/push.ts.
-const nelGuscio = () => Capacitor.isNativePlatform();
+export const guscio = () => Capacitor.isNativePlatform();
 const RISPOSTA_GUSCIO = 'ace-notifiche-guscio';
 const leggi = () => { try { return localStorage.getItem(RISPOSTA_GUSCIO); } catch { return null; } };
 const scrivi = (v: string) => { try { localStorage.setItem(RISPOSTA_GUSCIO, v); } catch { /* resta da chiedere */ } };
 
-export const notifichePossibili = () => (nelGuscio() ? leggi() === null : pushNelBrowser() && Notification.permission === 'default');
+export const notifichePossibili = () => (guscio() ? leggi() === null : pushNelBrowser() && Notification.permission === 'default');
 
 /** Gettone FCM del dispositivo (arriva con l'evento registration) salvato sul server. */
 async function iscriviGuscio(): Promise<boolean> {
@@ -44,7 +44,7 @@ async function iscrivi(): Promise<boolean> {
 }
 
 export async function attivaNotifiche(): Promise<boolean> {
-  if (nelGuscio()) {
+  if (guscio()) {
     const { receive } = await PushNotifications.requestPermissions();
     scrivi(receive);
     return receive === 'granted' && iscriviGuscio();
@@ -59,7 +59,7 @@ export async function attivaNotifiche(): Promise<boolean> {
  * in supabase/functions/_shared/push.ts): così una cancellata per sbaglio torna alla prossima apertura.
  */
 export async function rinnovaIscrizione() {
-  if (nelGuscio()) {
+  if (guscio()) {
     if ((await PushNotifications.checkPermissions()).receive === 'granted') await iscriviGuscio();
     return;
   }
