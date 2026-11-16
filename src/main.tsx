@@ -1,4 +1,4 @@
-import { StrictMode, Suspense } from 'react';
+import { lazy, StrictMode, Suspense } from 'react';
 import { createRoot } from 'react-dom/client';
 import { registerSW } from 'virtual:pwa-register';
 import App, { SenzaRete } from './App';
@@ -28,6 +28,10 @@ registerSW({
   },
 });
 
+// Gioco di pallavolo in prova (docs/09): solo in sviluppo, da /#gioco, senza accesso. Nella build di
+// produzione questa riga sparisce e il gioco non è raggiungibile finché non ha la sua voce nell'app.
+const Gioco = import.meta.env.DEV && location.hash === '#gioco' ? lazy(() => import('./gioco/Gioco')) : null;
+
 const radice = document.getElementById('root');
 if (!radice) throw new Error('manca #root in index.html');
 createRoot(radice).render(
@@ -35,7 +39,7 @@ createRoot(radice).render(
     <SenzaRete />
     <Errore>
       <Suspense fallback={<Attesa />}>
-        <App />
+        {Gioco ? <Gioco /> : <App />}
       </Suspense>
     </Errore>
   </StrictMode>,

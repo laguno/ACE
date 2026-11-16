@@ -1,0 +1,23 @@
+/* Gioco di pallavolo: a tutto schermo, in orizzontale. Colori e raggi dai token di stile.css. */
+/* main.gioco: vince sulla colonna da 430 px che stile.css dà a ogni main */
+main.gioco { position: fixed; inset: 0; width: 100%; margin: 0; padding: 0; background: var(--notte); touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.gioco canvas { display: block; width: 100%; height: 100%; }
+
+.gioco-tasti { position: absolute; bottom: max(16px, env(safe-area-inset-bottom)); display: flex; gap: 16px; }
+.gioco-sx { left: max(20px, env(safe-area-inset-left)); }
+.gioco-dx { right: max(20px, env(safe-area-inset-right)); }
+.gioco-tasti button { display: grid; place-items: center; width: 76px; height: 76px; padding: 0; border: 4px solid var(--bianco); border-radius: 999px; background: rgba(255, 255, 255, 0.55); color: var(--testo); touch-action: none; }
+.gioco-tasti button:active { background: var(--burro); }
+.gioco-tasti .gioco-salta { width: 100px; height: 100px; }
+
+.gioco-fine { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 12px; background: rgba(47, 42, 110, 0.8); color: var(--bianco); text-align: center; }
+.gioco-fine h1 { margin: 0; font: 800 32px 'Baloo 2', sans-serif; }
+.gioco-fine p { margin: 0; font: 800 22px Nunito, sans-serif; }
+.gioco-fine .principale { min-height: 54px; padding: 0 32px; border-radius: 999px; font: 800 18px Nunito, sans-serif; }
+
+/* in verticale il gioco si ferma (Gioco.tsx) e chiede di girare lo schermo */
+.gioco-gira { display: none; }
+@media (orientation: portrait) {
+  .gioco canvas, .gioco-tasti { visibility: hidden; }
+  .gioco-gira { position: absolute; inset: 0; display: grid; place-content: center; margin: 0; color: var(--bianco); font: 800 24px 'Baloo 2', sans-serif; }
+}
