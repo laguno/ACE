@@ -21,7 +21,7 @@ Il gioco è partito **lunedì 16/11/2026**: Lani usa ACE in produzione. `main` `
 - **CSP per ambiente**: `vercel.ts` al posto di `vercel.json` (Supabase da `VITE_SUPABASE_URL`, senza variabile la produzione). **Prima di unire a `main`**: una preview e `curl -I` per vedere che le intestazioni arrivano; se mancano non unire.
 - **ACE Prova**: `scripts\apk.ps1 -Ambiente prova -UrlProva https://...` (`docs/runbook.md`). Compilato senza firma: `it.messori.ace.prova`, "ACE Prova". Senza notifiche finché Firebase non ha la seconda app.
 - Worktree nuovo: serve `.env.local` (copiarlo da `app`), sennò `src/genitori/comune.test.ts` non parte.
-- Da decidere col signore: set "ai 15" con due di scarto (messo così); orientamento e APK 1.3 restano da fare.
+- Deciso dal signore: set ai 15 con due di scarto (`docs/09` §5). Orientamento e APK 1.3 restano da fare.
 
 ## Prossimo passo
 

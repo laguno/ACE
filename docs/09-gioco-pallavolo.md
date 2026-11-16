@@ -77,7 +77,8 @@ Il tetto lo conta il **server** (una riga per partita e giorno, nuova migrazione
 2. **Compagne**: solo descrizioni, come per le figurine; niente foto. Soprannomi e numeri li fornisce il signore quando sarà il momento (servono dalla Fase 2).
 3. **Tetto massimo: 3 partite al giorno.** Nessuna condizione per sbloccarle (ribadito alle 17:11).
 4. **Nessun premio per la vittoria**: niente passi, niente figurine, niente contatori. Il gioco vale solo il divertimento.
-5. **Dove si implementa.** Sessione di Claude Code sul repository di ACE (ramo `gioco`), con test e le regole di CLAUDE.md. Nessuna pubblicazione nelle finestre vietate (14:20-14:45 e 19:45-21:00) e backup prima di ogni pubblicazione, come da HANDOFF.
+5. **Set ai 15 con due punti di scarto** (16/11 sera): sul 14 pari si va avanti finché uno ha due punti in più.
+6. **Dove si implementa.** Sessione di Claude Code sul repository di ACE (ramo `gioco`), con test e le regole di CLAUDE.md. Nessuna pubblicazione nelle finestre vietate (14:20-14:45 e 19:45-21:00) e backup prima di ogni pubblicazione, come da HANDOFF.
 
 ## 6. Rischi
 
