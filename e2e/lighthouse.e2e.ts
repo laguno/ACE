@@ -2,7 +2,7 @@
 // Astra e Studio. Playwright prepara la pagina (ora, dati finti), Lighthouse la misura dalla stessa
 // Chrome. Oggi e Sera: caricamento completo. Astra e Studio sono schede, non indirizzi: caricamento
 // di Oggi, clic sulla scheda (timespan) e fotografia (snapshot), senza punteggio di prestazioni.
-// Le pagine arrivano con le intestazioni di sicurezza di vercel.json (CSP compresa, con il Supabase
+// Le pagine arrivano con le intestazioni di sicurezza di vercel.ts (CSP compresa, con il Supabase
 // finto al posto di quello vero) e una prova apre ogni schermata: nessuna violazione della CSP.
 // Il server è come Vercel anche nella compressione (gzip; Vercel usa brotli, un po' più piccolo):
 // vite preview mandava i file interi e le prestazioni risultavano peggiori del vero.
@@ -15,6 +15,7 @@ import { gzipSync } from 'node:zlib';
 import { startFlow } from 'lighthouse';
 import puppeteer from 'puppeteer-core';
 import { apri, CASI, prepara } from './casi';
+import { config } from '../vercel';
 
 test.skip(!process.env.LH, 'solo con npm run lighthouse');
 test.setTimeout(300_000);
@@ -32,9 +33,9 @@ const CONFIG = {
   },
 };
 
-// intestazioni di Vercel, come in produzione; l'indirizzo di Supabase diventa quello finto
-const VERCEL = JSON.parse(readFileSync('vercel.json', 'utf8')) as { headers: { headers: { key: string; value: string }[] }[] };
-const INTESTAZIONI = Object.fromEntries(VERCEL.headers[0].headers.map((h) => [h.key, h.value.replaceAll('qonullxzhqvbfpiibqye.supabase.co', 'finto.supabase.test')]));
+// intestazioni di Vercel, come in produzione; vercel.ts mette nella CSP il Supabase di
+// VITE_SUPABASE_URL, che npm run lighthouse imposta a quello finto
+const INTESTAZIONI = Object.fromEntries(config.headers[0].headers.map((h) => [h.key, h.value]));
 // solo sulle pagine: per i file dell'app si lascia passare la risposta compressa così com'è
 const conIntestazioni = (p: Page) =>
   p.route(`${URL}**`, async (route) => {

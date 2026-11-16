@@ -4,7 +4,7 @@ Una pagina per orientarsi. I dettagli stanno nel codice, nei commenti delle migr
 
 ## I pezzi
 
-- **App** (PWA): React + TypeScript + Vite, `vite-plugin-pwa`, su Vercel (`ace-passino.vercel.app`, `noindex`, CSP in `vercel.json`). Lani dal telefono Android e dall'iPad, i genitori dai loro telefoni. Le regole del gioco sono funzioni pure in `src/lib/regole` (numeri solo da `data/config-gioco.json`), il copione in `src/lib/copione`.
+- **App** (PWA): React + TypeScript + Vite, `vite-plugin-pwa`, su Vercel (`ace-passino.vercel.app`, `noindex`, CSP in `vercel.ts`, che al build ci mette il Supabase di `VITE_SUPABASE_URL`). Lani dal telefono Android e dall'iPad, i genitori dai loro telefoni. Le regole del gioco sono funzioni pure in `src/lib/regole` (numeri solo da `data/config-gioco.json`), il copione in `src/lib/copione`.
 - **Supabase** (progetto `qonullxzhqvbfpiibqye`): Postgres con RLS, Auth (iscrizioni chiuse), Storage privato (`foto-pagine`, `premi`), Edge Functions in Deno, cron (`pg_cron` + `pg_net`, segreto nel Vault).
 - **Fuori**: Nuvola (registro elettronico, sola lettura, credenziali nei segreti), il calendario di famiglia (iCal privato di Google), Anthropic (spiegazioni, studio, enigmi: al massimo una chiamata per compito o enigma), Web Push (chiavi VAPID).
 
