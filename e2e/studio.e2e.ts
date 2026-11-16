@@ -129,4 +129,8 @@ test('assenze: la verifica del giorno a casa è da recuperare, quella spostata a
   await expect(carta('Geografia')).toContainText('settimana prossima');
   await expect(carta('Geografia')).toContainText('Settimana prossima, il giorno lo dice la prof');
   await expect(carta('Matematica')).toContainText('fra 2 giorni');
+  // fucsia solo entro 2 giorni o da recuperare; il resto col colore dei testi secondari
+  await expect(carta('Matematica').locator('.valore')).not.toHaveClass(/quieto/);
+  await expect(carta('Spagnolo').locator('.valore')).not.toHaveClass(/quieto/);
+  await expect(carta('Geografia').locator('.valore')).toHaveClass(/quieto/);
 });

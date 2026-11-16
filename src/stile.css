@@ -269,6 +269,7 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .testa-carta { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
 .testa-carta h2 { margin: 0 0 4px; }
 .valore { flex: none; font: 800 13px Nunito, sans-serif; color: var(--accento); }
+.valore.quieto { color: var(--testo-2); }
 
 /* Studio (bozza Studio) */
 .schermo .carta p.data-verifica { font: 800 14px Nunito, sans-serif; color: var(--testo-2); }
