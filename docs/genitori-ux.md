@@ -190,3 +190,9 @@ Prima: 8 segnalazioni.
 | 7-8 | Oggi / Settimana / Forzieri | Firmato e Consegna scritti due volte | lasciato: pulizia, nessun difetto |
 
 Dopo: 2 corretti, 6 lasciati per scelta (3 e 4 da decidere col signore: servirebbe distinguere l'errore dal tetto in `passi()`).
+
+### Ritocco di sola interfaccia (approvato dal signore il 16/11)
+
+Fatto (`27231f3`): freccia su tutte le sezioni che si aprono; Sera e cartella una sera alla volta (fila dei sette giorni con l'ora, sotto la sera scelta con "In cartella per" il giorno dopo; 2639 → 895 px) con il foglio "Modifiche non salvate" uscendo da "‹ Impostazioni" o dalle schede; pillola di errore con **Riprova** (rifà la stessa funzione, nessuna logica nuova sui passi) e testi che dicono cosa non è salvato.
+
+Impeccable A rifatta: **31/40** (prevenzione errori 3 → 4, recupero dagli errori 2 → 3), carico cognitivo 1 su 8. B: detector 0 sui sorgenti, axe 0, bersagli piccoli 0. Mancano 3 punti a 34; restano solo P3, tutti di sola interfaccia: Forzieri con 9 righe (6 "Da scegliere"), pillole "0 note" / "0 serate chiuse" senza un'idea di bene o male, punteggio della partita che va a capo, "Premio non salvato" e "Foglio non salvato" senza Riprova, Stato di ACE senza il passo da fare, conferma delle modifiche solo su Sera.
