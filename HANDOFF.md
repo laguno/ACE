@@ -15,6 +15,14 @@ Il gioco è partito **lunedì 16/11/2026**: Lani usa ACE in produzione. `main` `
 - Motorola del genitore con la 1.2: sessione che resta, notifica FCM con ACE chiusa, tocco che apre ACE, icona delle impronte: ok.
 - Prove: `npm test` 323 (2 saltate), `prova:schema` 298, `tsc` 0. Backup di oggi in `Documents\ACE-backup` (l'ultimo 15:56, 207 KB).
 
+## Ramo `gioco` (16/11 sera, `C:\progetti\ace\app-gioco`, non unito, non pubblicato)
+
+- **Motore di pallavolo** `src/gioco/motore/index.ts` (`docs/09`): puro, 60 Hz, seme, rally point con due di scarto, 3 tocchi, CPU (`ia`, con `errore`). 29 test. Solo + - * / e `Math.sqrt`: stessa partita su ogni dispositivo. Misure in `M`, da tarare con la grafica. `puntiSet` arriva da fuori: metterlo in `data/config-gioco.json` quando nasce la schermata.
+- **CSP per ambiente**: `vercel.ts` al posto di `vercel.json` (Supabase da `VITE_SUPABASE_URL`, senza variabile la produzione). **Prima di unire a `main`**: una preview e `curl -I` per vedere che le intestazioni arrivano; se mancano non unire.
+- **ACE Prova**: `scripts\apk.ps1 -Ambiente prova -UrlProva https://...` (`docs/runbook.md`). Compilato senza firma: `it.messori.ace.prova`, "ACE Prova". Senza notifiche finché Firebase non ha la seconda app.
+- Worktree nuovo: serve `.env.local` (copiarlo da `app`), sennò `src/genitori/comune.test.ts` non parte.
+- Da decidere col signore: set "ai 15" con due di scarto (messo così); orientamento e APK 1.3 restano da fare.
+
 ## Prossimo passo
 
 1. **Stasera dopo le 21 o domani**: APK sul Samsung di Lani seguendo `docs/07-installazione.md` (Family Link, origini sconosciute acceso solo per installare, batteria senza restrizioni, ACE sempre consentita, Chrome limite normale) e la lista "Prova del guscio". Lì si prova anche il **flusso foto** (c'è solo nell'Oggi di Lani): permesso fotocamera, più scatti, galleria, "Ho finito". Poi notifica di prova: deve comparire una riga `fcm` di Lani in `push_iscrizioni`.
