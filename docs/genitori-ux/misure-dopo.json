@@ -92,7 +92,7 @@
         "pulsanti": 17
       },
       "06-forzieri": {
-        "altezzaPagina": 988,
+        "altezzaPagina": 844,
         "axe": [],
         "piccoli": [],
         "senzaEtichetta": [],
@@ -165,7 +165,7 @@
         "pulsanti": 13
       },
       "10-stato": {
-        "altezzaPagina": 922,
+        "altezzaPagina": 862,
         "axe": [],
         "piccoli": [],
         "senzaEtichetta": [],
@@ -178,13 +178,13 @@
         },
         "overflowX": 0,
         "carte": 3,
-        "sezioni": 4,
+        "sezioni": 6,
         "pulsanti": 5
       }
     },
     "390": {
       "01-oggi": {
-        "altezzaPagina": 1015,
+        "altezzaPagina": 994,
         "axe": [],
         "piccoli": [],
         "senzaEtichetta": [],
@@ -201,7 +201,7 @@
         "pulsanti": 9
       },
       "02-dai-passi": {
-        "altezzaPagina": 1015,
+        "altezzaPagina": 994,
         "axe": [],
         "piccoli": [],
         "senzaEtichetta": [],
@@ -218,7 +218,7 @@
         "pulsanti": 14
       },
       "03-segna-balla": {
-        "altezzaPagina": 1015,
+        "altezzaPagina": 994,
         "axe": [],
         "piccoli": [],
         "senzaEtichetta": [],
@@ -237,7 +237,7 @@
         "pulsanti": 13
       },
       "04-partita": {
-        "altezzaPagina": 1015,
+        "altezzaPagina": 994,
         "axe": [],
         "piccoli": [],
         "senzaEtichetta": [],
@@ -273,7 +273,7 @@
         "pulsanti": 17
       },
       "06-forzieri": {
-        "altezzaPagina": 951,
+        "altezzaPagina": 844,
         "axe": [],
         "piccoli": [],
         "senzaEtichetta": [],
@@ -346,7 +346,7 @@
         "pulsanti": 13
       },
       "10-stato": {
-        "altezzaPagina": 922,
+        "altezzaPagina": 862,
         "axe": [],
         "piccoli": [],
         "senzaEtichetta": [],
@@ -359,7 +359,7 @@
         },
         "overflowX": 0,
         "carte": 3,
-        "sezioni": 4,
+        "sezioni": 6,
         "pulsanti": 5
       }
     }
