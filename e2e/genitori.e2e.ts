@@ -269,7 +269,22 @@ test('foto mancante: la fa Lani; dopo le 20 o dalla scadenza la possono fare i g
   await page.reload();
   await expect(riga).toContainText('Se la fate voi, Lani non prende i passi');
   await expect(riga.getByRole('button', { name: 'Fotografa' })).toBeVisible();
+
+  // dopo il primo scatto: Un'altra pagina, Dalla galleria e Ho finito in fila sotto il testo, con la veste dei genitori
+  await riga.getByLabel(/^Fotocamera/).setInputFiles({ name: 'p.jpg', mimeType: 'image/jpeg', buffer: Buffer.from(JPEG_1PX, 'base64') });
+  const finito = riga.getByRole('button', { name: 'Ho finito' });
+  await expect(finito).toBeVisible();
+  const testo = await riga.locator('.ga-riga-testo').boundingBox();
+  const bottone = await finito.boundingBox();
+  expect(bottone!.height).toBeGreaterThanOrEqual(44);
+  expect(bottone!.y).toBeGreaterThan(testo!.y + testo!.height - 1); // sotto il testo, non accanto
+  expect(await finito.evaluate((b) => getComputedStyle(b).borderRadius)).toBe('999px');
+  if (process.env.FOTO_RIGA) await riga.screenshot({ path: process.env.FOTO_RIGA });
 });
+
+// JPEG di 1 pixel, abbastanza per il caricamento finto
+const JPEG_1PX =
+  '/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=';
 
 test('Lani è a casa oggi? Solo fino alle 14, con conferma', async ({ page }) => {
   await page.clock.setFixedTime(new Date('2026-11-23T07:30:00+01:00'));

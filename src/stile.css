@@ -843,3 +843,14 @@ dialog.ga-velo::backdrop { background: transparent; }
 .ga details.ga-chiusa > summary { padding: 0 4px; font: 800 18px 'Baloo 2', Nunito, sans-serif; }
 .ga details.ga-chiusa[open] > summary { margin-bottom: 8px; }
 .stato-riga { display: block; }
+
+/* Fotografa dentro l'area genitori: i bottoni sono quelli di Lani (globali), qui prendono la veste
+   dei genitori e scendono sotto il testo della riga, in fila, invece di schiacciarlo in colonna */
+.ga .ga-riga:has(.fotografa) { flex-wrap: wrap; }
+.ga .fotografa { flex: 1 0 100%; flex-direction: row; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 8px; }
+.ga .fotografa .scatti { flex: 1 0 100%; flex-direction: row; align-items: center; justify-content: flex-end; gap: 8px; }
+.ga .fotografa .compatto { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; margin: 0; padding: 0 14px; border: 2px solid var(--lilla-medio); border-radius: 999px; background: var(--bianco); color: var(--testo); font: 800 15px Nunito, sans-serif; white-space: nowrap; }
+.ga .fotografa .compatto:not(.secondario) { border-color: var(--accento); background: var(--accento); color: var(--bianco); box-shadow: inset 0 -3px 0 var(--accento-premuto); }
+.ga .fotografa .compatto:disabled { opacity: 0.55; }
+.ga .fotografa .compatto:focus-visible { outline: 3px solid var(--accento); outline-offset: 2px; }
+.ga .fotografa [role='alert'] { flex: 1 0 100%; text-align: right; }
