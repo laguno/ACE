@@ -109,6 +109,12 @@ async function turno() {
 Deno.serve(async (req) => {
   if (!stessoSegreto(req.headers.get('x-cron-segreto'), Deno.env.get('CRON_SEGRETO'))) return new Response('{"errore":"solo il cron"}', { status: 401 });
   try {
+    // prova di consegna (APK, docs/07): solo ai genitori, fuori dai conteggi del copione
+    const corpo = await req.json().catch(() => ({}));
+    if (corpo?.prova === 'genitori') {
+      const inviate = await inviaPush(db, 'genitore', { titolo: 'ACE', testo: 'Notifica di prova: arriva!', tipo: 'prova' });
+      return new Response(JSON.stringify({ prova: inviate }), { headers: { 'Content-Type': 'application/json' } });
+    }
     return new Response(JSON.stringify(await turno()), { headers: { 'Content-Type': 'application/json' } });
   } catch (e) {
     await registraErroreServer(db, 'notifiche', e);

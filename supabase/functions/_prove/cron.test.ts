@@ -77,6 +77,12 @@ describe('notifiche', () => {
     expect((await json(await f(richiesta({}, { cron: true })))).corpo.inviate).toMatchObject({ genitori_riepilogo: 1 });
     expect(await valore(`select count(*)::int from push_iscrizioni where endpoint like '%scaduto%'`)).toBe(0);
   });
+  it('prova di consegna: solo ai genitori, senza segnare niente in notifiche_inviate', async () => {
+    const f = await carica('notifiche');
+    expect((await json(await f(richiesta({ prova: 'genitori' }, { cron: true })))).corpo).toEqual({ prova: 1 });
+    expect(inviate.map((i) => i.endpoint)).toEqual(['https://push.test/papa']);
+    expect(await valore(`select count(*)::int from notifiche_inviate`)).toBe(0);
+  });
   it('guscio Android: la stessa notifica via FCM con il gettone Google firmato; gettone morto (404) cancellato', async () => {
     const { generateKeyPairSync, createVerify } = await import('node:crypto');
     const { privateKey, publicKey } = generateKeyPairSync('rsa', { modulusLength: 2048 });
