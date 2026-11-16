@@ -11,6 +11,14 @@ export const MESI = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno
 export const maiuscola = (s: string) => s.replace(/^./, (c) => c.toUpperCase());
 export const adesso = () => new Date().toISOString();
 
+/**
+ * Prova (revisione del 16/11, da approvare): i "+N" in testa alle carte di Oggi e Sera si vedono solo
+ * dopo il primo gesto fatto in quella carta, non prima. I numeri non cambiano. Per spegnerla: false
+ * (tornano sempre in vista, come prima).
+ */
+export const VALORE_DOPO_IL_GESTO = true;
+export const mostraValore = (gestoFatto: boolean) => !VALORE_DOPO_IL_GESTO || gestoFatto;
+
 export const SELECT_COMPITI = 'id, testo, fatto_il, scadenza_spostata, materie(nome)';
 
 /** La funzione "passi" decide i passi dallo stato del database; restituisce quanti ne ha dati. */

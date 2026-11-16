@@ -8,7 +8,7 @@ import { Fotografa, SELECT_RICHIESTE, descrizione, type RichiestaFoto } from './
 import * as C from './lib/calendario';
 import * as N from './lib/nuvola';
 import * as R from './lib/regole';
-import { GIORNI, MESI, RigaCompito, SELECT_COMPITI, adesso, maiuscola, spuntaCompito, useAnnulla, type Compito } from './spunte';
+import { GIORNI, MESI, RigaCompito, SELECT_COMPITI, adesso, maiuscola, mostraValore, spuntaCompito, useAnnulla, type Compito } from './spunte';
 import { attivaNotifiche, notifichePossibili } from './notifiche';
 import { supabase } from './supabase';
 import { DieciMinuti } from './DieciMinuti';
@@ -304,7 +304,7 @@ function Pomeriggio({ chiusura, apri }: { chiusura: string | null; apri: Apri })
           <>
             <div className="testa-carta">
               <h2>In quest'ordine</h2>
-              <span className="valore">+{P.compiti} ciascuno</span>
+              {mostraValore(compiti.some((c) => c.fatto_il)) && <span className="valore">+{P.compiti} ciascuno</span>}
             </div>
             <ul className="spunte ordine">
               {ordinati.map((c, i) => (
@@ -336,7 +336,7 @@ function Pomeriggio({ chiusura, apri }: { chiusura: string | null; apri: Apri })
         <div className="carta">
           <div className="testa-carta">
             <h2>Ripasso: {ver.materie?.nome?.toLowerCase() ?? 'verifica'}</h2>
-            <span className="valore">+{P.ripasso}</span>
+            {mostraValore(false) && <span className="valore">+{P.ripasso}</span>}
           </div>
           <p>
             Verifica {GIORNI[R.giorno(ver.data).getDay()]} {R.giorno(ver.data).getDate()}. Oggi la sessione {ripasso.numero}
@@ -371,7 +371,7 @@ function Pomeriggio({ chiusura, apri }: { chiusura: string | null; apri: Apri })
         <div className="carta">
           <div className="testa-carta">
             <h2>Da fotografare</h2>
-            <span className="valore">+{R.CONFIG.passi.foto_compito} ciascuna</span>
+            {mostraValore(!!fotoFatta) && <span className="valore">+{R.CONFIG.passi.foto_compito} ciascuna</span>}
           </div>
           {foto.length > 0 && <p className="nota">Le pagine del libro di carta che ACE ti chiede, mentre fai i compiti.</p>}
           <ul className="lista-foto">
