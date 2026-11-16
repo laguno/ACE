@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light only">
+<title>ACE - Area genitori v2</title>
+<!-- Bozza del restyling dell'area genitori (16/11, docs/genitori-ux.md). Sorgente di riferimento, non codice di produzione.
+     Stessi colori del kit (src/stile.css), ma più calmi: fondo panna, carte bianche, fucsia solo per l'azione principale. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bianco: #fff; --panna: #fff6fa; --testo: #3d2350; --testo-2: #5e4470; --accento: #c2185b; --accento-premuto: #8e0f42;
+  --rosa: #ffe3ef; --rosa-bordo: #ffc8e1; --lilla: #f3e6fd; --lilla-medio: #cdb8f5; --lilla-bordo: #9580cf; --verde: #2e7d32;
+  --burro-chiaro: #fff3c4; --linea: #efe4f5;
+  --ombra: 0 6px 16px rgba(123, 106, 224, 0.10);
+  color-scheme: light only;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: #ece4f2; color: var(--testo); font: 600 15px/1.4 Nunito, system-ui, sans-serif; }
+h1, h2, h3 { font-family: 'Baloo 2', Nunito, sans-serif; font-weight: 800; margin: 0; text-wrap: balance; }
+.galleria { display: flex; flex-wrap: wrap; gap: 40px 32px; padding: 32px; align-items: flex-start; }
+.cornice { width: 390px; }
+.cornice > p.didascalia { margin: 0 0 10px; font-weight: 800; color: var(--testo-2); }
+.cornice > p.didascalia span { font-weight: 600; }
+.schermo { position: relative; width: 390px; min-height: 844px; background: var(--panna); border-radius: 28px; overflow: hidden; box-shadow: 0 20px 50px rgba(61, 35, 80, .18); padding-bottom: 96px; }
+
+/* testata compatta da adulti: niente sticker grande */
+.testata { display: flex; align-items: center; gap: 12px; padding: 18px 16px 12px; }
+.testata .sopra { margin: 0; font-size: 13px; color: var(--testo-2); }
+.testata h1 { font-size: 24px; line-height: 1.1; }
+.testata .chiudi { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 14px; border-radius: 999px; border: 2px solid var(--lilla-medio); background: var(--bianco); color: var(--testo); font: 800 14px Nunito, sans-serif; }
+.contenuto { display: grid; gap: 20px; padding: 0 16px; }
+.sezione { display: grid; gap: 8px; }
+.sezione > h2 { font-size: 18px; display: flex; align-items: baseline; gap: 8px; }
+.sezione > h2 .conta { font: 800 13px Nunito, sans-serif; color: var(--bianco); background: var(--accento); border-radius: 999px; padding: 1px 8px; }
+.nota { margin: 0; font-size: 13px; color: var(--testo-2); }
+
+/* elenco con azione: la forma base dell'area (come "Altro" di oggi) */
+.elenco { background: var(--bianco); border-radius: 20px; box-shadow: var(--ombra); overflow: hidden; }
+.riga { display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 10px 12px 10px 14px; border-top: 1px solid var(--linea); }
+.riga:first-child { border-top: 0; }
+.riga .icona { flex: none; width: 36px; height: 36px; border-radius: 12px; display: grid; place-items: center; background: var(--lilla); color: var(--testo); }
+.riga .icona.rosa { background: var(--rosa); }
+.riga .icona.burro { background: var(--burro-chiaro); }
+.riga .testo { flex: 1; min-width: 0; }
+.riga .testo b { display: block; font-weight: 800; }
+.riga .testo small { display: block; font-size: 13px; color: var(--testo-2); }
+.riga .vai { color: var(--testo-2); }
+.riga.fatto .testo b { color: var(--testo-2); }
+
+/* bottoni: un solo pieno per schermata */
+.btn { min-height: 44px; padding: 0 16px; border-radius: 999px; font: 800 14px Nunito, sans-serif; white-space: nowrap; border: 2px solid var(--accento); background: var(--bianco); color: var(--accento); }
+.btn.pieno { border: 0; background: var(--accento); color: var(--bianco); box-shadow: inset 0 -3px 0 var(--accento-premuto); }
+.btn.tenue { border-color: var(--lilla-medio); color: var(--testo); }
+.btn.largo { width: 100%; min-height: 52px; font-size: 16px; }
+
+/* due azioni rapide grandi */
+.rapide { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.rapida { display: grid; gap: 4px; justify-items: start; padding: 16px; min-height: 104px; border-radius: 20px; border: 0; background: var(--bianco); box-shadow: var(--ombra); color: var(--testo); text-align: left; font: inherit; }
+.rapida .icona { width: 40px; height: 40px; border-radius: 14px; display: grid; place-items: center; background: var(--rosa); }
+.rapida b { font: 800 19px 'Baloo 2', Nunito, sans-serif; }
+.rapida small { font-size: 13px; color: var(--testo-2); }
+.rapida.segna .icona { background: var(--lilla); }
+
+/* situazione in tre righe */
+.situazione { display: grid; background: var(--bianco); border-radius: 20px; box-shadow: var(--ombra); padding: 4px 14px; }
+.situazione div { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--linea); }
+.situazione div:first-child { border-top: 0; }
+.situazione dt { color: var(--testo-2); }
+.situazione dd { margin: 0; font-weight: 800; text-align: right; }
+.situazione .ok { color: var(--verde); }
+
+/* barra delle schede in basso, nella zona del pollice */
+.schede { position: absolute; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(4, 1fr); background: var(--bianco); border-top: 1px solid var(--linea); padding: 6px 6px 14px; }
+.schede button { position: relative; display: grid; justify-items: center; gap: 2px; min-height: 56px; border: 0; background: none; border-radius: 16px; color: var(--testo-2); font: 800 12.5px Nunito, sans-serif; }
+.schede button[aria-current] { color: var(--accento); background: var(--rosa); }
+.schede .bollino { position: absolute; top: 4px; left: calc(50% + 6px); min-width: 18px; height: 18px; border-radius: 9px; background: var(--accento); color: var(--bianco); font-size: 11px; line-height: 18px; text-align: center; padding: 0 5px; }
+
+/* settimana: giorni */
+.giorni { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.giorni button { min-height: 52px; border-radius: 14px; border: 2px solid transparent; background: var(--bianco); color: var(--testo); font: 800 13px Nunito, sans-serif; display: grid; place-items: center; line-height: 1.1; }
+.giorni button small { font-weight: 700; font-size: 12px; color: var(--testo-2); }
+.giorni button[aria-current] { border-color: var(--accento); }
+.giorni button .punto { width: 6px; height: 6px; border-radius: 3px; background: var(--accento); }
+.riassunto { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 12px; border-radius: 999px; background: var(--bianco); box-shadow: var(--ombra); font-size: 13px; font-weight: 800; }
+.chip span { color: var(--testo-2); font-weight: 700; }
+.spunta { width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; border: 2px solid var(--lilla-bordo); flex: none; }
+.spunta.si { background: var(--verde); border-color: var(--verde); color: var(--bianco); }
+.menu-riga { min-width: 44px; min-height: 44px; border: 0; background: none; color: var(--testo-2); font: 800 20px Nunito, sans-serif; border-radius: 12px; }
+
+/* fogli dal basso (sheet) */
+.velo { position: absolute; inset: 0; background: rgba(47, 42, 110, .35); }
+.foglio { position: absolute; left: 0; right: 0; bottom: 0; background: var(--bianco); border-radius: 28px 28px 0 0; padding: 10px 16px 24px; display: grid; gap: 14px; }
+.foglio::before { content: ''; justify-self: center; width: 40px; height: 5px; border-radius: 3px; background: var(--lilla-medio); }
+.foglio h2 { font-size: 22px; }
+.opzioni { display: grid; gap: 8px; }
+.opzione { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; padding: 0 16px; border-radius: 16px; border: 2px solid var(--lilla-bordo); background: var(--bianco); font: 800 16px Nunito, sans-serif; color: var(--testo); }
+.opzione .valore { font-weight: 800; color: var(--accento); }
+.opzione[aria-pressed='true'] { border-color: var(--accento); background: var(--rosa); }
+.opzione[disabled] { opacity: .55; }
+.avviso { margin: 0; padding: 10px 14px; border-radius: 14px; background: var(--burro-chiaro); font-size: 14px; }
+.toast { position: absolute; left: 16px; right: 16px; top: 16px; display: flex; align-items: center; gap: 12px; padding: 10px 10px 10px 16px; border-radius: 16px; background: var(--testo); color: var(--bianco); font-weight: 700; }
+.toast button { margin-left: auto; min-height: 40px; padding: 0 14px; border: 0; border-radius: 999px; background: transparent; color: var(--rosa-bordo); font: 800 14px Nunito, sans-serif; }
+
+/* kit di campi */
+.campo { display: grid; gap: 6px; }
+.campo > span { font-size: 14px; font-weight: 800; }
+.campo .aiuto { font-size: 13px; color: var(--testo-2); font-weight: 600; }
+.ingresso { display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 14px; border-radius: 14px; border: 2px solid var(--lilla-bordo); background: var(--bianco); font: 700 16px Nunito, sans-serif; color: var(--testo); }
+.ingresso.vuoto { color: #6f5a80; }
+.ingresso.fuoco { outline: 3px solid var(--accento); outline-offset: 1px; }
+.ingresso.errore { border-color: var(--accento); }
+.ingresso .dopo { margin-left: auto; color: var(--testo-2); }
+.ingresso.area { min-height: 88px; align-items: flex-start; padding-top: 12px; }
+.errore-testo { margin: 0; font-size: 13px; font-weight: 800; color: var(--accento-premuto); }
+.passo { display: flex; align-items: center; justify-content: space-between; min-height: 48px; border-radius: 14px; border: 2px solid var(--lilla-bordo); padding: 0 4px; }
+.passo button { width: 44px; height: 40px; border: 0; border-radius: 10px; background: var(--lilla); font: 800 20px Nunito, sans-serif; color: var(--testo); }
+.passo b { font-size: 18px; }
+.segmenti { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; padding: 4px; border-radius: 16px; background: var(--lilla); }
+.segmenti button { min-height: 44px; border: 0; border-radius: 12px; background: transparent; font: 800 14px Nunito, sans-serif; color: var(--testo); }
+.segmenti button[aria-pressed='true'] { background: var(--bianco); box-shadow: var(--ombra); color: var(--accento); }
+.interruttore { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; }
+.levetta { flex: none; width: 52px; height: 32px; border-radius: 16px; background: var(--lilla-medio); position: relative; }
+.levetta::after { content: ''; position: absolute; top: 3px; left: 3px; width: 26px; height: 26px; border-radius: 13px; background: var(--bianco); box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+.levetta.su { background: var(--accento); }
+.levetta.su::after { left: 23px; }
+.vuoto-stato { display: grid; justify-items: center; gap: 6px; padding: 24px 16px; text-align: center; background: var(--bianco); border-radius: 20px; box-shadow: var(--ombra); }
+.vuoto-stato b { font: 800 17px 'Baloo 2', Nunito, sans-serif; }
+.etichetta-kit { margin: 4px 0 0; font: 800 12px Nunito, sans-serif; color: var(--testo-2); }
+svg { display: block; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="i-lucchetto" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="i-palla" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 3.5c3 3 3.5 8 0 12M4 9c4 0 8 1 11 6M20 9c-3 2-6 6-6 11" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-foglio" viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M10 13h5M10 17h5" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="i-foto" viewBox="0 0 24 24"><rect x="3.5" y="7" width="17" height="12" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="13" r="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 7l1.5-2.5h3L15 7" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="i-forziere" viewBox="0 0 24 24"><rect x="3.5" y="9" width="17" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.5 13h17M5 9c0-3 2.5-5 7-5s7 2 7 5" fill="none" stroke="currentColor" stroke-width="2"/><rect x="10.5" y="11.5" width="3" height="4" rx="1" fill="currentColor"/></symbol>
+  <symbol id="i-calendario" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14.5" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 10h16M8 3.5v4M16 3.5v4" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="i-pollice" viewBox="0 0 24 24"><path d="M7 11v9H4v-9zM7 11l4-7c1.5 0 2.5 1 2 3l-.7 3H19a2 2 0 0 1 2 2.3l-1.2 6A2 2 0 0 1 17.8 20H7" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+  <symbol id="i-matita" viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19zM14 7l3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+  <symbol id="i-oggi" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M5.2 18.8l2.1-2.1M16.7 7.3l2.1-2.1" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="i-ingranaggio" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M5.6 18.4l1.8-1.8M16.6 7.4l1.8-1.8" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="i-freccia" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-spunta" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+
+<div class="galleria">
+
+<!-- ============ OGGI ============ -->
+<section class="cornice">
+<p class="didascalia">1 · Oggi <span>(si apre qui)</span></p>
+<div class="schermo">
+  <header class="testata">
+    <div><p class="sopra">Lunedì 23 novembre</p><h1>Oggi</h1></div>
+    <button class="chiudi"><svg width="18" height="18"><use href="#i-lucchetto"/></svg>Chiudi l'area</button>
+  </header>
+  <div class="contenuto">
+    <section class="sezione">
+      <h2>Da fare per voi <span class="conta">5</span></h2>
+      <div class="elenco">
+        <div class="riga"><span class="icona"><svg width="20" height="20"><use href="#i-palla"/></svg></span><span class="testo"><b>Partita: Foxes Volley 3-1</b><small>Sabato 22/11 · l'ha segnata Lani</small></span><button class="btn">Approva</button></div>
+        <div class="riga"><span class="icona rosa"><svg width="20" height="20"><use href="#i-foglio"/></svg></span><span class="testo"><b>Gita del benessere</b><small>Lani dice di averlo dato · entro il 3/12</small></span><button class="btn">Firmato</button></div>
+        <div class="riga"><span class="icona burro"><svg width="20" height="20"><use href="#i-foto"/></svg></span><span class="testo"><b>Foto: Italiano pag 34-38</b><small>Per un compito · se la fa Lani prende +2</small></span><button class="btn tenue">Fotografa</button></div>
+        <div class="riga"><span class="icona burro"><svg width="20" height="20"><use href="#i-forziere"/></svg></span><span class="testo"><b>Forziere 1 aperto</b><small>Pizza con le amiche</small></span><button class="btn">Consegnato</button></div>
+        <div class="riga"><span class="icona"><svg width="20" height="20"><use href="#i-calendario"/></svg></span><span class="testo"><b>Spagnolo da recuperare</b><small>Verifica di lunedì 16/11, ancora senza data</small></span><button class="btn tenue">Metti data</button></div>
+      </div>
+    </section>
+    <div class="rapide">
+      <button class="rapida"><span class="icona"><svg width="22" height="22"><use href="#i-pollice"/></svg></span><b>Dai passi</b><small>Gesti di casa · oggi 2 su 6</small></button>
+      <button class="rapida segna"><span class="icona"><svg width="22" height="22"><use href="#i-matita"/></svg></span><b>Segna</b><small>Bagno, antisportiva, balla</small></button>
+    </div>
+    <section class="sezione">
+      <h2>Lani oggi</h2>
+      <dl class="situazione">
+        <div><dt>Passi di oggi</dt><dd>+14</dd></div>
+        <div><dt>Serata</dt><dd>da chiudere entro le 20:30</dd></div>
+        <div><dt>Prossima verifica</dt><dd>Spagnolo, giovedì 26</dd></div>
+      </dl>
+    </section>
+  </div>
+  <nav class="schede" aria-label="Sezioni genitori">
+    <button aria-current="page"><svg width="22" height="22"><use href="#i-oggi"/></svg>Oggi<span class="bollino">5</span></button>
+    <button><svg width="22" height="22"><use href="#i-calendario"/></svg>Settimana</button>
+    <button><svg width="22" height="22"><use href="#i-forziere"/></svg>Forzieri</button>
+    <button><svg width="22" height="22"><use href="#i-ingranaggio"/></svg>Impostazioni</button>
+  </nav>
+</div>
+</section>
+
+<!-- ============ OGGI, foglio "Dai passi" ============ -->
+<section class="cornice">
+<p class="didascalia">1a · Dai passi <span>(foglio dal basso, resta aperto)</span></p>
+<div class="schermo">
+  <header class="testata"><div><p class="sopra">Lunedì 23 novembre</p><h1>Oggi</h1></div></header>
+  <div class="velo"></div>
+  <div class="foglio" role="dialog" aria-labelledby="t-passi">
+    <h2 id="t-passi">Dai passi</h2>
+    <p class="nota">Oggi 3 su 6. Lani vedrà la vostra faccia col pollice.</p>
+    <div class="opzioni">
+      <button class="opzione" aria-pressed="true">Scrivania in ordine <span class="valore">+2 ✓</span></button>
+      <button class="opzione">Lavastoviglie fatta <span class="valore">+2</span></button>
+      <button class="opzione">Letto fatto <span class="valore">+2</span></button>
+      <button class="opzione">Vestiti in ordine <span class="valore">+2</span></button>
+    </div>
+    <button class="btn tenue largo">Fatto</button>
+  </div>
+  <div class="toast" role="status">Scrivania in ordine: +2 a Lani <button>Annulla</button></div>
+</div>
+</section>
+
+<!-- ============ OGGI, foglio "Segna" ============ -->
+<section class="cornice">
+<p class="didascalia">1b · Segna <span>(scelta, nota, conferma)</span></p>
+<div class="schermo">
+  <header class="testata"><div><p class="sopra">Lunedì 23 novembre</p><h1>Oggi</h1></div></header>
+  <div class="velo"></div>
+  <div class="foglio" role="dialog" aria-labelledby="t-segna">
+    <h2 id="t-segna">Segna</h2>
+    <div class="opzioni">
+      <button class="opzione">Bagno da sistemare <span class="valore">−1</span></button>
+      <button class="opzione">Antisportiva <span class="valore">−7</span></button>
+      <button class="opzione" aria-pressed="true">Balla <span class="valore">−10</span></button>
+    </div>
+    <label class="campo"><span>Che cosa non era vero</span><span class="ingresso area fuoco">ha detto di aver studiato storia</span><span class="aiuto">Lani lo leggerà nel popup.</span></label>
+    <p class="avviso">Sono le 21:20: Lani lo vede domattina.</p>
+    <button class="btn pieno largo">Segna −10</button>
+  </div>
+</div>
+</section>
+
+<!-- ============ SETTIMANA ============ -->
+<section class="cornice">
+<p class="didascalia">2 · Settimana <span>(assorbe Correzioni, Lani a casa, Sposta verifica, Fogli)</span></p>
+<div class="schermo">
+  <header class="testata"><div><p class="sopra">Dal 23 al 29 novembre</p><h1>Settimana</h1></div></header>
+  <div class="contenuto">
+    <div class="riassunto"><span class="chip">6,75 <span>media (obiettivo 7,35)</span></span><span class="chip">0 <span>note</span></span><span class="chip">1 <span>serate chiuse</span></span></div>
+    <div class="giorni" role="group" aria-label="Giorno">
+      <button>Lun<small>23</small></button>
+      <button aria-current="date">Mar<small>24</small><span class="punto"></span></button>
+      <button>Mer<small>25</small></button>
+      <button>Gio<small>26</small><span class="punto"></span></button>
+      <button>Ven<small>27</small></button>
+      <button>Sab<small>28</small></button>
+      <button>Dom<small>29</small></button>
+    </div>
+    <section class="sezione">
+      <h2>Martedì 24</h2>
+      <div class="elenco">
+        <div class="riga"><span class="spunta si"><svg width="16" height="16"><use href="#i-spunta"/></svg></span><span class="testo"><b>Geografia: cartina d'Europa</b><small>Spuntato oggi alle 16:00</small></span><button class="btn tenue">Togli</button></div>
+        <div class="riga"><span class="spunta"></span><span class="testo"><b>Spagnolo: verbi pag 12</b><small>Da fare</small></span></div>
+      </div>
+    </section>
+    <section class="sezione">
+      <h2>Verifiche in arrivo</h2>
+      <div class="elenco">
+        <div class="riga"><span class="icona"><svg width="20" height="20"><use href="#i-calendario"/></svg></span><span class="testo"><b>Spagnolo</b><small>Giovedì 26 · ripasso da domani</small></span><button class="btn tenue">Sposta</button></div>
+      </div>
+    </section>
+    <section class="sezione">
+      <h2>Fogli da firmare</h2>
+      <div class="elenco">
+        <div class="riga"><span class="icona rosa"><svg width="20" height="20"><use href="#i-foglio"/></svg></span><span class="testo"><b>Gita del benessere</b><small>Lani dice di averlo dato</small></span><button class="btn">Firmato</button></div>
+        <div class="riga"><span class="testo"><b>Aggiungi un foglio</b></span><span class="vai"><svg width="20" height="20"><use href="#i-freccia"/></svg></span></div>
+      </div>
+    </section>
+    <div class="elenco">
+      <div class="riga"><span class="icona"><svg width="20" height="20"><use href="#i-calendario"/></svg></span><span class="testo"><b>Lani a casa martedì 24</b><small>Niente chiavi in gioco; compiti alla lezione dopo</small></span><span class="vai"><svg width="20" height="20"><use href="#i-freccia"/></svg></span></div>
+      <div class="riga"><span class="icona"><svg width="20" height="20"><use href="#i-palla"/></svg></span><span class="testo"><b>Segna una partita</b><small>Se la FIPAV non la porta</small></span><span class="vai"><svg width="20" height="20"><use href="#i-freccia"/></svg></span></div>
+    </div>
+  </div>
+  <nav class="schede" aria-label="Sezioni genitori">
+    <button><svg width="22" height="22"><use href="#i-oggi"/></svg>Oggi<span class="bollino">5</span></button>
+    <button aria-current="page"><svg width="22" height="22"><use href="#i-calendario"/></svg>Settimana</button>
+    <button><svg width="22" height="22"><use href="#i-forziere"/></svg>Forzieri</button>
+    <button><svg width="22" height="22"><use href="#i-ingranaggio"/></svg>Impostazioni</button>
+  </nav>
+</div>
+</section>
+
+<!-- ============ FORZIERI ============ -->
+<section class="cornice">
+<p class="didascalia">3 · Forzieri <span>(una riga per forziere, si apre quello toccato)</span></p>
+<div class="schermo">
+  <header class="testata"><div><p class="sopra">7 senza premio</p><h1>Forzieri</h1></div></header>
+  <div class="contenuto">
+    <p class="nota">I primi piccoli, poi sempre più importanti; la cima legata alla pagella di giugno. Lani non vede i premi finché non apre il forziere.</p>
+    <div class="elenco">
+      <div class="riga"><span class="icona burro"><svg width="20" height="20"><use href="#i-forziere"/></svg></span><span class="testo"><b>1 · Pizza con le amiche</b><small>Aperto il 21/11 · da consegnare</small></span><button class="btn">Consegnato</button></div>
+      <div class="riga"><span class="icona"><svg width="20" height="20"><use href="#i-forziere"/></svg></span><span class="testo"><b>2 · Cinema</b><small>Tappa 6, 4 chiavi · enigma pronto</small></span><span class="vai"><svg width="20" height="20"><use href="#i-freccia"/></svg></span></div>
+      <div class="riga"><span class="icona rosa"><svg width="20" height="20"><use href="#i-forziere"/></svg></span><span class="testo"><b>3 · Da scegliere</b><small>Tappa 9, 7 chiavi · il prossimo</small></span><button class="btn pieno">Scegli</button></div>
+      <div class="riga"><span class="icona"><svg width="20" height="20"><use href="#i-forziere"/></svg></span><span class="testo"><b>4 · Da scegliere</b><small>Tappa 12, 14 chiavi</small></span><span class="vai"><svg width="20" height="20"><use href="#i-freccia"/></svg></span></div>
+      <div class="riga"><span class="icona"><svg width="20" height="20"><use href="#i-forziere"/></svg></span><span class="testo"><b>5 · Da scegliere</b><small>Tappa 15, 17 chiavi</small></span><span class="vai"><svg width="20" height="20"><use href="#i-freccia"/></svg></span></div>
+      <div class="riga"><span class="icona"><svg width="20" height="20"><use href="#i-forziere"/></svg></span><span class="testo"><b>6 · Da scegliere</b><small>Tappa 18, 21 chiavi</small></span><span class="vai"><svg width="20" height="20"><use href="#i-freccia"/></svg></span></div>
+      <div class="riga"><span class="icona"><svg width="20" height="20"><use href="#i-forziere"/></svg></span><span class="testo"><b>7 · Da scegliere</b><small>Tappa 21, 26 chiavi</small></span><span class="vai"><svg width="20" height="20"><use href="#i-freccia"/></svg></span></div>
+      <div class="riga"><span class="icona"><svg width="20" height="20"><use href="#i-forziere"/></svg></span><span class="testo"><b>8 · Da scegliere</b><small>Tappa 24, 31 chiavi</small></span><span class="vai"><svg width="20" height="20"><use href="#i-freccia"/></svg></span></div>
+      <div class="riga"><span class="icona"><svg width="20" height="20"><use href="#i-forziere"/></svg></span><span class="testo"><b>Cima · Da scegliere</b><small>Tappa 27, 36 chiavi · dopo gli enigmi 1-8</small></span><span class="vai"><svg width="20" height="20"><use href="#i-freccia"/></svg></span></div>
+    </div>
+  </div>
+  <nav class="schede" aria-label="Sezioni genitori">
+    <button><svg width="22" height="22"><use href="#i-oggi"/></svg>Oggi<span class="bollino">5</span></button>
+    <button><svg width="22" height="22"><use href="#i-calendario"/></svg>Settimana</button>
+    <button aria-current="page"><svg width="22" height="22"><use href="#i-forziere"/></svg>Forzieri</button>
+    <button><svg width="22" height="22"><use href="#i-ingranaggio"/></svg>Impostazioni</button>
+  </nav>
+</div>
+</section>
+
+<!-- ============ FORZIERE, dettaglio ============ -->
+<section class="cornice">
+<p class="didascalia">3a · Un forziere <span>(premio, enigma, immagine)</span></p>
+<div class="schermo">
+  <header class="testata"><div><p class="sopra">Forzieri</p><h1>Forziere 2</h1></div></header>
+  <div class="contenuto">
+    <p class="nota">Tappa 6, 4 chiavi. Il premio si cambia finché l'enigma non è comparso a Lani.</p>
+    <label class="campo"><span>Premio</span><span class="ingresso">Cinema</span></label>
+    <section class="sezione">
+      <h2>Enigma</h2>
+      <div class="elenco">
+        <div class="riga"><span class="testo"><b>«Ho due ruote…»</b><small>Soluzione: bici · parola per la cima: ruota</small></span></div>
+        <div class="riga"><span class="testo"><b>Immagine del premio</b><small>Da rifare: il premio è cambiato. Lani vede il pacco regalo.</small></span></div>
+      </div>
+    </section>
+    <button class="btn pieno largo">Salva e rifai l'enigma</button>
+  </div>
+</div>
+</section>
+
+<!-- ============ IMPOSTAZIONI ============ -->
+<section class="cornice">
+<p class="didascalia">4 · Impostazioni <span>(indice; ogni voce apre la sua pagina)</span></p>
+<div class="schermo">
+  <header class="testata"><div><p class="sopra">Area genitori</p><h1>Impostazioni</h1></div></header>
+  <div class="contenuto">
+    <div class="elenco">
+      <div class="riga"><span class="testo"><b>Sera e cartella</b><small>Chiusura 20:30 lun-ven · materiale per giorno</small></span><span class="vai"><svg width="20" height="20"><use href="#i-freccia"/></svg></span></div>
+      <div class="riga"><span class="testo"><b>Obiettivo media</b><small>7,35 per il liceo</small></span><span class="vai"><svg width="20" height="20"><use href="#i-freccia"/></svg></span></div>
+      <div class="riga interruttore"><span class="testo"><b>R-Evolution</b><small>Accesa dal 1° novembre</small></span><span class="levetta su" role="switch" aria-checked="true"></span></div>
+      <div class="riga"><span class="testo"><b>Dieci minuti</b><small>2 esercizi nel menu</small></span><span class="vai"><svg width="20" height="20"><use href="#i-freccia"/></svg></span></div>
+      <div class="riga"><span class="testo"><b>Frasi di famiglia</b><small>1 frase</small></span><span class="vai"><svg width="20" height="20"><use href="#i-freccia"/></svg></span></div>
+      <div class="riga"><span class="testo"><b>PIN dell'area</b><small>Resta aperta 10 minuti dall'ultima azione</small></span><span class="vai"><svg width="20" height="20"><use href="#i-freccia"/></svg></span></div>
+    </div>
+    <section class="sezione">
+      <h2>Per controllare</h2>
+      <div class="elenco">
+        <div class="riga"><span class="testo"><b>Stato di ACE</b><small>Nuvola ok alle 14:30 · nessun errore</small></span><span class="vai"><svg width="20" height="20"><use href="#i-freccia"/></svg></span></div>
+        <div class="riga"><span class="testo"><b>Vetrina</b><small>Popup e notifiche come li vede Lani</small></span><span class="vai"><svg width="20" height="20"><use href="#i-freccia"/></svg></span></div>
+        <div class="riga"><span class="testo"><b>Regole del gioco</b><small>Passi, chiavi, forzieri</small></span><span class="vai"><svg width="20" height="20"><use href="#i-freccia"/></svg></span></div>
+      </div>
+    </section>
+  </div>
+  <nav class="schede" aria-label="Sezioni genitori">
+    <button><svg width="22" height="22"><use href="#i-oggi"/></svg>Oggi<span class="bollino">5</span></button>
+    <button><svg width="22" height="22"><use href="#i-calendario"/></svg>Settimana</button>
+    <button><svg width="22" height="22"><use href="#i-forziere"/></svg>Forzieri</button>
+    <button aria-current="page"><svg width="22" height="22"><use href="#i-ingranaggio"/></svg>Impostazioni</button>
+  </nav>
+</div>
+</section>
+
+<!-- ============ KIT DI CAMPI ============ -->
+<section class="cornice">
+<p class="didascalia">5 · Kit di campi <span>(src/kit.tsx)</span></p>
+<div class="schermo" style="padding:20px 16px 24px">
+  <div class="contenuto" style="padding:0;gap:14px">
+    <p class="etichetta-kit">Testo · con fuoco · con errore</p>
+    <label class="campo"><span>Che foglio è</span><span class="ingresso fuoco">Gita del benessere</span></label>
+    <label class="campo"><span>Contro</span><span class="ingresso errore vuoto">Nome della squadra</span><p class="errore-testo">Scrivete contro chi ha giocato.</p></label>
+    <p class="etichetta-kit">Data e ora (selettore di sistema, campo della casa)</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <label class="campo"><span>Entro il</span><span class="ingresso">3 dic 2026<span class="dopo"><svg width="18" height="18"><use href="#i-calendario"/></svg></span></span></label>
+      <label class="campo"><span>Chiusura</span><span class="ingresso">20:30</span></label>
+    </div>
+    <p class="etichetta-kit">Numero · scelta a segmenti</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="campo"><span>Set di Lani</span><div class="passo"><button>−</button><b>3</b><button>+</button></div></div>
+      <div class="campo"><span>Set loro</span><div class="passo"><button>−</button><b>1</b><button>+</button></div></div>
+    </div>
+    <div class="segmenti" role="group" aria-label="In campo"><button aria-pressed="true">In campo</button><button>In panchina</button></div>
+    <p class="etichetta-kit">Scelta da elenco · interruttore</p>
+    <label class="campo"><span>Tipo</span><span class="ingresso">Forza e riflessi<span class="dopo">▾</span></span></label>
+    <div class="interruttore"><span><b>Stessa ora tutti i giorni</b></span><span class="levetta"></span></div>
+    <p class="etichetta-kit">Stato vuoto</p>
+    <div class="vuoto-stato"><b>Niente da fare per voi</b><span class="nota">Partite, fogli e foto sono a posto.</span></div>
+  </div>
+</div>
+</section>
+
+</div>
+</body>
+</html>

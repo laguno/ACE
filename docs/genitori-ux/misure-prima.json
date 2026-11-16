@@ -1,0 +1,467 @@
+{
+  "ora": "2026-11-23T17:00:00.000Z",
+  "larghezze": {
+    "360": {
+      "01-settimana": {
+        "altezzaPagina": 2830,
+        "axe": [],
+        "piccoli": [
+          {
+            "tag": "input[checkbox]",
+            "testo": "checkbox",
+            "misura": "24x24"
+          },
+          {
+            "tag": "input[checkbox]",
+            "testo": "checkbox",
+            "misura": "24x24"
+          }
+        ],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 12,
+          "perTipo": {
+            "file": 2,
+            "select": 4,
+            "checkbox": 2,
+            "date": 3,
+            "text": 1
+          },
+          "senzaStile": 2,
+          "senzaStilePerTipo": {
+            "file": 2
+          },
+          "pickerDiSistema": 5
+        },
+        "overflowX": 0,
+        "carte": 11,
+        "sezioni": 9,
+        "pulsanti": 21
+      },
+      "02-sgridata-foglio": {
+        "altezzaPagina": 2830,
+        "axe": [],
+        "piccoli": [
+          {
+            "tag": "input[checkbox]",
+            "testo": "checkbox",
+            "misura": "24x24"
+          },
+          {
+            "tag": "input[checkbox]",
+            "testo": "checkbox",
+            "misura": "24x24"
+          }
+        ],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 13,
+          "perTipo": {
+            "file": 2,
+            "select": 4,
+            "checkbox": 2,
+            "date": 3,
+            "text": 1,
+            "textarea": 1
+          },
+          "senzaStile": 2,
+          "senzaStilePerTipo": {
+            "file": 2
+          },
+          "pickerDiSistema": 5
+        },
+        "overflowX": 0,
+        "carte": 12,
+        "sezioni": 10,
+        "pulsanti": 23
+      },
+      "03-premi": {
+        "altezzaPagina": 2713,
+        "axe": [
+          {
+            "id": "target-size",
+            "impatto": "serious",
+            "nodi": 1,
+            "esempi": [
+              ".carta:nth-child(5) > details > summary"
+            ]
+          }
+        ],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 8,
+          "perTipo": {
+            "text": 8
+          },
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 0
+        },
+        "overflowX": 0,
+        "carte": 10,
+        "sezioni": 10,
+        "pulsanti": 16
+      },
+      "04-correzioni": {
+        "altezzaPagina": 844,
+        "axe": [],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 0,
+          "perTipo": {},
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 0
+        },
+        "overflowX": 0,
+        "carte": 6,
+        "sezioni": 2,
+        "pulsanti": 8
+      },
+      "05-fogli": {
+        "altezzaPagina": 844,
+        "axe": [],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 2,
+          "perTipo": {
+            "text": 1,
+            "date": 1
+          },
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 1
+        },
+        "overflowX": 0,
+        "carte": 5,
+        "sezioni": 3,
+        "pulsanti": 8
+      },
+      "06-altro": {
+        "altezzaPagina": 844,
+        "axe": [],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 0,
+          "perTipo": {},
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 0
+        },
+        "overflowX": 0,
+        "carte": 2,
+        "sezioni": 1,
+        "pulsanti": 10
+      },
+      "07-impostazioni": {
+        "altezzaPagina": 3705,
+        "axe": [],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 20,
+          "perTipo": {
+            "time": 7,
+            "textarea": 8,
+            "text": 3,
+            "select": 1,
+            "password": 1
+          },
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 7
+        },
+        "overflowX": 0,
+        "carte": 8,
+        "sezioni": 6,
+        "pulsanti": 12
+      },
+      "08-stato": {
+        "altezzaPagina": 844,
+        "axe": [],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 0,
+          "perTipo": {},
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 0
+        },
+        "overflowX": 0,
+        "carte": 3,
+        "sezioni": 3,
+        "pulsanti": 6
+      },
+      "09-vetrina": {
+        "altezzaPagina": 8400,
+        "axe": [],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 0,
+          "perTipo": {},
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 0
+        },
+        "overflowX": 0,
+        "carte": 18,
+        "sezioni": 18,
+        "pulsanti": 48
+      },
+      "10-regole": {
+        "altezzaPagina": 3670,
+        "axe": [],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 0,
+          "perTipo": {},
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 0
+        },
+        "overflowX": 0,
+        "carte": 9,
+        "sezioni": 9,
+        "pulsanti": 6
+      }
+    },
+    "390": {
+      "01-settimana": {
+        "altezzaPagina": 2740,
+        "axe": [],
+        "piccoli": [
+          {
+            "tag": "input[checkbox]",
+            "testo": "checkbox",
+            "misura": "24x24"
+          },
+          {
+            "tag": "input[checkbox]",
+            "testo": "checkbox",
+            "misura": "24x24"
+          }
+        ],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 12,
+          "perTipo": {
+            "file": 2,
+            "select": 4,
+            "checkbox": 2,
+            "date": 3,
+            "text": 1
+          },
+          "senzaStile": 2,
+          "senzaStilePerTipo": {
+            "file": 2
+          },
+          "pickerDiSistema": 5
+        },
+        "overflowX": 0,
+        "carte": 11,
+        "sezioni": 9,
+        "pulsanti": 21
+      },
+      "02-sgridata-foglio": {
+        "altezzaPagina": 2740,
+        "axe": [],
+        "piccoli": [
+          {
+            "tag": "input[checkbox]",
+            "testo": "checkbox",
+            "misura": "24x24"
+          },
+          {
+            "tag": "input[checkbox]",
+            "testo": "checkbox",
+            "misura": "24x24"
+          }
+        ],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 13,
+          "perTipo": {
+            "file": 2,
+            "select": 4,
+            "checkbox": 2,
+            "date": 3,
+            "text": 1,
+            "textarea": 1
+          },
+          "senzaStile": 2,
+          "senzaStilePerTipo": {
+            "file": 2
+          },
+          "pickerDiSistema": 5
+        },
+        "overflowX": 0,
+        "carte": 12,
+        "sezioni": 10,
+        "pulsanti": 23
+      },
+      "03-premi": {
+        "altezzaPagina": 2713,
+        "axe": [
+          {
+            "id": "target-size",
+            "impatto": "serious",
+            "nodi": 1,
+            "esempi": [
+              ".carta:nth-child(5) > details > summary"
+            ]
+          }
+        ],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 8,
+          "perTipo": {
+            "text": 8
+          },
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 0
+        },
+        "overflowX": 0,
+        "carte": 10,
+        "sezioni": 10,
+        "pulsanti": 16
+      },
+      "04-correzioni": {
+        "altezzaPagina": 844,
+        "axe": [],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 0,
+          "perTipo": {},
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 0
+        },
+        "overflowX": 0,
+        "carte": 6,
+        "sezioni": 2,
+        "pulsanti": 8
+      },
+      "05-fogli": {
+        "altezzaPagina": 844,
+        "axe": [],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 2,
+          "perTipo": {
+            "text": 1,
+            "date": 1
+          },
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 1
+        },
+        "overflowX": 0,
+        "carte": 5,
+        "sezioni": 3,
+        "pulsanti": 8
+      },
+      "06-altro": {
+        "altezzaPagina": 844,
+        "axe": [],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 0,
+          "perTipo": {},
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 0
+        },
+        "overflowX": 0,
+        "carte": 2,
+        "sezioni": 1,
+        "pulsanti": 10
+      },
+      "07-impostazioni": {
+        "altezzaPagina": 3705,
+        "axe": [],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 20,
+          "perTipo": {
+            "time": 7,
+            "textarea": 8,
+            "text": 3,
+            "select": 1,
+            "password": 1
+          },
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 7
+        },
+        "overflowX": 0,
+        "carte": 8,
+        "sezioni": 6,
+        "pulsanti": 12
+      },
+      "08-stato": {
+        "altezzaPagina": 844,
+        "axe": [],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 0,
+          "perTipo": {},
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 0
+        },
+        "overflowX": 0,
+        "carte": 3,
+        "sezioni": 3,
+        "pulsanti": 6
+      },
+      "09-vetrina": {
+        "altezzaPagina": 7623,
+        "axe": [],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 0,
+          "perTipo": {},
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 0
+        },
+        "overflowX": 0,
+        "carte": 18,
+        "sezioni": 18,
+        "pulsanti": 48
+      },
+      "10-regole": {
+        "altezzaPagina": 3599,
+        "axe": [],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 0,
+          "perTipo": {},
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 0
+        },
+        "overflowX": 0,
+        "carte": 9,
+        "sezioni": 9,
+        "pulsanti": 6
+      }
+    }
+  }
+}
