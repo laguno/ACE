@@ -1,0 +1,367 @@
+{
+  "ora": "2026-11-23T17:00:00.000Z",
+  "larghezze": {
+    "360": {
+      "01-oggi": {
+        "altezzaPagina": 1031,
+        "axe": [],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 0,
+          "perTipo": {},
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 0
+        },
+        "overflowX": 0,
+        "carte": 3,
+        "sezioni": 5,
+        "pulsanti": 9
+      },
+      "02-dai-passi": {
+        "altezzaPagina": 1031,
+        "axe": [],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 0,
+          "perTipo": {},
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 0
+        },
+        "overflowX": 0,
+        "carte": 3,
+        "sezioni": 6,
+        "pulsanti": 14
+      },
+      "03-segna-balla": {
+        "altezzaPagina": 1031,
+        "axe": [],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 4,
+          "perTipo": {
+            "radio": 4
+          },
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 0
+        },
+        "overflowX": 0,
+        "carte": 3,
+        "sezioni": 6,
+        "pulsanti": 13
+      },
+      "04-partita": {
+        "altezzaPagina": 1031,
+        "axe": [],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 2,
+          "perTipo": {
+            "radio": 2
+          },
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 0
+        },
+        "overflowX": 0,
+        "carte": 3,
+        "sezioni": 6,
+        "pulsanti": 16
+      },
+      "05-settimana": {
+        "altezzaPagina": 1029,
+        "axe": [],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 0,
+          "perTipo": {},
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 0
+        },
+        "overflowX": 0,
+        "carte": 3,
+        "sezioni": 5,
+        "pulsanti": 17
+      },
+      "06-forzieri": {
+        "altezzaPagina": 988,
+        "axe": [],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 0,
+          "perTipo": {},
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 0
+        },
+        "overflowX": 0,
+        "carte": 1,
+        "sezioni": 1,
+        "pulsanti": 15
+      },
+      "07-forziere": {
+        "altezzaPagina": 935,
+        "axe": [],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 1,
+          "perTipo": {
+            "text": 1
+          },
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 0
+        },
+        "overflowX": 0,
+        "carte": 1,
+        "sezioni": 2,
+        "pulsanti": 6
+      },
+      "08-impostazioni": {
+        "altezzaPagina": 975,
+        "axe": [],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 0,
+          "perTipo": {},
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 0
+        },
+        "overflowX": 0,
+        "carte": 2,
+        "sezioni": 3,
+        "pulsanti": 14
+      },
+      "09-sera": {
+        "altezzaPagina": 2639,
+        "axe": [],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 14,
+          "perTipo": {
+            "time": 7,
+            "textarea": 7
+          },
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 7
+        },
+        "overflowX": 0,
+        "carte": 1,
+        "sezioni": 2,
+        "pulsanti": 6
+      },
+      "10-stato": {
+        "altezzaPagina": 922,
+        "axe": [],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 0,
+          "perTipo": {},
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 0
+        },
+        "overflowX": 0,
+        "carte": 3,
+        "sezioni": 4,
+        "pulsanti": 5
+      }
+    },
+    "390": {
+      "01-oggi": {
+        "altezzaPagina": 1015,
+        "axe": [],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 0,
+          "perTipo": {},
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 0
+        },
+        "overflowX": 0,
+        "carte": 3,
+        "sezioni": 5,
+        "pulsanti": 9
+      },
+      "02-dai-passi": {
+        "altezzaPagina": 1015,
+        "axe": [],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 0,
+          "perTipo": {},
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 0
+        },
+        "overflowX": 0,
+        "carte": 3,
+        "sezioni": 6,
+        "pulsanti": 14
+      },
+      "03-segna-balla": {
+        "altezzaPagina": 1015,
+        "axe": [],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 4,
+          "perTipo": {
+            "radio": 4
+          },
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 0
+        },
+        "overflowX": 0,
+        "carte": 3,
+        "sezioni": 6,
+        "pulsanti": 13
+      },
+      "04-partita": {
+        "altezzaPagina": 1015,
+        "axe": [],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 2,
+          "perTipo": {
+            "radio": 2
+          },
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 0
+        },
+        "overflowX": 0,
+        "carte": 3,
+        "sezioni": 6,
+        "pulsanti": 16
+      },
+      "05-settimana": {
+        "altezzaPagina": 1029,
+        "axe": [],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 0,
+          "perTipo": {},
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 0
+        },
+        "overflowX": 0,
+        "carte": 3,
+        "sezioni": 5,
+        "pulsanti": 17
+      },
+      "06-forzieri": {
+        "altezzaPagina": 951,
+        "axe": [],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 0,
+          "perTipo": {},
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 0
+        },
+        "overflowX": 0,
+        "carte": 1,
+        "sezioni": 1,
+        "pulsanti": 15
+      },
+      "07-forziere": {
+        "altezzaPagina": 915,
+        "axe": [],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 1,
+          "perTipo": {
+            "text": 1
+          },
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 0
+        },
+        "overflowX": 0,
+        "carte": 1,
+        "sezioni": 2,
+        "pulsanti": 6
+      },
+      "08-impostazioni": {
+        "altezzaPagina": 970,
+        "axe": [],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 0,
+          "perTipo": {},
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 0
+        },
+        "overflowX": 0,
+        "carte": 2,
+        "sezioni": 3,
+        "pulsanti": 14
+      },
+      "09-sera": {
+        "altezzaPagina": 2639,
+        "axe": [],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 14,
+          "perTipo": {
+            "time": 7,
+            "textarea": 7
+          },
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 7
+        },
+        "overflowX": 0,
+        "carte": 1,
+        "sezioni": 2,
+        "pulsanti": 6
+      },
+      "10-stato": {
+        "altezzaPagina": 922,
+        "axe": [],
+        "piccoli": [],
+        "senzaEtichetta": [],
+        "campi": {
+          "totale": 0,
+          "perTipo": {},
+          "senzaStile": 0,
+          "senzaStilePerTipo": {},
+          "pickerDiSistema": 0
+        },
+        "overflowX": 0,
+        "carte": 3,
+        "sezioni": 4,
+        "pulsanti": 5
+      }
+    }
+  }
+}

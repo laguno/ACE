@@ -147,7 +147,38 @@ export const CASI: Record<string, Caso> = {
       d.forzieri = Array.from({ length: 9 }, (_, i) => ({ n: i + 1, premio: null }));
     },
   },
-  Genitori: { bozza: 'Genitori', quando: LUNEDI_POMERIGGIO, genitore: true },
+  // area genitori dal restyling del 16/11 (bozza design/Genitori-v2.html): le quattro schede e i fogli
+  Genitori: {
+    bozza: 'Genitori-v2',
+    quando: LUNEDI_POMERIGGIO,
+    genitore: true,
+    dati: (d) => {
+      d.fogli_firma = [{ id: 'f1', titolo: 'Gita del benessere', scadenza: '2026-12-03', dato_il: '2026-11-09T14:00:00Z', consegnato_il: null }];
+      d.forzieri = Array.from({ length: 9 }, (_, i) => ({ n: i + 1, premio: i === 0 ? 'Pizza con le amiche' : null, stato: i === 0 ? 'aperto' : 'chiuso' }));
+    },
+  },
+  'Genitori-dai-passi': { bozza: 'Genitori-v2', quando: LUNEDI_POMERIGGIO, genitore: true, vai: async (p) => p.getByRole('button', { name: /^Dai passi/ }).click() },
+  'Genitori-segna': {
+    bozza: 'Genitori-v2',
+    quando: LUNEDI_POMERIGGIO,
+    genitore: true,
+    vai: async (p) => {
+      await p.getByRole('button', { name: /^Segna/ }).click();
+      await p.getByRole('dialog').getByRole('button', { name: /^Balla/ }).click();
+      await p.getByRole('dialog').getByLabel('Lo scrivo io').check();
+    },
+  },
+  'Genitori-settimana': { bozza: 'Genitori-v2', quando: LUNEDI_POMERIGGIO, genitore: true, vai: async (p) => p.getByRole('navigation', { name: 'Sezioni genitori' }).getByRole('button', { name: 'Settimana' }).click() },
+  'Genitori-forzieri': { bozza: 'Genitori-v2', quando: LUNEDI_POMERIGGIO, genitore: true, vai: async (p) => p.getByRole('navigation', { name: 'Sezioni genitori' }).getByRole('button', { name: 'Forzieri' }).click() },
+  'Genitori-impostazioni': {
+    bozza: 'Genitori-v2',
+    quando: LUNEDI_POMERIGGIO,
+    genitore: true,
+    vai: async (p) => {
+      await p.getByRole('navigation', { name: 'Sezioni genitori' }).getByRole('button', { name: 'Impostazioni' }).click();
+      await p.getByRole('button', { name: /^Sera e cartella/ }).click();
+    },
+  },
 };
 
 /**

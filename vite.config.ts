@@ -10,6 +10,8 @@ export default defineConfig({
   // le copie di lavoro degli agenti (.claude/worktrees) non sono prove di questo ramo
   test: {
     exclude: [...configDefaults.exclude, '.claude/**'],
+    // il primo banco PGlite a freddo, con tutte le prove in parallelo, supera i 10 s di default
+    hookTimeout: 60_000,
     // le Edge Functions importano da npm: come Deno; nelle prove le stesse librerie, o finti senza rete
     alias: {
       'npm:@supabase/supabase-js@2': '@supabase/supabase-js',

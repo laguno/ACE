@@ -194,26 +194,29 @@ export function FotoSalvate({ client, avvisa, conferma }: { client: SupabaseClie
 
   if (!foto?.length) return null;
   return (
-    <div className="carta">
-      <h2>Foto delle pagine</h2>
-      <p className="nota">Le ultime due settimane. Se una foto è sbagliata, cancellala.</p>
-      <ul className="lista-foto">
+    // chiusa: si apre solo per cancellare una foto sbagliata
+    <details className="ga-chiusa">
+      <summary>Foto delle pagine ({foto.length})</summary>
+      <p className="ga-nota">Le ultime due settimane. Se una foto è sbagliata, cancellatela.</p>
+      <ul className="ga-elenco">
         {foto.map((f) => {
           const nome = `${f.materie?.nome ?? 'Pagine'}${f.pagine ? `: pagine ${f.pagine}` : ''}`;
           return (
             <li key={f.id}>
-              {f.url && <img className="miniatura" src={f.url} alt={nome} width={56} height={56} loading="lazy" />}
-              <span>
-                {nome}
-                <small>{new Date(f.caricata_il).toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' })}</small>
-              </span>
-              <button className="secondario stretto" aria-label={`Cancella la foto di ${nome}`} onClick={() => conferma(() => cancella(f))}>
-                Cancella
-              </button>
+              <div className="ga-riga">
+                {f.url && <img className="miniatura" src={f.url} alt={nome} width={44} height={44} loading="lazy" />}
+                <span className="ga-riga-testo">
+                  <b>{nome}</b>
+                  <small>{new Date(f.caricata_il).toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' })}</small>
+                </span>
+                <button className="ga-btn tenue" aria-label={`Cancella la foto di ${nome}`} onClick={() => conferma(() => cancella(f))}>
+                  Cancella
+                </button>
+              </div>
             </li>
           );
         })}
       </ul>
-    </div>
+    </details>
   );
 }

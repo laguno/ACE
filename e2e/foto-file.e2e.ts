@@ -239,8 +239,9 @@ test('genitore: cancella una foto sbagliata (riga e file), Lani la ritrova da fo
     sgridate: [],
   });
   await page.goto('/');
-  await page.getByRole('button', { name: 'Correzioni' }).click();
-  const carta = page.locator('.carta', { has: page.getByRole('heading', { name: 'Foto delle pagine' }) });
+  await page.getByRole('navigation', { name: 'Sezioni genitori' }).getByRole('button', { name: 'Settimana' }).click();
+  const carta = page.locator('details', { hasText: 'Foto delle pagine (1)' });
+  await carta.locator('summary').click(); // chiusa finché non serve
   await expect(carta).toContainText('Italiano: pagine 340–352');
   await expect(carta.getByRole('img', { name: 'Italiano: pagine 340–352' })).toHaveAttribute('src', /\/storage\/v1\/object\/sign\/foto-pagine\/r1\/1\.jpg\?token=/);
   // si può ancora cambiare idea
@@ -255,5 +256,5 @@ test('genitore: cancella una foto sbagliata (riga e file), Lani la ritrova da fo
   expect(t.caricate).toEqual([]);
   expect(t.richieste_foto[0].stato).toBe('fatta');
   expect(chiamate).toEqual([]);
-  await expect(page.getByRole('heading', { name: 'Foto delle pagine' })).toHaveCount(0);
+  await expect(page.getByText('Foto delle pagine')).toHaveCount(0);
 });
