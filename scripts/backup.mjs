@@ -5,7 +5,7 @@
 // Uso: npm run backup            -> database vero (progetto collegato)
 //      npm run backup -- --locale -> Supabase locale (per le prove di ripristino)
 import { execSync } from 'node:child_process';
-import { mkdirSync, statSync } from 'node:fs';
+import { mkdirSync, rmSync, statSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 
@@ -15,5 +15,13 @@ mkdirSync(cartella, { recursive: true });
 const ora = new Date().toLocaleString('sv-SE', { timeZone: 'Europe/Rome' }).replace(' ', '_').replaceAll(':', '-');
 const file = join(cartella, `ace-${locale ? 'locale-' : ''}${ora}.sql`);
 
-execSync(`npx supabase db dump ${locale ? '' : '--remote '}--data-only --schema public -f "${file}"`, { stdio: 'inherit' });
+try {
+  execSync(`npx supabase db dump ${locale ? '' : '--remote '}--data-only --schema public -f "${file}"`, { stdio: 'inherit' });
+} catch {
+  // db dump usa Docker: spento, lascia un file vuoto che sembra un backup (successo il 15/11)
+  rmSync(file, { force: true });
+  console.error('backup NON fatto: Docker Desktop è acceso? (npx supabase db dump lo usa)');
+  process.exit(1);
+}
+if (!statSync(file).size) { rmSync(file); console.error('backup NON fatto: file vuoto'); process.exit(1); }
 console.log(`backup: ${file} (${Math.round(statSync(file).size / 1024)} KB)`);
