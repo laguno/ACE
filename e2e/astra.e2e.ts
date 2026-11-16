@@ -58,7 +58,10 @@ test('percorso: sei qui, forzieri, bandierina, chiavi della settimana', async ({
   await expect(sfondo).toHaveAttribute('style', /sfondo-1-colline\.webp/);
   // "mancano N" si tocca: apre Come si fanno i passi
   await page.getByRole('button', { name: /Sei qui: mancano 95/ }).click();
-  await expect(page.getByRole('heading', { name: 'Come si fanno i passi' })).toBeVisible();
+  // le regole si aprono dall'inizio, non dal punto della mappa; al ritorno Astra riscende a "Sei qui"
+  await expect(page.getByRole('heading', { name: 'Come si fanno i passi' })).toBeInViewport();
+  await page.getByRole('button', { name: 'Torna a Astra' }).click();
+  await expect(page.getByText('Sei qui: mancano 95')).toBeInViewport();
 });
 
 test('forziere con enigma: risposta giusta, +20', async ({ page }) => {

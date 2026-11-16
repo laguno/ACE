@@ -108,11 +108,15 @@ export default function Astra({ apri, forziere: aperto }: { apri: (pagina: 'Figu
   const scesa = useRef(false);
   useEffect(() => {
     if (scelto) scesa.current = false;
-    else if (dati && !scesa.current) {
+    else if (regole) {
+      // le regole si leggono dall'inizio, non dal punto della mappa; al ritorno si riscende a "Sei qui"
+      scesa.current = false;
+      window.scrollTo(0, 0);
+    } else if (dati && !scesa.current) {
       document.querySelector('.qui')?.scrollIntoView({ block: 'center' });
       scesa.current = true;
     }
-  }, [dati, scelto]);
+  }, [dati, scelto, regole]);
   if (!dati) return <Attesa />;
 
   const pos = R.posizione(dati.passi);
