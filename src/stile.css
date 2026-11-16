@@ -345,7 +345,10 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .chiavi-settimana > span { display: flex; }
 .saldo { display: flex; align-items: center; gap: 6px; padding: 4px 11px; border: 3px solid var(--rosa-bordo); border-radius: 999px; }
 .saldo b { font: 800 20px/1 'Baloo 2', Nunito, sans-serif; color: var(--accento); font-variant-numeric: tabular-nums; }
-.testata .saldo { align-self: flex-start; display: inline-flex; margin-top: 8px; background: var(--bianco); }
+.testata .saldo { position: relative; align-self: flex-start; display: inline-flex; margin-top: 8px; background: var(--bianco); }
+/* accanto ai passi, quanti ne mancano alla prossima tappa (come "Sei qui" in Astra) */
+.saldo small { font: 800 13px/1 Nunito, sans-serif; color: var(--testo-2); white-space: nowrap; }
+.testata .contapassi { position: static; }
 /* passi che salgono: il numero conta da solo (Contapassi), il "+N" sale e svanisce */
 .contapassi { position: relative; display: inline-flex; }
 .contapassi-delta { position: absolute; left: 50%; bottom: 100%; padding: 2px 8px; border-radius: 999px; background: var(--accento); color: var(--bianco); font: 800 13px/1.2 Nunito, sans-serif; white-space: nowrap; pointer-events: none; opacity: 0; animation: delta-sale 1.6s ease-out forwards; }
@@ -356,7 +359,7 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
   100% { opacity: 0; transform: translate(-50%, -14px); }
 }
 /* nella testata di Oggi sopra c'è il testo: il "+N" esce a destra della pillola */
-.testata .contapassi-delta { left: calc(100% + 24px); bottom: auto; top: 50%; animation-name: delta-destra; }
+.testata .contapassi-delta { left: calc(100% + 8px); bottom: auto; top: 50%; animation-name: delta-destra; }
 @keyframes delta-destra {
   0% { opacity: 0; transform: translate(-8px, -50%); }
   15%, 60% { opacity: 1; transform: translate(0, -50%); }
@@ -378,9 +381,9 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .tappe .destra { left: 40px; }
 .tappe .sinistra { right: 40px; }
 /* etichette della mappa: non prendono i tocchi */
-.tappe .qui, .tappe .bandiera, .tappe .traguardo, .lani-sentiero { pointer-events: none; }
+.tappe .bandiera, .tappe .traguardo, .lani-sentiero { pointer-events: none; }
 /* "Sei qui" sotto la tappa attuale, Lani accanto dal lato largo, mai sovrapposti */
-.qui { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: var(--bianco); box-shadow: var(--ombra-etichetta); font: 800 12px/1.2 Nunito, sans-serif; color: var(--accento); }
+.qui { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 44px; border: 0; padding: 3px 10px; border-radius: 999px; background: var(--bianco); box-shadow: var(--ombra-etichetta); font: 800 12px/1.2 Nunito, sans-serif; color: var(--accento); }
 .qui b { font: 800 17px/1.1 'Baloo 2', Nunito, sans-serif; color: var(--testo); }
 .tappe .qui { left: 0; top: 38px; translate: -50% 0; z-index: 2; }
 .lani-sentiero { position: absolute; top: -62px; z-index: 1; width: 96px; height: 96px; }

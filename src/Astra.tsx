@@ -186,10 +186,11 @@ export default function Astra({ apri, forziere: aperto }: { apri: (pagina: 'Figu
               <span className="solo-lettori">Tappa {t}</span>
               {t === qui && !pos.inCima && (
                 <>
-                  <p className="qui">
+                  {/* al tocco apre "Come si fanno i passi": è la domanda che viene leggendo "mancano N" */}
+                  <button className="qui" onClick={() => setRegole(true)}>
                     <b>{SOGLIE[t - 1].toLocaleString('it-IT')}</b>
                     <span>Sei qui: mancano {pos.mancanoPassi}</span>
-                  </p>
+                  </button>
                   <img className={`lani-sentiero ${aDestra ? 'destra' : 'sinistra'}`} src={img('avatar/lani', 'lani-saluta')} alt="Lani" width={120} height={120} />
                 </>
               )}
