@@ -20,13 +20,13 @@ Il gioco parte **lunedì 16/11/2026** (`periodo.inizio`) con l'app com'è. Produ
 
 - Area genitori a quattro schede (Oggi, Settimana, Forzieri, Impostazioni), barra in basso, kit dei campi, PIN aperto 10 minuti dall'ultima azione. Studio, misure e risultati in `docs/genitori-ux.md`.
 - Deciso dal signore: niente annulla dopo Firmato, Consegnato e Togli spunta (restano con la conferma). Fatti: Segna più snello; in Settimana Fogli (aperta solo con fogli da firmare) e Foto (sempre chiusa) richiudibili.
-- Impeccable: critique 22 → **29/40** (obiettivo 34 non raggiunto), carico cognitivo 6 → 2 su 8, axe 0, bersagli piccoli 0, detector 0 sui sorgenti (4 falsi positivi nella pagina).
+- Impeccable: critique 22 → 29 → **31/40** dopo il ritocco di sola interfaccia approvato (freccia sulle sezioni chiuse, Sera una sera alla volta con avviso sulle modifiche non salvate, Riprova sulla pillola di errore); obiettivo 34 non raggiunto. Carico cognitivo 6 → 1 su 8, axe 0, bersagli piccoli 0, detector 0 sui sorgenti (4 falsi positivi nella pagina).
 - Code-review: 8 segnalazioni, 2 corrette (Togli con errore dell'update, Salva della Sera dopo un caricamento fallito), 6 lasciate (in `docs/genitori-ux.md` §8).
-- Prove sul codice unito: `npm test` 323 (2 saltate), `prova:schema` 298, `npx playwright test` 188 passate, `tsc` 0, build ok. Dopo il pull di `main` serve `npm install` (pacchetti Capacitor dell'APK). `hookTimeout` di vitest a 60 s: il primo banco PGlite a freddo superava i 10 s.
+- Prove sul codice unito: `npm test` 323 (2 saltate), `prova:schema` 298, `npx playwright test` 189 passate, `tsc` 0, build ok. Dopo il pull di `main` serve `npm install` (pacchetti Capacitor dell'APK). `hookTimeout` di vitest a 60 s: il primo banco PGlite a freddo superava i 10 s.
 
 ## Prossimo passo
 
-0. **Da decidere col signore**: ritocco di sola interfaccia per avvicinare 34/40 (proposta in chat); errore di `passi()` letto come "tetto pieno" in Dai passi (§8, punti 3-4: tocca la logica dei passi, non fatto).
+0. **Da decidere col signore**: i P3 rimasti verso 34/40, tutti di sola interfaccia (`docs/genitori-ux.md`, in fondo: Forzieri a 9 righe, pillole "0 note", punteggio a capo, Riprova su premio e foglio); errore di `passi()` letto come "tetto pieno" in Dai passi (§8, punti 3-4: tocca la logica dei passi, non fatto).
 
 1. **Signore, stasera**: pubblicare le funzioni toccate (`sync-nuvola`, e per `apriRegistro` anche `sync-calendario`, `chiavi`, `classifiche`), un comando alla volta: `npx supabase functions deploy sync-nuvola --use-api --yes`. Quella pubblicata adesso funziona (giro a mano ok), ma senza limite di tempo.
 2. Lunedì 16/11 alle 14:30: `sync_log` fonte nuvola con esito `ok`.
