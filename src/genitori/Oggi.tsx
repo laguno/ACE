@@ -221,7 +221,7 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
           </div>
         </dl>
         {/* una riga da un fatto vero di ieri, che loda il gesto e non la persona; senza il fatto non compare
-            (revisione del 16/11, testo da approvare) */}
+            (revisione del 16/11, testo approvato dal signore) */}
         {d.ieriChiusa && (
           <p className="ga-nota ga-da-dirle">
             <b>Una cosa da dirle oggi</b>

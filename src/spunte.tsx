@@ -12,7 +12,7 @@ export const maiuscola = (s: string) => s.replace(/^./, (c) => c.toUpperCase());
 export const adesso = () => new Date().toISOString();
 
 /**
- * Prova (revisione del 16/11, da approvare): i "+N" in testa alle carte di Oggi e Sera si vedono solo
+ * Prova (revisione del 16/11, approvata dal signore): i "+N" in testa alle carte di Oggi e Sera si vedono solo
  * dopo il primo gesto fatto in quella carta, non prima. I numeri non cambiano. Per spegnerla: false
  * (tornano sempre in vista, come prima).
  */

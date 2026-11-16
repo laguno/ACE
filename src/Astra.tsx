@@ -24,7 +24,7 @@ const MONDI = [
 ];
 const img = (cartella: string, id: string) => `/assets/${cartella}/${id}.webp`;
 
-// Scelta dello sfondo (revisione del 16/11, da approvare): Lani gira tra gli sfondi del catalogo fino al
+// Scelta dello sfondo (revisione del 16/11, approvata dal signore): Lani gira tra gli sfondi del catalogo fino al
 // mondo dove è arrivata (i mondi dopo restano una sorpresa). Resta sul dispositivo, e vale finché è in
 // quel mondo: al mondo nuovo vede lo sfondo nuovo. Per toglierla: questo blocco e il bottone "Cambia sfondo".
 const CHIAVE_SFONDO = 'ace-sfondo';
