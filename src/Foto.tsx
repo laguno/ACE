@@ -194,8 +194,9 @@ export function FotoSalvate({ client, avvisa, conferma }: { client: SupabaseClie
 
   if (!foto?.length) return null;
   return (
-    <section className="ga-sezione" aria-labelledby="foto-salvate">
-      <h2 id="foto-salvate">Foto delle pagine</h2>
+    // chiusa: si apre solo per cancellare una foto sbagliata
+    <details className="ga-chiusa">
+      <summary>Foto delle pagine ({foto.length})</summary>
       <p className="ga-nota">Le ultime due settimane. Se una foto è sbagliata, cancellatela.</p>
       <ul className="ga-elenco">
         {foto.map((f) => {
@@ -216,6 +217,6 @@ export function FotoSalvate({ client, avvisa, conferma }: { client: SupabaseClie
           );
         })}
       </ul>
-    </section>
+    </details>
   );
 }

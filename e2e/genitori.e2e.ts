@@ -156,6 +156,8 @@ test('aggiungere un foglio dalla Settimana', async ({ page }) => {
   const { t } = await finto(page, { ...dati(), fogli_firma: [] });
   await page.goto('/');
   await scheda(page, 'Settimana');
+  // senza fogli da firmare la sezione è chiusa
+  await page.getByText('Fogli da firmare', { exact: true }).click();
   await page.getByRole('button', { name: /^Aggiungi un foglio/ }).click();
   await page.getByLabel('Che foglio è').fill('Autorizzazione uscita');
   await page.getByLabel('Entro il').fill('2026-12-01');

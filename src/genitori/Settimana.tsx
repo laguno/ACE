@@ -203,8 +203,9 @@ export default function Settimana({ client, passi, avvisa }: Props) {
         </details>
       )}
 
-      <section className="ga-sezione" aria-labelledby="fogli">
-        <h2 id="fogli">Fogli da firmare</h2>
+      {/* chiusa se non c'è niente da firmare */}
+      <details className="ga-chiusa" open={d.fogli.length > 0}>
+        <summary>Fogli da firmare{d.fogli.length > 0 && ` (${d.fogli.length})`}</summary>
         <Elenco>
           {d.fogli.map((f) => (
             <Riga
@@ -222,7 +223,7 @@ export default function Settimana({ client, passi, avvisa }: Props) {
           ))}
           <Riga icona={<CalendarBlank size={20} weight="bold" aria-hidden />} titolo="Aggiungi un foglio" vai={() => setVista('foglio')} />
         </Elenco>
-      </section>
+      </details>
 
       <FotoSalvate client={client} avvisa={avvisa} conferma={(si) => setChiede({ foto: si })} />
 

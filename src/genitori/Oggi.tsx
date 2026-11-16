@@ -357,7 +357,7 @@ function FoglioSegna({ client, passi, avvisa, chiudi }: Props & { chiudi: () => 
           <button key={t} type="button" className="ga-opzione" aria-pressed={tipo === t} onClick={() => setTipo(t)}>
             <span className="ga-opzione-testo">
               {n}
-              <small>{cosa}</small>
+              {!tipo && <small>{cosa}</small>}
             </span>
             <span className="valore">{meno(R.passiSgridata(t))}</span>
           </button>
@@ -394,7 +394,6 @@ function FoglioSegna({ client, passi, avvisa, chiudi }: Props & { chiudi: () => 
           )}
         </fieldset>
       )}
-      {tipo && <p className="ga-nota">Lani perde i passi e vede il popup con la cosa da fare.</p>}
       {tipo && dopo21 && <p className="ga-avviso">Sono le {oraRoma()}: Lani lo vede domattina.</p>}
     </Foglio>
   );
