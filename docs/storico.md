@@ -151,3 +151,23 @@ Altri debiti: `spiega`, borsa, enigma, foto e push provati solo con le prove (se
 
 - `npm test`, `npm run prova:schema`, `npm run prova:schermate`, `npx tsc -p .`, `npm run build`.
 - Supabase: `sync_log` (esiti delle sincronizzazioni), `cron.job`, avvisi di sicurezza, `schema_migrations` allineata.
+
+# Da HANDOFF, 15-16/11/2026
+
+## Fatto il 15/11 sera (messaggio di Jarvis)
+
+- **sync-nuvola delle 19:30**: non il deploy (18:19) né le assenze. Una richiesta, quasi certamente a Nuvola, è rimasta senza risposta fino allo spegnimento (150 s, 115 ms di CPU): riga di `sync_log` aperta, nessun errore. Lanciata a mano alle 20:15: esito ok. Riga chiusa come `interrotta`. Correzione in `main`: limite di 20 s per ogni richiesta a Nuvola ("Nuvola non risponde", con l'avviso ai genitori) e `apriRegistro` che chiude come `interrotta` le righe aperte da più di 5 minuti.
+- **Richieste di foto**: le 12 aperte di compiti già passati sono `scaduta` (senza passi). `sync-nuvola` chiude da sola, a ogni giro, quelle di compiti e verifiche con la data prima di oggi; lo Storage non accetta foto per una richiesta non aperta (0024).
+- Partita di prova del 12/11 (FOXES VOLLEY, mai approvata) cancellata: nessun movimento né popup collegato.
+- Testi del 15/11 **approvati dal signore** (Bentornata, Com'è andata?, Prossima partita, pillola in Oggi, Come si fanno i passi): tolto "proposta del 15/11" da docs/05.
+- `come-passi` unito a `main`. A 360 px il pulsante "Come si fanno i passi" ora va a capo.
+- Assenze in Lani: in Studio le verifiche "da recuperare" (giorno a casa, non ancora spostate) vengono per prime, quelle spostate a "settimana prossima" non mostrano un giorno; sotto un compito spostato compare "Spostato: eri a casa". **Testi nuovi da approvare** (docs/05, righe "da approvare").
+- Prove: `npm test` 318 (2 saltate), `npm run prova:schema` 298, `npx playwright test` 158 (22 saltate), `npx tsc -p .` 0, build ok.
+
+## Fatto il 16/11 pomeriggio: area genitori (ramo `genitori-ux`, unito a `main`)
+
+- Area genitori a quattro schede (Oggi, Settimana, Forzieri, Impostazioni), barra in basso, kit dei campi, PIN aperto 10 minuti dall'ultima azione. Studio, misure e risultati in `docs/genitori-ux.md`.
+- Deciso dal signore: niente annulla dopo Firmato, Consegnato e Togli spunta (restano con la conferma). Fatti: Segna più snello; in Settimana Fogli (aperta solo con fogli da firmare) e Foto (sempre chiusa) richiudibili.
+- Impeccable: critique 22 → 29 → **31/40** dopo il ritocco di sola interfaccia approvato (freccia sulle sezioni chiuse, Sera una sera alla volta con avviso sulle modifiche non salvate, Riprova sulla pillola di errore); obiettivo 34 non raggiunto. Carico cognitivo 6 → 1 su 8, axe 0, bersagli piccoli 0, detector 0 sui sorgenti (4 falsi positivi nella pagina).
+- Code-review: 8 segnalazioni, 2 corrette (Togli con errore dell'update, Salva della Sera dopo un caricamento fallito), 6 lasciate (in `docs/genitori-ux.md` §8).
+- Prove sul codice unito: `npm test` 323 (2 saltate), `prova:schema` 298, `npx playwright test` 189 passate, `tsc` 0, build ok. Dopo il pull di `main` serve `npm install` (pacchetti Capacitor dell'APK). `hookTimeout` di vitest a 60 s: il primo banco PGlite a freddo superava i 10 s.

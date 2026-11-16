@@ -1,54 +1,40 @@
 # HANDOFF
 
-Storia delle sessioni, decisioni prese e scelte approvate fino al 15/11: `docs/storico.md`.
+Storia delle sessioni, decisioni prese e scelte approvate: `docs/storico.md`.
 
-## Dove siamo (15/11 sera)
+## Dove siamo (16/11 pomeriggio)
 
-Il gioco parte **lunedì 16/11/2026** (`periodo.inizio`) con l'app com'è. Produzione: `main` `26c2142` su `ace-passino.vercel.app`, con sprint 1, sprint 2 (R-Evolution, risultato automatico dalla FIPAV), assenze e la pagina "Come si fanno i passi". Cron: `sync-nuvola` 14:30 e 19:30, `sync-calendario` ogni ora, `notifiche` ogni 15 minuti, `chiavi` domenica 21:30, `classifiche` 6:15 e `partite` ogni mezz'ora il giorno della partita.
+Il gioco è partito **lunedì 16/11/2026**: Lani usa ACE in produzione. `main` `831e037` su `ace-passino.vercel.app`: sprint 1, sprint 2 (R-Evolution), assenze, "Come si fanno i passi", area genitori a quattro schede (31/40), APK con FCM. Cron: `sync-nuvola` 14:30 e 19:30, `sync-calendario` ogni ora, `notifiche` ogni 15 minuti, `chiavi` domenica 21:30, `classifiche` 6:15, `partite` ogni mezz'ora il giorno della partita. Controlli del 16/11: partita spostata al 13/12 alle 9:00 letta dalla FIPAV; `sync-nuvola` delle 14:30 ok (4 s).
 
-## Fatto il 15/11 sera (messaggio di Jarvis)
+## APK di ACE (16/11, ramo `apk` in `C:\progetti\ace\app-apk`, unito a `main`)
 
-- **sync-nuvola delle 19:30**: non il deploy (18:19) né le assenze. Una richiesta, quasi certamente a Nuvola, è rimasta senza risposta fino allo spegnimento (150 s, 115 ms di CPU): riga di `sync_log` aperta, nessun errore. Lanciata a mano alle 20:15: esito ok. Riga chiusa come `interrotta`. Correzione in `main`: limite di 20 s per ogni richiesta a Nuvola ("Nuvola non risponde", con l'avviso ai genitori) e `apriRegistro` che chiude come `interrotta` le righe aperte da più di 5 minuti.
-- **Richieste di foto**: le 12 aperte di compiti già passati sono `scaduta` (senza passi). `sync-nuvola` chiude da sola, a ogni giro, quelle di compiti e verifiche con la data prima di oggi; lo Storage non accetta foto per una richiesta non aperta (0024).
-- Partita di prova del 12/11 (FOXES VOLLEY, mai approvata) cancellata: nessun movimento né popup collegato.
-- Testi del 15/11 **approvati dal signore** (Bentornata, Com'è andata?, Prossima partita, pillola in Oggi, Come si fanno i passi): tolto "proposta del 15/11" da docs/05.
-- `come-passi` unito a `main`. A 360 px il pulsante "Come si fanno i passi" ora va a capo.
-- Assenze in Lani: in Studio le verifiche "da recuperare" (giorno a casa, non ancora spostate) vengono per prime, quelle spostate a "settimana prossima" non mostrano un giorno; sotto un compito spostato compare "Spostato: eri a casa". **Testi nuovi da approvare** (docs/05, righe "da approvare").
-- Prove: `npm test` 318 (2 saltate), `npm run prova:schema` 298, `npx playwright test` 158 (22 saltate), `npx tsc -p .` 0, build ok.
-
-## Fatto il 16/11 pomeriggio: area genitori (ramo `genitori-ux`, unito a `main`)
-
-- Area genitori a quattro schede (Oggi, Settimana, Forzieri, Impostazioni), barra in basso, kit dei campi, PIN aperto 10 minuti dall'ultima azione. Studio, misure e risultati in `docs/genitori-ux.md`.
-- Deciso dal signore: niente annulla dopo Firmato, Consegnato e Togli spunta (restano con la conferma). Fatti: Segna più snello; in Settimana Fogli (aperta solo con fogli da firmare) e Foto (sempre chiusa) richiudibili.
-- Impeccable: critique 22 → 29 → **31/40** dopo il ritocco di sola interfaccia approvato (freccia sulle sezioni chiuse, Sera una sera alla volta con avviso sulle modifiche non salvate, Riprova sulla pillola di errore); obiettivo 34 non raggiunto. Carico cognitivo 6 → 1 su 8, axe 0, bersagli piccoli 0, detector 0 sui sorgenti (4 falsi positivi nella pagina).
-- Code-review: 8 segnalazioni, 2 corrette (Togli con errore dell'update, Salva della Sera dopo un caricamento fallito), 6 lasciate (in `docs/genitori-ux.md` §8).
-- Prove sul codice unito: `npm test` 323 (2 saltate), `prova:schema` 298, `npx playwright test` 189 passate, `tsc` 0, build ok. Dopo il pull di `main` serve `npm install` (pacchetti Capacitor dell'APK). `hookTimeout` di vitest a 60 s: il primo banco PGlite a freddo superava i 10 s.
+- Guscio Capacitor (non TWA) con `server.url` di produzione, id `it.messori.ace`, solo verticale, barra di stato rosa dipinta da `MainActivity` (insets nativi: la pagina web non si tocca). Le modifiche web arrivano da sole; un APK nuovo serve solo per icone, permessi, plugin (versionCode più alto, stessa chiave, "Aggiorna").
+- Notifiche: FCM HTTP v1 (JWT RS256 con WebCrypto, `supabase/functions/_shared/push.ts`) accanto a web-push; migrazione `0039_push_fcm` (tipo `web`/`fcm`). I limiti del copione restano in `manda()` di `notifiche`. FCM 404 cancella l'iscrizione, 400 no. Prova: `{"prova":"genitori"}` a `notifiche` (comando in `docs/runbook.md`).
+- Nel guscio i genitori ricevono la richiesta del permesso all'accesso (App.tsx); Lani usa "Attiva i promemoria" in Oggi.
+- **APK 1.2** (versionCode 3) firmato: `C:\progetti\ace\apk\ace-1.2.apk`. Icona piccola delle notifiche: due impronte (scelta del signore). Keystore `C:\progetti\ace\chiavi\ace-release.jks`, alias `ace`, password nel gestore del signore; backup e firma in `docs/runbook.md`.
+- Motorola del genitore con la 1.2: sessione che resta, notifica FCM con ACE chiusa, tocco che apre ACE, icona delle impronte: ok.
+- Prove: `npm test` 323 (2 saltate), `prova:schema` 298, `tsc` 0. Backup di oggi in `Documents\ACE-backup` (l'ultimo 15:56, 207 KB).
 
 ## Prossimo passo
 
-0. **Da decidere col signore**: i P3 rimasti verso 34/40, tutti di sola interfaccia (`docs/genitori-ux.md`, in fondo: Forzieri a 9 righe, pillole "0 note", punteggio a capo, Riprova su premio e foglio); errore di `passi()` letto come "tetto pieno" in Dai passi (§8, punti 3-4: tocca la logica dei passi, non fatto).
-
-1. **Signore, stasera**: pubblicare le funzioni toccate (`sync-nuvola`, e per `apriRegistro` anche `sync-calendario`, `chiavi`, `classifiche`), un comando alla volta: `npx supabase functions deploy sync-nuvola --use-api --yes`. Quella pubblicata adesso funziona (giro a mano ok), ma senza limite di tempo.
-2. Lunedì 16/11 alle 14:30: `sync_log` fonte nuvola con esito `ok`.
-3. Signore: in Genitori, Impostazioni, Spegni e poi Accendi R-Evolution (in produzione `r_evolution_da` è ancora 2026-11-13 e manca l'annuncio).
-4. **Da martedì**: APK di ACE per il Samsung di Lani (piano di Jarvis del 15/11, approvato): guscio Capacitor (non TWA) con `server.url` di produzione, id tipo `it.messori.ace`, solo verticale; foto a più scatti provate nel guscio; notifiche con FCM (`@capacitor/push-notifications`, chiave del service account come segreto di Supabase, tipo di iscrizione web/fcm in tabella) e web-push per l'iPad, stessi limiti del copione; keystore in `C:\progetti\ace\chiavi\` e APK in `C:\progetti\ace\apk\`, fuori dal repository, backup in `docs/runbook.md`; installazione con Family Link in `docs/07-installazione.md`; prova prima sul telefono di un genitore.
-5. **Dopo lunedì**: ambiente di prova `ace-prova` (secondo progetto Supabase, preview di Vercel collegate lì, dati finti dal simulatore). Il signore crea il progetto e mette le chiavi in Vercel.
-6. Domenica 22/11 alle 21:30 le prime chiavi (`sync_log` fonte chiavi). Enigmi v4 sull'app vera al primo forziere (il 7 è il cruciverba: griglia allineata sul telefono).
-7. Debiti: assenze lette da Nuvola (servizio non mappato); `spiega`, borsa, enigma, foto e push provati solo con le prove; protezione delle password trapelate (la accende il signore). A inizio dicembre il CSV dei passi per la taratura (`npm run esporta:passi`).
+1. **Stasera dopo le 21 o domani**: APK sul Samsung di Lani seguendo `docs/07-installazione.md` (Family Link, origini sconosciute acceso solo per installare, batteria senza restrizioni, ACE sempre consentita, Chrome limite normale) e la lista "Prova del guscio". Lì si prova anche il **flusso foto** (c'è solo nell'Oggi di Lani): permesso fotocamera, più scatti, galleria, "Ho finito". Poi notifica di prova: deve comparire una riga `fcm` di Lani in `push_iscrizioni`.
+2. Signore: Accendi R-Evolution in Impostazioni (`r_evolution_da` vuoto); spostare geografia e spagnolo; approvare la partita del 14/11 segnata da Lani (prima dell'inizio: 0 passi).
+3. Signore: cancellare il JSON del service account FCM da Download (è già nel segreto `FCM_SERVICE_ACCOUNT`).
+4. Area genitori verso 34/40: P3 di sola interfaccia in fondo a `docs/genitori-ux.md`; errore di `passi()` letto come "tetto pieno" in Dai passi (§8, punti 3-4: tocca la logica, chiedere).
+5. Ambiente di prova `ace-prova` (secondo progetto Supabase, preview Vercel): lo crea il signore.
+6. Domenica 22/11 alle 21:30 le prime chiavi (`sync_log` fonte chiavi). Debiti: assenze da Nuvola, protezione password trapelate, CSV passi a inizio dicembre (`npm run esporta:passi`).
 
 ## Attenzione
 
-- **Account**: ACE si apre con `claude-personal` (`CLAUDE_CONFIG_DIR=%USERPROFILE%\.claude-personal`); l'hook SessionStart avvisa, senza bloccare, se non è così.
-- Deploy e `db push` li lancia il signore (il controllo automatico di Claude Code li blocca): `db push --remote --yes`, `npx supabase functions deploy <nome> --use-api --yes`. `git push` e i deploy vanno lanciati da soli, non in comandi composti.
-- Schema `0001`-`0038` e `20261115173113_libreria_risorse` applicati: la prossima migrazione è `0039`. Mai cambiare una migrazione applicata. Le migrazioni con "cron" nel nome non girano su PGlite.
-- Supabase rifiuta UPDATE e DELETE senza WHERE anche dentro le funzioni (safeupdate); PGlite no. Dati di prova sul database vero: ripulirli sempre.
+- **Finestre senza pubblicazioni**: 14:20-14:45 e 19:45-21:00. Ogni pubblicazione: backup (`npm run backup`, serve Docker acceso), prove verdi, poi controllo di `sync_log` e Stato di ACE. Niente dati veri di Lani in chat, solo conteggi.
+- Schema `0001`-`0039` e `20261115173113_libreria_risorse` applicati: la prossima migrazione è `0040`. `db push` vuole `--remote --yes --include-all`. Mai cambiare una migrazione applicata; quelle con "cron" non girano su PGlite.
+- APK: `scripts\apk.ps1` (SDK `C:\progetti\ace\android-sdk`, JDK 21); la password del keystore la scrive il signore nel suo terminale, mai in chat. Dopo il pull di `main` serve `npm install`.
+- Supabase rifiuta UPDATE e DELETE senza WHERE anche nelle funzioni (safeupdate). Avvisi su `forzieri_lani` e sulle RPC: voluti.
 - `sync_log.esito`: `ok`, `errore`, `interrotta`. `richieste_foto.stato`: `aperta`, `fatta`, `scaduta`.
-- Segreti: `NUVOLA_UTENTE`, `NUVOLA_PASSWORD`, `CRON_SEGRETO` (nel Vault `cron_segreto`), `GOOGLE_CALENDAR_ICS_URL`, `ANTHROPIC_API_KEY`, `VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY`/`VAPID_SUBJECT`.
-- Storage: `npx supabase storage cp --workdir C:\progetti\ace\app --remote --experimental --yes <file> ss:///<bucket>/<nome>` lanciato dalla cartella del file.
-- `docs/05-copione.md` è salvato con i CRLF: `sed -i` di Git Bash li toglie e il diff diventa tutto il file. Rimetterli prima del commit.
-- Avvisi di Supabase su `forzieri_lani` e sulle 8 funzioni RPC: voluti. Tipi: `npx supabase gen types typescript --linked > src/tipi-database.ts`. Revisione prima di unire: `ocr delegate preview --from origin/main --to <ramo>`.
+- Segreti: `NUVOLA_UTENTE`, `NUVOLA_PASSWORD`, `CRON_SEGRETO` (Vault `cron_segreto`), `GOOGLE_CALENDAR_ICS_URL`, `ANTHROPIC_API_KEY`, `VAPID_*`, `FCM_SERVICE_ACCOUNT`.
+- I documenti con CRLF (`docs/05`, `docs/07`, ...): niente `sed -i` di Git Bash, usare script node o Edit.
 
 ## Come verificare
 
 - `npm test`, `npm run prova:schema`, `npx playwright test`, `npx tsc -p .`, `npm run build`.
-- Supabase: `sync_log` (righe senza `finito_il` = giro appeso), `cron.job`, avvisi di sicurezza, `schema_migrations` allineata.
+- Supabase: `sync_log` (righe senza `finito_il` = giro appeso), `cron.job`, `push_iscrizioni`, `net._http_response`, `schema_migrations` allineata.
