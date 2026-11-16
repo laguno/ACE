@@ -69,6 +69,22 @@ test('pomeriggio di lunedì: compiti di martedì, il più lungo prima', async ({
   await page.screenshot({ path: 'e2e/risultati/oggi-pomeriggio.png', fullPage: true });
 });
 
+test('pomeriggio: il compito fatto va in fondo, dopo i 5 secondi di Annulla', async ({ page }) => {
+  await page.clock.install({ time: new Date('2026-11-09T17:45:00+01:00') });
+  await finto(page, dati());
+  await page.goto('/');
+  const righe = page.locator('.spunte li');
+  await page.getByRole('checkbox', { name: /Italiano/ }).check();
+  // finché c'è Annulla la riga resta al suo posto
+  await expect(righe.nth(0)).toContainText('Italiano');
+  await expect(righe.nth(0).getByRole('button', { name: 'Annulla' })).toBeVisible();
+  await page.clock.runFor(5100);
+  await expect(righe.nth(0)).toContainText('Matematica');
+  await expect(righe.nth(0).locator('.bollino')).toHaveText('1');
+  await expect(righe.nth(2)).toContainText('Italiano');
+  await expect(page.getByText('Inizia da qui')).toHaveCount(0);
+});
+
 test('martedì alle 17:10 si apre sulla sera: chiusura alle 18:00 per l’allenamento', async ({ page }) => {
   await page.clock.setFixedTime(new Date('2026-11-10T17:10:00+01:00'));
   await finto(page, dati());
