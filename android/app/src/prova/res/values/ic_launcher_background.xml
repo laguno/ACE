@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ACE Prova: fondo dell'icona scuro invece del rosa, per non confonderla con ACE vera.
+     ponytail: solo il colore; la fascia "PROVA" sull'icona quando serve davvero. -->
+<resources>
+    <color name="ic_launcher_background">#3D2350</color>
+</resources>

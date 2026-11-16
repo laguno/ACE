@@ -4,6 +4,8 @@ Redatto da Jarvis il 16/11/2026 dopo aver letto `HANDOFF.md`, `docs/storico.md`,
 
 **Aggiornamento 16/11, 17:50 — il progetto Supabase `ace-prova` non si può ancora creare.** Il signore ha eliminato il vecchio progetto "VolleyPro AI Coach", ma il pulsante di creazione del nuovo resta disabilitato (piano gratuito). Finché non si sblocca, **si fa tutto ciò che non dipende da quel progetto**: CSP per ambiente (§2), `capacitor.config.ts` e Gradle per "ACE Prova" (§3), motore del gioco (docs/09). Alternative se non si sblocca: Supabase locale con Docker più tunnel https, oppure piano a pagamento.
 
+**Fatto il 16/11 sera (ramo `gioco`, non pubblicato):** CSP in `vercel.ts` al posto di `vercel.json` (§2); `capacitor.config.ts`, tipo di build `prova` in Gradle e `scripts\apk.ps1 -Ambiente prova` (§3, comando in `docs/runbook.md`). **Da verificare alla prima preview, prima di unire a `main`:** che Vercel legga `vercel.ts` e che le intestazioni arrivino (`curl -I` sull'indirizzo della preview: `content-security-policy` col Supabase giusto). Se mancano, non unire: la produzione resterebbe senza intestazioni di sicurezza.
+
 ## Cosa c'era già deciso
 
 Dal 13/11 il signore ha deciso un **ambiente di prova** (`docs/storico.md`, riga 40; `HANDOFF.md`, punto 5): non un utente di test (il database è di una sola bambina), ma un secondo progetto Supabase **`ace-prova`** con le stesse migrazioni e funzioni, la preview di Vercel collegata a quello, dati finti dal simulatore, ogni pubblicazione prima lì e poi in produzione. Il signore crea il progetto e mette le chiavi in Vercel.

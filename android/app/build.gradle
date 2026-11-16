@@ -21,8 +21,20 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+        // "ACE Prova" (docs/10-ambiente-di-prova.md): gradlew assembleProva. Uguale a release, ma con
+        // identificatore it.messori.ace.prova: si installa accanto ad ACE vera, che non cambia.
+        // Nome e colore dell'icona in src/prova/res.
+        prova {
+            initWith release
+            applicationIdSuffix ".prova"
+            matchingFallbacks = ['release']
+        }
     }
 }
+
+// ACE Prova parte senza notifiche: google-services.json conosce solo it.messori.ace e il plugin
+// fermerebbe la compilazione. Quando il signore aggiunge la seconda app in Firebase, togliere queste righe.
+tasks.matching { it.name == 'processProvaGoogleServices' }.configureEach { enabled = false }
 
 repositories {
     flatDir{
