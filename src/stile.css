@@ -664,7 +664,7 @@ body:has(.avvio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom))
    niente scorrimento orizzontale. Da 360 px in su non cambia niente. */
 @media (max-width: 359px) {
   .testata-avatar, .sera .testata-avatar { width: 38vw; height: auto; }
-  .astra-saldi, .riga-pallini { flex-wrap: wrap; }
+  .astra-saldi, .riga-pallini, .testata .saldo { flex-wrap: wrap; border-radius: 24px; }
   .tappe .traguardo { white-space: normal; max-width: 110px; }
 }
 
