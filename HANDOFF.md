@@ -2,9 +2,9 @@
 
 Storia delle sessioni, decisioni prese e scelte approvate: `docs/storico.md`.
 
-## Dove siamo (16/11 pomeriggio)
+## Dove siamo (16/11 sera)
 
-Il gioco è partito **lunedì 16/11/2026**: Lani usa ACE in produzione. `main` `831e037` su `ace-passino.vercel.app`: sprint 1, sprint 2 (R-Evolution), assenze, "Come si fanno i passi", area genitori a quattro schede (Impeccable 34/40, obiettivo raggiunto), APK con FCM. Cron: `sync-nuvola` 14:30 e 19:30, `sync-calendario` ogni ora, `notifiche` ogni 15 minuti, `chiavi` domenica 21:30, `classifiche` 6:15, `partite` ogni mezz'ora il giorno della partita. Controlli del 16/11: partita spostata al 13/12 alle 9:00 letta dalla FIPAV; `sync-nuvola` delle 14:30 ok (4 s).
+Il gioco è partito **lunedì 16/11/2026**: Lani usa ACE in produzione. `main` su `ace-passino.vercel.app`: sprint 1, sprint 2 (R-Evolution, **accesa dal 16/11**), **tema campo di R-Evolution** (16/11 alle 21:08, unione `49b087b`: granata della divisa, nastro "Ultim'ora", tabellone, emoji solo lì; bozza `design/REvolution.html`), assenze, "Come si fanno i passi", area genitori a quattro schede (Impeccable 34/40, obiettivo raggiunto), APK con FCM. Cron: `sync-nuvola` 14:30 e 19:30, `sync-calendario` ogni ora, `notifiche` ogni 15 minuti, `chiavi` domenica 21:30, `classifiche` 6:15, `partite` ogni mezz'ora il giorno della partita. Controlli del 16/11: partita spostata al 13/12 alle 9:00 letta dalla FIPAV; `sync-nuvola` delle 14:30 ok (4 s).
 
 ## APK di ACE (16/11, ramo `apk` in `C:\progetti\ace\app-apk`, unito a `main`)
 
@@ -18,14 +18,16 @@ Il gioco è partito **lunedì 16/11/2026**: Lani usa ACE in produzione. `main` `
 ## Prossimo passo
 
 1. **Stasera dopo le 21 o domani**: APK sul Samsung di Lani seguendo `docs/07-installazione.md` (Family Link, origini sconosciute acceso solo per installare, batteria senza restrizioni, ACE sempre consentita, Chrome limite normale) e la lista "Prova del guscio". Lì si prova anche il **flusso foto** (c'è solo nell'Oggi di Lani): permesso fotocamera, più scatti, galleria, "Ho finito". Poi notifica di prova: deve comparire una riga `fcm` di Lani in `push_iscrizioni`.
-2. Signore: Accendi R-Evolution in Impostazioni (`r_evolution_da` vuoto); spostare geografia e spagnolo; approvare la partita del 14/11 segnata da Lani (prima dell'inizio: 0 passi).
-3. Signore: cancellare il JSON del service account FCM da Download (è già nel segreto `FCM_SERVICE_ACCOUNT`).
-4. Area genitori a 34/40 (16/11, ramo `genitori-ux` unito): restano P3 di sola interfaccia in fondo a `docs/genitori-ux.md` (rosso su "mai sincronizzato", "0 su 0 serate", gergo); errore di `passi()` letto come "tetto pieno" in Dai passi (§8, punti 3-4: tocca la logica, chiedere).
-5. Ambiente di prova `ace-prova` (secondo progetto Supabase, preview Vercel): lo crea il signore.
-6. Domenica 22/11 alle 21:30 le prime chiavi (`sync_log` fonte chiavi). Debiti: assenze da Nuvola, protezione password trapelate, CSV passi a inizio dicembre (`npm run esporta:passi`).
+2. Tema campo: guardarlo sul Samsung e sull'iPad di Lani (emoji, nastro, sticker). Idee approvate dal signore, da fare: striscia delle ultime partite a pallini vinta/persa; sticker della testata che cambia posa dopo la partita (`lani-festeggia` se vinta, `lani-partita-persa` se persa).
+3. Signore: spostare geografia e spagnolo; approvare la partita del 14/11 segnata da Lani (prima dell'inizio: 0 passi).
+4. Signore: cancellare il JSON del service account FCM da Download (è già nel segreto `FCM_SERVICE_ACCOUNT`).
+5. Area genitori a 34/40 (16/11, ramo `genitori-ux` unito): restano P3 di sola interfaccia in fondo a `docs/genitori-ux.md` (rosso su "mai sincronizzato", "0 su 0 serate", gergo); errore di `passi()` letto come "tetto pieno" in Dai passi (§8, punti 3-4: tocca la logica, chiedere).
+6. Ambiente di prova `ace-prova` (secondo progetto Supabase, preview Vercel): lo crea il signore.
+7. Domenica 22/11 alle 21:30 le prime chiavi (`sync_log` fonte chiavi). Debiti: assenze da Nuvola, protezione password trapelate, CSV passi a inizio dicembre (`npm run esporta:passi`).
 
 ## Attenzione
 
+- Prova e2e "PNG enorme (6000×4000)" di `foto-file`: fallita una volta nel giro completo del 16/11 sera, da sola passa (carico della macchina). Se si ripete, guardarla.
 - **Finestre senza pubblicazioni**: 14:20-14:45 e 19:45-21:00. Ogni pubblicazione: backup (`npm run backup`, serve Docker acceso), prove verdi, poi controllo di `sync_log` e Stato di ACE. Niente dati veri di Lani in chat, solo conteggi.
 - Schema `0001`-`0039` e `20261115173113_libreria_risorse` applicati: la prossima migrazione è `0040`. `db push` vuole `--remote --yes --include-all`. Mai cambiare una migrazione applicata; quelle con "cron" non girano su PGlite.
 - APK: `scripts\apk.ps1` (SDK `C:\progetti\ace\android-sdk`, JDK 21); la password del keystore la scrive il signore nel suo terminale, mai in chat. Dopo il pull di `main` serve `npm install`.
