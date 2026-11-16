@@ -22,7 +22,7 @@ Il gioco è partito **lunedì 16/11/2026**: Lani usa ACE in produzione. `main` `
 - **CSP per ambiente**: `vercel.ts` al posto di `vercel.json` (Supabase da `VITE_SUPABASE_URL`, senza variabile la produzione). **Prima di unire a `main`**: una preview e `curl -I` per vedere che le intestazioni arrivano; se mancano non unire.
 - **ACE Prova**: `scripts\apk.ps1 -Ambiente prova -UrlProva https://...` (`docs/runbook.md`). Compilato senza firma: `it.messori.ace.prova`, "ACE Prova". Senza notifiche finché Firebase non ha la seconda app.
 - Worktree nuovo: serve `.env.local` (copiarlo da `app`), sennò `src/genitori/comune.test.ts` non parte.
-- Deciso dal signore: partita a tempo di 2 minuti (`docs/09` §5). Orientamento e APK 1.3 restano da fare.
+- Deciso dal signore: partita a tempo di 2 minuti (`docs/09` §5). Plugin di orientamento aggiunto (`@capacitor/screen-orientation`, `Gioco.tsx`), `versionCode 4` / 1.3 in Gradle: APK 1.3 da compilare, firmare e provare sul telefono.
 
 ## Prossimo passo
 

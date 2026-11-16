@@ -3,6 +3,7 @@
 // Per ora si apre solo in sviluppo da #gioco (main.tsx): niente voce nell'app, niente tetto, niente server.
 // ponytail: personaggi e testi sono segnaposto (pose che esistono già), in attesa delle figurine
 // intere del signore e del copione.
+import { ScreenOrientation } from '@capacitor/screen-orientation';
 import { ArrowFatUp, CaretLeft, CaretRight } from '@phosphor-icons/react';
 import { useEffect, useRef, useState } from 'react';
 import config from '../../data/config-gioco.json' with { type: 'json' };
@@ -99,6 +100,13 @@ export default function Gioco() {
   const tasti = useRef<Comandi>({ sx: false, dx: false, salta: false });
   const [partita, setPartita] = useState(0);
   const [fine, setFine] = useState<[number, number] | null>(null);
+
+  // Nell'APK (dalla 1.3) il gioco gira lo schermo da solo e uscendo lo rimette dritto: il resto di ACE
+  // è verticale. Nel browser e negli APK vecchi il blocco non c'è: resta "Gira il telefono".
+  useEffect(() => {
+    void ScreenOrientation.lock({ orientation: 'landscape' }).catch(() => {});
+    return () => void ScreenOrientation.lock({ orientation: 'portrait' }).catch(() => {});
+  }, []);
 
   useEffect(() => {
     const c = tela.current;
