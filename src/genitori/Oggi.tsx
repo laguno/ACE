@@ -352,7 +352,8 @@ function FoglioSegna({ client, passi, avvisa, chiudi }: Props & { chiudi: () => 
   return (
     <Foglio titolo="Segna" azione={tipo ? `Segna ${meno(R.passiSgridata(tipo))}` : 'Segna'} pronto={pronto} conferma={segna} chiudi={chiudi}>
       <div className="ga-opzioni">
-        {SGRIDATE.map(([t, n, cosa]) => (
+        {/* scelta una voce, le altre si chiudono: una decisione alla volta ("Cambia voce" le riapre) */}
+        {SGRIDATE.filter(([t]) => !tipo || t === tipo).map(([t, n, cosa]) => (
           <button key={t} type="button" className="ga-opzione" aria-pressed={tipo === t} onClick={() => setTipo(t)}>
             <span className="ga-opzione-testo">
               {n}
@@ -361,6 +362,11 @@ function FoglioSegna({ client, passi, avvisa, chiudi }: Props & { chiudi: () => 
             <span className="valore">{meno(R.passiSgridata(t))}</span>
           </button>
         ))}
+        {tipo && (
+          <button type="button" className="ga-domanda" onClick={() => setTipo(undefined)}>
+            Cambia voce
+          </button>
+        )}
       </div>
       {tipo === 'balla' && (
         <fieldset className="ga-campo ga-frasi">
