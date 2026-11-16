@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1072971872014",
+    "project_id": "ace-famiglia",
+    "storage_bucket": "ace-famiglia.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1072971872014:android:78e2a4bd9ecae51c3b095f",
+        "android_client_info": {
+          "package_name": "it.messori.ace"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC6XHONOgl4EaUao0IT-E_o5oBkMAf-x4I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
