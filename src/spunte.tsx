@@ -87,6 +87,9 @@ export function useAnnulla() {
   return {
     inAttesa: (id: string) => id in attesa,
     avvia(id: string, invia: () => void) {
+      // ogni spunta passa di qui: una vibrazione breve dice "presa" (non su iPhone e iPad, che non vibrano;
+      // niente col movimento ridotto)
+      if (!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) navigator.vibrate?.(10);
       const t = window.setTimeout(() => {
         togli(id);
         invia();
