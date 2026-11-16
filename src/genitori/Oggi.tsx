@@ -80,11 +80,12 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
 
   async function consegna(n: number) {
     const { error } = await client.from('forzieri').update({ stato: 'consegnato', consegnato_il: new Date().toISOString() }).eq('n', n);
-    fatto(error ? 'Non salvato. Riprova.' : `Forziere ${n}: consegnato.`);
+    if (error) return avvisa(`Forziere ${n}: consegna non salvata.`, () => consegna(n));
+    fatto(`Forziere ${n}: consegnato.`);
   }
   async function firmato(f: Foglio_) {
     const { error } = await client.from('fogli_firma').update({ consegnato_il: new Date().toISOString() }).eq('id', f.id);
-    if (error) return avvisa('Non salvato. Riprova.');
+    if (error) return avvisa(`${f.titolo}: firma non salvata.`, () => firmato(f));
     const p = await passi('foglio', f.id);
     fatto(p ? `${f.titolo}: firmato, +${p} a Lani.` : `${f.titolo}: firmato.`);
   }
@@ -344,7 +345,7 @@ function FoglioSegna({ client, passi, avvisa, chiudi }: Props & { chiudi: () => 
     chiudi();
     const nota = tipo === 'balla' && 'nota' in balla ? balla.nota : null;
     const { data, error } = await client.from('sgridate').insert({ tipo, nota }).select('id').single();
-    if (error || !data) return avvisa('Non salvato. Riprova.');
+    if (error || !data) return avvisa(`${nome}: non segnata.`, segna);
     const p = await passi('sgridata', data.id);
     avvisa(p ? `${nome}: ${meno(p)} passi.` : `${nome}: segnata.`);
   }

@@ -57,7 +57,8 @@ export default function Forzieri({ client, avvisa }: Props) {
   async function consegnato(n: number) {
     setConsegna(undefined);
     const { error } = await client.from('forzieri').update({ stato: 'consegnato', consegnato_il: new Date().toISOString() }).eq('n', n);
-    avvisa(error ? 'Non salvato. Riprova.' : `${nome(n)}: consegnato.`);
+    if (error) return avvisa(`${nome(n)}: consegna non salvata.`, () => consegnato(n));
+    avvisa(`${nome(n)}: consegnato.`);
     carica();
   }
 

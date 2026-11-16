@@ -152,6 +152,23 @@ test('firmare un foglio da Oggi: un tocco, passi dal server', async ({ page }) =
   await expect(page.getByText('Niente da fare per voi')).toBeVisible();
 });
 
+test('errore: la pillola dice cosa non è salvato e Riprova rifà la stessa azione', async ({ page }) => {
+  const { t, chiamate } = await finto(page, dati(), { passi: { passi: 2 } });
+  let rotto = true;
+  await page.route('https://finto.supabase.test/rest/v1/fogli_firma*', (r) =>
+    rotto && r.request().method() === 'PATCH' ? ((rotto = false), r.fulfill({ status: 500, contentType: 'application/json', body: '{"message":"giù"}' })) : r.fallback(),
+  );
+  await page.goto('/');
+  await daFare(page).getByRole('button', { name: 'Firmato' }).click();
+  await page.getByRole('dialog', { name: 'Gita del benessere: firmato?' }).getByRole('button', { name: 'Sì, firmato' }).click();
+  await expect(page.getByRole('status')).toContainText('Gita del benessere: firma non salvata.');
+  expect(t.fogli_firma[0].consegnato_il).toBeFalsy();
+  await page.getByRole('status').getByRole('button', { name: 'Riprova' }).click();
+  await expect(page.getByRole('status')).toHaveText('Gita del benessere: firmato, +2 a Lani.');
+  expect(t.fogli_firma[0].consegnato_il).toBeTruthy();
+  await expect.poll(() => chiamate).toContainEqual({ tipo: 'foglio', id: 'f1' });
+});
+
 test('aggiungere un foglio dalla Settimana', async ({ page }) => {
   const { t } = await finto(page, { ...dati(), fogli_firma: [] });
   await page.goto('/');
@@ -336,8 +353,17 @@ test('Impostazioni: R-Evolution con conferma, dieci minuti, frasi, orari', async
   await page.getByRole('button', { name: '‹ Impostazioni' }).click();
 
   await page.getByRole('button', { name: /^Sera e cartella/ }).click();
+  // una sera alla volta: in alto i giorni con l'ora
+  await page.getByRole('group', { name: 'Sera della settimana' }).getByRole('button', { name: /^Mar/ }).click();
   await page.getByLabel('Chiusura di martedì').fill('21:00');
-  await page.getByRole('button', { name: 'Salva' }).click();
+  await expect(page.getByRole('group', { name: 'Sera della settimana' }).getByRole('button', { name: /^Mar/ })).toContainText('21:00');
+  // modifiche non salvate: uscire chiede prima, sia indietro sia dalle schede
+  await page.getByRole('button', { name: '‹ Impostazioni' }).click();
+  await page.getByRole('dialog', { name: 'Modifiche non salvate' }).getByRole('button', { name: 'Resta qui' }).click();
+  await page.getByRole('navigation', { name: 'Sezioni genitori' }).getByRole('button', { name: 'Oggi' }).click();
+  await page.getByRole('dialog', { name: 'Modifiche non salvate' }).getByRole('button', { name: 'Resta qui' }).click();
+  await expect(page.getByLabel('Chiusura di martedì')).toHaveValue('21:00');
+  await page.getByRole('button', { name: 'Salva la settimana' }).click();
   await expect(page.getByRole('status')).toHaveText('Sera e cartella salvate.');
   // il finto aggiunge la riga dell'upsert: conta l'ultima
   expect(t.impostazioni.filter((i) => i.chiave === 'ora_chiusura').at(-1)?.valore).toEqual({ 1: '20:30', 2: '21:00' });

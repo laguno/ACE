@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { CalendarBlank, GearSix, LockSimple, Sun, TreasureChest } from '@phosphor-icons/react';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { Attesa, Sticker } from './kit';
+import { Attesa, Foglio, Sticker } from './kit';
 import * as R from './lib/regole';
 import { installata } from './Benvenuta';
 import { GIORNI, MESI } from './spunte';
@@ -26,18 +26,22 @@ const SCHEDE = [
 /** esci: sul telefono di un genitore (logout, in Impostazioni). chiudi: sui dispositivi di Lani ("Chiudi l'area"). */
 export default function Genitori({ client, esci, chiudi }: { client: SupabaseClient; esci?: () => void; chiudi?: () => void }) {
   const [scheda, setScheda] = useState<Scheda>('oggi');
-  const [avviso, setAvviso] = useState<string>();
+  const [avviso, setAvviso] = useState<{ testo: string; riprova?: () => void }>();
   const [daFare, setDaFare] = useState(0);
+  // Impostazioni con modifiche non salvate: prima di cambiare scheda si chiede
+  const [sospeso, setSospeso] = useState(false);
+  const [vaiA, setVaiA] = useState<Scheda>();
+  const cambia = (s: Scheda) => (setScheda(s), setAvviso(undefined), setSospeso(false), setVaiA(undefined));
   const timer = useRef<number>(undefined);
   const passi = async (tipo: string, id: string) => {
     const { data } = await client.functions.invoke('passi', { body: { tipo, id } });
     return (data?.passi as number) ?? 0;
   };
-  // avviso in basso per 10 secondi
-  const avvisa = (s: string) => {
-    setAvviso(s);
+  // avviso in basso per 10 secondi; con "Riprova" resta finché non si tocca o si cambia scheda
+  const avvisa = (testo: string, riprova?: () => void) => {
+    setAvviso({ testo, riprova });
     window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => setAvviso(undefined), 10000);
+    if (!riprova) timer.current = window.setTimeout(() => setAvviso(undefined), 10000);
   };
   useEffect(() => () => window.clearTimeout(timer.current), []);
   const [avvio, setAvvio] = useState(() => {
@@ -85,15 +89,25 @@ export default function Genitori({ client, esci, chiudi }: { client: SupabaseCli
       {scheda === 'oggi' && <Oggi {...props} conta={setDaFare} />}
       {scheda === 'settimana' && <Settimana {...props} />}
       {scheda === 'forzieri' && <Forzieri {...props} />}
-      {scheda === 'impostazioni' && <Impostazioni {...props} esci={esci} />}
+      {scheda === 'impostazioni' && <Impostazioni {...props} esci={esci} sospeso={setSospeso} />}
+      {vaiA && (
+        <Foglio titolo="Modifiche non salvate" azione="Esci senza salvare" conferma={() => cambia(vaiA)} chiudi={() => setVaiA(undefined)} chiudiTesto="Resta qui">
+          <p className="ga-nota">Gli orari e il materiale che avete cambiato non sono salvati.</p>
+        </Foglio>
+      )}
       {avviso && (
         <p role="status" className="ga-pillola">
-          {avviso}
+          {avviso.testo}
+          {avviso.riprova && (
+            <button type="button" onClick={() => (setAvviso(undefined), avviso.riprova?.())}>
+              Riprova
+            </button>
+          )}
         </p>
       )}
       <nav className="ga-schede" aria-label="Sezioni genitori">
         {SCHEDE.map(([s, nome, Icona]) => (
-          <button key={s} type="button" aria-current={s === scheda ? 'page' : undefined} onClick={() => (setScheda(s), setAvviso(undefined))}>
+          <button key={s} type="button" aria-current={s === scheda ? 'page' : undefined} onClick={() => (sospeso && s !== scheda ? setVaiA(s) : cambia(s))}>
             <Icona size={22} weight={s === scheda ? 'fill' : 'bold'} aria-hidden />
             {nome}
             {s === 'oggi' && daFare > 0 && (

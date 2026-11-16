@@ -15,10 +15,14 @@ type Valori = { caricate: boolean; chiusura: Record<string, string>; materiale: 
 const SETTIMANA = [1, 2, 3, 4, 5, 6, 0];
 const TITOLI: Record<Pagina, string> = { sera: 'Sera e cartella', obiettivo: 'Obiettivo media', dieci: 'Dieci minuti', frasi: 'Frasi di famiglia', pin: 'PIN dell’area', stato: 'Stato di ACE', vetrina: 'Vetrina', regole: 'Regole del gioco' };
 
-export default function Impostazioni({ client, avvisa, esci }: Props & { esci?: () => void }) {
+export default function Impostazioni({ client, avvisa, esci, sospeso }: Props & { esci?: () => void; sospeso?: (si: boolean) => void }) {
   const [pagina, setPagina] = useState<Pagina>();
   const [v, setV] = useState<Valori>();
   const [chiede, setChiede] = useState<'accendi' | 'spegni' | 'esci'>();
+  // modifiche della Sera non salvate: "‹ Impostazioni" e le schede in basso chiedono prima di uscire
+  const [modificato, setModificato] = useState(false);
+  const [lascia, setLascia] = useState(false);
+  useEffect(() => sospeso?.(modificato), [modificato]);
 
   async function carica() {
     const [im, re, es, fr] = await Promise.all([
@@ -57,11 +61,22 @@ export default function Impostazioni({ client, avvisa, esci }: Props & { esci?: 
   if (pagina)
     return (
       <>
-        <button type="button" className="ga-indietro" onClick={() => setPagina(undefined)}>
+        <button type="button" className="ga-indietro" onClick={() => (modificato ? setLascia(true) : setPagina(undefined))}>
           ‹ Impostazioni
         </button>
         <h2>{TITOLI[pagina]}</h2>
-        {pagina === 'sera' && <Sera client={client} v={v} fatto={fatto} />}
+        {pagina === 'sera' && <Sera client={client} v={v} fatto={fatto} avvisa={avvisa} modifica={setModificato} />}
+        {lascia && (
+          <Foglio
+            titolo="Modifiche non salvate"
+            azione="Esci senza salvare"
+            conferma={() => (setLascia(false), setModificato(false), setPagina(undefined))}
+            chiudi={() => setLascia(false)}
+            chiudiTesto="Resta qui"
+          >
+            <p className="ga-nota">Gli orari e il materiale che avete cambiato non sono salvati.</p>
+          </Foglio>
+        )}
         {pagina === 'obiettivo' && <Obiettivo client={client} v={v} fatto={fatto} />}
         {pagina === 'dieci' && <MenuDieciMinuti client={client} fatto={(s) => fatto(s, false)} />}
         {pagina === 'frasi' && <FrasiDiFamiglia client={client} fatto={(s) => fatto(s, false)} />}
@@ -127,36 +142,70 @@ export default function Impostazioni({ client, avvisa, esci }: Props & { esci?: 
 
 type Sotto = { client: Props['client']; v: Valori; fatto: (s: string) => void };
 
-function Sera({ client, v, fatto }: Sotto) {
-  async function salva(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const f = new FormData(e.currentTarget);
-    const chiusura: Record<string, string> = {};
-    const materiale: Record<string, string[]> = {};
-    for (let g = 0; g < 7; g++) {
-      const ora = String(f.get(`chiusura${g}`) ?? '');
-      if (ora) chiusura[g] = ora;
-      const righe = String(f.get(`materiale${g}`) ?? '').split('\n').map((s) => s.trim()).filter(Boolean);
-      if (righe.length) materiale[g] = righe;
+/**
+ * Una sera alla volta (prima erano 14 campi in 2600 px): in alto i sette giorni con l'ora, sotto la
+ * sera scelta con la cartella per il giorno dopo. Un solo Salva per tutta la settimana.
+ */
+function Sera({ client, v, fatto, avvisa, modifica }: Sotto & { avvisa: Props['avvisa']; modifica: (si: boolean) => void }) {
+  const [chiusura, setChiusura] = useState<Record<string, string>>(v.chiusura);
+  const [materiale, setMateriale] = useState<Record<string, string>>(() => Object.fromEntries(SETTIMANA.map((g) => [g, (v.materiale[g] ?? []).join('\n')])));
+  const [g, setG] = useState(() => R.giornoRoma(new Date()).getDay());
+  const dopo = (g + 1) % 7;
+  const grande = (x: number) => GIORNI[x].replace(/^./, (c) => c.toUpperCase());
+
+  async function scrivi() {
+    const ore: Record<string, string> = {};
+    const righe: Record<string, string[]> = {};
+    for (const x of SETTIMANA) {
+      if (chiusura[x]) ore[x] = chiusura[x];
+      const r = (materiale[x] ?? '').split('\n').map((s) => s.trim()).filter(Boolean);
+      if (r.length) righe[x] = r;
     }
     const { error } = await client.from('impostazioni').upsert([
-      { chiave: 'ora_chiusura', valore: chiusura },
-      { chiave: 'materiale_cartella', valore: materiale },
+      { chiave: 'ora_chiusura', valore: ore },
+      { chiave: 'materiale_cartella', valore: righe },
     ]);
-    fatto(error ? 'Non salvato. Riprova.' : 'Sera e cartella salvate.');
+    // in errore si resta qui con le modifiche, e la pillola ha "Riprova"
+    if (error) return avvisa('Sera e cartella non salvate.', scrivi);
+    modifica(false);
+    fatto('Sera e cartella salvate.');
   }
   if (!v.caricate) return <p className="ga-nota">Orari e materiale non caricati. Tornate a Impostazioni e riprovate.</p>;
   return (
-    <form className="ga-sezione" onSubmit={salva}>
+    <form
+      className="ga-sezione"
+      onSubmit={(e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        scrivi();
+      }}
+    >
       <p className="ga-nota">Ora della chiusura (vuota: niente chiusura). Con allenamento o partita dopo le 17 l’app chiude mezz’ora prima.</p>
-      {SETTIMANA.map((g) => (
-        <fieldset key={g} className="ga-modulo ga-giorno">
-          <legend className="ga-etichetta">{GIORNI[g].replace(/^./, (x) => x.toUpperCase())}</legend>
-          <CampoData etichetta={`Chiusura di ${GIORNI[g]}`} type="time" name={`chiusura${g}`} defaultValue={v.chiusura[g] ?? ''} vuoto="Nessuna" />
-          <AreaTesto etichetta={`Materiale per ${GIORNI[(g + 1) % 7]}`} aiuto="Uno per riga" name={`materiale${(g + 1) % 7}`} rows={2} defaultValue={(v.materiale[(g + 1) % 7] ?? []).join('\n')} />
-        </fieldset>
-      ))}
-      <button className="ga-btn pieno largo">Salva</button>
+      <div className="ga-giorni" role="group" aria-label="Sera della settimana">
+        {SETTIMANA.map((x) => (
+          <button key={x} type="button" aria-pressed={x === g} onClick={() => setG(x)}>
+            {grande(x).slice(0, 3)} <small>{chiusura[x] || '–'}</small>
+          </button>
+        ))}
+      </div>
+      <fieldset className="ga-modulo ga-giorno">
+        <legend className="ga-etichetta">{grande(g)} sera</legend>
+        <CampoData
+          key={`c${g}`}
+          etichetta={`Chiusura di ${GIORNI[g]}`}
+          type="time"
+          value={chiusura[g] ?? ''}
+          vuoto="Nessuna"
+          onChange={(e) => (setChiusura({ ...chiusura, [g]: e.target.value }), modifica(true))}
+        />
+        <AreaTesto
+          etichetta={`In cartella per ${GIORNI[dopo]}`}
+          aiuto="Oltre ai libri dell’orario. Uno per riga."
+          rows={3}
+          value={materiale[dopo] ?? ''}
+          onChange={(e) => (setMateriale({ ...materiale, [dopo]: e.target.value }), modifica(true))}
+        />
+      </fieldset>
+      <button className="ga-btn pieno largo">Salva la settimana</button>
     </form>
   );
 }

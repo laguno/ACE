@@ -808,6 +808,11 @@ dialog.ga-velo::backdrop { background: transparent; }
 .ga details { border-radius: 16px; background: var(--lilla); padding: 0 14px; }
 .ga summary { display: flex; align-items: center; min-height: 48px; font-weight: 800; cursor: pointer; }
 .ga details[open] { padding-bottom: 12px; }
+/* freccia delle sezioni che si aprono: giù chiusa, su aperta (le righe hanno la loro, a destra) */
+.ga summary::-webkit-details-marker { display: none; }
+.ga summary::after { content: ''; flex: none; width: 9px; height: 9px; margin: 0 6px 4px auto; border: solid var(--testo-2); border-width: 0 2.5px 2.5px 0; transform: rotate(45deg); transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1); }
+.ga details[open] > summary::after { margin-bottom: -4px; transform: rotate(-135deg); }
+@media (prefers-reduced-motion: reduce) { .ga summary::after { transition: none; } }
 .ga-indietro { justify-self: start; display: inline-flex; align-items: center; gap: 4px; min-height: 44px; padding: 0 8px 0 0; border: 0; background: none; color: var(--accento); font: 800 15px Nunito, sans-serif; }
 .ga-riga-dentro { flex: 1; min-width: 0; min-height: 44px; padding: 0; }
 .ga-riga:has(> .ga-riga-dentro) { padding-top: 4px; padding-bottom: 4px; }
@@ -819,6 +824,7 @@ dialog.ga-velo::backdrop { background: transparent; }
 .ga-giorno { margin: 0; border: 0; }
 .ga-giorno legend { float: left; width: 100%; padding: 0; font-size: 16px; }
 .ga-pillola { pointer-events: none; }
+.ga-pillola button { pointer-events: auto; margin: -8px -8px -8px auto; min-height: 44px; padding: 0 14px; border: 0; border-radius: 999px; background: transparent; color: var(--rosa-bordo); font: 800 15px Nunito, sans-serif; }
 .ga-ultimo { display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 4px 0 14px; border-radius: 14px; background: var(--testo); color: var(--bianco); font-weight: 700; }
 .ga-ultimo button { margin-left: auto; min-height: 44px; padding: 0 14px; border: 0; border-radius: 999px; background: transparent; color: var(--rosa-bordo); font: 800 14px Nunito, sans-serif; }
 /* controlli nativi nascosti sotto la veste della casa: tutto il campo è il bersaglio */

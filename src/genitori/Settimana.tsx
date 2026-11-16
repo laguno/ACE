@@ -57,17 +57,17 @@ export default function Settimana({ client, passi, avvisa }: Props) {
   async function togli(c: Compito) {
     setChiede(undefined);
     const { data: stornato, error } = await client.rpc('storna_spunta', { p_motivo: 'compito', p_riferimento: c.id });
-    if (error) return avvisa('Correzione non riuscita.');
+    if (error) return avvisa(`${c.materie?.nome ?? 'Compito'}: spunta non tolta.`, () => togli(c));
     const { data: u } = await client.auth.getUser();
     const { error: e2 } = await client.from('compiti').update({ fatto_il: null, corretto_da: u.user?.id, corretto_il: new Date().toISOString() }).eq('id', c.id);
     // lo storno è già fatto e si può ripetere: basta ritoccare Togli
-    if (e2) return fatto('Passi annullati, ma la spunta è rimasta. Riprova Togli.');
+    if (e2) return avvisa('Passi annullati, ma la spunta è rimasta.', () => togli(c));
     fatto(stornato ? 'Spunta tolta e passi annullati.' : 'Spunta tolta (i passi erano già chiusi con le chiavi della settimana).');
   }
   async function firma(f: Foglio_) {
     setChiede(undefined);
     const { error } = await client.from('fogli_firma').update({ consegnato_il: new Date().toISOString() }).eq('id', f.id);
-    if (error) return avvisa('Non salvato. Riprova.');
+    if (error) return avvisa(`${f.titolo}: firma non salvata.`, () => firma(f));
     const p = await passi('foglio', f.id);
     fatto(p ? `${f.titolo}: firmato, +${p} a Lani.` : `${f.titolo}: firmato.`);
   }
