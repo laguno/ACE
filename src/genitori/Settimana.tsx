@@ -59,7 +59,9 @@ export default function Settimana({ client, passi, avvisa }: Props) {
     const { data: stornato, error } = await client.rpc('storna_spunta', { p_motivo: 'compito', p_riferimento: c.id });
     if (error) return avvisa('Correzione non riuscita.');
     const { data: u } = await client.auth.getUser();
-    await client.from('compiti').update({ fatto_il: null, corretto_da: u.user?.id, corretto_il: new Date().toISOString() }).eq('id', c.id);
+    const { error: e2 } = await client.from('compiti').update({ fatto_il: null, corretto_da: u.user?.id, corretto_il: new Date().toISOString() }).eq('id', c.id);
+    // lo storno è già fatto e si può ripetere: basta ritoccare Togli
+    if (e2) return fatto('Passi annullati, ma la spunta è rimasta. Riprova Togli.');
     fatto(stornato ? 'Spunta tolta e passi annullati.' : 'Spunta tolta (i passi erano già chiusi con le chiavi della settimana).');
   }
   async function firma(f: Foglio_) {

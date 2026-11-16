@@ -11,7 +11,7 @@ import type { Props } from './comune';
 // pagine per controllare (Stato di ACE, Vetrina, Regole) e, sul telefono di un genitore, l'uscita.
 
 type Pagina = 'sera' | 'obiettivo' | 'dieci' | 'frasi' | 'pin' | 'stato' | 'vetrina' | 'regole';
-type Valori = { chiusura: Record<string, string>; materiale: Record<string, string[]>; obiettivo: number; rEvolutionDa: string | null | 'errore'; esercizi: number; frasi: number };
+type Valori = { caricate: boolean; chiusura: Record<string, string>; materiale: Record<string, string[]>; obiettivo: number; rEvolutionDa: string | null | 'errore'; esercizi: number; frasi: number };
 const SETTIMANA = [1, 2, 3, 4, 5, 6, 0];
 const TITOLI: Record<Pagina, string> = { sera: 'Sera e cartella', obiettivo: 'Obiettivo media', dieci: 'Dieci minuti', frasi: 'Frasi di famiglia', pin: 'PIN dell’area', stato: 'Stato di ACE', vetrina: 'Vetrina', regole: 'Regole del gioco' };
 
@@ -29,6 +29,8 @@ export default function Impostazioni({ client, avvisa, esci }: Props & { esci?: 
     ]);
     const m = Object.fromEntries((im.data ?? []).map((r) => [r.chiave, r.valore]));
     setV({
+      // in errore niente modulo della sera: il Salva riscriverebbe tutti i giorni con i campi vuoti
+      caricate: !im.error,
       chiusura: m.ora_chiusura ?? {},
       materiale: m.materiale_cartella ?? {},
       obiettivo: Number(m.obiettivo_media ?? 7.35),
@@ -143,6 +145,7 @@ function Sera({ client, v, fatto }: Sotto) {
     ]);
     fatto(error ? 'Non salvato. Riprova.' : 'Sera e cartella salvate.');
   }
+  if (!v.caricate) return <p className="ga-nota">Orari e materiale non caricati. Tornate a Impostazioni e riprovate.</p>;
   return (
     <form className="ga-sezione" onSubmit={salva}>
       <p className="ga-nota">Ora della chiusura (vuota: niente chiusura). Con allenamento o partita dopo le 17 l’app chiude mezz’ora prima.</p>
