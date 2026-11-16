@@ -32,7 +32,7 @@ const dati = () => ({
   movimenti_passi: [],
   gesti_casa: [],
   sgridate: [],
-  assenze: [],
+  assenze: [{ giorno: '2026-11-20' }],
   impegni_famiglia: [],
   frasi: [{ id: 'x1', testo: 'Ogni giorno un pezzetto.', autore: 'papà', di_famiglia: true }],
   dieci_minuti: [],
@@ -48,7 +48,10 @@ const dati = () => ({
     { id: 'c1', materia_id: 'geografia', testo: 'Cartina d’Europa', scadenza: '2026-11-24', fatto_il: '2026-11-23T15:00:00Z' },
     { id: 'c2', materia_id: 'spagnolo', testo: 'Verbi pag 12', scadenza: '2026-11-24', fatto_il: null },
   ],
-  verifiche: [{ id: 'v1', materia_id: 'spagnolo', tipo: 'verifica', data: '2026-11-26', recupero_vago: false, data_spostata: null }],
+  verifiche: [
+    { id: 'v1', materia_id: 'spagnolo', tipo: 'verifica', data: '2026-11-26', recupero_vago: false, data_spostata: null },
+    { id: 'v2', materia_id: 'geografia', tipo: 'verifica', data: '2026-11-20', recupero_vago: false, data_spostata: null },
+  ],
   richieste_foto: [{ id: 'r1', motivo: 'compito', materia_id: 'italiano', pagine: '34–38', stato: 'aperta', creato_il: '2026-11-23T13:00:00Z' }],
   fogli_firma: [{ id: 'f1', titolo: 'Gita del benessere', scadenza: '2026-12-03', dato_il: '2026-11-23T14:00:00Z', consegnato_il: null }],
   sync_log: [{ fonte: 'nuvola', esito: 'ok', iniziato_il: '2026-11-23T13:30:00Z', finito_il: '2026-11-23T13:31:00Z' }],
@@ -59,7 +62,21 @@ const dati = () => ({
 type Passo = [nome: string, vai: (p: Page) => Promise<unknown>];
 const scheda = (n: string) => (p: Page) => p.getByRole('navigation', { name: 'Sezioni genitori' }).getByRole('button', { name: n }).click();
 const altro = (n: RegExp) => async (p: Page) => (await scheda('Altro')(p), p.getByRole('button', { name: n }).click());
-const PASSI: Passo[] = [
+const dentro = (s: string, n: RegExp) => async (p: Page) => (await scheda(s)(p), p.getByRole('button', { name: n }).first().click());
+// dal restyling del 16/11: quattro schede, fogli dal basso, pagine dentro Impostazioni e Forzieri
+const DOPO: Passo[] = [
+  ['01-oggi', async () => {}],
+  ['02-dai-passi', (p) => p.getByRole('button', { name: /^Dai passi/ }).click()],
+  ['03-segna-balla', async (p) => (await p.getByRole('button', { name: /^Segna/ }).click(), p.getByRole('button', { name: /^Balla/ }).click())],
+  ['04-partita', (p) => p.getByRole('button', { name: /^Partita: Foxes/ }).click()],
+  ['05-settimana', scheda('Settimana')],
+  ['06-forzieri', scheda('Forzieri')],
+  ['07-forziere', dentro('Forzieri', /^2 · Cinema/)],
+  ['08-impostazioni', scheda('Impostazioni')],
+  ['09-sera', dentro('Impostazioni', /^Sera e cartella/)],
+  ['10-stato', dentro('Impostazioni', /^Stato di ACE/)],
+];
+const PRIMA: Passo[] = [
   ['01-settimana', async () => {}],
   ['02-sgridata-foglio', (p) => p.getByRole('button', { name: /^Balla/ }).click()],
   ['03-premi', scheda('Premi')],
@@ -73,7 +90,7 @@ const PASSI: Passo[] = [
 ];
 
 async function foto(browser: Browser, larghezza: number, tema: 'light' | 'dark') {
-  for (const [nome, vai] of PASSI) {
+  for (const [nome, vai] of FASE === 'prima' ? PRIMA : DOPO) {
     const ctx = await browser.newContext({ viewport: { width: larghezza, height: 844 }, deviceScaleFactor: 1, locale: 'it-IT', timezoneId: 'Europe/Rome', reducedMotion: 'reduce', colorScheme: tema });
     const p = await ctx.newPage();
     await p.clock.setFixedTime(ORA);
@@ -88,7 +105,8 @@ async function foto(browser: Browser, larghezza: number, tema: 'light' | 'dark')
 }
 
 for (const larghezza of [390, 360])
-  for (const tema of ['light', 'dark'] as const)
+  // il tema scuro è identico (color-scheme: light only, docs/genitori-ux.md): si fotografa una volta
+  for (const tema of ['light'] as const)
     test(`foto genitori ${larghezza} ${tema}`, async ({ browser }) => {
       test.setTimeout(120_000);
       await foto(browser, larghezza, tema);

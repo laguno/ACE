@@ -510,7 +510,6 @@ dialog.velo:focus { outline: none; }
 .stretto { width: auto; margin-top: 0; padding: 0 16px; min-height: 44px; flex: none; }
 .giorno { border: 0; padding: 0; margin: 0; display: grid; gap: 8px; }
 .giorno legend { font-weight: 800; text-transform: capitalize; margin-bottom: 4px; }
-.genitori .numeri dt:last-child { font-size: 12px; }
 /* Vetrina: popup e notifiche con dati di esempio */
 .vetrina { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; }
 .vetrina li { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-top: 2px dashed var(--lilla); }
@@ -571,23 +570,9 @@ body:has(.avvio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom))
 /* Sera: "L'ho dato" su una riga */
 .foglio .secondario.compatto { flex: none; white-space: nowrap; margin-top: 0; align-self: center; }
 
-/* Genitori (bozza Genitori): testata, gesti rosa pieni, sgridate contornate, foglio dell'app */
-.testa-genitori { display: flex; align-items: center; gap: 12px; padding-left: 4px; }
-.testa-genitori > div { display: flex; flex-direction: column; }
-.testa-genitori .sopratitolo { min-height: 0; display: block; font: 800 14px Nunito, sans-serif; }
-.genitori .testa-genitori h1 { margin: 0; font-size: 26px; line-height: 1.1; }
-.gesto { min-height: 48px; padding: 8px 12px; border: 0; border-radius: 16px; background: var(--rosa); color: var(--testo); font: 800 14px/1.25 Nunito, sans-serif; text-align: left; box-shadow: inset 0 -4px 0 var(--rosa-bordo); }
-.gesto span { color: var(--accento); white-space: nowrap; }
-.gesto:disabled { background: var(--lilla); box-shadow: none; color: var(--testo-2); }
-.gesto:disabled span { color: var(--testo-2); }
+/* Ripresi dall'area genitori di prima, usati anche altrove */
 .griglia.tre { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.sgridata { min-height: 48px; padding: 4px 8px; border: 2px solid var(--lilla-medio); border-radius: 16px; background: var(--bianco); color: var(--testo); font: 800 14px/1.2 Nunito, sans-serif; }
 .elenco { display: flex; flex-direction: column; padding: 8px 16px; }
-.riga-elenco { display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 8px 0; border: 0; border-top: 2px dashed var(--lilla); background: none; color: var(--testo); text-align: left; font: inherit; }
-.riga-elenco:first-child { border-top: 0; }
-.riga-elenco > span:not(.riquadro) { flex: 1; display: flex; flex-direction: column; }
-.riga-elenco b { font-size: 16px; }
-.riga-elenco small { font-size: 13px; color: var(--testo-2); }
 /* schermata rotta (Errore.tsx) */
 .errore-app { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; min-height: 100dvh; padding: 24px 16px; text-align: center; }
 /* Stato di ACE (area genitori) */
@@ -598,24 +583,6 @@ body:has(.avvio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom))
 .stato-ok { color: var(--verde); font-weight: 700; }
 .stato-ko { color: var(--accento); font-weight: 700; }
 .esci { align-self: center; justify-self: center; padding: 0 16px; color: var(--testo-2); font: 700 14px Nunito, sans-serif; }
-.foglio-app { align-items: end; padding: 24px 16px calc(24px + env(safe-area-inset-bottom)); }
-.foglio-app .carta { width: min(100%, 398px); margin: 0 auto; border-radius: 24px; box-shadow: var(--ombra-alta); }
-.foglio-app h2 { margin: 0; font-size: 20px; }
-.foglio-app p { margin: 0; color: var(--testo-2); }
-.genitori .schede { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; overflow: visible; padding-bottom: 0; }
-.genitori .schede button { padding: 0 2px; font: 800 12px Nunito, sans-serif; }
-/* sotto i 380 px le cinque schede non stanno in griglia: scorrono, ognuna con il suo respiro */
-@media (max-width: 379px) {
-  .genitori .schede { display: flex; overflow-x: auto; }
-  .genitori .schede button { padding: 0 12px; }
-}
-.genitori .numeri div { display: flex; flex-direction: column; gap: 0; padding: 8px 12px; border-radius: 24px; box-shadow: var(--ombra); }
-.genitori .numeri dt { font: 800 12px Nunito, sans-serif; color: var(--testo-2); }
-.genitori .numeri dd { font: 800 26px/1.1 'Baloo 2', Nunito, sans-serif; }
-.genitori .numeri dt:last-child { font: 700 12px Nunito, sans-serif; }
-.genitori .gesto { font-size: 13px; }
-.genitori .sgridata { font-size: 12px; }
-.genitori .carta .nota.piccola { margin: 8px 0 0; }
 
 /* Oggi: pillola di ieri col numero grande (bozza Oggi) */
 .pillola-oro .numero { margin-left: auto; padding-left: 8px; font: 800 24px/1 'Baloo 2', Nunito, sans-serif; color: var(--accento); white-space: nowrap; }
@@ -677,7 +644,6 @@ body:has(.avvio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom))
 /* partite (sprint 2): spunta "in campo" su una riga, bersaglio di 44 px */
 .modulo label.riga-spunta { display: flex; align-items: center; gap: 12px; min-height: 44px; color: var(--testo); font-weight: 700; }
 .modulo label.riga-spunta input { width: 24px; height: 24px; min-height: 0; padding: 0; accent-color: var(--accento); }
-.partita-da-approvare { padding-top: 12px; border-top: 2px dashed var(--lilla); }
 
 /* classifiche FIPAV (sprint 2): la riga di Lani in fucsia */
 .classifica { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
@@ -716,3 +682,150 @@ body:has(.avvio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom))
 .blocco-passi summary { min-height: 44px; display: flex; align-items: center; font-weight: 800; cursor: pointer; }
 .blocco-passi details p { margin: 4px 0; color: var(--testo-2); }
 .come-passi-apri { min-height: 44px; }
+
+/* ================================================================================================
+ * Area genitori v2 (restyling del 16/11, design/Genitori-v2.html). Stessa palette, più calma: fondo
+ * panna, righe bianche, fucsia pieno solo per l'azione principale. Tutto con il prefisso ga-.
+ * ============================================================================================== */
+.ga { --linea: #efe4f5; --ombra-ga: 0 6px 16px rgba(123, 106, 224, 0.1); display: grid; gap: 20px; padding-bottom: calc(96px + env(safe-area-inset-bottom)); font-size: 15px; }
+.ga h1, .ga h2, .ga h3 { margin: 0; text-wrap: balance; }
+.ga-testa { display: flex; align-items: center; gap: 12px; min-height: 56px; }
+.ga-testa p { margin: 0; font-size: 13px; color: var(--testo-2); }
+.ga-testa h1 { font-size: 24px; line-height: 1.1; }
+.ga-testa .ga-btn { margin-left: auto; }
+.ga-sezione { display: grid; gap: 8px; }
+.ga-sezione > h2 { display: flex; align-items: baseline; gap: 8px; font-size: 18px; }
+.ga-conta { padding: 1px 8px; border-radius: 999px; background: var(--accento); color: var(--bianco); font: 800 13px Nunito, sans-serif; }
+.ga-nota { margin: 0; font-size: 14px; color: var(--testo-2); }
+.ga-pillola { position: fixed; z-index: 9; left: 50%; bottom: calc(84px + env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(100% - 32px, 398px); display: flex; align-items: center; gap: 12px; margin: 0; padding: 12px 16px; min-height: 48px; border-radius: 16px; background: var(--testo); color: var(--bianco); font-weight: 700; box-shadow: var(--ombra-alta); }
+
+/* bottoni: pieno (uno per schermata), bordato, tenue */
+.ga-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 0 16px; border-radius: 999px; border: 2px solid var(--accento); background: var(--bianco); color: var(--accento); font: 800 14px Nunito, sans-serif; white-space: nowrap; flex: none; }
+.ga-btn.pieno { border-color: var(--accento); background: var(--accento); color: var(--bianco); box-shadow: inset 0 -3px 0 var(--accento-premuto); }
+.ga-btn.pieno:active { background: var(--accento-premuto); }
+.ga-btn.tenue { border-color: var(--lilla-medio); color: var(--testo); }
+.ga-btn.largo { width: 100%; min-height: 52px; font-size: 16px; }
+.ga-btn:disabled { opacity: 0.55; }
+.ga-btn:focus-visible, .ga-riga:focus-visible, .ga-schede button:focus-visible, .ga-giorni button:focus-visible, .ga-opzione:focus-visible, .ga-rapida:focus-visible { outline: 3px solid var(--accento); outline-offset: 2px; }
+
+/* elenco a righe */
+.ga-elenco { margin: 0; padding: 0; list-style: none; background: var(--bianco); border-radius: 20px; box-shadow: var(--ombra-ga); overflow: hidden; }
+.ga-elenco > li + li { border-top: 1px solid var(--linea); }
+.ga-riga { width: 100%; display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 10px 12px 10px 14px; border: 0; background: none; color: var(--testo); font: inherit; text-align: left; }
+.ga-riga-testo { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.ga-riga-testo b { font-weight: 800; }
+.ga-riga-testo small { font-size: 13px; color: var(--testo-2); }
+.ga-icona { flex: none; width: 36px; height: 36px; border-radius: 12px; display: grid; place-items: center; background: var(--lilla); color: var(--testo); }
+.ga-icona.rosa { background: var(--rosa); }
+.ga-icona.burro { background: var(--burro-chiaro); }
+.ga-freccia { flex: none; color: var(--testo-2); }
+.ga-spunta { flex: none; width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; border: 2px solid var(--lilla-bordo); }
+.ga-spunta.si { background: var(--verde); border-color: var(--verde); color: var(--bianco); }
+
+/* due azioni rapide grandi */
+.ga-rapide { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.ga-rapida { display: grid; gap: 4px; justify-items: start; align-content: start; min-height: 104px; padding: 16px; border: 0; border-radius: 20px; background: var(--bianco); box-shadow: var(--ombra-ga); color: var(--testo); font: inherit; text-align: left; }
+.ga-rapida .ga-icona { width: 40px; height: 40px; border-radius: 14px; background: var(--rosa); }
+.ga-rapida b { font: 800 19px 'Baloo 2', Nunito, sans-serif; }
+.ga-rapida small { font-size: 13px; color: var(--testo-2); }
+
+/* situazione in tre righe */
+.ga-situazione { margin: 0; padding: 4px 14px; background: var(--bianco); border-radius: 20px; box-shadow: var(--ombra-ga); }
+.ga-situazione div { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; }
+.ga-situazione div + div { border-top: 1px solid var(--linea); }
+.ga-situazione dt { color: var(--testo-2); }
+.ga-situazione dd { margin: 0; font-weight: 800; text-align: right; }
+.ga-domanda { justify-self: start; min-height: 44px; padding: 0 4px; border: 0; background: none; color: var(--testo-2); font: 700 14px Nunito, sans-serif; text-decoration: underline; }
+
+/* barra delle schede in basso */
+.ga-schede { position: fixed; z-index: 8; left: 50%; bottom: 0; transform: translateX(-50%); width: min(100%, 430px); display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 6px 6px calc(10px + env(safe-area-inset-bottom)); background: var(--bianco); border-top: 1px solid var(--linea); }
+.ga-schede button { position: relative; display: grid; justify-items: center; align-content: center; gap: 2px; min-height: 56px; border: 0; border-radius: 16px; background: none; color: var(--testo-2); font: 800 12.5px Nunito, sans-serif; }
+.ga-schede button[aria-current] { background: var(--rosa); color: var(--accento-premuto); }
+.ga-bollino { position: absolute; top: 4px; left: calc(50% + 6px); min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--accento); color: var(--bianco); font-size: 11px; line-height: 18px; text-align: center; }
+body:has(.ga) .barra { display: none; }
+
+/* settimana */
+.ga-riassunto { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.ga-riassunto li { display: inline-flex; align-items: baseline; gap: 6px; min-height: 32px; padding: 4px 12px; border-radius: 999px; background: var(--bianco); box-shadow: var(--ombra-ga); font-weight: 800; font-size: 14px; }
+.ga-riassunto span { font-weight: 700; font-size: 13px; color: var(--testo-2); }
+.ga-giorni { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.ga-giorni button { display: grid; place-items: center; align-content: center; min-height: 52px; padding: 0; border: 2px solid transparent; border-radius: 14px; background: var(--bianco); color: var(--testo); font: 800 13px/1.1 Nunito, sans-serif; }
+.ga-giorni button small { font-size: 12px; font-weight: 700; color: var(--testo-2); }
+.ga-giorni button[aria-pressed='true'] { border-color: var(--accento); }
+.ga-giorni .punto { width: 6px; height: 6px; margin-top: 2px; border-radius: 3px; background: var(--accento); }
+
+/* fogli dal basso */
+dialog.ga-velo { position: fixed; inset: 0; z-index: 10; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; display: grid; align-items: end; justify-items: center; background: rgba(47, 42, 110, 0.35); color: inherit; }
+dialog.ga-velo:not([open]) { display: none; }
+dialog.ga-velo::backdrop { background: transparent; }
+.ga-foglio { width: min(100%, 430px); max-height: 92dvh; overflow-y: auto; display: grid; gap: 14px; padding: 10px 16px calc(20px + env(safe-area-inset-bottom)); border-radius: 28px 28px 0 0; background: var(--bianco); }
+.ga-foglio::before { content: ''; justify-self: center; width: 40px; height: 5px; border-radius: 3px; background: var(--lilla-medio); }
+.ga-foglio h2 { font-size: 22px; }
+.ga-foglio p { margin: 0; }
+.ga-opzioni { display: grid; gap: 8px; }
+.ga-opzione { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; padding: 0 16px; border: 2px solid var(--lilla-bordo); border-radius: 16px; background: var(--bianco); color: var(--testo); font: 800 16px Nunito, sans-serif; text-align: left; }
+.ga-opzione .valore { color: var(--accento); }
+.ga-opzione[aria-pressed='true'] { border-color: var(--accento); background: var(--rosa); }
+.ga-opzione:disabled { opacity: 0.55; }
+.ga-avviso { margin: 0; padding: 10px 14px; border-radius: 14px; background: var(--burro-chiaro); font-size: 14px; }
+
+/* campi */
+.ga-campo { display: grid; gap: 6px; min-width: 0; }
+.ga-etichetta { font-size: 14px; font-weight: 800; color: var(--testo); }
+.ga-aiuto { font-size: 13px; color: var(--testo-2); }
+.ga-errore { font-size: 13px; font-weight: 800; color: var(--accento-premuto); }
+.ga-ingresso { width: 100%; min-height: 48px; padding: 0 14px; border: 2px solid var(--lilla-bordo); border-radius: 14px; background: var(--bianco); color: var(--testo); font: 700 16px Nunito, sans-serif; appearance: none; }
+.ga-ingresso::placeholder { color: #6f5a80; opacity: 1; }
+.ga-ingresso:focus-visible, .ga-data:focus-within, .ga-passo:focus-within, .ga-segmenti:focus-within { outline: 3px solid var(--accento); outline-offset: 1px; }
+.ga-ingresso[aria-invalid='true'] { border-color: var(--accento); }
+.ga-area { min-height: 88px; padding: 12px 14px; resize: vertical; line-height: 1.4; }
+.ga-data { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.ga-data.vuoto { color: #6f5a80; }
+.ga-data input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; border: 0; padding: 0; font-size: 16px; }
+.ga-data input::-webkit-calendar-picker-indicator { position: absolute; inset: 0; width: auto; height: auto; opacity: 0; cursor: pointer; }
+.ga-scelta { position: relative; display: block; }
+.ga-scelta select { padding-right: 40px; }
+.ga-scelta svg { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+.ga-passo { display: flex; align-items: center; justify-content: space-between; min-height: 48px; padding: 0 2px; border: 2px solid var(--lilla-bordo); border-radius: 14px; background: var(--bianco); }
+.ga-passo button { width: 44px; height: 44px; border: 0; border-radius: 12px; background: var(--lilla); color: var(--testo); font: 800 20px Nunito, sans-serif; }
+.ga-passo button:disabled { opacity: 0.45; }
+.ga-passo-n { font: 800 18px Nunito, sans-serif; }
+.ga-segmenti { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; margin: 0; padding: 4px; border: 0; border-radius: 16px; background: var(--lilla); }
+.ga-segmenti label { position: relative; }
+.ga-segmenti input { position: absolute; opacity: 0; inset: 0; margin: 0; }
+.ga-segmenti span { display: grid; place-items: center; min-height: 44px; border-radius: 12px; font: 800 14px Nunito, sans-serif; color: var(--testo); }
+.ga-segmenti input:checked + span { background: var(--bianco); color: var(--accento-premuto); box-shadow: var(--ombra-ga); }
+.ga-interruttore:disabled { opacity: 0.6; }
+.ga-levetta { flex: none; position: relative; width: 52px; height: 32px; border-radius: 16px; background: var(--lilla-bordo); transition: background 0.15s; }
+.ga-levetta::after { content: ''; position: absolute; top: 3px; left: 3px; width: 26px; height: 26px; border-radius: 13px; background: var(--bianco); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); transition: left 0.15s; }
+.ga-levetta.su { background: var(--accento); }
+.ga-levetta.su::after { left: 23px; }
+@media (prefers-reduced-motion: reduce) { .ga-levetta, .ga-levetta::after { transition: none; } }
+.ga-modulo { display: grid; gap: 14px; padding: 16px; border-radius: 20px; background: var(--bianco); box-shadow: var(--ombra-ga); }
+.ga-due { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ga-vuoto { display: grid; justify-items: center; gap: 4px; padding: 20px 16px; border-radius: 20px; background: var(--bianco); box-shadow: var(--ombra-ga); text-align: center; color: var(--testo-2); }
+.ga-vuoto b { font: 800 17px 'Baloo 2', Nunito, sans-serif; color: var(--testo); }
+.ga details { border-radius: 16px; background: var(--lilla); padding: 0 14px; }
+.ga summary { display: flex; align-items: center; min-height: 48px; font-weight: 800; cursor: pointer; }
+.ga details[open] { padding-bottom: 12px; }
+.ga-indietro { justify-self: start; display: inline-flex; align-items: center; gap: 4px; min-height: 44px; padding: 0 8px 0 0; border: 0; background: none; color: var(--accento); font: 800 15px Nunito, sans-serif; }
+.ga-riga-dentro { flex: 1; min-width: 0; min-height: 44px; padding: 0; }
+.ga-riga:has(> .ga-riga-dentro) { padding-top: 4px; padding-bottom: 4px; }
+.ga-frasi { margin: 0; padding: 0; border: 0; gap: 8px; }
+.ga-radio { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 14px; border: 2px solid var(--lilla-bordo); border-radius: 14px; font-weight: 700; }
+.ga-radio:has(input:checked) { border-color: var(--accento); background: var(--rosa); }
+.ga-radio input { width: 22px; height: 22px; margin: 0; accent-color: var(--accento); }
+.ga-radio:focus-within { outline: 3px solid var(--accento); outline-offset: 1px; }
+.ga-giorno { margin: 0; border: 0; }
+.ga-giorno legend { float: left; width: 100%; padding: 0; font-size: 16px; }
+.ga-pillola { pointer-events: none; }
+.ga-ultimo { display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 4px 0 14px; border-radius: 14px; background: var(--testo); color: var(--bianco); font-weight: 700; }
+.ga-ultimo button { margin-left: auto; min-height: 44px; padding: 0 14px; border: 0; border-radius: 999px; background: transparent; color: var(--rosa-bordo); font: 800 14px Nunito, sans-serif; }
+/* controlli nativi nascosti sotto la veste della casa: tutto il campo è il bersaglio */
+.ga-data input, .ga-segmenti input, .ga-radio input { appearance: none; border-radius: inherit; }
+.ga-radio { position: relative; }
+.ga-radio input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.ga-radio span { display: flex; align-items: center; gap: 12px; }
+.ga-radio span::before { content: ''; flex: none; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--lilla-bordo); background: var(--bianco); box-sizing: border-box; }
+.ga-radio input:checked + span::before { border: 7px solid var(--accento); }
+.ga-giorni { gap: 2px; }

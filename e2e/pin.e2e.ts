@@ -31,8 +31,36 @@ for (const [nome, risposta, testo] of CASI)
     await expect(page.getByLabel('PIN')).toHaveValue('');
   });
 
-test('PIN giusto: si apre l’area genitori', async ({ page }) => {
+test('PIN giusto: si apre l’area genitori, con "Chiudi l’area"', async ({ page }) => {
   await apri(page, { status: 200, body: 'ok' });
-  await expect(page.getByRole('button', { name: 'Torna ad ACE' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Chiudi l’area' })).toBeVisible();
   await expect(page.getByLabel('PIN')).toHaveCount(0);
+});
+
+// dal 16/11: aperta 10 minuti dall'ultima azione, anche uscendo dall'app; poi di nuovo il PIN
+test('PIN: l’area resta aperta 10 minuti dall’ultima azione, poi si richiude', async ({ page }) => {
+  await apri(page, { status: 200, body: 'ok' });
+  await expect(page.getByRole('heading', { name: 'Oggi', level: 1 })).toBeVisible();
+  // l'app esce e torna dopo 9 minuti (anche ricaricata): ancora aperta
+  await page.clock.setFixedTime(new Date('2026-11-30T07:19:00+01:00'));
+  await page.reload();
+  await page.getByRole('button', { name: 'Genitori' }).click();
+  await expect(page.getByRole('heading', { name: 'Oggi', level: 1 })).toBeVisible();
+  await page.getByRole('navigation', { name: 'Sezioni genitori' }).getByRole('button', { name: 'Settimana' }).click();
+  // 9 minuti dopo l'ultimo tocco: ancora aperta
+  await page.clock.setFixedTime(new Date('2026-11-30T07:28:00+01:00'));
+  await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
+  await expect(page.getByRole('heading', { name: 'Settimana', level: 1 })).toBeVisible();
+  // più di 10 minuti senza toccare: torna il PIN
+  await page.clock.setFixedTime(new Date('2026-11-30T07:39:30+01:00'));
+  await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
+  await expect(page.getByLabel('PIN')).toBeVisible();
+});
+
+test('PIN: "Chiudi l’area" blocca subito', async ({ page }) => {
+  await apri(page, { status: 200, body: 'ok' });
+  await page.getByRole('button', { name: 'Chiudi l’area' }).click();
+  await expect(page.getByRole('navigation', { name: 'Sezioni genitori' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Genitori' }).click();
+  await expect(page.getByLabel('PIN')).toBeVisible();
 });

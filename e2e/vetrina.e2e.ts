@@ -12,7 +12,7 @@ async function apriVetrina(page: Page) {
   await page.clock.setFixedTime(new Date('2026-11-10T18:00:00+01:00'));
   await finto(page, { profili: PAPA, voti: [], impostazioni: [], note: [], serate: [], movimenti_passi: [] });
   await page.goto('/');
-  await page.getByRole('button', { name: 'Altro' }).click();
+  await page.getByRole('navigation', { name: 'Sezioni genitori' }).getByRole('button', { name: 'Impostazioni' }).click();
   await page.getByRole('button', { name: /^Vetrina/ }).click();
   return scritture;
 }

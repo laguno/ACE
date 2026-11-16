@@ -42,7 +42,7 @@ test('genitori: Altro, Regole del gioco, completa con i dettagli aperti', async 
   await page.clock.setFixedTime(LUNEDI);
   await finto(page, { ...dati(false), profili: [{ id: 'lani', ruolo: 'genitore', nome: 'Papà' }], voti: [], note: [], gesti_casa: [], sgridate: [], richieste_foto: [] });
   await page.goto('/');
-  await page.getByRole('button', { name: 'Altro' }).click();
+  await page.getByRole('navigation', { name: 'Sezioni genitori' }).getByRole('button', { name: 'Impostazioni' }).click();
   await page.getByRole('button', { name: /^Regole del gioco/ }).click();
   await expect(page.getByRole('heading', { name: 'R-Evolution' })).toBeVisible();
   await expect(page.getByText(`Al massimo +${config.passi.gesti_casa.tetto_giornaliero} al giorno.`)).toBeVisible();

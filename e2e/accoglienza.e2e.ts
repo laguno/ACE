@@ -38,5 +38,5 @@ test('genitori: le quattro cose con lo stato vero', async ({ page }) => {
   await page.screenshot({ path: 'e2e/risultati/avvio-genitori.png' });
   await expect(page.getByText('(ne mancano 8)', { exact: false })).toBeVisible();
   await page.getByRole('button', { name: 'Scegli i premi' }).click();
-  await expect(page.getByText('8 forzieri ancora senza premio.', { exact: false })).toBeVisible();
+  await expect(page.getByText('8 forzieri senza premio.', { exact: false })).toBeVisible();
 });

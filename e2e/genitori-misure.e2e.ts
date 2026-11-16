@@ -63,6 +63,20 @@ const dati = () => ({
 type Passo = [nome: string, vai: (p: Page) => Promise<unknown>];
 const scheda = (n: string) => (p: Page) => p.getByRole('navigation', { name: 'Sezioni genitori' }).getByRole('button', { name: n }).click();
 const altro = (n: RegExp) => async (p: Page) => (await scheda('Altro')(p), p.getByRole('button', { name: n }).click());
+const dentro = (s: string, n: RegExp) => async (p: Page) => (await scheda(s)(p), p.getByRole('button', { name: n }).first().click());
+// dal restyling del 16/11: quattro schede, fogli dal basso, pagine dentro Impostazioni e Forzieri
+const DOPO: Passo[] = [
+  ['01-oggi', async () => {}],
+  ['02-dai-passi', (p) => p.getByRole('button', { name: /^Dai passi/ }).click()],
+  ['03-segna-balla', async (p) => (await p.getByRole('button', { name: /^Segna/ }).click(), p.getByRole('button', { name: /^Balla/ }).click())],
+  ['04-partita', (p) => p.getByRole('button', { name: /^Partita: Foxes/ }).click()],
+  ['05-settimana', scheda('Settimana')],
+  ['06-forzieri', scheda('Forzieri')],
+  ['07-forziere', dentro('Forzieri', /^2 · Cinema/)],
+  ['08-impostazioni', scheda('Impostazioni')],
+  ['09-sera', dentro('Impostazioni', /^Sera e cartella/)],
+  ['10-stato', dentro('Impostazioni', /^Stato di ACE/)],
+];
 const PASSI: Passo[] = [
   ['01-settimana', async () => {}],
   ['02-sgridata-foglio', (p) => p.getByRole('button', { name: /^Balla/ }).click()],
@@ -133,7 +147,7 @@ for (const larghezza of [390, 360])
   test(`misure genitori ${larghezza}`, async ({ browser }) => {
     test.setTimeout(180_000);
     const schermate: Record<string, unknown> = {};
-    for (const [nome, vai] of PASSI) {
+    for (const [nome, vai] of FASE === 'prima' ? PASSI : DOPO) {
       const ctx = await browser.newContext({ viewport: { width: larghezza, height: 844 }, locale: 'it-IT', timezoneId: 'Europe/Rome', reducedMotion: 'reduce', colorScheme: 'light' });
       const p = await ctx.newPage();
       await p.clock.setFixedTime(ORA);

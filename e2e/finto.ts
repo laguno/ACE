@@ -25,7 +25,7 @@ function filtra(righe: Record<string, unknown>[], q: URLSearchParams) {
 
 // Unisce le tabelle collegate chieste nel select: materie(nome) è il genitore (materia_id), le
 // altre sono figlie collegate con <singolare>_id (verifiche -> verifica_id).
-const SINGOLARE: Record<string, string> = { verifiche: 'verifica', quiz: 'quiz' };
+const SINGOLARE: Record<string, string> = { verifiche: 'verifica', quiz: 'quiz', compiti: 'compito' };
 function unisci(t: Tabelle, nome: string, riga: Record<string, unknown>, select: string | null) {
   const fuori = { ...riga };
   for (const [, x] of (select ?? '').matchAll(/(\w+)\(/g)) {

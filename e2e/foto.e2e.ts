@@ -74,8 +74,9 @@ test('Lani esce a metà: le foto restano e al ritorno si continua', async ({ pag
   expect(chiamate).toEqual([]);
 });
 
-test('genitori: Da fotografare nella settimana', async ({ page }) => {
-  await page.clock.setFixedTime(new Date('2026-12-01T18:00:00+01:00'));
+// dal 16/11 la foto la fa Lani; i genitori la possono fare dalle 20 (o dalla scadenza), senza passi
+test('genitori: foto mancante in Da fare per voi, dopo le 20', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-12-01T20:30:00+01:00'));
   const { t, chiamate } = await finto(page, {
     ...base(),
     profili: [{ id: 'lani', ruolo: 'genitore', nome: 'Papà' }],
@@ -85,8 +86,8 @@ test('genitori: Da fotografare nella settimana', async ({ page }) => {
     sgridate: [],
   });
   await page.goto('/');
-  const carta = page.locator('.carta', { has: page.getByRole('heading', { name: 'Da fotografare' }) });
-  await expect(carta).toContainText('Per un compito');
+  const carta = page.getByRole('list', { name: 'Da fare per voi' }).getByRole('listitem').filter({ hasText: 'Foto: Italiano' });
+  await expect(carta).toContainText('Lani non prende i passi');
   await carta.getByLabel('Galleria: Italiano: pagine 340–352').setInputFiles([
     { name: 'a.jpg', mimeType: 'image/jpeg', buffer: JPEG },
     { name: 'b.jpg', mimeType: 'image/jpeg', buffer: JPEG },

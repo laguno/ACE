@@ -1,204 +1,368 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { finto } from './finto';
 
+// Area genitori dal restyling del 16/11 (docs/genitori-ux.md): una prova per ognuno dei compiti
+// dello studio, con le quattro schede (Oggi, Settimana, Forzieri, Impostazioni).
+
 const PAPA = [{ id: 'lani', ruolo: 'genitore', nome: 'Papà' }]; // il finto entra sempre con id 'lani'
+const LUNEDI_SERA = new Date('2026-11-23T18:00:00+01:00');
+const ACCESA = { chiave: 'r_evolution_da', valore: '2026-11-01' };
 
 function dati() {
   return {
     profili: PAPA,
+    materie: [
+      { id: 'geografia', nome: 'Geografia' },
+      { id: 'italiano', nome: 'Italiano' },
+    ],
     voti: [{ voto: 7 }, { voto: 6.5 }],
     impostazioni: [
       { chiave: 'obiettivo_media', valore: 7.35 },
       { chiave: 'ora_chiusura', valore: { 1: '20:30' } },
       { chiave: 'materiale_cartella', valore: { 1: ['Cartellina di tecnologia'] } },
-    ],
+    ] as Record<string, unknown>[],
     note: [],
     serate: [],
-    movimenti_passi: [],
-    gesti_casa: [],
-    sgridate: [],
-    forzieri: Array.from({ length: 9 }, (_, i) => ({ n: i + 1, premio: null, enigma: null, soluzione: null, stato: 'chiuso' })),
-    compiti: [{ id: 'c1', testo: 'Pag 12', fatto_il: '2026-11-09T15:00:00Z', materia_id: null }],
-    fogli_firma: [{ id: 'f1', titolo: 'Gita del benessere', scadenza: '2026-12-03', dato_il: '2026-11-09T19:00:00Z', consegnato_il: null }],
+    movimenti_passi: [] as Record<string, unknown>[],
+    gesti_casa: [] as Record<string, unknown>[],
+    sgridate: [] as Record<string, unknown>[],
+    popup_coda: [] as Record<string, unknown>[],
+    assenze: [] as Record<string, unknown>[],
+    lezioni: [],
+    verifiche: [] as Record<string, unknown>[],
+    richieste_foto: [] as Record<string, unknown>[],
+    partite: [] as Record<string, unknown>[],
+    forzieri: Array.from({ length: 9 }, (_, i) => ({ n: i + 1, premio: null as string | null, enigma: null, soluzione: null, stato: 'chiuso' })),
+    compiti: [{ id: 'c1', testo: 'Cartina', materia_id: 'geografia', scadenza: '2026-11-24', scadenza_spostata: null, fatto_il: '2026-11-23T15:00:00Z' }] as Record<string, unknown>[],
+    fogli_firma: [{ id: 'f1', titolo: 'Gita del benessere', scadenza: '2026-12-03', dato_il: '2026-11-23T14:00:00Z', consegnato_il: null }] as Record<string, unknown>[],
   };
 }
+const scheda = (p: Page, nome: string) => p.getByRole('navigation', { name: 'Sezioni genitori' }).getByRole('button', { name: nome }).click();
+const daFare = (p: Page) => p.getByRole('list', { name: 'Da fare per voi' });
 
 test.beforeEach(async ({ page }) => {
-  await page.clock.setFixedTime(new Date('2026-11-10T18:00:00+01:00'));
+  await page.clock.setFixedTime(LUNEDI_SERA);
 });
 
-test('settimana: gesti di casa e sgridate chiamano i passi', async ({ page }) => {
-  const { t, chiamate } = await finto(page, dati());
+test('Oggi: si apre qui, con le cose da fare, le due azioni e Lani in tre righe', async ({ page }) => {
+  await finto(page, dati());
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'La settimana di Lani' })).toBeVisible();
-  await expect(page.locator('.numeri')).toContainText('6,75');
-  await page.getByRole('button', { name: 'Scrivania in ordine +2' }).click();
-  await expect(page.getByRole('status')).toContainText('Scrivania in ordine');
+  await expect(page.getByRole('heading', { name: 'Oggi', level: 1 })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Da fare per voi/ })).toContainText('1');
+  await expect(daFare(page)).toContainText('Gita del benessere');
+  await expect(page.getByRole('button', { name: /^Dai passi/ })).toContainText('oggi 0 su 6');
+  await expect(page.getByText('da chiudere entro le 20:30')).toBeVisible();
+  // il numero delle cose da fare anche sulla scheda
+  await expect(page.getByRole('navigation', { name: 'Sezioni genitori' }).getByRole('button', { name: /Oggi/ })).toContainText('1');
+  // dopo le 14 niente domanda "a casa oggi?"
+  await expect(page.getByRole('button', { name: 'Lani è a casa oggi?' })).toHaveCount(0);
+});
+
+test('dare un gesto: due tocchi, il foglio resta aperto, Annulla storna e spegne il popup', async ({ page }) => {
+  const d = dati();
+  const { t, chiamate } = await finto(page, d, { passi: { passi: 2 } });
+  await page.goto('/');
+  await page.getByRole('button', { name: /^Dai passi/ }).click();
+  const foglio = page.getByRole('dialog', { name: 'Dai passi' });
+  await foglio.getByRole('button', { name: /^Scrivania in ordine/ }).click();
+  await expect(foglio.getByRole('status')).toContainText('Scrivania in ordine: +2 a Lani.');
   expect(t.gesti_casa[0]).toMatchObject({ voce: 'scrivania' });
-  await page.getByRole('button', { name: 'Balla −10' }).click();
-  // foglio dell'app al posto del prompt del browser: Segna resta spento finché il campo è vuoto
-  const foglio = page.getByRole('dialog');
-  await expect(foglio.getByRole('button', { name: 'Segna' })).toBeDisabled();
-  await foglio.getByLabel('Che cosa non era vero').fill('ha detto di aver studiato');
-  await foglio.getByRole('button', { name: 'Segna' }).click();
-  await expect(foglio).toHaveCount(0);
-  await expect.poll(() => t.sgridate[0]).toMatchObject({ tipo: 'balla', nota: 'ha detto di aver studiato' });
-  await expect.poll(() => chiamate.map((c) => c.tipo)).toEqual(['gesto', 'sgridata']);
-  await page.screenshot({ path: 'e2e/risultati/genitori.png', fullPage: true });
+  await expect.poll(() => chiamate.map((c) => c.tipo)).toEqual(['gesto']);
+  await expect(foglio).toBeVisible();
+  // il server ha dato il +2 e accodato il popup: Annulla usa lo storno di oggi
+  const id = t.gesti_casa[0].id as string;
+  t.popup_coda.push({ id: 'pp', chiave: `gesto:${id}`, mostrato_il: null });
+  await foglio.getByRole('status').getByRole('button', { name: 'Annulla' }).click();
+  await expect(foglio.getByRole('status')).toHaveText('Scrivania in ordine: annullato.');
+  expect(t['rpc/storna_spunta']).toEqual([expect.objectContaining({ p_motivo: 'gesto', p_riferimento: id })]);
+  expect(t.popup_coda[0].mostrato_il).toBeTruthy();
 });
 
-test('premi: salva il premio e chiede l’enigma', async ({ page }) => {
-  const { t } = await finto(page, dati(), { enigma: { enigma: 'Ho due ruote…', soluzione: 'bici' } });
-  await page.goto('/');
-  await page.getByRole('button', { name: 'Premi' }).click();
-  await expect(page.getByText('9 forzieri ancora senza premio.', { exact: false })).toBeVisible();
-  const primo = page.locator('.carta', { hasText: 'Forziere 1' });
-  await primo.getByLabel('Premio').fill('Una bici nuova');
-  await primo.getByRole('button', { name: 'Salva e crea l’enigma' }).click();
-  await expect(page.getByRole('status')).toHaveText('Forziere 1: premio salvato ed enigma pronto.');
-  expect(t.forzieri[0].premio).toBe('Una bici nuova');
-});
-
-test('frasi di famiglia: si aggiungono e si tolgono', async ({ page }) => {
-  const { t } = await finto(page, { ...dati(), frasi: [{ id: 'x1', testo: 'Affrettati lentamente.', autore: 'motto latino', di_famiglia: false }] });
-  await page.goto('/');
-  await page.getByRole('button', { name: 'Altro' }).click();
-  await page.getByRole('button', { name: /^Impostazioni/ }).click();
-  const carta = page.locator('form', { has: page.getByRole('heading', { name: 'Frasi di famiglia' }) });
-  // quelle della raccolta non compaiono qui
-  await expect(carta).not.toContainText('Affrettati lentamente.');
-  await carta.getByLabel('Frase').fill('Ogni giorno un pezzetto.');
-  await carta.getByLabel('Di chi (facoltativo)').fill('papà');
-  await carta.getByRole('button', { name: 'Aggiungi la frase' }).click();
-  await expect(page.getByRole('status')).toContainText('Frase salvata');
-  expect(t.frasi.find((f) => f.testo === 'Ogni giorno un pezzetto.')).toMatchObject({ autore: 'papà', di_famiglia: true });
-  await expect(carta).toContainText('«Ogni giorno un pezzetto.»');
-  await carta.getByRole('button', { name: 'Togli: Ogni giorno un pezzetto.' }).click();
-  await expect(page.getByRole('status')).toHaveText('Frase tolta.');
-  await expect(carta).not.toContainText('Ogni giorno un pezzetto.');
-  expect(t.frasi).toHaveLength(1);
-});
-
-test('correzioni e fogli', async ({ page }) => {
-  const { t, chiamate } = await finto(page, dati());
-  await page.goto('/');
-  await page.getByRole('button', { name: 'Correzioni' }).click();
-  await page.getByRole('button', { name: 'Togli' }).click();
-  await page.getByRole('dialog').getByRole('button', { name: 'Togli' }).click();
-  await expect(page.getByRole('status')).toContainText('Spunta tolta');
-  expect(t.compiti[0].fatto_il).toBeNull();
-  await page.getByRole('button', { name: 'Fogli' }).click();
-  await expect(page.getByText('Lani dice di averlo dato')).toBeVisible();
-  await page.getByRole('button', { name: 'Firmato' }).click();
-  await expect.poll(() => chiamate).toContainEqual({ tipo: 'foglio', id: 'f1' });
-  expect(t.fogli_firma[0].consegnato_il).toBeTruthy();
-});
-
-test('Stato di ACE: sincronizzazioni, chiavi ed errori (filone H)', async ({ page }) => {
-  const d = {
-    ...dati(),
-    sync_log: [
-      { fonte: 'nuvola', esito: 'ok', iniziato_il: '2026-11-10T13:30:00Z', finito_il: '2026-11-10T13:31:00Z' },
-      { fonte: 'calendario', esito: 'errore', iniziato_il: '2026-11-10T16:05:00Z', finito_il: '2026-11-10T16:05:10Z' },
-    ],
-    settimane: [{ inizio: '2026-11-02', chiavi: 2 }],
-    errori_client: [{ id: 1, creato_il: '2026-11-10T15:00:00Z', dove: 'Oggi', messaggio: 'Rete assente', origine: 'app' }],
-  };
+test('dare un gesto: le voci già date oggi e il tetto pieno', async ({ page }) => {
+  const d = dati();
+  d.gesti_casa = [{ id: 'g1', voce: 'letto', data: '2026-11-23' }];
+  d.movimenti_passi = [
+    { motivo: 'gesto', riferimento: 'g1', passi: 2, giorno: '2026-11-23' },
+    { motivo: 'gesto', riferimento: 'altro', passi: 4, giorno: '2026-11-23' },
+  ];
   await finto(page, d);
   await page.goto('/');
-  await page.getByRole('button', { name: 'Altro' }).click();
-  await page.getByRole('button', { name: /Stato di ACE/ }).click();
-  await expect(page.getByRole('heading', { name: 'Stato di ACE' })).toBeVisible();
-  await expect(page.getByText('ok, oggi alle 14:30')).toBeVisible();
-  await expect(page.getByText(/non riuscita, oggi alle 17:05/)).toBeVisible();
-  await expect(page.getByText('Prossima: oggi alle 19:30')).toBeVisible();
-  await expect(page.getByText('2 chiavi nella settimana dal 2')).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Errori degli ultimi 7 giorni: 1' })).toBeVisible();
-  await expect(page.getByText('Rete assente')).toBeVisible();
+  await page.getByRole('button', { name: /^Dai passi/ }).click();
+  const foglio = page.getByRole('dialog', { name: 'Dai passi' });
+  await expect(foglio).toContainText('Il tetto di oggi è pieno');
+  await expect(foglio.getByRole('button', { name: /^Letto fatto/ })).toContainText('dato oggi');
+  await expect(foglio.getByRole('button', { name: /^Vestiti in ordine/ })).toBeDisabled();
 });
 
-const ACCESA = { chiave: 'r_evolution_da', valore: '2027-01-07' };
-
-test('partita (sprint 2): un genitore la segna già approvata e chiama i passi', async ({ page }) => {
-  await page.clock.setFixedTime(new Date('2027-01-16T19:00:00+01:00'));
-  const d = dati();
-  const { t, chiamate } = await finto(page, { ...d, impostazioni: [...d.impostazioni, ACCESA], partite: [] }, { passi: { passi: 25 } });
+test('segnare una sgridata: scelta e conferma col numero', async ({ page }) => {
+  const { t, chiamate } = await finto(page, dati(), { passi: { passi: -1 } });
   await page.goto('/');
-  const carta = page.locator('.carta', { has: page.getByRole('heading', { name: 'Partita', exact: true }) });
-  await carta.getByLabel('Contro').fill('Volley Bibbiano');
-  await carta.getByLabel('Set di Lani').selectOption('3');
-  await carta.getByLabel('Set loro').selectOption('1');
-  await carta.getByRole('button', { name: 'Segna la partita' }).click();
-  await expect(page.getByRole('status')).toContainText('Partita 3-1 con Volley Bibbiano');
-  expect(t.partite[0]).toMatchObject({ data: '2027-01-16', avversaria: 'Volley Bibbiano', set_nostri: 3, set_loro: 1, in_campo: true });
-  expect(t.partite[0].approvata_il).toBeTruthy();
-  await expect.poll(() => chiamate.map((c) => c.tipo)).toEqual(['partita']);
-  await page.screenshot({ path: 'e2e/risultati/genitori-partita.png', fullPage: true });
+  await page.getByRole('button', { name: /^Segna/ }).click();
+  const foglio = page.getByRole('dialog', { name: 'Segna' });
+  await expect(foglio.getByRole('button', { name: 'Segna', exact: true })).toBeDisabled();
+  await foglio.getByRole('button', { name: /^Bagno da sistemare/ }).click();
+  await foglio.getByRole('button', { name: 'Segna −1' }).click();
+  await expect(foglio).toHaveCount(0);
+  await expect(page.getByRole('status')).toHaveText('Bagno da sistemare: −1 passi.');
+  expect(t.sgridate[0]).toMatchObject({ tipo: 'bagno', nota: null });
+  await expect.poll(() => chiamate.map((c) => c.tipo)).toEqual(['sgridata']);
 });
 
-test('partita segnata da Lani: il genitore corregge e approva, oppure rifiuta', async ({ page }) => {
-  await page.clock.setFixedTime(new Date('2027-01-17T10:00:00+01:00'));
+test('balla: frasi pronte con il tu per Lani, testo libero al massimo 80 caratteri e 16 parole', async ({ page }) => {
+  const { t } = await finto(page, dati(), { passi: { passi: -10 } });
+  await page.goto('/');
+  await page.getByRole('button', { name: /^Segna/ }).click();
+  const foglio = page.getByRole('dialog', { name: 'Segna' });
+  await foglio.getByRole('button', { name: /^Balla/ }).click();
+  await foglio.getByLabel('Ha detto di aver studiato').check();
+  await foglio.getByRole('button', { name: 'Segna −10' }).click();
+  await expect.poll(() => t.sgridate[0]).toMatchObject({ tipo: 'balla', nota: 'Hai detto di aver studiato, ma non era così' });
+
+  await page.getByRole('button', { name: /^Segna/ }).click();
+  await foglio.getByRole('button', { name: /^Balla/ }).click();
+  await foglio.getByLabel('Lo scrivo io').check();
+  const campo = foglio.getByLabel(/Per Lani, con il tu/);
+  await expect(campo).toHaveAttribute('maxlength', '80');
+  await campo.fill('hai detto che a me e a te lo ha detto lei ma non è vero e lo sai bene');
+  await expect(foglio.getByRole('alert')).toHaveText('Al massimo 16 parole: il popup di Lani è corto.');
+  await expect(foglio.getByRole('button', { name: 'Segna −10' })).toBeDisabled();
+  await campo.fill('hai detto di aver messo in ordine la borsa.');
+  await foglio.getByRole('button', { name: 'Segna −10' }).click();
+  // maiuscola e senza il punto: il copione aggiunge ". −10. ..."
+  await expect.poll(() => t.sgridate[1]).toMatchObject({ nota: 'Hai detto di aver messo in ordine la borsa' });
+});
+
+test('dopo le 21 la sgridata avvisa che Lani la vede domattina', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-11-23T21:20:00+01:00'));
+  await finto(page, dati());
+  await page.goto('/');
+  await page.getByRole('button', { name: /^Segna/ }).click();
+  await page.getByRole('dialog').getByRole('button', { name: /^Antisportiva/ }).click();
+  await expect(page.getByRole('dialog')).toContainText('Sono le 21:20: Lani lo vede domattina.');
+});
+
+test('firmare un foglio da Oggi: un tocco, passi dal server', async ({ page }) => {
+  const { t, chiamate } = await finto(page, dati(), { passi: { passi: 2 } });
+  await page.goto('/');
+  await daFare(page).getByRole('button', { name: 'Firmato' }).click();
+  await expect(page.getByRole('status')).toHaveText('Gita del benessere: firmato, +2 a Lani.');
+  expect(t.fogli_firma[0].consegnato_il).toBeTruthy();
+  await expect.poll(() => chiamate).toContainEqual({ tipo: 'foglio', id: 'f1' });
+  await expect(page.getByText('Niente da fare per voi')).toBeVisible();
+});
+
+test('aggiungere un foglio dalla Settimana', async ({ page }) => {
+  const { t } = await finto(page, { ...dati(), fogli_firma: [] });
+  await page.goto('/');
+  await scheda(page, 'Settimana');
+  await page.getByRole('button', { name: /^Aggiungi un foglio/ }).click();
+  await page.getByLabel('Che foglio è').fill('Autorizzazione uscita');
+  await page.getByLabel('Entro il').fill('2026-12-01');
+  await expect(page.getByText('1 dic 2026')).toBeVisible();
+  await page.getByRole('button', { name: 'Aggiungi il foglio' }).click();
+  await expect(page.getByRole('status')).toContainText('Foglio aggiunto');
+  expect(t.fogli_firma[0]).toMatchObject({ titolo: 'Autorizzazione uscita', scadenza: '2026-12-01' });
+  await expect(page.getByText('Autorizzazione uscita')).toBeVisible();
+});
+
+test('approvare una partita: un tocco da Oggi; correggere col foglio; rifiutare', async ({ page }) => {
   const d = dati();
-  const partite = [
-    { id: 'p1', data: '2027-01-16', avversaria: 'Foxes Volley', set_nostri: 3, set_loro: 1, in_campo: true, approvata_il: null },
-    { id: 'p2', data: '2027-01-16', avversaria: 'Arbor Itarca', set_nostri: 0, set_loro: 3, in_campo: true, approvata_il: null },
+  d.impostazioni.push(ACCESA);
+  d.partite = [
+    { id: 'p1', data: '2026-11-21', avversaria: 'Foxes Volley', set_nostri: 3, set_loro: 1, in_campo: true, approvata_il: null },
+    { id: 'p2', data: '2026-11-22', avversaria: 'Arbor Itarca', set_nostri: 0, set_loro: 3, in_campo: true, approvata_il: null },
+    { id: 'p3', data: '2026-11-22', avversaria: 'Volley Bibbiano', set_nostri: 3, set_loro: 0, in_campo: true, approvata_il: null },
   ];
-  const { t, chiamate } = await finto(page, { ...d, impostazioni: [...d.impostazioni, ACCESA], partite }, { passi: { passi: 10 } });
+  const { t, chiamate } = await finto(page, d, { passi: { passi: 10 } });
   await page.goto('/');
-  const foxes = page.getByRole('form', { name: 'Partita con Foxes Volley' });
-  await foxes.getByLabel('Set loro').selectOption('2');
-  await foxes.getByLabel('Lani è entrata in campo').uncheck();
-  await foxes.getByRole('button', { name: 'Approva' }).click();
-  await expect(page.getByRole('status')).toHaveText('Partita 3-2 con Foxes Volley approvata: +10 passi.');
-  expect(t.partite.find((p) => p.id === 'p1')).toMatchObject({ set_loro: 2, in_campo: false });
+  const riga = (nome: string) => daFare(page).getByRole('listitem').filter({ hasText: nome });
+  await riga('Foxes Volley').getByRole('button', { name: 'Approva' }).click();
+  await expect(page.getByRole('status')).toHaveText('Partita 3-1 con Foxes Volley approvata: +10 passi.');
   expect(t.partite.find((p) => p.id === 'p1')?.approvata_il).toBeTruthy();
   await expect.poll(() => chiamate).toEqual([{ tipo: 'partita', id: 'p1' }]);
-  await expect(foxes).toHaveCount(0);
 
-  await page.getByRole('form', { name: 'Partita con Arbor Itarca' }).getByRole('button', { name: 'Rifiuta' }).click();
+  await riga('Volley Bibbiano').getByRole('button', { name: /^Partita: Volley Bibbiano/ }).click();
+  const foglio = page.getByRole('dialog', { name: 'Partita con Volley Bibbiano' });
+  await foglio.getByRole('button', { name: 'Set loro: più' }).click();
+  await foglio.getByLabel('In panchina').check();
+  await foglio.getByRole('button', { name: 'Approva' }).click();
+  await expect(page.getByRole('status')).toHaveText('Partita 3-1 con Volley Bibbiano approvata: +10 passi.');
+  expect(t.partite.find((p) => p.id === 'p3')).toMatchObject({ set_loro: 1, in_campo: false });
+
+  await riga('Arbor Itarca').getByRole('button', { name: /^Partita: Arbor/ }).click();
+  await page.getByRole('dialog').getByRole('button', { name: /^Rifiuta/ }).click();
   await expect(page.getByRole('status')).toHaveText('Partita con Arbor Itarca rifiutata.');
-  expect(t.partite.map((p) => p.id)).toEqual(['p1']);
-  await expect(page.getByRole('heading', { name: 'Partite da approvare' })).toHaveCount(0);
+  expect(t.partite.map((p) => p.id)).toEqual(['p1', 'p3']);
 });
 
-test('Impostazioni (sprint 2): accendere R-Evolution e cambiare il menu dei dieci minuti', async ({ page }) => {
-  await page.clock.setFixedTime(new Date('2026-11-23T18:00:00+01:00'));
+test('partite: prima di R-Evolution non compaiono', async ({ page }) => {
+  const d = dati();
+  d.partite = [{ id: 'p1', data: '2026-11-21', avversaria: 'Foxes Volley', set_nostri: 3, set_loro: 1, in_campo: true, approvata_il: null }];
+  await finto(page, d);
+  await page.goto('/');
+  await expect(daFare(page)).not.toContainText('Foxes');
+  await scheda(page, 'Settimana');
+  await expect(page.getByRole('heading', { name: 'Partite' })).toHaveCount(0);
+});
+
+test('segnare una partita dalla Settimana: già approvata, passi dal server', async ({ page }) => {
+  const d = dati();
+  d.impostazioni.push(ACCESA);
+  const { t, chiamate } = await finto(page, d, { passi: { passi: 25 } });
+  await page.goto('/');
+  await scheda(page, 'Settimana');
+  await page.getByRole('button', { name: /^Segna una partita/ }).click();
+  await page.getByLabel('Contro').fill('Volley Bibbiano');
+  await page.getByRole('button', { name: 'Set loro: più' }).click();
+  await page.getByRole('button', { name: 'Segna la partita' }).click();
+  await expect(page.getByRole('status')).toContainText('Partita 3-1 con Volley Bibbiano');
+  expect(t.partite[0]).toMatchObject({ data: '2026-11-23', avversaria: 'Volley Bibbiano', set_nostri: 3, set_loro: 1, in_campo: true });
+  expect(t.partite[0].approvata_il).toBeTruthy();
+  await expect.poll(() => chiamate.map((c) => c.tipo)).toEqual(['partita']);
+});
+
+test('correggere una spunta nel suo giorno della Settimana', async ({ page }) => {
+  const { t } = await finto(page, dati());
+  await page.goto('/');
+  await scheda(page, 'Settimana');
+  await page.getByRole('button', { name: 'Mar 24', exact: true }).click();
+  await page.getByRole('button', { name: 'Togli la spunta: Cartina' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Togli la spunta' }).click();
+  await expect(page.getByRole('status')).toContainText('Spunta tolta');
+  expect(t.compiti[0].fatto_il).toBeNull();
+  expect(t['rpc/storna_spunta']).toEqual([expect.objectContaining({ p_motivo: 'compito', p_riferimento: 'c1' })]);
+});
+
+test('foto mancante: la fa Lani; dopo le 20 o dalla scadenza la possono fare i genitori, senza passi', async ({ page }) => {
+  const d = dati();
+  d.compiti.push({ id: 'c2', testo: 'Leggere', materia_id: 'italiano', scadenza: '2026-11-25', fatto_il: null });
+  d.richieste_foto = [{ id: 'r1', motivo: 'compito', materia_id: 'italiano', pagine: '34–38', compito_id: 'c2', stato: 'aperta', creato_il: '2026-11-23T13:00:00Z' }];
+  await finto(page, d);
+  await page.goto('/');
+  const riga = daFare(page).getByRole('listitem').filter({ hasText: 'Foto: Italiano' });
+  await expect(riga).toContainText('La fa Lani · +2');
+  await expect(riga.getByRole('button')).toHaveCount(0);
+
+  await page.clock.setFixedTime(new Date('2026-11-23T20:10:00+01:00'));
+  await page.reload();
+  await expect(riga).toContainText('Se la fate voi, Lani non prende i passi');
+  await expect(riga.getByRole('button', { name: 'Fotografa' })).toBeVisible();
+});
+
+test('Lani è a casa oggi? Solo fino alle 14, con conferma', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-11-23T07:30:00+01:00'));
+  const { t } = await finto(page, dati());
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Lani è a casa oggi?' }).click();
+  const foglio = page.getByRole('dialog', { name: 'Lani a casa lunedì 23/11' });
+  await foglio.getByRole('button', { name: 'Segna Lani a casa' }).click();
+  await expect(page.getByRole('status')).toHaveText('Lani a casa: lunedì 23/11.');
+  expect(t.assenze.map((a) => a.giorno)).toEqual(['2026-11-23']);
+  await expect(page.getByRole('button', { name: 'Lani è a casa oggi?' })).toHaveCount(0);
+  await expect(page.getByText('a casa da scuola')).toBeVisible();
+});
+
+test('consegnare un forziere da Oggi, con conferma', async ({ page }) => {
+  const d = dati();
+  d.forzieri[0] = { ...d.forzieri[0], premio: 'Pizza con le amiche', stato: 'aperto' };
+  const { t } = await finto(page, d);
+  await page.goto('/');
+  await daFare(page).getByRole('button', { name: 'Consegnato' }).click();
+  await page.getByRole('dialog', { name: 'Forziere 1: consegnato?' }).getByRole('button', { name: 'Sì, consegnato' }).click();
+  await expect(page.getByRole('status')).toHaveText('Forziere 1: consegnato.');
+  expect(t.forzieri[0]).toMatchObject({ stato: 'consegnato' });
+});
+
+test('cambiare un premio: Forzieri, riga, premio, salva e crea l’enigma', async ({ page }) => {
+  const { t } = await finto(page, dati(), { enigma: { enigma: 'Ho due ruote…', soluzione: 'bici' } });
+  await page.goto('/');
+  await scheda(page, 'Forzieri');
+  await expect(page.getByText('9 forzieri senza premio.', { exact: false })).toBeVisible();
+  await page.getByRole('button', { name: 'Scegli', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Forziere 1' })).toBeVisible();
+  await page.getByLabel('Premio').fill('Una bici nuova');
+  await page.getByRole('button', { name: 'Salva e crea l’enigma' }).click();
+  await expect(page.getByRole('status')).toHaveText('Forziere 1: premio salvato ed enigma pronto.');
+  expect(t.forzieri[0].premio).toBe('Una bici nuova');
+  await page.getByRole('button', { name: '‹ Forzieri' }).click();
+  await expect(page.getByRole('list', { name: 'Forzieri' })).toContainText('1 · Una bici nuova');
+});
+
+test('Impostazioni: R-Evolution con conferma, dieci minuti, frasi, orari', async ({ page }) => {
   const menu = [
     { id: 'plank', nome: 'Plank e varianti', tipo: 'forza_riflessi', creato_il: '2026-11-13T10:00:00Z' },
     { id: 'visore', nome: 'Riflessi con il visore', tipo: 'forza_riflessi', creato_il: '2026-11-13T10:00:01Z' },
     { id: 'respiro', nome: 'Respirazione guidata', tipo: 'recupero', creato_il: '2026-11-13T10:00:02Z' },
   ];
-  const { t } = await finto(page, { ...dati(), esercizi_dieci_minuti: menu });
+  const { t } = await finto(page, { ...dati(), esercizi_dieci_minuti: menu, frasi: [{ id: 'x1', testo: 'Affrettati lentamente.', autore: 'motto latino', di_famiglia: false }] });
   await page.goto('/');
-  await page.getByRole('button', { name: 'Altro' }).click();
-  await page.getByRole('button', { name: /^Impostazioni/ }).click();
+  await scheda(page, 'Impostazioni');
 
-  await page.getByRole('button', { name: 'Accendi R-Evolution da oggi' }).click();
+  await page.getByRole('switch', { name: /R-Evolution/ }).click();
+  await page.getByRole('dialog', { name: 'Accendere R-Evolution?' }).getByRole('button', { name: 'Accendi da oggi' }).click();
   await expect(page.getByRole('status')).toContainText('R-Evolution accesa');
   expect(t.impostazioni.find((i) => i.chiave === 'r_evolution_da')?.valore).toBe('2026-11-23');
-  await expect(page.getByText(/^Accesa dal 23 novembre/)).toBeVisible();
-
-  const carta = page.locator('form', { has: page.getByRole('heading', { name: 'Menu dei dieci minuti' }) });
-  // l'unico esercizio di recupero non si toglie
-  await expect(carta.getByRole('button', { name: 'Togli: Respirazione guidata' })).toBeDisabled();
-  await carta.getByLabel('Esercizio nuovo').fill('Mobilità delle spalle');
-  await carta.getByLabel('Tipo').selectOption('recupero');
-  await carta.getByRole('button', { name: 'Aggiungi al menu' }).click();
-  await expect(page.getByRole('status')).toHaveText('Esercizio aggiunto al menu.');
-  expect(t.esercizi_dieci_minuti.find((e) => e.nome === 'Mobilità delle spalle')).toMatchObject({ tipo: 'recupero' });
-  await carta.getByRole('button', { name: 'Togli: Riflessi con il visore' }).click();
-  await expect(page.getByRole('status')).toHaveText('Esercizio tolto dal menu.');
-  expect(t.esercizi_dieci_minuti.map((e) => e.id)).not.toContain('visore');
-  await page.screenshot({ path: 'e2e/risultati/genitori-impostazioni-sprint2.png', fullPage: true });
-
-  await page.getByRole('button', { name: 'Spegni R-Evolution' }).click();
+  await expect(page.getByRole('switch', { name: /R-Evolution/ })).toHaveAttribute('aria-checked', 'true');
+  await page.getByRole('switch', { name: /R-Evolution/ }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Spegni' }).click();
   await expect(page.getByRole('status')).toContainText('R-Evolution spenta');
   expect(t.impostazioni.find((i) => i.chiave === 'r_evolution_da')).toBeUndefined();
+
+  await page.getByRole('button', { name: /^Dieci minuti/ }).click();
+  await expect(page.getByRole('button', { name: 'Togli: Respirazione guidata' })).toBeDisabled();
+  await page.getByLabel('Esercizio nuovo').fill('Mobilità delle spalle');
+  await page.getByLabel('Tipo').selectOption('recupero');
+  await page.getByRole('button', { name: 'Aggiungi al menu' }).click();
+  await expect(page.getByRole('status')).toHaveText('Esercizio aggiunto al menu.');
+  expect(t.esercizi_dieci_minuti.find((e) => e.nome === 'Mobilità delle spalle')).toMatchObject({ tipo: 'recupero' });
+  await page.getByRole('button', { name: 'Togli: Riflessi con il visore' }).click();
+  await expect(page.getByRole('status')).toHaveText('Esercizio tolto dal menu.');
+  await page.getByRole('button', { name: '‹ Impostazioni' }).click();
+
+  await page.getByRole('button', { name: /^Frasi di famiglia/ }).click();
+  await expect(page.getByText('Affrettati lentamente.')).toHaveCount(0);
+  await page.getByLabel('Frase', { exact: true }).fill('Ogni giorno un pezzetto.');
+  await page.getByLabel('Di chi (facoltativo)').fill('papà');
+  await page.getByRole('button', { name: 'Aggiungi la frase' }).click();
+  await expect(page.getByRole('status')).toContainText('Frase salvata');
+  expect(t.frasi.find((f) => f.testo === 'Ogni giorno un pezzetto.')).toMatchObject({ autore: 'papà', di_famiglia: true });
+  await page.getByRole('button', { name: 'Togli: Ogni giorno un pezzetto.' }).click();
+  await expect(page.getByRole('status')).toHaveText('Frase tolta.');
+  await page.getByRole('button', { name: '‹ Impostazioni' }).click();
+
+  await page.getByRole('button', { name: /^Sera e cartella/ }).click();
+  await page.getByLabel('Chiusura di martedì').fill('21:00');
+  await page.getByRole('button', { name: 'Salva' }).click();
+  await expect(page.getByRole('status')).toHaveText('Sera e cartella salvate.');
+  // il finto aggiunge la riga dell'upsert: conta l'ultima
+  expect(t.impostazioni.filter((i) => i.chiave === 'ora_chiusura').at(-1)?.valore).toEqual({ 1: '20:30', 2: '21:00' });
 });
 
-test('partita: prima di R-Evolution non si vede', async ({ page }) => {
+test('Impostazioni: Stato di ACE in "Per controllare"', async ({ page }) => {
+  await finto(page, {
+    ...dati(),
+    sync_log: [
+      { fonte: 'nuvola', esito: 'ok', iniziato_il: '2026-11-23T13:30:00Z', finito_il: '2026-11-23T13:31:00Z' },
+      { fonte: 'calendario', esito: 'errore', iniziato_il: '2026-11-23T16:05:00Z', finito_il: '2026-11-23T16:05:10Z' },
+    ],
+    settimane: [{ inizio: '2026-11-16', chiavi: 2 }],
+    errori_client: [{ id: 1, creato_il: '2026-11-23T15:00:00Z', dove: 'Oggi', messaggio: 'Rete assente', origine: 'app' }],
+  });
+  await page.goto('/');
+  await scheda(page, 'Impostazioni');
+  await page.getByRole('button', { name: /^Stato di ACE/ }).click();
+  await expect(page.getByText('ok, oggi alle 14:30')).toBeVisible();
+  await expect(page.getByText(/non riuscita, oggi alle 17:05/)).toBeVisible();
+  await expect(page.getByText('Prossima: oggi alle 19:30')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Errori degli ultimi 7 giorni: 1' })).toBeVisible();
+});
+
+test('Esci dall’account: in Impostazioni, con conferma', async ({ page }) => {
   await finto(page, dati());
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'La settimana di Lani' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Partita' })).toHaveCount(0);
+  await scheda(page, 'Impostazioni');
+  await page.getByRole('button', { name: 'Esci dall’account' }).click();
+  await expect(page.getByRole('dialog', { name: 'Uscire dall’account?' })).toBeVisible();
+  await page.getByRole('dialog').getByRole('button', { name: 'Annulla' }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
 });
