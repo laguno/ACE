@@ -142,3 +142,51 @@ In sintesi: niente più ricerca scorrendo per nessun compito; le cose da decider
 1. Va bene la struttura a quattro schede con la barra in basso e "Da fare per voi" in cima a Oggi?
 2. Gesto in 2 tocchi (foglio "Dai passi") invece di 1: accettabile in cambio di zero scorrimento e dell'annulla?
 3. Lani a casa per giorno (con "fino a" per più giorni) al posto del modulo Dal/Al?
+
+## 8. Valutazione dopo il restyling (16/11 pomeriggio)
+
+Sul ramo finale (`de987e0`), dopo i due ritocchi decisi: Segna più snello (la spiegazione di ogni voce resta solo finché non si sceglie, tolta la nota ripetuta sotto) e, in Settimana, Fogli da firmare e Foto delle pagine richiudibili (Fogli aperta solo se c'è un foglio da firmare, Foto sempre chiusa: si apre solo per cancellare una foto sbagliata).
+
+### Impeccable B (tecnica): detector, axe, misure
+
+| Misura | Prima | Dopo |
+|---|---|---|
+| Detector sui sorgenti (`detect.mjs`, area genitori + kit + stile) | 0 | 0 |
+| Detector nella pagina (10 schermate × 390 e 360) | 2 (eyebrow sulla data, `dark-glow`) | 4 `cramped padding`, falsi positivi: bottoni larghi alti 56-60 px con `min-height` e padding verticale 0 (voci di Dai passi, "Rifiuta" della partita, "Salva e rifai l'enigma") |
+| axe (`accessibilita.e2e.ts`, chiaro e scuro) | 1 (`target-size`) | 0 |
+| Bersagli sotto 44 px | 4 | 0 |
+| Campi senza etichetta | 0 | 0 |
+| Campi con l'aspetto del browser | 4 | 0 |
+| Overflow a 360 px | 0 | 0 |
+| Altezza della schermata d'ingresso a 390 px | 2740 px (Settimana) | 1015 px (Oggi) |
+| Impostazioni a 390 px | 3705 px | 970 px (indice); la pagina Sera e cartella resta 2639 px |
+
+Misure in `docs/genitori-ux/misure-dopo.json`, foto in `docs/genitori-ux/dopo/`.
+
+### Impeccable A (Nielsen, revisione separata)
+
+**29/40** (era 22): stato 3, linguaggio 3, controllo 3, coerenza 3, prevenzione errori 3, riconoscimento 3, flessibilità 3, estetica 3 (era 1), recupero dagli errori 2, aiuto 3. Carico cognitivo: 2 falliti su 8 (era 6). Non è ancora l'obiettivo di 34.
+
+Problemi rimasti, tutti risolvibili con sola interfaccia:
+
+1. [P1] Sera e cartella: 14 campi in 2639 px con un solo Salva in fondo; cambiando scheda le modifiche si perdono senza avviso; "Chiusura di lunedì" accanto a "Materiale per martedì".
+2. [P2] I `summary` delle sezioni chiuse (Partite, Fogli, Foto, Enigma e soluzione) non hanno la freccia: sembrano titoli vuoti.
+3. [P2] Recupero dagli errori: "Non salvato. Riprova." non dice cosa, sparisce dopo 10 s e non ha il bottone Riprova.
+4. [P3] Forzieri: 9 righe, 6 uguali "Da scegliere".
+5. [P3] "Partita: Foxes Volley 3-1" va a capo dentro il punteggio; le pillole "0 note", "0 serate chiuse" non dicono se va bene.
+
+### Code-review (`/code-review`, main...genitori-ux)
+
+Prima: 8 segnalazioni.
+
+| # | Dove | Cosa | Esito |
+|---|---|---|---|
+| 1 | `Settimana.tsx` togli | errore dell'update di `compiti` ignorato dopo lo storno: "Spunta tolta" anche se la spunta resta | corretto: "Passi annullati, ma la spunta è rimasta. Riprova Togli." |
+| 2 | `Impostazioni.tsx` Sera | con le impostazioni non caricate il Salva riscriveva tutti i giorni con i soli campi compilati | corretto: in errore la pagina non mostra il modulo |
+| 3 | `Genitori.tsx` passi() | l'errore della funzione `passi` è inghiottito (restituisce 0) | lasciato: tocca la logica dei passi |
+| 4 | `Oggi.tsx` Dai passi | per lo stesso motivo un errore si legge come "tetto già pieno" | lasciato, come il 3 |
+| 5 | `Oggi.tsx` Lani oggi | l'ora di chiusura ignora `ora_chiusura_breve` (sera prima di una partita) | lasciato: solo testo per i genitori |
+| 6 | `Settimana.tsx` query compiti | filtra per scadenza originale: un compito vecchio spostato a questa settimana non compare | lasciato: caso raro |
+| 7-8 | Oggi / Settimana / Forzieri | Firmato e Consegna scritti due volte | lasciato: pulizia, nessun difetto |
+
+Dopo: 2 corretti, 6 lasciati per scelta (3 e 4 da decidere col signore: servirebbe distinguere l'errore dal tetto in `passi()`).
