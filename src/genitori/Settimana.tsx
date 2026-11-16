@@ -13,7 +13,7 @@ import { bello, piu, type Props } from './comune';
 
 type Compito = { id: string; testo: string; scadenza: string; scadenza_spostata: string | null; fatto_il: string | null; materie: { nome: string } | null };
 type Foglio_ = { id: string; titolo: string; scadenza: string | null; dato_il: string | null };
-type Dati = { media: number | null; obiettivo: number; note: number; serate: number; compiti: Compito[]; assenze: string[]; fogli: Foglio_[]; rEvolutionDa: string | null };
+type Dati = { media: number | null; obiettivo: number; note: number; serate: string[]; chiusura: Record<string, string>; compiti: Compito[]; assenze: string[]; fogli: Foglio_[]; rEvolutionDa: string | null };
 const quando = (c: Compito) => c.scadenza_spostata ?? c.scadenza;
 
 export default function Settimana({ client, passi, avvisa }: Props) {
@@ -26,7 +26,7 @@ export default function Settimana({ client, passi, avvisa }: Props) {
   const [chiede, setChiede] = useState<'casa' | 'togliCasa' | { togli: Compito } | { firma: Foglio_ } | { foto: () => void }>();
 
   async function carica() {
-    const [v, o, n, s, c, a, f, re] = await Promise.all([
+    const [v, o, n, s, c, a, f, re, ch] = await Promise.all([
       client.from('voti').select('voto'),
       client.from('impostazioni').select('valore').eq('chiave', 'obiettivo_media').maybeSingle(),
       client.from('note').select('id', { count: 'exact', head: true }).gte('data', R.iso(lun)).lte('data', R.iso(dom)),
@@ -36,13 +36,15 @@ export default function Settimana({ client, passi, avvisa }: Props) {
       client.from('assenze').select('giorno').gte('giorno', R.iso(lun)).lte('giorno', R.iso(dom)),
       client.from('fogli_firma').select('id, titolo, scadenza, dato_il').is('consegnato_il', null).order('scadenza'),
       client.from('impostazioni').select('valore').eq('chiave', R.CHIAVE_R_EVOLUTION).maybeSingle(),
+      client.from('impostazioni').select('valore').eq('chiave', 'ora_chiusura').maybeSingle(),
     ]);
     const voti = (v.data ?? []).map((x) => Number(x.voto));
     setD({
       media: voti.length ? voti.reduce((x, y) => x + y, 0) / voti.length : null,
       obiettivo: Number(o.data?.valore ?? 7.35),
       note: n.count ?? 0,
-      serate: (s.data ?? []).length,
+      serate: (s.data ?? []).map((x) => x.data as string),
+      chiusura: (ch.data?.valore as Record<string, string> | undefined) ?? {},
       compiti: (c.data ?? []) as unknown as Compito[],
       assenze: (a.data ?? []).map((x) => x.giorno as string),
       fogli: f.data ?? [],
@@ -74,8 +76,11 @@ export default function Settimana({ client, passi, avvisa }: Props) {
   async function aggiungi(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
-    const { error } = await client.from('fogli_firma').insert({ titolo: String(f.get('titolo')).trim(), scadenza: f.get('scadenza') || null });
-    if (error) return avvisa('Foglio non salvato. Riprova.');
+    nuovo(String(f.get('titolo')).trim(), String(f.get('scadenza') ?? '') || null);
+  }
+  async function nuovo(titolo: string, scadenza: string | null) {
+    const { error } = await client.from('fogli_firma').insert({ titolo, scadenza });
+    if (error) return avvisa(`${titolo}: foglio non salvato.`, () => nuovo(titolo, scadenza));
     setVista(undefined);
     fatto('Foglio aggiunto: Lani lo vede la sera, nella cartella.');
   }
@@ -112,17 +117,18 @@ export default function Settimana({ client, passi, avvisa }: Props) {
   const delGiorno = d.compiti.filter((c) => quando(c) === giorno);
   const aCasa = d.assenze.includes(giorno);
   const scuola = R.giornoDiScuola(R.giorno(giorno));
+  // serate da chiudere finora: i giorni passati con una chiusura, più oggi se è già chiusa
+  const oggiIso = R.iso(oggi);
+  const attese = giorni.filter((g) => (g < oggiIso && d.chiusura[R.giorno(g).getDay()]) || (g === oggiIso && d.serate.includes(g))).length;
   return (
     <>
       <ul className="ga-riassunto" aria-label="La settimana in numeri">
         <li>
-          {fmt(d.media)} <span>media (obiettivo {fmt(d.obiettivo)})</span>
+          {fmt(d.media)} <span>{d.media === null ? 'media' : `media, ${d.media >= d.obiettivo ? 'sopra' : 'sotto'} l’obiettivo ${fmt(d.obiettivo)}`}</span>
         </li>
+        <li>{d.note ? <>{d.note} <span>{d.note === 1 ? 'nota della scuola' : 'note della scuola'}</span></> : <span>Nessuna nota</span>}</li>
         <li>
-          {d.note} <span>{d.note === 1 ? 'nota' : 'note'}</span>
-        </li>
-        <li>
-          {d.serate} <span>serate chiuse</span>
+          {d.serate.length} su {attese} <span>serate chiuse finora</span>
         </li>
       </ul>
 

@@ -196,3 +196,11 @@ Dopo: 2 corretti, 6 lasciati per scelta (3 e 4 da decidere col signore: servireb
 Fatto (`27231f3`): freccia su tutte le sezioni che si aprono; Sera e cartella una sera alla volta (fila dei sette giorni con l'ora, sotto la sera scelta con "In cartella per" il giorno dopo; 2639 → 895 px) con il foglio "Modifiche non salvate" uscendo da "‹ Impostazioni" o dalle schede; pillola di errore con **Riprova** (rifà la stessa funzione, nessuna logica nuova sui passi) e testi che dicono cosa non è salvato.
 
 Impeccable A rifatta: **31/40** (prevenzione errori 3 → 4, recupero dagli errori 2 → 3), carico cognitivo 1 su 8. B: detector 0 sui sorgenti, axe 0, bersagli piccoli 0. Mancano 3 punti a 34; restano solo P3, tutti di sola interfaccia: Forzieri con 9 righe (6 "Da scegliere"), pillole "0 note" / "0 serate chiuse" senza un'idea di bene o male, punteggio della partita che va a capo, "Premio non salvato" e "Foglio non salvato" senza Riprova, Stato di ACE senza il passo da fare, conferma delle modifiche solo su Sera.
+
+### Difetti minori (approvati dal signore il 16/11): 34/40
+
+Fatto (`583d8c6`): Forzieri con in vista solo quelli con premio e il prossimo da scegliere, gli altri chiusi in "Altri N da scegliere" (951 → 844 px); pillole di Settimana che dicono se va bene ("media, sotto l'obiettivo 7,35", "Nessuna nota", "X su Y serate chiuse finora"); punteggio della partita con il trattino non separabile; Riprova anche su premio e foglio; Stato di ACE con le sezioni e le righe del kit e, dopo un giro non riuscito, cosa fare.
+
+Impeccable A: **34/40, obiettivo raggiunto** (riconoscimento 3 → 4, estetica 3 → 4, recupero dagli errori 3 → 4), carico cognitivo 0 su 8. B: detector 0 sui sorgenti, axe 0, bersagli piccoli 0. Il Riprova di "Passi annullati, ma la spunta è rimasta" rifà anche `storna_spunta`: è sicuro, il secondo storno non scrive niente (`registra_passi`, `on conflict (motivo, riferimento) do nothing`).
+
+Restano P3 di sola interfaccia: "mai sincronizzato" in rosso anche quando è normale e "Errori degli ultimi 7 giorni: 0" ripetuto da "Nessun errore registrato."; "0 su 0 serate chiuse finora" il lunedì; gergo ("Enigma pronto", "R-Evolution", "Set loro", "Dieci minuti"); conferma delle modifiche solo su Sera; le sere cambiate non segnate nella fila dei giorni.

@@ -105,7 +105,7 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
               <Riga
                 key={p.id}
                 icona={<Volleyball size={20} weight="bold" aria-hidden />}
-                titolo={`Partita: ${p.avversaria} ${p.set_nostri}-${p.set_loro}`}
+                titolo={`Partita: ${p.avversaria} ${p.set_nostri}‑${p.set_loro}`}
                 sotto={`${bello(p.data)} · l'ha segnata Lani`}
                 azione={
                   <button type="button" className="ga-btn" onClick={() => setFoglio({ partita: p })}>

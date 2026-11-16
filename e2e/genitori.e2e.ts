@@ -384,6 +384,8 @@ test('Impostazioni: Stato di ACE in "Per controllare"', async ({ page }) => {
   await page.getByRole('button', { name: /^Stato di ACE/ }).click();
   await expect(page.getByText('ok, oggi alle 14:30')).toBeVisible();
   await expect(page.getByText(/non riuscita, oggi alle 17:05/)).toBeVisible();
+  // dopo un giro non riuscito dice cosa fare
+  await expect(page.getByText('Ci riprova da sola al prossimo giro: di solito basta.')).toBeVisible();
   await expect(page.getByText('Prossima: oggi alle 19:30')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Errori degli ultimi 7 giorni: 1' })).toBeVisible();
 });
