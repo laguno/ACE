@@ -145,6 +145,7 @@ test('firmare un foglio da Oggi: un tocco, passi dal server', async ({ page }) =
   const { t, chiamate } = await finto(page, dati(), { passi: { passi: 2 } });
   await page.goto('/');
   await daFare(page).getByRole('button', { name: 'Firmato' }).click();
+  await page.getByRole('dialog', { name: 'Gita del benessere: firmato?' }).getByRole('button', { name: 'Sì, firmato' }).click();
   await expect(page.getByRole('status')).toHaveText('Gita del benessere: firmato, +2 a Lani.');
   expect(t.fogli_firma[0].consegnato_il).toBeTruthy();
   await expect.poll(() => chiamate).toContainEqual({ tipo: 'foglio', id: 'f1' });
@@ -165,7 +166,7 @@ test('aggiungere un foglio dalla Settimana', async ({ page }) => {
   await expect(page.getByText('Autorizzazione uscita')).toBeVisible();
 });
 
-test('approvare una partita: un tocco da Oggi; correggere col foglio; rifiutare', async ({ page }) => {
+test('approvare una partita da Oggi: il foglio mostra il risultato, si corregge o si rifiuta', async ({ page }) => {
   const d = dati();
   d.impostazioni.push(ACCESA);
   d.partite = [
@@ -177,11 +178,12 @@ test('approvare una partita: un tocco da Oggi; correggere col foglio; rifiutare'
   await page.goto('/');
   const riga = (nome: string) => daFare(page).getByRole('listitem').filter({ hasText: nome });
   await riga('Foxes Volley').getByRole('button', { name: 'Approva' }).click();
+  await page.getByRole('dialog', { name: 'Partita con Foxes Volley' }).getByRole('button', { name: 'Approva' }).click();
   await expect(page.getByRole('status')).toHaveText('Partita 3-1 con Foxes Volley approvata: +10 passi.');
   expect(t.partite.find((p) => p.id === 'p1')?.approvata_il).toBeTruthy();
   await expect.poll(() => chiamate).toEqual([{ tipo: 'partita', id: 'p1' }]);
 
-  await riga('Volley Bibbiano').getByRole('button', { name: /^Partita: Volley Bibbiano/ }).click();
+  await riga('Volley Bibbiano').getByRole('button', { name: 'Approva' }).click();
   const foglio = page.getByRole('dialog', { name: 'Partita con Volley Bibbiano' });
   await foglio.getByRole('button', { name: 'Set loro: più' }).click();
   await foglio.getByLabel('In panchina').check();
@@ -189,7 +191,7 @@ test('approvare una partita: un tocco da Oggi; correggere col foglio; rifiutare'
   await expect(page.getByRole('status')).toHaveText('Partita 3-1 con Volley Bibbiano approvata: +10 passi.');
   expect(t.partite.find((p) => p.id === 'p3')).toMatchObject({ set_loro: 1, in_campo: false });
 
-  await riga('Arbor Itarca').getByRole('button', { name: /^Partita: Arbor/ }).click();
+  await riga('Arbor Itarca').getByRole('button', { name: 'Approva' }).click();
   await page.getByRole('dialog').getByRole('button', { name: /^Rifiuta/ }).click();
   await expect(page.getByRole('status')).toHaveText('Partita con Arbor Itarca rifiutata.');
   expect(t.partite.map((p) => p.id)).toEqual(['p1', 'p3']);
@@ -202,7 +204,7 @@ test('partite: prima di R-Evolution non compaiono', async ({ page }) => {
   await page.goto('/');
   await expect(daFare(page)).not.toContainText('Foxes');
   await scheda(page, 'Settimana');
-  await expect(page.getByRole('heading', { name: 'Partite' })).toHaveCount(0);
+  await expect(page.getByText('Partite', { exact: true })).toHaveCount(0);
 });
 
 test('segnare una partita dalla Settimana: già approvata, passi dal server', async ({ page }) => {
@@ -211,6 +213,7 @@ test('segnare una partita dalla Settimana: già approvata, passi dal server', as
   const { t, chiamate } = await finto(page, d, { passi: { passi: 25 } });
   await page.goto('/');
   await scheda(page, 'Settimana');
+  await page.getByText('Partite', { exact: true }).click();
   await page.getByRole('button', { name: /^Segna una partita/ }).click();
   await page.getByLabel('Contro').fill('Volley Bibbiano');
   await page.getByRole('button', { name: 'Set loro: più' }).click();
@@ -225,7 +228,7 @@ test('correggere una spunta nel suo giorno della Settimana', async ({ page }) =>
   const { t } = await finto(page, dati());
   await page.goto('/');
   await scheda(page, 'Settimana');
-  await page.getByRole('button', { name: 'Mar 24', exact: true }).click();
+  await page.getByRole('button', { name: /^Mar 24/ }).click();
   await page.getByRole('button', { name: 'Togli la spunta: Cartina' }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Togli la spunta' }).click();
   await expect(page.getByRole('status')).toContainText('Spunta tolta');
@@ -239,7 +242,7 @@ test('foto mancante: la fa Lani; dopo le 20 o dalla scadenza la possono fare i g
   d.richieste_foto = [{ id: 'r1', motivo: 'compito', materia_id: 'italiano', pagine: '34–38', compito_id: 'c2', stato: 'aperta', creato_il: '2026-11-23T13:00:00Z' }];
   await finto(page, d);
   await page.goto('/');
-  const riga = daFare(page).getByRole('listitem').filter({ hasText: 'Foto: Italiano' });
+  const riga = page.getByRole('list', { name: 'Da sapere' }).getByRole('listitem').filter({ hasText: 'Foto: Italiano' });
   await expect(riga).toContainText('La fa Lani · +2');
   await expect(riga.getByRole('button')).toHaveCount(0);
 

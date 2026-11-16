@@ -33,11 +33,11 @@ export default function Genitori({ client, esci, chiudi }: { client: SupabaseCli
     const { data } = await client.functions.invoke('passi', { body: { tipo, id } });
     return (data?.passi as number) ?? 0;
   };
-  // avviso in basso per 6 secondi
+  // avviso in basso per 10 secondi
   const avvisa = (s: string) => {
     setAvviso(s);
     window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => setAvviso(undefined), 6000);
+    timer.current = window.setTimeout(() => setAvviso(undefined), 10000);
   };
   useEffect(() => () => window.clearTimeout(timer.current), []);
   const [avvio, setAvvio] = useState(() => {

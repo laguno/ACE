@@ -40,7 +40,7 @@ test('Lani a casa dal giorno della Settimana: compito alla lezione dopo, verific
   const { t } = await finto(page, dati());
   await page.goto('/');
   await scheda(page, 'Settimana');
-  await page.getByRole('button', { name: 'Mar 24', exact: true }).click();
+  await page.getByRole('button', { name: /^Mar 24/ }).click();
   await page.getByRole('button', { name: /^Lani a casa martedì 24\/11/ }).click();
   const foglio = page.getByRole('dialog', { name: 'Lani a casa martedì 24/11' });
   await foglio.getByRole('button', { name: 'Segna Lani a casa' }).click();
@@ -49,7 +49,7 @@ test('Lani a casa dal giorno della Settimana: compito alla lezione dopo, verific
   // geografia di martedì va a venerdì 27; quello già fatto resta dov'è
   expect(t.compiti.find((c) => c.id === 'c1')?.scadenza_spostata).toBe('2026-11-27');
   expect(t.compiti.find((c) => c.id === 'c2')?.scadenza_spostata).toBeUndefined();
-  await expect(page.getByRole('button', { name: 'Mar 24', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^Mar 24/ })).toBeVisible();
   await expect(page.getByText('Niente chiavi in gioco questo giorno')).toBeVisible();
 
   await scheda(page, 'Oggi');
@@ -66,7 +66,7 @@ test('Lani a casa per più giorni con "fino a"', async ({ page }) => {
   const { t } = await finto(page, dati());
   await page.goto('/');
   await scheda(page, 'Settimana');
-  await page.getByRole('button', { name: 'Mar 24', exact: true }).click();
+  await page.getByRole('button', { name: /^Mar 24/ }).click();
   await page.getByRole('button', { name: /^Lani a casa martedì 24\/11/ }).click();
   const foglio = page.getByRole('dialog');
   await foglio.getByLabel('Fino a').fill('2026-11-26');

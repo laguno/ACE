@@ -23,7 +23,7 @@ export default function Settimana({ client, passi, avvisa }: Props) {
   const [giorno, setGiorno] = useState(R.iso(oggi));
   const [d, setD] = useState<Dati>();
   const [vista, setVista] = useState<'partita' | 'foglio'>();
-  const [chiede, setChiede] = useState<'casa' | { togli: Compito } | { firma: Foglio_ } | { foto: () => void }>();
+  const [chiede, setChiede] = useState<'casa' | 'togliCasa' | { togli: Compito } | { firma: Foglio_ } | { foto: () => void }>();
 
   async function carica() {
     const [v, o, n, s, c, a, f, re] = await Promise.all([
@@ -132,7 +132,12 @@ export default function Settimana({ client, passi, avvisa }: Props) {
             <button key={g} type="button" aria-pressed={g === giorno} onClick={() => setGiorno(g)}>
               {GIORNI[data.getDay()].slice(0, 3).replace(/^./, (x) => x.toUpperCase())}{' '}
               <small>{data.getDate()}</small>
-              {qualcosa && <span className="punto" aria-hidden />}
+              {qualcosa && (
+                <>
+                  <span className="punto" aria-hidden />
+                  <span className="solo-lettori">, da guardare</span>
+                </>
+              )}
             </button>
           );
         })}
@@ -170,7 +175,7 @@ export default function Settimana({ client, passi, avvisa }: Props) {
                 titolo="Lani a casa"
                 sotto="Niente chiavi in gioco questo giorno"
                 azione={
-                  <button type="button" className="ga-btn tenue" onClick={async () => fatto(await togliAssenza(client, giorno))}>
+                  <button type="button" className="ga-btn tenue" onClick={() => setChiede('togliCasa')}>
                     Togli
                   </button>
                 }
@@ -188,13 +193,14 @@ export default function Settimana({ client, passi, avvisa }: Props) {
       </section>
 
       {R.rEvolutionAttiva(oggi, d.rEvolutionDa) && (
-        <section className="ga-sezione" aria-labelledby="partite">
-          <h2 id="partite">Partite</h2>
+        // si usa di rado (correggere in campo / in panchina, segnarne una a mano): chiusa
+        <details className="ga-chiusa">
+          <summary>Partite</summary>
           <Elenco>
             <PartiteFipav client={client} passi={passi} avvisa={avvisa} />
             <Riga icona={<Volleyball size={20} weight="bold" aria-hidden />} titolo="Segna una partita" sotto="Se la FIPAV non la porta" vai={() => setVista('partita')} />
           </Elenco>
-        </section>
+        </details>
       )}
 
       <section className="ga-sezione" aria-labelledby="fogli">
@@ -221,10 +227,15 @@ export default function Settimana({ client, passi, avvisa }: Props) {
       <FotoSalvate client={client} avvisa={avvisa} conferma={(si) => setChiede({ foto: si })} />
 
       {chiede === 'casa' && <FoglioAssenza client={client} giorno={giorno} avvisa={fatto} chiudi={() => setChiede(undefined)} />}
+      {chiede === 'togliCasa' && (
+        <Foglio titolo={`Togliere l’assenza di ${bello(giorno)}?`} azione="Togli l’assenza" conferma={async () => (setChiede(undefined), fatto(await togliAssenza(client, giorno)))} chiudi={() => setChiede(undefined)}>
+          <p className="ga-nota">Quel giorno torna di scuola: chiavi in gioco come sempre. I compiti già spostati restano dove sono.</p>
+        </Foglio>
+      )}
       {typeof chiede === 'object' && 'togli' in chiede && (
         <Foglio titolo="Togliere la spunta?" azione="Togli la spunta" conferma={() => togli(chiede.togli)} chiudi={() => setChiede(undefined)}>
           <p className="ga-nota">
-            {chiede.togli.materie?.nome ?? 'Compito'}: {chiede.togli.testo}. Lani perde i passi di questo compito e vede chi l’ha corretta. Per un imbroglio voluto c’è anche “Balla”.
+            {chiede.togli.materie?.nome ?? 'Compito'}: {chiede.togli.testo}. Lani perde i passi di questo compito e vede chi l’ha corretta. Se l’ha fatto apposta, in Oggi c’è Segna, Balla.
           </p>
         </Foglio>
       )}

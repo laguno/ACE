@@ -20,9 +20,9 @@ export const VOCI_GESTI = [
 ] as const;
 
 export const SGRIDATE = [
-  ['bagno', 'Bagno da sistemare'],
-  ['antisportivo', 'Antisportiva'],
-  ['balla', 'Balla'],
+  ['bagno', 'Bagno da sistemare', 'Asciugamani, tappetino, specchio'],
+  ['antisportivo', 'Antisportiva', 'Un gesto antisportivo in campo'],
+  ['balla', 'Balla', 'Una cosa non vera o un imbroglio voluto'],
 ] as const;
 
 /**

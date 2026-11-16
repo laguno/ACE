@@ -75,7 +75,7 @@ test('Lani esce a metà: le foto restano e al ritorno si continua', async ({ pag
 });
 
 // dal 16/11 la foto la fa Lani; i genitori la possono fare dalle 20 (o dalla scadenza), senza passi
-test('genitori: foto mancante in Da fare per voi, dopo le 20', async ({ page }) => {
+test('genitori: foto mancante in Oggi (Da sapere), dopo le 20', async ({ page }) => {
   await page.clock.setFixedTime(new Date('2026-12-01T20:30:00+01:00'));
   const { t, chiamate } = await finto(page, {
     ...base(),
@@ -86,7 +86,7 @@ test('genitori: foto mancante in Da fare per voi, dopo le 20', async ({ page }) 
     sgridate: [],
   });
   await page.goto('/');
-  const carta = page.getByRole('list', { name: 'Da fare per voi' }).getByRole('listitem').filter({ hasText: 'Foto: Italiano' });
+  const carta = page.getByRole('list', { name: 'Da sapere' }).getByRole('listitem').filter({ hasText: 'Foto: Italiano' });
   await expect(carta).toContainText('Lani non prende i passi');
   await carta.getByLabel('Galleria: Italiano: pagine 340–352').setInputFiles([
     { name: 'a.jpg', mimeType: 'image/jpeg', buffer: JPEG },

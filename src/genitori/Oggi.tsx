@@ -28,7 +28,7 @@ type Dati = {
 export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: (n: number) => void }) {
   const oggi = R.iso(R.giornoRoma(new Date()));
   const [d, setD] = useState<Dati>();
-  const [foglio, setFoglio] = useState<'passi' | 'segna' | 'casa' | { partita: PartitaDaApprovare } | { forziere: number } | { verifica: Verifica }>();
+  const [foglio, setFoglio] = useState<'passi' | 'segna' | 'casa' | { partita: PartitaDaApprovare } | { forziere: number } | { verifica: Verifica } | { firma: Foglio_ }>();
 
   async function carica() {
     const [pa, re, fo, rf, fz, ve, gm, gc, mp, se, im] = await Promise.all([
@@ -96,19 +96,18 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
         <h2 id="da-fare">
           Da fare per voi {righe.length > 0 && <span className="ga-conta">{righe.length}</span>}
         </h2>
-        {righe.length === 0 ? (
+        {righe.length === 0 && d.foto.length === 0 ? (
           <Vuoto titolo="Niente da fare per voi" testo="Partite, fogli, foto e forzieri sono a posto." />
-        ) : (
+        ) : righe.length > 0 && (
           <Elenco etichetta="Da fare per voi">
             {d.partite.map((p) => (
               <Riga
                 key={p.id}
                 icona={<Volleyball size={20} weight="bold" aria-hidden />}
                 titolo={`Partita: ${p.avversaria} ${p.set_nostri}-${p.set_loro}`}
-                sotto={`${bello(p.data)} · l'ha segnata Lani · tocca per correggere`}
-                vai={() => setFoglio({ partita: p })}
+                sotto={`${bello(p.data)} · l'ha segnata Lani`}
                 azione={
-                  <button type="button" className="ga-btn" onClick={async () => fatto(await approvaPartita(client, passi, p))}>
+                  <button type="button" className="ga-btn" onClick={() => setFoglio({ partita: p })}>
                     Approva
                   </button>
                 }
@@ -122,7 +121,7 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
                 titolo={f.titolo}
                 sotto={`Lani dice di averlo dato${f.scadenza ? ` · entro ${bello(f.scadenza)}` : ''}`}
                 azione={
-                  <button type="button" className="ga-btn" onClick={() => firmato(f)}>
+                  <button type="button" className="ga-btn" onClick={() => setFoglio({ firma: f })}>
                     Firmato
                   </button>
                 }
@@ -149,12 +148,18 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
                 titolo={`${v.materie?.nome ?? 'Verifica'} da recuperare`}
                 sotto={`Verifica di ${bello(v.data)}, ancora senza data`}
                 azione={
-                  <button type="button" className="ga-btn tenue" onClick={() => setFoglio({ verifica: v })}>
+                  <button type="button" className="ga-btn" onClick={() => setFoglio({ verifica: v })}>
                     Metti data
                   </button>
                 }
               />
             ))}
+          </Elenco>
+        )}
+        {d.foto.length > 0 && (
+          <>
+          <p className="ga-nota">Da sapere</p>
+          <Elenco etichetta="Da sapere">
             {d.foto.map((r) => {
               // correzione del signore del 16/11: la foto la fa Lani (+2); i genitori solo dalla scadenza o dopo le 20
               const scade = r.compiti?.scadenza ?? r.verifiche?.data;
@@ -171,6 +176,7 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
               );
             })}
           </Elenco>
+          </>
         )}
       </section>
 
@@ -189,7 +195,7 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
             <PencilSimple size={22} weight="bold" aria-hidden />
           </span>
           <b>Segna</b>
-          <small>Bagno, antisportiva, balla</small>
+          <small>Un fatto da correggere</small>
         </button>
       </div>
 
@@ -220,6 +226,11 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
       {foglio === 'segna' && <FoglioSegna {...{ client, passi, avvisa }} chiudi={() => setFoglio(undefined)} />}
       {foglio === 'casa' && <FoglioAssenza client={client} giorno={oggi} avvisa={fatto} chiudi={() => setFoglio(undefined)} />}
       {typeof foglio === 'object' && 'verifica' in foglio && <FoglioSposta client={client} verifica={foglio.verifica} avvisa={fatto} chiudi={() => setFoglio(undefined)} />}
+      {typeof foglio === 'object' && 'firma' in foglio && (
+        <Foglio titolo={`${foglio.firma.titolo}: firmato?`} azione="Sì, firmato" conferma={() => (firmato(foglio.firma), setFoglio(undefined))} chiudi={() => setFoglio(undefined)}>
+          <p className="ga-nota">Lani prende i passi del foglio consegnato.</p>
+        </Foglio>
+      )}
       {typeof foglio === 'object' && 'forziere' in foglio && (
         <Foglio titolo={`Forziere ${foglio.forziere}: consegnato?`} azione="Sì, consegnato" conferma={() => (consegna(foglio.forziere), setFoglio(undefined))} chiudi={() => setFoglio(undefined)}>
           <p className="ga-nota">Segnatelo quando Lani ha avuto il premio.</p>
@@ -237,9 +248,9 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
   );
 }
 
-/** Le righe di "Da fare per voi" (la foto conta anche se la fa Lani: è una cosa da sapere). */
+/** Le righe di "Da fare per voi": quello che aspetta i genitori (le foto le fa Lani: stanno sotto, in "Da sapere"). */
 function daFare(d: Dati) {
-  return [...d.partite, ...d.fogli, ...d.forzieri, ...d.verifiche.filter((v) => daRecuperare(v, d.assenze)), ...d.foto];
+  return [...d.partite, ...d.fogli, ...d.forzieri, ...d.verifiche.filter((v) => daRecuperare(v, d.assenze))];
 }
 
 function FoglioPartita({ partita: p, approva, rifiuta, chiudi }: { partita: PartitaDaApprovare; approva: (f: FormData) => void; rifiuta: () => void; chiudi: () => void }) {
@@ -341,9 +352,12 @@ function FoglioSegna({ client, passi, avvisa, chiudi }: Props & { chiudi: () => 
   return (
     <Foglio titolo="Segna" azione={tipo ? `Segna ${meno(R.passiSgridata(tipo))}` : 'Segna'} pronto={pronto} conferma={segna} chiudi={chiudi}>
       <div className="ga-opzioni">
-        {SGRIDATE.map(([t, n]) => (
+        {SGRIDATE.map(([t, n, cosa]) => (
           <button key={t} type="button" className="ga-opzione" aria-pressed={tipo === t} onClick={() => setTipo(t)}>
-            {n}
+            <span className="ga-opzione-testo">
+              {n}
+              <small>{cosa}</small>
+            </span>
             <span className="valore">{meno(R.passiSgridata(t))}</span>
           </button>
         ))}

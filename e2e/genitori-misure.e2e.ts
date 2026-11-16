@@ -69,7 +69,7 @@ const DOPO: Passo[] = [
   ['01-oggi', async () => {}],
   ['02-dai-passi', (p) => p.getByRole('button', { name: /^Dai passi/ }).click()],
   ['03-segna-balla', async (p) => (await p.getByRole('button', { name: /^Segna/ }).click(), p.getByRole('button', { name: /^Balla/ }).click())],
-  ['04-partita', (p) => p.getByRole('button', { name: /^Partita: Foxes/ }).click()],
+  ['04-partita', (p) => p.getByRole('list', { name: 'Da fare per voi' }).getByRole('button', { name: 'Approva' }).first().click()],
   ['05-settimana', scheda('Settimana')],
   ['06-forzieri', scheda('Forzieri')],
   ['07-forziere', dentro('Forzieri', /^2 · Cinema/)],

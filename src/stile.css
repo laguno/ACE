@@ -829,3 +829,10 @@ dialog.ga-velo::backdrop { background: transparent; }
 .ga-radio span::before { content: ''; flex: none; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--lilla-bordo); background: var(--bianco); box-sizing: border-box; }
 .ga-radio input:checked + span::before { border: 7px solid var(--accento); }
 .ga-giorni { gap: 2px; }
+.ga-opzione-testo { display: flex; flex-direction: column; padding: 6px 0; }
+.ga-opzione-testo small { font: 600 13px Nunito, sans-serif; color: var(--testo-2); }
+.ga-schede button { font-size: 13px; }
+.ga-btn { font-size: 15px; }
+.ga details.ga-chiusa { padding: 0; background: none; }
+.ga details.ga-chiusa > summary { padding: 0 4px; font: 800 18px 'Baloo 2', Nunito, sans-serif; }
+.ga details.ga-chiusa[open] > summary { margin-bottom: 8px; }
