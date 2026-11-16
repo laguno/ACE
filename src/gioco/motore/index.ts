@@ -109,7 +109,11 @@ export function nuovaPartita(seme: number, puntiSet: number): Stato {
 // rally point; il set si vince a puntiSet con due punti di scarto
 function punto(s: Stato, lato: Lato): void {
   s.punti[lato]++;
-  if (s.punti[lato] >= s.puntiSet && s.punti[lato] - s.punti[lato === 0 ? 1 : 0] >= 2) s.vincitore = lato;
+  if (
+    s.punti[lato] >= s.puntiSet &&
+    s.punti[lato] - s.punti[lato === 0 ? 1 : 0] >= 2
+  )
+    s.vincitore = lato;
   else servi(s, lato);
 }
 
@@ -127,8 +131,39 @@ function pareti(p: Corpo): void {
   }
 }
 
+// rete: un'asta con la cima tonda. xPrima dice da che lato stava la palla: da sotto non passa.
+function rete(p: Corpo, xPrima: number): void {
+  const dxR = p.x - M.reteX;
+  const lim = M.raggio + M.reteMezza;
+  if (p.y < M.reteAlta) {
+    if (Math.abs(dxR) < lim || (xPrima - M.reteX) * dxR < 0) {
+      const lato = xPrima < M.reteX ? -1 : 1;
+      p.x = M.reteX + lato * lim;
+      p.vx = lato * Math.abs(p.vx);
+    }
+  } else {
+    const dy = p.y - M.reteAlta;
+    const d2 = dxR * dxR + dy * dy;
+    if (d2 < lim * lim) {
+      const d = Math.sqrt(d2);
+      const nx = d > 0 ? dxR / d : 0;
+      const ny = d > 0 ? dy / d : 1;
+      p.x = M.reteX + nx * lim;
+      p.y = M.reteAlta + ny * lim;
+      const vn = p.vx * nx + p.vy * ny;
+      if (vn < 0) {
+        p.vx -= 2 * vn * nx;
+        p.vy -= 2 * vn * ny;
+      }
+    }
+  }
+}
+
 /** Un sessantesimo di secondo. Non tocca lo stato ricevuto. A partita finita lo restituisce com'è. */
-export function passo(prima: Stato, comandi: readonly [Comandi, Comandi]): Stato {
+export function passo(
+  prima: Stato,
+  comandi: readonly [Comandi, Comandi],
+): Stato {
   if (prima.vincitore !== null) return prima;
   const s: Stato = {
     ...prima,
@@ -164,31 +199,8 @@ export function passo(prima: Stato, comandi: readonly [Comandi, Comandi]): Stato
   p.y += p.vy;
   pareti(p);
 
-  // rete: un'asta con la cima tonda
-  const dxR = p.x - M.reteX;
-  const lim = M.raggio + M.reteMezza;
-  if (p.y < M.reteAlta) {
-    if (Math.abs(dxR) < lim || (xPrima - M.reteX) * dxR < 0) {
-      const lato = xPrima < M.reteX ? -1 : 1;
-      p.x = M.reteX + lato * lim;
-      p.vx = lato * Math.abs(p.vx);
-    }
-  } else {
-    const dy = p.y - M.reteAlta;
-    const d2 = dxR * dxR + dy * dy;
-    if (d2 < lim * lim) {
-      const d = Math.sqrt(d2);
-      const nx = d > 0 ? dxR / d : 0;
-      const ny = d > 0 ? dy / d : 1;
-      p.x = M.reteX + nx * lim;
-      p.y = M.reteAlta + ny * lim;
-      const vn = p.vx * nx + p.vy * ny;
-      if (vn < 0) {
-        p.vx -= 2 * vn * nx;
-        p.vy -= 2 * vn * ny;
-      }
-    }
-  }
+  rete(p, xPrima);
+  const xLato = p.x;
 
   // tocchi: la palla riparte lungo la linea centro del giocatore → centro della palla
   const R = M.raggio + M.raggioG;
@@ -215,10 +227,13 @@ export function passo(prima: Stato, comandi: readonly [Comandi, Comandi]): Stato
     s.latoTocchi = l;
     s.mira = estrai(s) * 2 - 1;
     if (s.tocchi > M.tocchiMax) {
+      pareti(p);
       punto(s, l === 0 ? 1 : 0);
       return s;
     }
   }
+  // un tocco a ridosso della rete o del muro non deve spingere la palla dall'altra parte
+  rete(p, xLato);
   pareti(p);
 
   if (p.y - M.raggio <= 0) punto(s, p.x < M.reteX ? 1 : 0);
@@ -247,10 +262,18 @@ export function ia(s: Stato, lato: Lato, errore: number): Comandi {
     }
   }
   const mia = lato === 0 ? x < M.reteX : x > M.reteX;
-  const meta = mia ? x + (lato === 0 ? -1 : 1) * M.scartoIA + s.mira * errore : M.casa[lato];
+  const meta = mia
+    ? x + (lato === 0 ? -1 : 1) * M.scartoIA + s.mira * errore
+    : M.casa[lato];
   const dx = meta - g.x;
   const alta = s.palla.y - (g.y + M.centroG);
   const salta =
-    mia && s.attesa === 0 && s.tocchi >= 1 && s.palla.vy < 0 && Math.abs(s.palla.x - g.x) < 70 && alta > 110 && alta < 220;
+    mia &&
+    s.attesa === 0 &&
+    s.tocchi >= 1 &&
+    s.palla.vy < 0 &&
+    Math.abs(s.palla.x - g.x) < 70 &&
+    alta > 110 &&
+    alta < 220;
   return { sx: dx < -M.passoG, dx: dx > M.passoG, salta };
 }
