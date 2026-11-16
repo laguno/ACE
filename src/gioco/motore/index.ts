@@ -45,7 +45,7 @@ export type Stato = {
   palla: Corpo;
   giocatori: [Corpo, Corpo];
   punti: [number, number];
-  puntiSet: number;
+  durata: number; // tic di gioco: scaduti, la partita finisce al primo punto che non lascia la parità
   battuta: Lato;
   attesa: number; // tic che mancano alla discesa della palla di battuta
   tocchi: number; // tocchi di fila di latoTocchi
@@ -82,8 +82,11 @@ function servi(s: Stato, lato: Lato): void {
   s.mira = estrai(s) * 2 - 1;
 }
 
-/** Partita nuova: il seme decide chi batte per primo. puntiSet viene da data/config-gioco.json. */
-export function nuovaPartita(seme: number, puntiSet: number): Stato {
+/**
+ * Partita nuova, a tempo: il seme decide chi batte per primo. durata in tic (secondi × HZ), dai
+ * secondi di data/config-gioco.json.
+ */
+export function nuovaPartita(seme: number, durata: number): Stato {
   const s: Stato = {
     tic: 0,
     seme: seme | 0,
@@ -93,7 +96,7 @@ export function nuovaPartita(seme: number, puntiSet: number): Stato {
       { x: 0, y: 0, vx: 0, vy: 0 },
     ],
     punti: [0, 0],
-    puntiSet,
+    durata,
     battuta: 0,
     attesa: 0,
     tocchi: 0,
@@ -106,14 +109,12 @@ export function nuovaPartita(seme: number, puntiSet: number): Stato {
   return s;
 }
 
-// rally point; il set si vince a puntiSet con due punti di scarto
+// Rally point, a tempo: vince chi ha più punti quando il tempo è scaduto. Lo scambio in corso si
+// finisce sempre (si controlla solo a punto fatto) e in parità si va avanti: decide il punto dopo.
 function punto(s: Stato, lato: Lato): void {
   s.punti[lato]++;
-  if (
-    s.punti[lato] >= s.puntiSet &&
-    s.punti[lato] - s.punti[lato === 0 ? 1 : 0] >= 2
-  )
-    s.vincitore = lato;
+  if (s.tic >= s.durata && s.punti[0] !== s.punti[1])
+    s.vincitore = s.punti[0] > s.punti[1] ? 0 : 1;
   else servi(s, lato);
 }
 

@@ -217,6 +217,11 @@
     "secondi": 600,
     "finestra": { "da": "06:00", "a": "13:00" }
   },
+  "pallavolo": {
+    "nota": "Gioco di pallavolo (docs/09, decisi dal signore il 16/11): partita a tempo, vince chi ha più punti allo scadere; lo scambio in corso si finisce, in parità decide il punto dopo. Nessun premio per la vittoria. Il tetto al giorno lo conterà il server dalla Fase 2.",
+    "secondi": 120,
+    "partite_al_giorno": 3
+  },
   "classifiche": {
     "nota": "Sprint 2: classifiche dal portale FIPAV Reggio Emilia, lette una volta al giorno dalla funzione classifiche. Stagione 2026/27. Se la squadra passa alla fase dopo cambia il girone (CId): per ora si cambia qui.",
     "portale": "https://reggioemilia.portalefipav.net/classifica.aspx?CId=",

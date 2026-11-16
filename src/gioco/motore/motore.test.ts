@@ -4,6 +4,7 @@ import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import {
   FERMO,
+  HZ,
   M,
   caso,
   ia,
@@ -16,7 +17,7 @@ import {
 
 type Coppia = readonly [Comandi, Comandi];
 
-const PUNTI = 15;
+const DURATA = 2 * 60 * HZ; // durata normale: due minuti
 const FERMI: Coppia = [FERMO, FERMO];
 const seme32 = fc.integer({ min: -(2 ** 31), max: 2 ** 31 - 1 });
 const comandiArb = fc.record({
@@ -36,14 +37,14 @@ const sequenzaArb: fc.Arbitrary<Coppia[]> = fc
 
 // ---- aiutanti ----
 
-const nuova = (seme: number, puntiSet = PUNTI) => nuovaPartita(seme, puntiSet);
+const nuova = (seme: number, durata = DURATA) => nuovaPartita(seme, durata);
 
 /** Rigioca una partita: seme + comandi, uno per tic. */
 function gioca(
   seme: number,
   comandi: readonly Coppia[],
-  puntiSet = PUNTI,
-  da: Stato = nuova(seme, puntiSet),
+  durata = DURATA,
+  da: Stato = nuova(seme, durata),
 ): Stato {
   let s = da;
   for (const c of comandi) s = passo(s, c);
@@ -196,7 +197,7 @@ describe("nuovaPartita", () => {
         expect(s.punti).toEqual([0, 0]);
         expect(s.vincitore).toBeNull();
         expect(s.tic).toBe(0);
-        expect(s.puntiSet).toBe(PUNTI);
+        expect(s.durata).toBe(DURATA);
         expect(s.attesa).toBe(M.attesa);
         expect(s.tocchi).toBe(0);
         expect(s.latoTocchi).toBeNull();
@@ -271,7 +272,7 @@ describe("determinismo", () => {
         const salvato = JSON.parse(
           JSON.stringify(gioca(seme, comandi.slice(0, meta))),
         ) as Stato;
-        const ripreso = gioca(seme, comandi.slice(meta), PUNTI, salvato);
+        const ripreso = gioca(seme, comandi.slice(meta), DURATA, salvato);
         expect(ripreso).toEqual(gioca(seme, comandi));
       }),
       { numRuns: 30 },
@@ -381,67 +382,102 @@ describe("regole", () => {
     expect(dopo.tocchi).toBe(1);
   });
 
-  describe("fine set (puntiSet 3)", () => {
-    const P = 3;
-    const conPunti = (a: number, b: number) => {
-      const s = nuova(7, P);
+  describe("fine partita a tempo", () => {
+    const D = 600; // durata breve per i test a tavolino
+    /** Stato con il tempo già scaduto (tic >= durata dopo il passo) e punteggio dato. */
+    const scaduto = (a: number, b: number) => {
+      const s = nuova(7, D);
       s.punti = [a, b];
+      s.tic = D;
       return s;
     };
-    it("a puntiSet-1 pari il punto successivo non chiude: serve lo scarto di 2", () => {
-      for (const lato of [0, 1] as const) {
-        const s = passo(
-          aTerra(conPunti(P - 1, P - 1), lato === 0 ? 1 : 0),
-          FERMI,
-        );
-        expect(s.punti[lato]).toBe(P);
-        expect(s.vincitore).toBeNull();
-        expect(s.battuta).toBe(lato);
-      }
-    });
-    it("con scarto 2 chiude, e vince chi ha segnato", () => {
-      for (const lato of [0, 1] as const) {
-        const contro = lato === 0 ? 1 : 0;
-        const punti: [number, number] = [0, 0];
-        punti[lato] = P - 1;
-        punti[contro] = P - 3;
-        const chiude = passo(aTerra(conPunti(...punti), contro), FERMI);
-        expect(chiude.vincitore).toBe(lato);
-        // dopo il vantaggio (P, P-1) un altro punto chiude
-        punti[lato] = P;
-        punti[contro] = P - 1;
-        expect(passo(aTerra(conPunti(...punti), contro), FERMI).vincitore).toBe(
-          lato,
-        );
-      }
-    });
-    it("proprietà: il set si chiude solo con puntiSet e due di scarto (oltre il puntiSet si va ai vantaggi)", () => {
+    it("prima della scadenza nessun punto chiude la partita", () => {
       fc.assert(
         fc.property(
-          fc.integer({ min: 2, max: PUNTI }),
           fc.integer({ min: 0, max: 30 }),
           fc.integer({ min: 0, max: 30 }),
           fc.constantFrom<Lato>(0, 1),
-          (puntiSet, a, b, lato) => {
+          (a, b, lato) => {
+            const s = nuova(7, D);
+            s.punti = [a, b];
+            s.tic = D - 2; // dopo il passo: D - 1, ancora un tic di tempo
+            const dopo = passo(aTerra(s, lato === 0 ? 1 : 0), FERMI);
+            expect(dopo.punti[lato]).toBe(s.punti[lato] + 1);
+            expect(dopo.vincitore).toBeNull();
+            expect(dopo.battuta).toBe(lato);
+          },
+        ),
+      );
+    });
+    it("a tempo scaduto con la palla in volo la partita non finisce finché lo scambio non si chiude", () => {
+      let s = scaduto(5, 3);
+      // palla alta sopra un tratto di campo vuoto: cade a sinistra, punto al lato 1
+      s.attesa = 0;
+      s.palla = { x: M.raggio + 72, y: M.altoBattuta, vx: 0, vy: 0 };
+      let tic = 0;
+      while (sommaPunti(s) === 8 && tic++ < 600) {
+        s = passo(s, FERMI);
+        if (sommaPunti(s) === 8) expect(s.vincitore).toBeNull();
+      }
+      expect(tic).toBeGreaterThan(1); // la palla era davvero in volo
+      expect(s.punti).toEqual([5, 4]);
+      expect(s.vincitore).toBe(0); // vince chi ha più punti, anche se ha segnato chi era sotto
+    });
+    it("a tempo scaduto un punto che lascia il punteggio diverso chiude: vince chi ha più punti", () => {
+      for (const [a, b] of [
+        [5, 3],
+        [3, 5],
+        [0, 0],
+        [9, 8],
+      ] as const) {
+        for (const lato of [0, 1] as const) {
+          const s = scaduto(a, b);
+          const dopo = passo(aTerra(s, lato === 0 ? 1 : 0), FERMI);
+          const p = [a, b];
+          p[lato]++;
+          if (p[0] === p[1]) expect(dopo.vincitore).toBeNull();
+          else expect(dopo.vincitore).toBe(p[0] > p[1] ? 0 : 1);
+        }
+      }
+    });
+    it("a tempo scaduto un punto che porta in parità non chiude; il punto dopo sì", () => {
+      for (const lato of [0, 1] as const) {
+        const contro = lato === 0 ? 1 : 0;
+        const punti: [number, number] = [0, 0];
+        punti[lato] = 4; // chi segna era sotto di uno
+        punti[contro] = 5;
+        const parita = passo(aTerra(scaduto(...punti), contro), FERMI);
+        expect(parita.punti).toEqual([5, 5]);
+        expect(parita.vincitore).toBeNull();
+        expect(parita.battuta).toBe(lato);
+        const fine = passo(aTerra(parita, contro), FERMI);
+        expect(fine.punti[lato]).toBe(6);
+        expect(fine.vincitore).toBe(lato);
+      }
+    });
+    it("proprietà: a tempo scaduto vince chi ha più punti dopo il punto, in parità si continua", () => {
+      fc.assert(
+        fc.property(
+          fc.integer({ min: 0, max: 30 }),
+          fc.integer({ min: 0, max: 30 }),
+          fc.constantFrom<Lato>(0, 1),
+          (a, b, lato) => {
             const punti: [number, number] = [a, b];
-            const contro = lato === 0 ? 1 : 0;
-            fc.pre(
-              !punti.some((x, i) => x >= puntiSet && x - punti[1 - i] >= 2),
-            ); // stato già chiuso: non raggiungibile
-            const s = nuova(9, puntiSet);
-            s.punti = punti;
-            const dopo = passo(aTerra(s, contro), FERMI);
-            const n = punti[lato] + 1;
-            const chiude = n >= puntiSet && n - punti[contro] >= 2;
-            expect(dopo.punti[lato]).toBe(n);
-            expect(dopo.vincitore).toBe(chiude ? lato : null);
-            if (!chiude) expect(dopo.battuta).toBe(lato);
+            punti[lato]++;
+            const dopo = passo(
+              aTerra(scaduto(a, b), lato === 0 ? 1 : 0),
+              FERMI,
+            );
+            expect(dopo.punti).toEqual(punti);
+            expect(dopo.vincitore).toBe(
+              punti[0] === punti[1] ? null : punti[0] > punti[1] ? 0 : 1,
+            );
           },
         ),
       );
     });
     it("a partita chiusa il motore non si muove più", () => {
-      const chiusa = passo(aTerra(conPunti(P - 1, 0), 1), FERMI);
+      const chiusa = passo(aTerra(scaduto(2, 0), 1), FERMI);
       expect(chiusa.vincitore).toBe(0);
       expect(passo(chiusa, FERMI)).toBe(chiusa);
     });
@@ -522,42 +558,42 @@ describe("rete", () => {
   // Difetto trovato da queste prove il 16/11 e corretto (la rete si riapplica dopo i tocchi): il tocco di un giocatore addossato alla rete spingeva la palla oltre, da sotto.
   // Caso minimo: giocatore 0 a x = reteX-reteMezza-raggioG, palla ferma a x = reteX-raggio-reteMezza, y = centro del giocatore:
   // dopo 1 tic la palla è a x~522, y~59 (dall'altra parte, sotto reteAlta).
-  it(
-    "un tocco con il giocatore addossato alla rete non porta la palla dall'altra parte da sotto",
-    () => {
-      // giocatore 0 alla sua massima x, palla appena fuori dalla fascia della rete, all'altezza del suo centro:
-      // la spinta del tocco la manda lungo la linea centro-centro, oltre la rete.
-      for (const lato of [0, 1] as const) {
-        const s = libera(nuova(2));
-        const dir = lato === 0 ? 1 : -1;
-        const g = s.giocatori[lato];
-        g.x = M.reteX - dir * (M.reteMezza + M.raggioG);
-        s.palla = {
-          x: M.reteX - dir * (M.raggio + M.reteMezza),
-          y: g.y + M.centroG,
-          vx: 0,
-          vy: 0,
-        };
-        expect(primaViolazione(s, 5, () => FERMI, reteIntatta)).toBeNull();
-      }
-    },
-  );
+  it("un tocco con il giocatore addossato alla rete non porta la palla dall'altra parte da sotto", () => {
+    // giocatore 0 alla sua massima x, palla appena fuori dalla fascia della rete, all'altezza del suo centro:
+    // la spinta del tocco la manda lungo la linea centro-centro, oltre la rete.
+    for (const lato of [0, 1] as const) {
+      const s = libera(nuova(2));
+      const dir = lato === 0 ? 1 : -1;
+      const g = s.giocatori[lato];
+      g.x = M.reteX - dir * (M.reteMezza + M.raggioG);
+      s.palla = {
+        x: M.reteX - dir * (M.raggio + M.reteMezza),
+        y: g.y + M.centroG,
+        vx: 0,
+        vy: 0,
+      };
+      expect(primaViolazione(s, 5, () => FERMI, reteIntatta)).toBeNull();
+    }
+  });
 });
 
 describe("CPU (ia)", () => {
-  it("CPU contro CPU (errore 20 e 20) finisce entro 200000 tic, per 10 semi", () => {
+  // dopo la scadenza servono al più uno scambio e i punti di parità: un margine largo
+  const MARGINE = 3 * 60 * HZ; // gli scambi CPU contro CPU durano anche 90 secondi
+  it("CPU contro CPU (errore 20 e 20) finisce entro durata + margine, per 10 semi", () => {
     for (let seme = 0; seme < 10; seme++) {
       const s = finoA(
         nuova(seme),
         (st) => st.vincitore !== null,
-        200000,
+        DURATA + MARGINE,
         (st) => [ia(st, 0, 20), ia(st, 1, 20)],
       );
-      expect(s.vincitore).not.toBeNull();
-      expect(Math.max(...s.punti)).toBeGreaterThanOrEqual(PUNTI);
+      expect(s.tic).toBeGreaterThanOrEqual(DURATA);
+      const v = s.vincitore as Lato;
+      expect(s.punti[v]).toBeGreaterThan(s.punti[v === 0 ? 1 : 0]);
     }
   });
-  it("con errore 0 contro 80 il lato preciso vince almeno 15 partite su 20", () => {
+  it("con errore 0 contro 80 il lato preciso vince più spesso: almeno 14 partite su 20", () => {
     let vinte = 0;
     for (let seme = 0; seme < 20; seme++) {
       const preciso: Lato = seme % 2 === 0 ? 0 : 1; // si alterna il lato per non premiare il campo
@@ -565,12 +601,12 @@ describe("CPU (ia)", () => {
       const s = finoA(
         nuova(seme),
         (st) => st.vincitore !== null,
-        200000,
+        DURATA + MARGINE,
         (st) => [ia(st, 0, err(0)), ia(st, 1, err(1))],
       );
       if (s.vincitore === preciso) vinte++;
     }
-    expect(vinte).toBeGreaterThanOrEqual(15);
+    expect(vinte).toBeGreaterThanOrEqual(14);
   });
   it("ia non cambia lo stato e risponde con comandi veri", () => {
     fc.assert(

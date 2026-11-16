@@ -17,11 +17,11 @@ Il gioco è partito **lunedì 16/11/2026**: Lani usa ACE in produzione. `main` `
 
 ## Ramo `gioco` (16/11 sera, `C:\progetti\ace\app-gioco`, non unito, non pubblicato)
 
-- **Motore di pallavolo** `src/gioco/motore/index.ts` (`docs/09`): puro, 60 Hz, seme, rally point con due di scarto, 3 tocchi, CPU (`ia`, con `errore`). 29 test. Solo + - * / e `Math.sqrt`: stessa partita su ogni dispositivo. Misure in `M`, da tarare con la grafica. `puntiSet` arriva da fuori: metterlo in `data/config-gioco.json` quando nasce la schermata.
+- **Motore di pallavolo** `src/gioco/motore/index.ts` (`docs/09`): puro, 60 Hz, seme, rally point, partita a tempo (`pallavolo.secondi` = 120 in `data/config-gioco.json`: scambio finito, in parità un punto in più), 3 tocchi, CPU (`ia`, con `errore`). Solo + - * / e `Math.sqrt`: stessa partita su ogni dispositivo. Misure in `M`, da tarare con la grafica.
 - **CSP per ambiente**: `vercel.ts` al posto di `vercel.json` (Supabase da `VITE_SUPABASE_URL`, senza variabile la produzione). **Prima di unire a `main`**: una preview e `curl -I` per vedere che le intestazioni arrivano; se mancano non unire.
 - **ACE Prova**: `scripts\apk.ps1 -Ambiente prova -UrlProva https://...` (`docs/runbook.md`). Compilato senza firma: `it.messori.ace.prova`, "ACE Prova". Senza notifiche finché Firebase non ha la seconda app.
 - Worktree nuovo: serve `.env.local` (copiarlo da `app`), sennò `src/genitori/comune.test.ts` non parte.
-- Deciso dal signore: set ai 15 con due di scarto (`docs/09` §5). Orientamento e APK 1.3 restano da fare.
+- Deciso dal signore: partita a tempo di 2 minuti (`docs/09` §5). Orientamento e APK 1.3 restano da fare.
 
 ## Prossimo passo
 

@@ -57,7 +57,7 @@ Il tetto lo conta il **server** (una riga per partita e giorno, nuova migrazione
 ## 4. Le fasi
 
 **Fase 1 (si prova prima di tutto): "Partita di prova"**
-- Un campo (uno sfondo del manifest), 1 contro CPU, tre personaggi (Lani, una compagna, uno a sorpresa), set ai 15 punti.
+- Un campo (uno sfondo del manifest), 1 contro CPU, tre personaggi (Lani, una compagna, uno a sorpresa), partita a tempo di 2 minuti (§5, punto 5).
 - Criterio di fatto: giocabile a 60 fps sul Samsung di Lani; motore con test; un pomeriggio di prova con lei che dice se è divertente. **Se non lo è, si ferma qui.**
 - Gioco libero per la prova, senza tetto né server; solo su "ACE Prova" e sul telefono del signore finché non è pronto.
 
@@ -77,7 +77,7 @@ Il tetto lo conta il **server** (una riga per partita e giorno, nuova migrazione
 2. **Compagne**: solo descrizioni, come per le figurine; niente foto. Soprannomi e numeri li fornisce il signore quando sarà il momento (servono dalla Fase 2).
 3. **Tetto massimo: 3 partite al giorno.** Nessuna condizione per sbloccarle (ribadito alle 17:11).
 4. **Nessun premio per la vittoria**: niente passi, niente figurine, niente contatori. Il gioco vale solo il divertimento.
-5. **Set ai 15 con due punti di scarto** (16/11 sera): sul 14 pari si va avanti finché uno ha due punti in più.
+5. **Partita a tempo: 2 minuti** (16/11 sera; sostituisce il set ai 15 della Fase 1). Vince chi ha più punti allo scadere; lo scambio in corso si finisce; in parità si gioca un punto in più e chi lo fa vince. Il numero sta in `data/config-gioco.json` (`pallavolo.secondi`). Con il tetto di 3 partite fanno 6 minuti al giorno.
 6. **Dove si implementa.** Sessione di Claude Code sul repository di ACE (ramo `gioco`), con test e le regole di CLAUDE.md. Nessuna pubblicazione nelle finestre vietate (14:20-14:45 e 19:45-21:00) e backup prima di ogni pubblicazione, come da HANDOFF.
 
 ## 6. Rischi
