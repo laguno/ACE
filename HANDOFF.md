@@ -16,7 +16,17 @@ Il gioco parte **lunedì 16/11/2026** (`periodo.inizio`) con l'app com'è. Produ
 - Assenze in Lani: in Studio le verifiche "da recuperare" (giorno a casa, non ancora spostate) vengono per prime, quelle spostate a "settimana prossima" non mostrano un giorno; sotto un compito spostato compare "Spostato: eri a casa". **Testi nuovi da approvare** (docs/05, righe "da approvare").
 - Prove: `npm test` 318 (2 saltate), `npm run prova:schema` 298, `npx playwright test` 158 (22 saltate), `npx tsc -p .` 0, build ok.
 
+## Fatto il 16/11 pomeriggio: area genitori (ramo `genitori-ux`, unito a `main`)
+
+- Area genitori a quattro schede (Oggi, Settimana, Forzieri, Impostazioni), barra in basso, kit dei campi, PIN aperto 10 minuti dall'ultima azione. Studio, misure e risultati in `docs/genitori-ux.md`.
+- Deciso dal signore: niente annulla dopo Firmato, Consegnato e Togli spunta (restano con la conferma). Fatti: Segna più snello; in Settimana Fogli (aperta solo con fogli da firmare) e Foto (sempre chiusa) richiudibili.
+- Impeccable: critique 22 → **29/40** (obiettivo 34 non raggiunto), carico cognitivo 6 → 2 su 8, axe 0, bersagli piccoli 0, detector 0 sui sorgenti (4 falsi positivi nella pagina).
+- Code-review: 8 segnalazioni, 2 corrette (Togli con errore dell'update, Salva della Sera dopo un caricamento fallito), 6 lasciate (in `docs/genitori-ux.md` §8).
+- Prove sul codice unito: `npm test` 323 (2 saltate), `prova:schema` 298, `npx playwright test` 188 passate, `tsc` 0, build ok. Dopo il pull di `main` serve `npm install` (pacchetti Capacitor dell'APK). `hookTimeout` di vitest a 60 s: il primo banco PGlite a freddo superava i 10 s.
+
 ## Prossimo passo
+
+0. **Da decidere col signore**: ritocco di sola interfaccia per avvicinare 34/40 (proposta in chat); errore di `passi()` letto come "tetto pieno" in Dai passi (§8, punti 3-4: tocca la logica dei passi, non fatto).
 
 1. **Signore, stasera**: pubblicare le funzioni toccate (`sync-nuvola`, e per `apriRegistro` anche `sync-calendario`, `chiavi`, `classifiche`), un comando alla volta: `npx supabase functions deploy sync-nuvola --use-api --yes`. Quella pubblicata adesso funziona (giro a mano ok), ma senza limite di tempo.
 2. Lunedì 16/11 alle 14:30: `sync_log` fonte nuvola con esito `ok`.
