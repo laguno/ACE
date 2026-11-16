@@ -13,7 +13,7 @@ Le bozze sono in `design/*.html` (esportate dal canvas di design, con le immagin
 | Fondi | #FFF6FA (panna rosata), #FFE3EF (rosa), #F3E6FD (lilla), #CDB8F5 (lilla medio), #BFE6FF (azzurro mattino), #FFE27A (giallo burro, oro e traguardi) |
 | Carte | bianche, raggio 26-34 px, ombra morbida viola `0 10px 24px rgba(123,106,224,.14)` |
 | Pulsanti | pillola, altezza ≥ 44 px (principali 54), ombra interna in basso |
-| Icone di servizio | set Phosphor (bold), mai emoji |
+| Icone di servizio | set Phosphor (bold), mai emoji (tranne in R-Evolution, tema campo del 16/11: `design/REvolution.html`) |
 | Personaggi | sticker con contorno bianco, mai ritagliati dentro cerchi |
 
 Accessibilità: contrasto 4,5:1 anche sui testi piccoli, bersagli tattili ≥ 44 px, `<button>` e `<label>` veri, testo alternativo sugli avatar che contano.

@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { Volleyball } from '@phosphor-icons/react';
 import * as R from './lib/regole';
 import { assenteDalCalendario, garaDi, oraDiRoma, pillolaPartita, traQuanto } from './lib/classifiche';
-import { GIORNI, maiuscola } from './spunte';
+import { Emoji } from './kit';
+import { GIORNI, MESI } from './spunte';
 import { supabase } from './supabase';
 
 // Prossima partita di R-Evolution (regole del 15/11, docs/08): dal calendario gare FIPAV (gare_fipav,
@@ -44,19 +45,32 @@ export function useProssimaPartita(): Prossima | null | undefined {
   return p;
 }
 
-export function CartaProssimaPartita() {
-  const p = useProssimaPartita();
+/** Le righe del nastro "Ultim'ora" sulla prossima partita: avversaria, giorno e ora, quanto manca. */
+export function notizieProssima(p: Prossima, ora: Date): string[] {
+  const g = R.giornoRoma(p.inizio);
+  return [`Prossima partita: ${p.avversaria}`, `${GIORNI[g.getDay()]} ${g.getDate()} ${MESI[g.getMonth()]} alle ${oraDiRoma(p.inizio)}`, traQuanto(p.inizio, ora)];
+}
+
+export function CartaProssimaPartita({ p }: { p: Prossima | null | undefined }) {
   if (!p) return null;
   const g = R.giornoRoma(p.inizio);
   return (
     <div className="carta prossima-partita" aria-label="Prossima partita">
-      <h2>Prossima partita</h2>
-      <p>
-        <b>{p.avversaria}</b>, {p.inCasa ? 'in casa' : 'in trasferta'}
-      </p>
-      <p>
-        {maiuscola(GIORNI[g.getDay()])} {g.getDate()}/{g.getMonth() + 1} alle {oraDiRoma(p.inizio)}, {traQuanto(p.inizio, new Date())}
-      </p>
+      <div className="giorno">
+        {GIORNI[g.getDay()].slice(0, 3)} <b>{g.getDate()}</b> {MESI[g.getMonth()]}
+      </div>
+      <div>
+        <h2>
+          <Emoji e="🏐" /> Prossima partita
+        </h2>
+        <p className="avversaria">{p.avversaria}</p>
+        <p>
+          Alle {oraDiRoma(p.inizio)}, {p.inCasa ? 'in casa' : 'in trasferta'} <Emoji e={p.inCasa ? '🏠' : '🚌'} />
+        </p>
+        <span className="quanto">
+          <Emoji e="⏳" /> {traQuanto(p.inizio, new Date())}
+        </span>
+      </div>
     </div>
   );
 }

@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import * as R from './lib/regole';
 import { stessaSquadra, type RigaClassifica } from './lib/classifiche';
-import { Attesa, Testata } from './kit';
+import { Attesa, Emoji, Sticker, useSfondo } from './kit';
 import { MESI } from './spunte';
 import { supabase } from './supabase';
 import { SegnaPartita } from './Partita';
-import { CartaProssimaPartita } from './ProssimaPartita';
+import { CartaProssimaPartita, notizieProssima, useProssimaPartita } from './ProssimaPartita';
 
 // R-Evolution (sprint 2, docs/03): partite segnate da Lani (passi dopo l'approvazione di un
 // genitore), dieci minuti del mese e classifiche dei campionati dal portale FIPAV (funzione
@@ -21,6 +21,8 @@ export default function REvolution() {
   const [d, setD] = useState<{ partite: Partita[]; dieci: number; passiCampo: number; classifiche: Classifica[] }>();
   const [errore, setErrore] = useState('');
   const [avviso, setAvviso] = useState('');
+  const prossima = useProssimaPartita();
+  useSfondo('campo');
 
   const carica = () =>
     Promise.all([
@@ -51,29 +53,76 @@ export default function REvolution() {
 
   const giocate = d.partite.filter((p) => p.approvata_il);
   const vinte = giocate.filter((p) => p.set_nostri > p.set_loro).length;
+  // nastro "Ultim'ora": prossima partita e quanto manca, ultimo risultato approvato, posto in classifica
+  const ultima = giocate[0];
+  const notizie = [
+    ...(prossima ? notizieProssima(prossima, new Date()) : []),
+    ...(ultima ? [`ultima partita: ${ultima.set_nostri}-${ultima.set_loro} con ${ultima.avversaria}`] : []),
+    ...d.classifiche.flatMap((c) => {
+      const r = c.righe.find((x) => stessaSquadra(x.squadra, c.squadra));
+      return r ? [`${r.pos}° posto in ${c.campionato}`] : [];
+    }),
+  ];
+  const giro = notizie.map((n) => (
+    <Fragment key={n}>
+      {n}
+      <Emoji e="🏐" />
+    </Fragment>
+  ));
   return (
     <section className="schermo r-evolution">
-      <Testata sfondo="rosa" posa="lani-divisa" sopra="R-Evolution" titolo="In campo" riga={<p className="conto">+{d.passiCampo} passi presi in campo.</p>} />
+      <header className="campo-testata">
+        <span className="campo-numero" aria-hidden>
+          9
+        </span>
+        <h1>In campo</h1>
+        <p className="conto">
+          <b>+{d.passiCampo}</b> passi presi in campo.
+        </p>
+        <Sticker posa="lani-battuta" misura={236} className="campo-sticker" />
+      </header>
 
-      <CartaProssimaPartita />
+      {notizie.length > 0 && (
+        <div className="ultimora" tabIndex={0}>
+          <strong aria-hidden>Ultim'ora</strong>
+          <p className="solo-lettori">Ultim'ora. {notizie.join('. ')}.</p>
+          {/* il secondo span è la copia che chiude il giro */}
+          <div className="nastro" aria-hidden>
+            <span>{giro}</span>
+            <span>{giro}</span>
+          </div>
+        </div>
+      )}
 
-      <dl className="numeri">
+      <CartaProssimaPartita p={prossima} />
+
+      <dl className="numeri tabellone">
         <div>
-          <dt>Partite</dt>
+          <dt>
+            <Emoji e="🏐" /> partite
+          </dt>
           <dd>{giocate.length}</dd>
-          <dt>{vinte === 1 ? 'una vinta' : `${vinte} vinte`}</dt>
         </div>
         <div>
-          <dt>Dieci minuti</dt>
+          <dt>
+            <Emoji e="🏆" /> vinte
+          </dt>
+          <dd>{vinte}</dd>
+        </div>
+        <div>
+          <dt>
+            <Emoji e="⏱️" /> dieci minuti a {MESI[oggi.getMonth()]}
+          </dt>
           <dd>{d.dieci}</dd>
-          <dt>a {MESI[oggi.getMonth()]}</dt>
         </div>
       </dl>
 
       {d.classifiche.map((c) => (
         <div className="carta" key={c.cid}>
           <div className="testa-carta">
-            <h2>Classifica {c.campionato}</h2>
+            <h2>
+              <Emoji e="🏆" /> Classifica {c.campionato}
+            </h2>
           </div>
           <table className="classifica">
             <thead>
@@ -113,7 +162,9 @@ export default function REvolution() {
 
       <div className="carta">
         <div className="testa-carta">
-          <h2>Partite</h2>
+          <h2>
+            <Emoji e="📣" /> Partite
+          </h2>
         </div>
         {d.partite.length === 0 ? (
           <p>Ancora nessuna partita segnata. Dopo la gara la segni qui sotto.</p>
