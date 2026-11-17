@@ -974,3 +974,62 @@ dialog.ga-velo::backdrop { background: transparent; }
 .r-evolution .coach h2 { margin: 0; font: 800 13px Nunito, sans-serif; color: var(--testo-2); }
 .r-evolution .coach p { margin: 2px 0 0; font-weight: 700; }
 .r-evolution .coach .collegamento { padding: 0; color: var(--granata); }
+
+/* Sensi (passo 5, 17/11): risposta proporzionata al gesto (PRODUCT.md, principio 4). Durate, curve e
+   intensità arrivano da data/config-sensi.json come variabili --sensi-* (sensi.ts): qui niente valori propri.
+   Con prefers-reduced-motion niente movimento: restano i cambi di stato (il cerchio pieno, i colori). */
+.spunta-piu { position: absolute; left: 27px; top: -6px; z-index: 1; padding: 2px 8px; border-radius: 999px; background: var(--accento); color: var(--su-colore); font: 800 13px/1.2 Nunito, sans-serif; white-space: nowrap; pointer-events: none; opacity: 0; translate: -50% 0; }
+.momento-tappa { --momento-durata: var(--sensi-tappa-durata-ms); --momento-scala: var(--sensi-tappa-rimbalzo-scala); }
+.momento-chiave { --momento-durata: var(--sensi-chiave-durata-ms); --momento-scala: var(--sensi-chiave-rimbalzo-scala); }
+.momento-forziere { --momento-durata: var(--sensi-forziere-durata-ms); --momento-scala: var(--sensi-forziere-rimbalzo-scala); }
+@media (prefers-reduced-motion: no-preference) {
+  /* spunta (20 volte al giorno): il cerchio si riempie con un rimbalzo, il "+N" sale e svanisce */
+  .spunte li.appena .bollino { animation: spunta-riempie var(--sensi-spunta-durata-ms) var(--sensi-curva-rimbalzo) both; }
+  .spunta-piu { animation: spunta-sale var(--sensi-spunta-piu-sale-ms) var(--sensi-curva-arrivo) forwards; }
+  .valore.appena { animation: rimbalza var(--sensi-spunta-durata-ms) var(--sensi-curva-rimbalzo) both; }
+  @keyframes spunta-riempie {
+    from { transform: scale(0.6); background: var(--bianco); color: var(--accento); }
+    60% { transform: scale(var(--sensi-spunta-rimbalzo-scala)); }
+    to { transform: none; }
+  }
+  @keyframes rimbalza { 60% { transform: scale(var(--sensi-spunta-rimbalzo-scala)); } }
+  @keyframes spunta-sale {
+    0% { opacity: 0; transform: translateY(0); }
+    20%, 70% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(calc(-1 * var(--sensi-spunta-piu-sale-px))); }
+  }
+  /* tappa e chiave: lo sticker arriva con un rimbalzo */
+  .momento-tappa .popup-avatar img, .momento-chiave .popup-avatar img { animation: momento-arriva var(--momento-durata) var(--sensi-curva-rimbalzo) both; }
+  @keyframes momento-arriva {
+    from { opacity: 0; transform: scale(0.5); }
+    60% { opacity: 1; transform: scale(var(--momento-scala)); }
+    to { transform: none; }
+  }
+  /* forziere: scossa, apertura, il premio che emerge con un brillio */
+  .momento-forziere .popup-oggetto, .momento-forziere .popup-premio { animation: forziere-apre var(--momento-durata) var(--sensi-curva-arrivo) both; }
+  @keyframes forziere-apre {
+    0% { transform: scale(0.55) rotate(0); filter: drop-shadow(0 0 0 transparent); }
+    8% { transform: scale(0.55) rotate(calc(-1 * var(--sensi-forziere-scossa-gradi))); }
+    16% { transform: scale(0.55) rotate(var(--sensi-forziere-scossa-gradi)); }
+    24% { transform: scale(0.55) rotate(calc(-1 * var(--sensi-forziere-scossa-gradi))); }
+    32% { transform: scale(0.55) rotate(0); filter: drop-shadow(0 0 0 transparent); }
+    60% { transform: scale(var(--momento-scala)); filter: drop-shadow(0 0 var(--sensi-forziere-brillio-px) var(--burro)); }
+    100% { transform: none; filter: drop-shadow(0 0 0 transparent); }
+  }
+  .momento-forziere .popup-avatar img:not(.popup-oggetto) { animation: momento-arriva var(--momento-durata) var(--sensi-curva-rimbalzo) both; }
+  /* partita vinta: lo sticker festeggia, il titolo gira come un tabellone */
+  .momento-partita .popup-avatar img { animation: festeggia var(--sensi-partita-durata-ms) var(--sensi-curva-arrivo) both; }
+  .momento-partita h2 { animation: tabellone var(--sensi-partita-durata-ms) var(--sensi-curva-arrivo) both; transform-origin: 50% 0; }
+  @keyframes festeggia {
+    0%, 50%, 100% { transform: none; }
+    25%, 75% { transform: translateY(calc(-1 * var(--sensi-partita-salto-px))); }
+  }
+  @keyframes tabellone { from { opacity: 0; transform: perspective(400px) rotateX(-90deg); } to { opacity: 1; transform: none; } }
+  /* errore: una piccola scossa, niente suono */
+  main [role='alert'], .ga-errore { animation: scossa var(--sensi-errore-durata-ms) ease-in-out both; }
+  @keyframes scossa {
+    20%, 60% { transform: translateX(calc(-1 * var(--sensi-errore-scossa-px))); }
+    40%, 80% { transform: translateX(var(--sensi-errore-scossa-px)); }
+  }
+}
+@media (prefers-reduced-motion: reduce) { .spunta-piu { display: none; } }

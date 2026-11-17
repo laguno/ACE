@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState, useSyncExternalStore } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { BookOpen, MoonStars, Star, Sun, Volleyball } from '@phosphor-icons/react';
 import type { Session } from '@supabase/supabase-js';
 import Accesso from './Accesso';
@@ -13,6 +13,7 @@ import { Attesa } from './kit';
 import { attivaNotifiche, guscio, notifichePossibili, rinnovaIscrizione } from './notifiche';
 import { CHIAVE_SESSIONE, supabase, type Profilo } from './supabase';
 import { useREvolutionDa } from './accensione';
+import { cambioSchermata } from './sensi';
 
 // L'app si apre su Oggi o Sera: le altre schermate si caricano al primo tocco (il service worker
 // le tiene già in memoria, anche senza rete).
@@ -141,6 +142,14 @@ function Lani() {
   useEffect(() => {
     if (giornata && !voce) setVoce(C.momento(oraAdesso(), giornata.chiusura) === 'sera' ? 'Sera' : 'Oggi');
   }, [giornata]);
+  // cambio di schermata: una dissolvenza breve (config-sensi.json); la prima apertura no
+  const contenuto = useRef<HTMLElement>(null);
+  const primaVoce = useRef(true);
+  useEffect(() => {
+    if (!voce) return;
+    if (primaVoce.current) primaVoce.current = false;
+    else cambioSchermata(contenuto.current);
+  }, [voce]);
   if (accogli) return <Benvenuta fine={() => setAccogli(false)} />;
   if (!voce) return <Attesa />;
 
@@ -153,7 +162,7 @@ function Lani() {
 
   return (
     <>
-      <main>
+      <main ref={contenuto}>
         <Suspense fallback={<Attesa />}>
           {voce === 'Sera' ? (
             <Sera />

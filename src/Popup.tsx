@@ -3,6 +3,7 @@ import manifest from '../data/manifest.json' with { type: 'json' };
 import { oraAdesso } from './giornata';
 import * as K from './lib/copione';
 import * as R from './lib/regole';
+import { momentoDelPopup, senti } from './sensi';
 import { adesso } from './spunte';
 import { supabase } from './supabase';
 import { MOMENTO_DEL_POPUP, VistaFrase, fraseDelGiorno, type FraseDelGiorno } from './Frase';
@@ -127,12 +128,15 @@ export function PopupVista({ p, chiudi, azione, altre }: { p: Popup; chiudi: () 
   const t = tono(p);
   const src = immagine(p.posa);
   const malus = t === 'bastone' ? p.testo.match(/[−-]\d+/)?.[0] : undefined;
+  // tappa, chiave, forziere e partita vinta: il momento grande si sente (suono e vibrazione) e si vede (CSS)
+  const momento = momentoDelPopup(p.situazione);
 
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     const d = ref.current;
     if (d && !d.open) d.showModal?.();
     d?.focus(); // il focus sul dialog: si legge il titolo, Tab porta a Ok, niente anello a chi tocca
+    if (momento) senti(momento);
   }, []);
 
   return (
@@ -147,7 +151,7 @@ export function PopupVista({ p, chiudi, azione, altre }: { p: Popup; chiudi: () 
       }}
     >
       {CON_CORIANDOLI.includes(p.situazione) && <Coriandoli />}
-      <div className={`popup popup-${t}`}>
+      <div className={`popup popup-${t}${momento ? ` momento-${momento}` : ''}`}>
         <div className="popup-avatar" aria-hidden>
           {p.situazione === 'forziere_lucchetto' && <img src="/assets/oggetti/lucchetto.webp" alt="" width={110} height={110} />}
           {src && <img src={`/${src}`} alt="" width={t === 'lucchetto' ? 120 : 200} height={t === 'lucchetto' ? 120 : 200} />}

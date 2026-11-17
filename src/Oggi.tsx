@@ -319,6 +319,7 @@ function Pomeriggio({ chiusura, apri }: { chiusura: string | null; apri: Apri })
                   }}
                   onAnnulla={attesa.inAttesa(c.id) ? () => attesa.annulla(c.id, () => segna(c.id)(null)) : undefined}
                   onAiuto={() => setAiuto(c)}
+                  valore={P.compiti}
                 />
               ))}
             </ul>

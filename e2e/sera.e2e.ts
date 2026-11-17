@@ -155,7 +155,7 @@ test('Annulla entro 5 secondi: la spunta non parte', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Sera' }).click();
   await page.getByRole('checkbox', { name: /Pag 12 es 3/ }).check();
-  expect(await page.evaluate(() => (window as unknown as { vibrazioni: unknown[] }).vibrazioni)).toEqual([10]);
+  expect(await page.evaluate(() => (window as unknown as { vibrazioni: unknown[] }).vibrazioni)).toEqual([[10]]); // una vibrazione da 10 ms (data/config-sensi.json)
   await page.clock.runFor(3000);
   await page.getByRole('button', { name: 'Annulla' }).click();
   await expect(page.getByRole('checkbox', { name: /Pag 12 es 3/ })).not.toBeChecked();

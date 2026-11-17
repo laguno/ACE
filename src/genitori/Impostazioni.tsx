@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import * as R from '../lib/regole';
 import { AreaTesto, Attesa, CampoData, CampoTesto, Elenco, Foglio, Interruttore, Riga, Scelta } from '../kit';
+import { scegliSuono, suonoAcceso } from '../sensi';
 import { GIORNI, MESI } from '../spunte';
 import Stato from '../Stato';
 import Vetrina from '../Vetrina';
@@ -22,6 +23,8 @@ export default function Impostazioni({ client, avvisa, esci, sospeso }: Props & 
   // modifiche della Sera non salvate: "‹ Impostazioni" e le schede in basso chiedono prima di uscire
   const [modificato, setModificato] = useState(false);
   const [lascia, setLascia] = useState(false);
+  // per dispositivo (memoria del browser), non in impostazioni: il telefono di Lani e l'iPad scelgono da sé
+  const [suono, setSuono] = useState(suonoAcceso);
   useEffect(() => sospeso?.(modificato), [modificato]);
 
   async function carica() {
@@ -107,6 +110,14 @@ export default function Impostazioni({ client, avvisa, esci, sospeso }: Props & 
         <Riga titolo="Dieci minuti" sotto={`${v.esercizi} ${v.esercizi === 1 ? 'esercizio' : 'esercizi'} nel menu`} vai={() => setPagina('dieci')} />
         <Riga titolo="Frasi di famiglia" sotto={v.frasi ? `${v.frasi} ${v.frasi === 1 ? 'frase' : 'frasi'}` : 'Nessuna'} vai={() => setPagina('frasi')} />
         <Riga titolo="PIN dell’area" sotto="Sui dispositivi di Lani; resta aperta 10 minuti dall’ultima azione" vai={() => setPagina('pin')} />
+        <li>
+          <Interruttore
+            titolo="Suoni su questo dispositivo"
+            testo={suono ? 'Tic alla spunta, musichette per tappe, chiavi, forzieri e partite. Mai nelle notifiche.' : 'Spenti: restano movimento e vibrazione'}
+            acceso={suono}
+            onChange={(acceso) => (scegliSuono(acceso), setSuono(acceso))}
+          />
+        </li>
       </Elenco>
       <section className="ga-sezione" aria-labelledby="controllare">
         <h2 id="controllare">Per controllare</h2>

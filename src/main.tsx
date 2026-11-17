@@ -15,8 +15,10 @@ import '@fontsource/nunito/latin-800.css';
 import '@fontsource/nunito/latin-600-italic.css';
 import '@fontsource/nunito/latin-800-italic.css';
 import './stile.css';
+import { preparaSensi } from './sensi';
 
 ascoltaErrori();
+preparaSensi();
 
 // Versione nuova: il service worker nuovo prende il posto del vecchio e la pagina si ricarica da sola
 // (autoUpdate). Il browser però la cerca solo quando l'app si apre da zero: un'app lasciata in

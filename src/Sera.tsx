@@ -45,7 +45,7 @@ function Voci({ titolo, valore, voci, pronta, quandoPronta, onAnnulla, colore, c
     <div className="carta">
       <div className="testa-carta">
         <h2>{titolo}</h2>
-        {mostraValore(pronta) && <span className="valore">+{valore}</span>}
+        {mostraValore(pronta) && <span className={`valore${onAnnulla ? ' appena' : ''}`}>+{valore}</span>}
       </div>
       {children}
       <ul className="pastiglie">
@@ -227,6 +227,7 @@ export default function Sera() {
                   ? () => attesa.annulla(c.id, () => setCompiti((l) => l?.map((x) => (x.id === c.id ? { ...x, fatto_il: null } : x))))
                   : undefined
               }
+              valore={R.CONFIG.passi.obbligatori.compiti}
             />
           ))}
         </ul>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Check, Lightbulb } from '@phosphor-icons/react';
 import { supabase } from './supabase';
+import { senti } from './sensi';
 
 // Pezzi comuni a Oggi e Sera: la spunta di un compito e il suo aspetto.
 
@@ -30,7 +31,7 @@ export async function passi(tipo: string, id: string): Promise<number> {
 /** Compito spostato dai genitori alla lezione dopo un giorno a casa (docs/02, Assenze). */
 const SPOSTATO = 'Spostato: eri a casa';
 
-export function RigaCompito({ c, numero, nota, onSpunta, onAiuto, onAnnulla }: {
+export function RigaCompito({ c, numero, nota, onSpunta, onAiuto, onAnnulla, valore }: {
   c: Compito;
   numero?: number;
   /** riga piccola sotto il testo (es. "Inizia da qui: è il più lungo") */
@@ -39,10 +40,19 @@ export function RigaCompito({ c, numero, nota, onSpunta, onAiuto, onAnnulla }: {
   onAiuto?: () => void;
   /** presente nei 5 secondi dopo la spunta */
   onAnnulla?: () => void;
+  /** passi della spunta: "+N" che sale subito dopo il gesto */
+  valore?: number;
 }) {
+  // appena spuntato (i 5 secondi dell'Annulla): il cerchio si riempie con un rimbalzo e il "+N" sale
+  const appena = !!onAnnulla && !!c.fatto_il;
   return (
-    <li className={onAiuto || onAnnulla ? 'con-aiuto' : undefined}>
+    <li className={[onAiuto || onAnnulla ? 'con-aiuto' : '', appena ? 'appena' : ''].filter(Boolean).join(' ') || undefined}>
       <label className="numerata">
+        {appena && valore ? (
+          <span className="spunta-piu" aria-hidden>
+            +{valore}
+          </span>
+        ) : null}
         <input type="checkbox" checked={!!c.fatto_il} disabled={!!c.fatto_il} onChange={onSpunta} />
         {/* un solo bersaglio per Pomeriggio e Sera: il cerchio fa da casella, con la spunta diventa ✓;
             nel pomeriggio dentro c'è il numero dell'ordine */}
@@ -95,9 +105,9 @@ export function useAnnulla() {
   return {
     inAttesa: (id: string) => id in attesa,
     avvia(id: string, invia: () => void) {
-      // ogni spunta passa di qui: una vibrazione breve dice "presa" (non su iPhone e iPad, che non vibrano;
-      // niente col movimento ridotto)
-      if (!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) navigator.vibrate?.(10);
+      // ogni spunta passa di qui: tic e vibrazione minuscoli dicono "presa" (sensi.ts; niente vibrazione
+      // su iPhone e iPad, che non vibrano, né col movimento ridotto)
+      senti('spunta');
       const t = window.setTimeout(() => {
         togli(id);
         invia();

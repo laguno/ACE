@@ -1,0 +1,59 @@
+{
+  "_nota": "Unico posto dei valori sensoriali (passo 5, 17/11): durate, curve, intensità, vibrazioni, volumi e suoni. Il codice non ha numeri suoi. Feedback in proporzione alla frequenza: la spunta (20 volte al giorno) minuscola, tappa, chiave, forziere e partita vinta momenti grandi, l'errore una piccola scossa senza suono. Con prefers-reduced-motion niente movimento né vibrazione; il suono si spegne per dispositivo dalle Impostazioni dei genitori. Suoni: Kenney, Interface Sounds e Music Jingles, licenza CC0 (public/suoni/LICENZA-Kenney.txt).",
+  "volume_generale": 0.6,
+  "cambio_schermata": { "durata_ms": 180, "curva": "cubic-bezier(0.16, 1, 0.3, 1)" },
+  "curve": {
+    "arrivo": "cubic-bezier(0.16, 1, 0.3, 1)",
+    "rimbalzo": "cubic-bezier(0.34, 1.56, 0.64, 1)"
+  },
+  "momenti": {
+    "spunta": {
+      "durata_ms": 320,
+      "rimbalzo_scala": 1.18,
+      "piu_sale_ms": 900,
+      "piu_sale_px": 22,
+      "vibrazione_ms": [10],
+      "suoni": [{ "file": "tic", "volume": 0.5, "dopo_ms": 0 }]
+    },
+    "tappa": {
+      "durata_ms": 650,
+      "rimbalzo_scala": 1.12,
+      "vibrazione_ms": [30, 70, 30],
+      "suoni": [{ "file": "tappa", "volume": 0.7, "dopo_ms": 120 }]
+    },
+    "chiave": {
+      "durata_ms": 650,
+      "rimbalzo_scala": 1.12,
+      "vibrazione_ms": [30, 70, 30],
+      "suoni": [{ "file": "chiave", "volume": 0.7, "dopo_ms": 120 }]
+    },
+    "forziere": {
+      "durata_ms": 1500,
+      "scossa_gradi": 7,
+      "rimbalzo_scala": 1.14,
+      "brillio_px": 22,
+      "vibrazione_ms": [260],
+      "suoni": [
+        { "file": "forziere-apre", "volume": 0.8, "dopo_ms": 420 },
+        { "file": "forziere-brilla", "volume": 0.55, "dopo_ms": 900 }
+      ]
+    },
+    "partita": {
+      "durata_ms": 900,
+      "salto_px": 18,
+      "vibrazione_ms": [30, 70, 30, 70, 30],
+      "suoni": [
+        { "file": "fischio", "volume": 0.22, "dopo_ms": 0 },
+        { "file": "partita", "volume": 0.7, "dopo_ms": 520 }
+      ]
+    },
+    "errore": {
+      "durata_ms": 320,
+      "scossa_px": 6,
+      "vibrazione_ms": [],
+      "suoni": []
+    }
+  },
+  "fischio": { "durata_ms": 420, "frequenza_hz": 2650, "trillo_hz": 26, "trillo_ampiezza_hz": 170, "attacco_ms": 15 },
+  "file_suoni": ["tic", "tappa", "chiave", "forziere-apre", "forziere-brilla", "partita"]
+}
