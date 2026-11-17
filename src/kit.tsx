@@ -4,7 +4,14 @@ import { CalendarBlank, CaretDown, CaretRight, Clock } from '@phosphor-icons/rea
 // Kit "zucchero filato" (design/Stile.html): i pezzi che si ripetono in tutte le schermate.
 // Colori e misure stanno in stile.css come variabili; qui solo i pezzi con un po' di struttura.
 
-export type Sfondo = 'mattina' | 'pomeriggio' | 'sera' | 'viola' | 'panna' | 'rosa';
+export type Sfondo = 'mattina' | 'pomeriggio' | 'sera' | 'viola' | 'panna' | 'rosa' | 'campo';
+
+/** Emoji decorativa: solo in R-Evolution (eccezione del 16/11), mai in popup e notifiche. Muta per i lettori di schermo. */
+export const Emoji = ({ e }: { e: string }) => (
+  <span className="emoji" aria-hidden>
+    {e}
+  </span>
+);
 
 /** Sfondo della schermata secondo il momento (bozze: mattina azzurro, pomeriggio lilla, sera lilla scuro). */
 export function useSfondo(sfondo: Sfondo) {

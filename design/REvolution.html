@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ACE - R-Evolution (tema campo)</title>
+<!-- Bozza del 16/11: R-Evolution stacca dal resto di ACE con i colori della divisa (granata e bianco).
+     Squadre, risultati e numeri sono d'esempio. Fonte di riferimento, non codice di produzione. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+<style>
+  :root {
+    color-scheme: light only;
+    /* kit di ACE (src/stile.css) */
+    --bianco: #fff;
+    --panna: #fff6fa;
+    --testo: #3d2350;
+    --testo-2: #5e4470;
+    --rosa: #ffe3ef;
+    --lilla: #f3e6fd;
+    --ombra: 0 10px 24px rgba(123, 106, 224, 0.14);
+    --ombra-alta: 0 16px 36px rgba(123, 106, 224, 0.3);
+    /* nuovi, solo per R-Evolution: i colori della divisa */
+    --granata: #7b2342;        /* maglia: testata, azioni, riga della squadra */
+    --granata-scuro: #561530;  /* tabellone e premuto */
+    --granata-chiaro: #f6d3de; /* testi secondari su granata: 7:1 */
+    --granata-velo: #f8e4ea;   /* superfici chiare della sezione */
+    --burro: #ffe27a;          /* dal kit: etichetta dell'ultim'ora */
+    --ombra-campo: 0 12px 26px rgba(86, 21, 48, 0.28);
+  }
+  * { box-sizing: border-box; }
+  ::selection { background: var(--granata); color: var(--bianco); }
+  body { margin: 0; background: var(--panna); color: var(--testo); font: 600 16px/1.4 Nunito, sans-serif; -webkit-font-smoothing: antialiased; }
+  h1, h2 { font-family: 'Baloo 2', Nunito, sans-serif; font-weight: 800; margin: 0; }
+  main { position: relative; width: min(100%, 430px); margin: 0 auto; padding: 0 16px 104px; display: flex; flex-direction: column; gap: 12px; overflow-x: clip; }
+  :focus-visible { outline: 3px solid var(--granata); outline-offset: 2px; }
+
+  /* Testata: campo granata a tutta larghezza, taglio in diagonale, il 9 della maglia dietro */
+  .testata { position: relative; margin: 0 -16px 4px; padding: 30px 20px 0; min-height: 268px; color: var(--bianco); isolation: isolate; }
+  .testata::before {
+    content: ''; position: absolute; inset: 0; z-index: -2;
+    background:
+      linear-gradient(var(--bianco), var(--bianco)) 0 196px / 100% 3px no-repeat,   /* linea di fondo campo */
+      linear-gradient(var(--bianco), var(--bianco)) 62px 0 / 3px 100% no-repeat,    /* linea laterale */
+      var(--granata);
+    background-blend-mode: soft-light, soft-light, normal;
+    clip-path: polygon(0 0, 100% 0, 100% 78%, 0 100%);
+  }
+  .numero { position: absolute; z-index: -1; right: 108px; top: -34px; font: 800 300px/1 'Baloo 2', sans-serif; color: var(--granata-scuro); opacity: 0.55; user-select: none; }
+  .testata h1 { font-size: 46px; line-height: 0.95; letter-spacing: -0.02em; }
+  .testata .conto { margin: 10px 0 0; max-width: 170px; font: 800 15px/1.35 Nunito, sans-serif; color: var(--granata-chiaro); }
+  .testata .conto b { display: block; font: 800 34px/1 'Baloo 2', sans-serif; color: var(--bianco); font-variant-numeric: tabular-nums; }
+  .sticker { position: absolute; right: -22px; bottom: -22px; width: 236px; height: 236px; object-fit: contain; pointer-events: none; filter: drop-shadow(0 10px 14px rgba(86, 21, 48, 0.35)); }
+  @media (prefers-reduced-motion: no-preference) {
+    .sticker { animation: scatta 0.55s cubic-bezier(0.16, 1, 0.3, 1) both; }
+    @keyframes scatta { from { transform: translate(60px, 18px) rotate(8deg); } to { transform: none; } }
+  }
+
+  /* Ultim'ora: nastro che scorre con la prossima partita e quanto manca. Si ferma al tocco e con
+     il movimento ridotto (allora si scorre col dito). Le stesse notizie stanno nelle carte sotto. */
+  .ultimora { position: relative; display: flex; align-items: stretch; height: 44px; margin: 0 -16px; overflow: hidden; background: var(--granata-scuro); color: var(--bianco); font: 800 15px/44px Nunito, sans-serif; box-shadow: var(--ombra-campo); }
+  .ultimora strong { position: relative; z-index: 1; flex: none; padding: 0 22px 0 16px; background: var(--burro); color: var(--granata-scuro); font: 800 13px/44px Nunito, sans-serif; letter-spacing: 0.05em; text-transform: uppercase; clip-path: polygon(0 0, 100% 0, calc(100% - 12px) 100%, 0 100%); }
+  .nastro { display: flex; flex: none; white-space: nowrap; }
+  .nastro span { padding-left: 14px; }
+  .nastro i { font-style: normal; padding: 0 8px; }
+  @media (prefers-reduced-motion: no-preference) {
+    .nastro { animation: scorre 22s linear infinite; }
+    .ultimora:hover .nastro, .ultimora:active .nastro, .ultimora:focus-visible .nastro { animation-play-state: paused; }
+    @keyframes scorre { to { transform: translateX(-50%); } }
+  }
+  @media (prefers-reduced-motion: reduce) { .ultimora { overflow-x: auto; } .nastro span + span { display: none; } }
+  .emoji { font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif; font-weight: 400; }
+
+  /* Tabellone: i tre numeri su un pannello scuro solo */
+  .tabellone { display: grid; grid-template-columns: repeat(3, 1fr); margin: 0; padding: 14px 4px; border-radius: 24px; background: var(--granata-scuro); box-shadow: var(--ombra-campo); color: var(--bianco); text-align: center; }
+  .tabellone div + div { border-left: 2px solid rgba(255, 255, 255, 0.16); }
+  .tabellone dd { margin: 0; font: 800 46px/1 'Baloo 2', sans-serif; font-variant-numeric: tabular-nums; }
+  .tabellone dt { margin-top: 2px; font: 800 13px/1.2 Nunito, sans-serif; color: var(--granata-chiaro); }
+
+  /* Carte */
+  .carta { background: var(--bianco); border-radius: 24px; box-shadow: var(--ombra); padding: 16px; }
+  .carta h2 { font-size: 20px; line-height: 1.15; margin-bottom: 8px; }
+  .nota { margin: 10px 0 0; font-size: 13px; color: var(--testo-2); }
+
+  /* Prossima partita: il giorno grande in granata, l'avversaria accanto */
+  .prossima { display: grid; grid-template-columns: 84px 1fr; gap: 14px; align-items: center; padding: 12px; }
+  .giorno { display: grid; place-items: center; align-content: center; height: 96px; border-radius: 18px; background: var(--granata); color: var(--bianco); font: 800 13px/1.1 Nunito, sans-serif; }
+  .giorno b { font: 800 44px/0.95 'Baloo 2', sans-serif; font-variant-numeric: tabular-nums; }
+  .prossima h2 { margin: 0; font: 800 13px Nunito, sans-serif; color: var(--testo-2); }
+  .prossima .avversaria { margin: 2px 0 4px; font: 800 23px/1.1 'Baloo 2', sans-serif; overflow-wrap: anywhere; }
+  .prossima p { margin: 0; font-size: 15px; }
+  .pillola { display: inline-block; margin-top: 8px; padding: 4px 12px; border-radius: 999px; background: var(--granata-velo); color: var(--granata-scuro); font: 800 13px Nunito, sans-serif; }
+
+  /* Classifica: la riga della squadra è una fascia granata piena */
+  .classifica { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; font-variant-numeric: tabular-nums; }
+  .classifica th { font: 800 12px Nunito, sans-serif; color: var(--testo-2); text-align: right; padding: 4px 6px; }
+  .classifica td { text-align: right; padding: 9px 6px; border-top: 2px dashed var(--lilla); }
+  .classifica th:nth-child(2), .classifica td:nth-child(2) { text-align: left; overflow-wrap: anywhere; }
+  .classifica td:first-child, .classifica th:first-child { padding-left: 10px; }
+  .classifica td:last-child, .classifica th:last-child { padding-right: 10px; }
+  .classifica tr.lani td { background: var(--granata); color: var(--bianco); font-weight: 800; border-top-color: transparent; }
+  .classifica tr.lani + tr td { border-top-color: transparent; }
+  .classifica tr.lani td:first-child { border-radius: 14px 0 0 14px; }
+  .classifica tr.lani td:last-child { border-radius: 0 14px 14px 0; }
+  abbr { text-decoration: none; }
+
+  /* Partite: il risultato come una targhetta da tabellone */
+  .partite { list-style: none; margin: 0; padding: 0; }
+  .partite li { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 10px 0; border-top: 2px dashed var(--lilla); }
+  .partite li:first-child { border-top: 0; padding-top: 2px; }
+  .partite span { display: flex; flex-direction: column; gap: 2px; font-weight: 800; }
+  .partite small { font: 700 13px Nunito, sans-serif; color: var(--testo-2); }
+  .partite b { flex: none; min-width: 64px; padding: 4px 10px; border-radius: 12px; text-align: center; font: 800 22px/1.2 'Baloo 2', sans-serif; font-variant-numeric: tabular-nums; background: var(--lilla); color: var(--testo-2); }
+  .partite b.vinta { background: var(--granata); color: var(--bianco); }
+
+  .principale { min-height: 52px; border: 0; border-radius: 999px; background: var(--granata); color: var(--bianco); font: 800 17px Nunito, sans-serif; box-shadow: var(--ombra-campo); }
+  .principale:active { background: var(--granata-scuro); }
+
+  /* Barra: la voce accesa prende il granata, le altre restano com'erano */
+  .barra { position: fixed; z-index: 5; left: 50%; bottom: 14px; transform: translateX(-50%); width: min(100% - 28px, 402px); height: 66px; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 4px; padding: 6px; border-radius: 32px; background: var(--bianco); box-shadow: var(--ombra-alta); }
+  .barra button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border: 0; border-radius: 24px; background: none; color: var(--testo-2); font: 800 12px Nunito, sans-serif; white-space: nowrap; letter-spacing: -0.2px; }
+  .barra i { font-size: 24px; }
+  .barra button[aria-current='page'] { background: var(--granata); color: var(--bianco); }
+  .barra .corto { display: none; }
+  @media (max-width: 379px) { .barra .lungo { display: none; } .barra .corto { display: inline; } }
+</style>
+</head>
+<body>
+<main>
+  <header class="testata">
+    <span class="numero" aria-hidden="true">9</span>
+    <h1>In campo</h1>
+    <p class="conto"><b>+84</b> passi presi in campo.</p>
+    <img class="sticker" src="../public/assets/avatar/lani/lani-battuta.webp" alt="">
+  </header>
+
+  <!-- il secondo span è la copia che chiude il giro: nascosta ai lettori di schermo -->
+  <div class="ultimora" tabindex="0" aria-label="Ultim'ora: prossima partita con Volley Girasole, domenica 13 dicembre alle 9:00, tra 27 giorni. Ultima partita vinta 3-1 con Volley Fiume. Seconde in classifica Under 14.">
+    <strong aria-hidden="true">Ultim'ora</strong>
+    <div class="nastro" aria-hidden="true">
+      <span>Prossima partita: Volley Girasole<i class="emoji">🏐</i>domenica 13 dicembre alle 9:00<i class="emoji">⏳</i>mancano 27 giorni<i class="emoji">💪</i>ultima partita: 3-1 con Volley Fiume<i class="emoji">🏆</i>seconde in classifica Under 14<i class="emoji">🔥</i></span>
+      <span>Prossima partita: Volley Girasole<i class="emoji">🏐</i>domenica 13 dicembre alle 9:00<i class="emoji">⏳</i>mancano 27 giorni<i class="emoji">💪</i>ultima partita: 3-1 con Volley Fiume<i class="emoji">🏆</i>seconde in classifica Under 14<i class="emoji">🔥</i></span>
+    </div>
+  </div>
+
+  <div class="carta prossima" aria-label="Prossima partita">
+    <div class="giorno">dom <b>13</b> dicembre</div>
+    <div>
+      <h2><span class="emoji" aria-hidden="true">🏐</span> Prossima partita</h2>
+      <p class="avversaria">Volley Girasole</p>
+      <p>Alle 9:00, in trasferta <span class="emoji" aria-hidden="true">🚌</span></p>
+      <span class="pillola"><span class="emoji" aria-hidden="true">⏳</span> tra 27 giorni</span>
+    </div>
+  </div>
+
+  <dl class="tabellone">
+    <div><dd>3</dd><dt><span class="emoji" aria-hidden="true">🏐</span> partite</dt></div>
+    <div><dd>2</dd><dt><span class="emoji" aria-hidden="true">🏆</span> vinte</dt></div>
+    <div><dd>6</dd><dt><span class="emoji" aria-hidden="true">⏱️</span> dieci minuti<br>a novembre</dt></div>
+  </dl>
+
+  <div class="carta">
+    <h2><span class="emoji" aria-hidden="true">🏆</span> Classifica Under 14</h2>
+    <table class="classifica">
+      <thead>
+        <tr><th scope="col"><abbr title="Posizione">Pos</abbr></th><th scope="col">Squadra</th><th scope="col"><abbr title="Punti">Pt</abbr></th><th scope="col"><abbr title="Partite giocate">G</abbr></th><th scope="col"><abbr title="Partite vinte">V</abbr></th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>Pallavolo Aurora</td><td>9</td><td>3</td><td>3</td></tr>
+        <tr class="lani"><td>2</td><td>U14R-EVOLUTION</td><td>6</td><td>3</td><td>2</td></tr>
+        <tr><td>3</td><td>Volley Girasole</td><td>5</td><td>3</td><td>2</td></tr>
+        <tr><td>4</td><td>Polisportiva Tre Torri</td><td>4</td><td>3</td><td>1</td></tr>
+        <tr><td>5</td><td>Volley Fiume</td><td>3</td><td>3</td><td>1</td></tr>
+        <tr><td>6</td><td>Pallavolo Castello</td><td>0</td><td>3</td><td>0</td></tr>
+      </tbody>
+    </table>
+    <p class="nota">U14 Femminile girone A, dal portale FIPAV. Aggiornata il 16 novembre.</p>
+  </div>
+
+  <div class="carta">
+    <h2><span class="emoji" aria-hidden="true">📣</span> Partite</h2>
+    <ul class="partite">
+      <li><span>Volley Fiume<small>14 novembre, da approvare</small></span><b class="vinta">3-1</b></li>
+      <li><span>Pallavolo Aurora<small>7 novembre</small></span><b>1-3</b></li>
+      <li><span>Pallavolo Castello<small>31 ottobre</small></span><b class="vinta">3-0</b></li>
+    </ul>
+  </div>
+
+  <button class="principale" type="button">Segna una partita</button>
+</main>
+
+<nav class="barra" aria-label="Sezioni">
+  <button type="button"><i class="ph-bold ph-sun" aria-hidden="true"></i>Oggi</button>
+  <button type="button"><i class="ph-bold ph-book-open" aria-hidden="true"></i>Studio</button>
+  <button type="button"><i class="ph-bold ph-moon-stars" aria-hidden="true"></i>Sera</button>
+  <button type="button" aria-current="page"><i class="ph-fill ph-volleyball" aria-hidden="true"></i><span class="lungo">R-Evolution</span><span class="corto">R-Evo</span></button>
+  <button type="button"><i class="ph-bold ph-star" aria-hidden="true"></i>Astra</button>
+</nav>
+</body>
+</html>

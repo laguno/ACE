@@ -24,7 +24,7 @@ L'unica app che sa cosa deve fare Lani oggi, nell'ordine giusto, e glielo dice c
 
 ## Brand Personality
 
-Affettuosa, vivace, chiara. Parla in italiano di casa, dà del tu, non usa parole da adulti e non umilia mai: loda il gesto e non la persona, sui voti brutti guarda avanti con il piano, il rimprovero riguarda il fatto e dice la cosa da fare subito. Popup brevi (titolo di 4 parole al massimo, testo di 25 al massimo), niente emoji, numeri veri. Il tono visivo è quello del kit "zucchero filato" di `design/Stile.html`: la famiglia disegnata come sticker è il cuore emotivo dell'app.
+Affettuosa, vivace, chiara. Parla in italiano di casa, dà del tu, non usa parole da adulti e non umilia mai: loda il gesto e non la persona, sui voti brutti guarda avanti con il piano, il rimprovero riguarda il fatto e dice la cosa da fare subito. Popup brevi (titolo di 4 parole al massimo, testo di 25 al massimo), niente emoji, numeri veri. Sola eccezione (16/11): R-Evolution, dove Lani è in divisa e la schermata stacca apposta dal resto (granata e bianco, tabellone, nastro "Ultim'ora", emoji; bozza `design/REvolution.html`). Il tono visivo è quello del kit "zucchero filato" di `design/Stile.html`: la famiglia disegnata come sticker è il cuore emotivo dell'app.
 
 ## Anti-references
 

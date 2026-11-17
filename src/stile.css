@@ -31,6 +31,12 @@
   --notte-lilla: #3b3470;
   --notte-rosa: #4b2f5e;
   --notte-bordo: #9d8fe0;
+  /* solo R-Evolution (design/REvolution.html): i colori della divisa */
+  --granata: #7b2342;        /* maglia: testata, azioni, riga della squadra */
+  --granata-scuro: #561530;  /* tabellone, nastro, premuto */
+  --granata-chiaro: #f6d3de; /* testi secondari su granata: 7:1 */
+  --granata-velo: #f8e4ea;
+  --ombra-campo: 0 12px 26px rgba(86, 21, 48, 0.28);
   /* ombre: una tinta, tre altezze (carte; popup, flash card e flottanti; etichette della mappa) */
   --ombra: 0 10px 24px rgba(123, 106, 224, 0.14);
   --ombra-alta: 0 16px 36px rgba(123, 106, 224, 0.3);
@@ -685,15 +691,88 @@ body:has(.avvio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom))
 .classifica th:nth-child(2), .classifica td:nth-child(2) { text-align: left; overflow-wrap: anywhere; }
 .classifica tr.lani td { color: var(--accento-premuto); font-weight: 800; }
 
-/* R-Evolution (sprint 2) */
-.r-evolution .numeri { grid-template-columns: repeat(2, 1fr); }
+/* R-Evolution (sprint 2). Tema campo del 16/11 (design/REvolution.html): qui Lani è in divisa e la
+   schermata stacca dal resto: granata e bianco, tabellone, nastro dell'ultim'ora, emoji (solo qui). */
+.r-evolution { margin: -16px -16px 0; padding: 0 16px; overflow-x: clip; }
+.r-evolution ::selection { background: var(--granata); color: var(--bianco); }
+.r-evolution :focus-visible { outline-color: var(--granata); }
+.emoji { font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif; font-weight: 400; font-style: normal; }
+
+/* testata: campo granata tagliato in diagonale, il 9 della maglia dietro, lo sticker che sborda */
+.campo-testata { position: relative; isolation: isolate; margin: 0 -16px 4px; padding: 30px 20px 0; min-height: 268px; color: var(--bianco); }
+.campo-testata::before {
+  content: ''; position: absolute; inset: 0; z-index: -2;
+  background:
+    linear-gradient(var(--bianco), var(--bianco)) 0 196px / 100% 3px no-repeat,
+    linear-gradient(var(--bianco), var(--bianco)) 62px 0 / 3px 100% no-repeat,
+    var(--granata);
+  background-blend-mode: soft-light, soft-light, normal;
+  clip-path: polygon(0 0, 100% 0, 100% 78%, 0 100%);
+}
+.campo-numero { position: absolute; z-index: -1; right: 108px; top: -34px; font: 800 300px/1 'Baloo 2', sans-serif; color: var(--granata-scuro); opacity: 0.55; user-select: none; }
+.campo-testata h1 { margin: 0; font-size: 46px; line-height: 0.95; letter-spacing: -0.02em; }
+.campo-testata .conto { margin: 10px 0 0; max-width: 170px; font: 800 15px/1.35 Nunito, sans-serif; color: var(--granata-chiaro); }
+.campo-testata .conto b { display: block; font: 800 34px/1 'Baloo 2', sans-serif; color: var(--bianco); font-variant-numeric: tabular-nums; }
+.campo-sticker { position: absolute; right: -22px; bottom: -22px; filter: drop-shadow(0 10px 14px rgba(86, 21, 48, 0.35)); }
+@media (max-width: 359px) { .campo-sticker { width: 190px; height: 190px; } .campo-numero { display: none; } }
+@media (prefers-reduced-motion: no-preference) {
+  .campo-sticker { animation: scatta 0.55s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  @keyframes scatta { from { transform: translate(60px, 18px) rotate(8deg); } to { transform: none; } }
+}
+
+/* ultim'ora: nastro che scorre; si ferma al tocco, con il movimento ridotto si scorre col dito */
+.ultimora { display: flex; align-items: stretch; height: 44px; margin: 0 -16px; overflow: hidden; background: var(--granata-scuro); color: var(--bianco); font: 800 15px/44px Nunito, sans-serif; box-shadow: var(--ombra-campo); }
+.ultimora strong { position: relative; z-index: 1; flex: none; padding: 0 22px 0 16px; background: var(--burro); color: var(--granata-scuro); font: 800 13px/44px Nunito, sans-serif; letter-spacing: 0.05em; text-transform: uppercase; clip-path: polygon(0 0, 100% 0, calc(100% - 12px) 100%, 0 100%); }
+.nastro { display: flex; flex: none; white-space: nowrap; }
+.nastro span { padding-left: 14px; }
+.nastro .emoji { padding: 0 8px; }
+@media (prefers-reduced-motion: no-preference) {
+  .nastro { animation: scorre 22s linear infinite; }
+  .ultimora:hover .nastro, .ultimora:active .nastro, .ultimora:focus-visible .nastro { animation-play-state: paused; }
+  @keyframes scorre { to { transform: translateX(-50%); } }
+}
+@media (prefers-reduced-motion: reduce) { .ultimora { overflow-x: auto; } .nastro span + span { display: none; } }
+
+/* prossima partita: il giorno grande in granata, l'avversaria accanto */
+.r-evolution .carta.prossima-partita { display: grid; grid-template-columns: 84px 1fr; gap: 14px; align-items: center; padding: 12px; }
+.prossima-partita .giorno { display: grid; place-items: center; align-content: center; height: 96px; border-radius: 18px; background: var(--granata); color: var(--bianco); font: 800 13px/1.1 Nunito, sans-serif; }
+.prossima-partita .giorno b { font: 800 44px/0.95 'Baloo 2', sans-serif; font-variant-numeric: tabular-nums; }
+.r-evolution .prossima-partita h2 { margin: 0; font: 800 13px Nunito, sans-serif; color: var(--testo-2); }
+.r-evolution .prossima-partita .avversaria { margin: 2px 0 4px; font: 800 23px/1.1 'Baloo 2', Nunito, sans-serif; overflow-wrap: anywhere; }
+.prossima-partita .quanto { display: inline-block; margin-top: 8px; padding: 4px 12px; border-radius: 999px; background: var(--granata-velo); color: var(--granata-scuro); font: 800 13px Nunito, sans-serif; }
+
+/* tabellone: i tre numeri su un pannello scuro solo */
+.r-evolution .tabellone { gap: 0; padding: 14px 4px; border-radius: 24px; background: var(--granata-scuro); box-shadow: var(--ombra-campo); color: var(--bianco); text-align: center; }
+.r-evolution .tabellone div { display: flex; flex-direction: column-reverse; justify-content: flex-end; padding: 0 4px; border-radius: 0; background: none; }
+.r-evolution .tabellone div + div { border-left: 2px solid rgba(255, 255, 255, 0.16); }
+.r-evolution .tabellone dd { font: 800 46px/1 'Baloo 2', Nunito, sans-serif; font-variant-numeric: tabular-nums; }
+.r-evolution .tabellone dt { margin-top: 2px; font: 800 13px/1.2 Nunito, sans-serif; color: var(--granata-chiaro); }
+
+/* classifica: la riga della squadra è una fascia granata piena */
+.r-evolution .classifica { border-collapse: separate; border-spacing: 0; }
+.r-evolution .classifica td:first-child, .r-evolution .classifica th:first-child { padding-left: 10px; }
+.r-evolution .classifica td:last-child, .r-evolution .classifica th:last-child { padding-right: 10px; }
+.r-evolution .classifica tr.lani td { background: var(--granata); color: var(--bianco); border-top-color: transparent; }
+.r-evolution .classifica tr.lani + tr td { border-top-color: transparent; }
+.r-evolution .classifica tr.lani td:first-child { border-radius: 14px 0 0 14px; }
+.r-evolution .classifica tr.lani td:last-child { border-radius: 0 14px 14px 0; }
+
+/* azioni e voce della barra in granata, solo qui */
+.r-evolution .principale { background: var(--granata); box-shadow: inset 0 -4px 0 var(--granata-scuro); }
+.r-evolution .principale:active { background: var(--granata-scuro); }
+.r-evolution .modulo input:focus-visible { outline-color: var(--granata); }
+.r-evolution .modulo label.riga-spunta input { accent-color: var(--granata); }
+.r-evolution .valore { color: var(--granata); }
+body[data-sfondo='campo'] .barra button[aria-current='page'] { background: var(--granata); color: var(--bianco); }
+
 .partite { list-style: none; margin: 0; padding: 0; display: grid; }
 .partite li { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 10px 0; border-top: 2px dashed var(--lilla); }
 .partite li:first-child { border-top: 0; }
 .partite span { display: flex; flex-direction: column; gap: 2px; font-weight: 800; }
 .partite small { font: 700 13px Nunito, sans-serif; color: var(--testo-2); }
-.partite b { font: 800 22px 'Baloo 2', Nunito, sans-serif; color: var(--testo-2); }
-.partite b.vinta { color: var(--accento); }
+/* il risultato come una targhetta da tabellone */
+.partite b { flex: none; min-width: 64px; padding: 4px 10px; border-radius: 12px; text-align: center; font: 800 22px/1.2 'Baloo 2', Nunito, sans-serif; font-variant-numeric: tabular-nums; background: var(--lilla); color: var(--testo-2); }
+.partite b.vinta { background: var(--granata); color: var(--bianco); }
 /* cinque voci (R-Evolution): etichette su una riga; sotto i 380 px "R-Evo" (il nome intero resta in aria-label) */
 .barra.cinque button { white-space: nowrap; letter-spacing: -0.2px; }
 .barra .corto { display: none; }

@@ -46,9 +46,12 @@ test('R-Evolution: classifica, partite con il risultato e passi presi in campo',
   await expect(classifica.getByRole('row', { name: /DENTI ALBINETANA/ })).not.toHaveClass(/lani/);
   await expect(classifica.getByText('U13 Femminile girone C, dal portale FIPAV. Aggiornata il 18 gennaio.')).toBeVisible();
 
-  await expect(page.getByText('Volley Bibbiano')).toBeVisible();
-  await expect(page.getByText('3-1')).toHaveClass(/vinta/);
-  await expect(page.getByText('2-3')).toHaveClass(/persa/);
+  // le partite stanno anche nel nastro dell'ultim'ora: qui si guarda la lista
+  const partite = page.locator('.partite');
+  await expect(partite.getByText('Volley Bibbiano')).toBeVisible();
+  await expect(partite.getByText('3-1')).toHaveClass(/vinta/);
+  await expect(partite.getByText('2-3')).toHaveClass(/persa/);
+  await expect(page.locator('.ultimora .solo-lettori')).toHaveText("Ultim'ora. ultima partita: 3-1 con Volley Bibbiano. 1° posto in Under 13.");
   // quella da approvare si vede ma non conta tra le giocate
   await expect(page.getByText('17 gennaio, da approvare')).toBeVisible();
   await expect(page.locator('.numeri dd').first()).toHaveText('2');
@@ -115,4 +118,23 @@ test('segna la partita: giorno e avversaria proposti dal calendario di famiglia'
   await page.getByRole('button', { name: 'R-Evolution' }).click();
   await expect(page.getByLabel('Contro')).toHaveValue('FOXES VOLLEY');
   await expect(page.getByLabel('Giorno')).toHaveValue('2027-01-16');
+});
+
+test('tema campo: carta della prossima partita e nastro Ultim’ora dal calendario FIPAV', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2027-01-18T10:00:00+01:00'));
+  await finto(page, {
+    ...dati(),
+    gare_fipav: [{ cid: 93399, numero: 7, giornata: 4, inizio: '2027-01-23T16:00:00Z', casa: 'FOXES VOLLEY', ospite: 'U14R-EVOLUTION', set_casa: null, set_ospite: null }],
+  });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'R-Evolution' }).click();
+  const carta = page.getByLabel('Prossima partita');
+  await expect(carta.locator('.giorno')).toHaveText('sab 23 gennaio');
+  await expect(carta.locator('.avversaria')).toHaveText('FOXES VOLLEY');
+  await expect(carta).toContainText('Alle 17:00, in trasferta');
+  await expect(carta.locator('.quanto')).toContainText('tra 5 giorni');
+  await expect(page.locator('.ultimora .solo-lettori')).toContainText('Ultim’ora. Prossima partita: FOXES VOLLEY. sabato 23 gennaio alle 17:00. tra 5 giorni.'.replace('’', "'"));
+  // il nastro non allarga la pagina
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: 'e2e/risultati/r-evolution-prossima.png' });
 });
