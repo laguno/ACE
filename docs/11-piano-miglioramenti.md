@@ -25,6 +25,49 @@ Da controllare a schermo e riferire:
 - (a) il corsivo del biglietto dell'enigma (`.biglietto p`, `stile.css` riga 442) è un corsivo vero o simulato? Il font Nunito corsivo viene caricato?
 - (b) nome accessibile dei forzieri in `Astra.tsx` riga 240: "Forziere N: X passi, Y chiavi" non contiene il testo visibile "915 · 4 chiavi" (WCAG 2.5.3). Proporre la correzione.
 
+## Verifica del 17/11
+
+Fatta il 17/11 alle 15:10-15:40 sul ramo `rifinitura` (= `main` a `b8749ab`), senza modifiche al codice.
+
+### `npx playwright test accessibilita` (axe)
+
+42 su 42 passano: 21 schermate (Oggi, Sera, Studio, Astra, Figurina, Album, i quattro popup, Benvenuta, le pagine dei genitori) in tema chiaro e scuro, a 390 px, con WCAG 2.0/2.1/2.2 A e AA e best-practice. Zero violazioni.
+
+### `npm run lighthouse`
+
+Tutti e 5 i test passano, compresa la prova CSP (nessuna violazione su tutte le schermate). Punteggi a 390 px (caricamento completo; per Studio e Astra anche la fotografia dopo il clic sulla scheda):
+
+| Schermata | Prestazioni | Accessibilità | Buone pratiche | SEO |
+|---|---|---|---|---|
+| Oggi | 85 | 100 | 100 | 50 |
+| Sera | 87 | 100 | 100 | 50 |
+| Studio | 84 | 100 (scheda: 100) | 100 | 50 (scheda: 67) |
+| Astra | 85 | 100 (scheda: 100) | 100 | 50 (scheda: 67) |
+
+- Prestazioni: il punto debole è il primo disegno grande (LCP, punteggio 0,44-0,58) e il CSS non usato (0,5); il cambio di scheda è a 100. Non è un difetto di accessibilità: resta fuori dal passo 3.
+- SEO 50: voluto. App privata, non indicizzabile (niente `meta description`, `robots.txt`, pagina non scansionabile). Nessuna azione.
+
+### `MISURE_GENITORI=1 npx playwright test genitori-misure`
+
+Fallisce, ma per lo script, non per l'app.
+
+- Con `=1` (fase "prima") lo script percorre l'area genitori di prima del restyling del 16/11: cerca il pulsante "Balla" in prima pagina, che non c'è più. Va in timeout a 390 e 360 px.
+- Con `=dopo` (fase attuale) si ferma al passo `04-partita`: cerca "Approva" in "Da fare per voi", ma dal commit `e2225d1` il risultato delle partite arriva solo dalla FIPAV e i genitori non approvano più.
+- Effetto collaterale: lo script scrive `docs/genitori-ux/misure-<fase>.json` anche quando fallisce e svuota le misure buone. I due file sono stati ripristinati con `git restore`.
+- Correzione proposta (non fatta, il passo 1 è in sola lettura): togliere il passo `04-partita` da `DOPO` e scrivere il file solo se entrambe le larghezze sono state misurate. Va approvata dal signore.
+
+### Controlli fatti a mano: confermati
+
+- Bordi dei campi 3,16:1, "← Astra" con pillola bianca, popup con `<dialog>`, etichetta "Esci dall'account": nessuna violazione axe sulle schermate che li contengono; confermati.
+
+### (a) Corsivo del biglietto dell'enigma
+
+Corsivo vero. Prova a schermo (Astra, forziere 2 con l'enigma, 390 px): `.biglietto p` ha `font-style: italic`, peso 600, famiglia Nunito, e la faccia "Nunito italic 600" risulta caricata (`document.fonts.check('italic 600 16px Nunito')` vero). Le facce corsive 600 e 800 sono importate in `src/main.tsx` (righe 15-16). Il browser non deve inclinare il testo da solo. Nessuna azione.
+
+### (b) Nome accessibile dei forzieri
+
+Già a posto. Dal commit `fe73938` l'etichetta visibile e il nome accessibile dicono la stessa cosa: a schermo "395 passi, 2 chiavi", nome "Forziere 1: 395 passi, 2 chiavi". Il nome contiene il testo visibile, quindi WCAG 2.5.3 (Label in Name) è rispettato. La forma "915 · 4 chiavi" citata nel piano era quella di prima. Nessuna correzione necessaria.
+
 ## Passo 2: avviso Nuvola
 
 Se `sync_log` ha due esiti consecutivi non ok (`errore` o `interrotta`) per `sync-nuvola`, notificare ai soli genitori, una volta, con una riga. Mai rimproveri, niente a Lani, rispettare i limiti del copione e il tetto di notifiche in `manda()`. Provare con test.
