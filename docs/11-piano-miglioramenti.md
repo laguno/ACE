@@ -119,4 +119,10 @@ Il signore vuole più sensorialità e dinamismo. Il principio 4 di PRODUCT.md ("
 - `prefers-reduced-motion` rispettato; niente ansia, niente conti alla rovescia, nessun suono nelle notifiche.
 - Suono: un solo AudioContext, sblocco al primo tocco, interruttore per dispositivo in Impostazioni dei genitori; file Kenney (Interface Sounds, UI Audio, controllare la licenza) di pochi kB, nel service worker. Su iPad (PWA) il Web Audio può restare muto al rientro dal background e col tasto silenzioso: usare un fallback `<audio>` o unmute-ios-audio e riferire cosa funziona solo dopo prova sull'iPad vero. `navigator.vibrate` non esiste su iOS: lì solo visivo.
 - Strumenti: comandi `animate` e `delight` di Impeccable (`npx skills add pbakaus/impeccable --skill animate` e `--skill delight`, se non presenti). `delight` aggiunge momenti di gioia e tocchi inattesi; `animate` animazioni e microinterazioni che sostengono usabilità e piacere. In aggiunta, la skill `design-skills:interaction-design` per microinterazioni, stati e gesti (consiglio di Jarvis, 17/11).
-- Mappa: spunta = cerchio che si riempie con rimbalzo, "+N" che sale, tic breve, vibrazione 10 ms; tappa = momento grande con jingle breve e doppia vibrazione corta; forziere = scossa, apertura, premio che emerge, apertura e brillio, una vibrazione lunga; partita vinta = tabellone animato, sticker che festeggia, fischio e applauso brevi; errore = piccola scossa, nessun suono; cambio schermata = transizione di [testo del piano interrotto qui: da completare col signore]
+- Mappa: spunta = cerchio che si riempie con rimbalzo, "+N" che sale, tic breve, vibrazione 10 ms; tappa = momento grande con jingle breve e doppia vibrazione corta; forziere = scossa, apertura, premio che emerge, apertura e brillio, una vibrazione lunga; partita vinta = tabellone animato, sticker che festeggia, fischio e applauso brevi; errore = piccola scossa, nessun suono; cambio schermata = transizione di 150-200 ms.
+
+Principio 4 di PRODUCT.md aggiornato e approvato dal signore il 17/11 ("Calore che risponde, senza rumore"); ok del signore al passo 5 il 17/11.
+
+## A fine sessione
+
+Aggiornare HANDOFF.md (massimo una pagina), commit e push. Riferire in 5 righe: cosa è fatto, cosa fallisce ancora, cosa serve dal signore.
