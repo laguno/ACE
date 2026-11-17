@@ -1,18 +1,16 @@
 import { useEffect, useState } from 'react';
-import { CalendarBlank, Camera, FileText, PencilSimple, ThumbsUp, TreasureChest, Volleyball } from '@phosphor-icons/react';
+import { CalendarBlank, Camera, FileText, PencilSimple, ThumbsUp, TreasureChest } from '@phosphor-icons/react';
 import * as R from '../lib/regole';
 import { Attesa, AreaTesto, Elenco, Foglio, Riga, Vuoto } from '../kit';
 import { Fotografa, SELECT_RICHIESTE, descrizione, type RichiestaFoto } from '../Foto';
-import { CampiRisultato, approvaPartita, partiteDaApprovare, rifiutaPartita, type PartitaDaApprovare } from '../Partita';
 import { FoglioAssenza, FoglioSposta, caricaVerifiche, daRecuperare, giorniDiScuola, type Verifica } from '../Assenze';
-import { BALLA_MAX, FRASI_BALLA, SGRIDATE, VOCI_GESTI, bello, meno, notaBalla, oraRoma, type Props } from './comune';
+import { BALLA_MAX, FRASI_BALLA, SGRIDATE, VOCI_GESTI, bello, meno, notaBalla, oraRoma, piu, type Props } from './comune';
 
 // Oggi (si apre qui): cosa c'è da fare per i genitori, le due azioni di ogni giorno, Lani in tre righe.
 
 type Richiesta = RichiestaFoto & { compiti: { scadenza: string } | null; verifiche: { data: string } | null };
 type Foglio_ = { id: string; titolo: string; scadenza: string | null };
 type Dati = {
-  partite: PartitaDaApprovare[];
   fogli: Foglio_[];
   foto: Richiesta[];
   forzieri: { n: number; premio: string | null }[];
@@ -21,19 +19,20 @@ type Dati = {
   gestiOggi: number;
   date: { id: string; voce: string }[];
   passiOggi: number;
-  serata: { chiusa_il: string | null } | null;
+  serata: { cartella_il: string | null } | null;
   chiusura: string | null;
+  /** quando Lani ha chiuso la serata di ieri, se l'ha chiusa: il fatto vero per "Una cosa da dirle oggi".
+      Come in Oggi di Lani, "ha chiuso tutto" = cartella pronta: chiusa_il non la scrive nessuna parte dell'app. */
+  ieriChiusa: string | null;
 };
 
 export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: (n: number) => void }) {
   const oggi = R.iso(R.giornoRoma(new Date()));
   const [d, setD] = useState<Dati>();
-  const [foglio, setFoglio] = useState<'passi' | 'segna' | 'casa' | { partita: PartitaDaApprovare } | { forziere: number } | { verifica: Verifica } | { firma: Foglio_ }>();
+  const [foglio, setFoglio] = useState<'passi' | 'segna' | 'casa' | { forziere: number } | { verifica: Verifica } | { firma: Foglio_ }>();
 
   async function carica() {
-    const [pa, re, fo, rf, fz, ve, gm, gc, mp, se, im] = await Promise.all([
-      partiteDaApprovare(client),
-      client.from('impostazioni').select('valore').eq('chiave', R.CHIAVE_R_EVOLUTION).maybeSingle(),
+    const [fo, rf, fz, ve, gm, gc, mp, se, im, ie] = await Promise.all([
       client.from('fogli_firma').select('id, titolo, scadenza').not('dato_il', 'is', null).is('consegnato_il', null).order('scadenza'),
       client.from('richieste_foto').select(`${SELECT_RICHIESTE}, compiti(scadenza), verifiche(data)`).eq('stato', 'aperta').order('creato_il'),
       client.from('forzieri').select('n, premio').eq('stato', 'aperto').order('n'),
@@ -41,16 +40,15 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
       client.from('movimenti_passi').select('passi, riferimento, motivo').in('motivo', ['gesto', 'storno']).eq('giorno', oggi),
       client.from('gesti_casa').select('id, voce').eq('data', oggi),
       client.from('movimenti_passi').select('passi').eq('giorno', oggi),
-      client.from('serate').select('chiusa_il').eq('data', oggi).maybeSingle(),
+      client.from('serate').select('cartella_il').eq('data', oggi).maybeSingle(),
       client.from('impostazioni').select('valore').eq('chiave', 'ora_chiusura').maybeSingle(),
+      client.from('serate').select('cartella_il').eq('data', R.iso(piu(R.giorno(oggi), -1))).maybeSingle(),
     ]);
     const mov = gm.data ?? [];
     // gesti dati oggi e non annullati (storno "gesto:<id>")
     const annullati = new Set(mov.filter((m) => m.motivo === 'storno').map((m) => String(m.riferimento).replace(/^gesto:/, '')));
     const presi = new Set(mov.filter((m) => m.motivo === 'gesto' && m.passi > 0).map((m) => String(m.riferimento)));
     const nuovi: Dati = {
-      // le partite le segna Lani solo con R-Evolution accesa
-      partite: R.rEvolutionAttiva(R.giorno(oggi), typeof re.data?.valore === 'string' ? re.data.valore : null) ? pa : [],
       fogli: fo.data ?? [],
       foto: (rf.data ?? []) as unknown as Richiesta[],
       forzieri: fz.data ?? [],
@@ -61,6 +59,7 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
       passiOggi: (mp.data ?? []).reduce((a, m) => a + m.passi, 0),
       serata: se.data ?? null,
       chiusura: (im.data?.valore as Record<string, string> | undefined)?.[R.giorno(oggi).getDay()] ?? null,
+      ieriChiusa: ie.data?.cartella_il ?? null,
     };
     setD(nuovi);
     conta(daFare(nuovi).length);
@@ -98,22 +97,9 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
           Da fare per voi {righe.length > 0 && <span className="ga-conta">{righe.length}</span>}
         </h2>
         {righe.length === 0 && d.foto.length === 0 ? (
-          <Vuoto titolo="Niente da fare per voi" testo="Partite, fogli, foto e forzieri sono a posto." />
+          <Vuoto titolo="Niente da fare per voi" testo="Fogli, foto e forzieri sono a posto." />
         ) : righe.length > 0 && (
           <Elenco etichetta="Da fare per voi">
-            {d.partite.map((p) => (
-              <Riga
-                key={p.id}
-                icona={<Volleyball size={20} weight="bold" aria-hidden />}
-                titolo={`Partita: ${p.avversaria} ${p.set_nostri}‑${p.set_loro}`}
-                sotto={`${bello(p.data)} · l'ha segnata Lani`}
-                azione={
-                  <button type="button" className="ga-btn" onClick={() => setFoglio({ partita: p })}>
-                    Approva
-                  </button>
-                }
-              />
-            ))}
             {d.fogli.map((f) => (
               <Riga
                 key={f.id}
@@ -209,13 +195,21 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
           </div>
           <div>
             <dt>Serata</dt>
-            <dd>{aCasaOggi ? 'a casa da scuola' : d.serata?.chiusa_il ? `chiusa alle ${oraRoma(new Date(d.serata.chiusa_il))}` : d.chiusura ? `da chiudere entro le ${d.chiusura}` : 'niente chiusura oggi'}</dd>
+            <dd>{aCasaOggi ? 'a casa da scuola' : d.serata?.cartella_il ? `chiusa alle ${oraRoma(new Date(d.serata.cartella_il))}` : d.chiusura ? `da chiudere entro le ${d.chiusura}` : 'niente chiusura oggi'}</dd>
           </div>
           <div>
             <dt>Prossima verifica</dt>
             <dd>{prossima ? `${prossima.materie?.nome ?? 'Verifica'}, ${bello(prossima.data)}` : 'nessuna'}</dd>
           </div>
         </dl>
+        {/* una riga da un fatto vero di ieri, che loda il gesto e non la persona; senza il fatto non compare
+            (revisione del 16/11, testo approvato dal signore) */}
+        {d.ieriChiusa && (
+          <p className="ga-nota ga-da-dirle">
+            <b>Una cosa da dirle oggi</b>
+            Ieri sera ha chiuso tutto alle {oraRoma(new Date(d.ieriChiusa))}. Per esempio: «Ho visto che ieri sera hai chiuso tutto.»
+          </p>
+        )}
         {chiediCasa && (
           <button type="button" className="ga-domanda" onClick={() => setFoglio('casa')}>
             Lani è a casa oggi?
@@ -237,33 +231,13 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
           <p className="ga-nota">Segnatelo quando Lani ha avuto il premio.</p>
         </Foglio>
       )}
-      {typeof foglio === 'object' && 'partita' in foglio && (
-        <FoglioPartita
-          partita={foglio.partita}
-          approva={async (f) => (setFoglio(undefined), fatto(await approvaPartita(client, passi, foglio.partita, f)))}
-          rifiuta={async () => (setFoglio(undefined), fatto(await rifiutaPartita(client, foglio.partita)))}
-          chiudi={() => setFoglio(undefined)}
-        />
-      )}
     </>
   );
 }
 
 /** Le righe di "Da fare per voi": quello che aspetta i genitori (le foto le fa Lani: stanno sotto, in "Da sapere"). */
 function daFare(d: Dati) {
-  return [...d.partite, ...d.fogli, ...d.forzieri, ...d.verifiche.filter((v) => daRecuperare(v, d.assenze))];
-}
-
-function FoglioPartita({ partita: p, approva, rifiuta, chiudi }: { partita: PartitaDaApprovare; approva: (f: FormData) => void; rifiuta: () => void; chiudi: () => void }) {
-  return (
-    <Foglio titolo={`Partita con ${p.avversaria}`} azione="Approva" conferma={approva} chiudi={chiudi}>
-      <p className="ga-nota">{bello(p.data)} · l'ha segnata Lani. Correggete se serve, poi approvate: i passi arrivano adesso.</p>
-      <CampiRisultato nostri={p.set_nostri} loro={p.set_loro} inCampo={p.in_campo ?? true} />
-      <button type="button" className="ga-btn largo" onClick={rifiuta}>
-        Rifiuta: non si è giocata
-      </button>
-    </Foglio>
-  );
+  return [...d.fogli, ...d.forzieri, ...d.verifiche.filter((v) => daRecuperare(v, d.assenze))];
 }
 
 /**

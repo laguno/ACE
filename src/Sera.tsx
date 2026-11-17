@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import * as C from './lib/calendario';
 import * as N from './lib/nuvola';
 import * as R from './lib/regole';
-import { GIORNI, RigaCompito, SELECT_COMPITI, adesso, maiuscola, passi, spuntaCompito, useAnnulla, type Compito } from './spunte';
+import { GIORNI, RigaCompito, SELECT_COMPITI, adesso, maiuscola, mostraValore, passi, spuntaCompito, useAnnulla, type Compito } from './spunte';
 import { supabase } from './supabase';
 import { Check } from '@phosphor-icons/react';
 import { Sticker, Testata } from './kit';
@@ -45,7 +45,7 @@ function Voci({ titolo, valore, voci, pronta, quandoPronta, onAnnulla, colore, c
     <div className="carta">
       <div className="testa-carta">
         <h2>{titolo}</h2>
-        <span className="valore">+{valore}</span>
+        {mostraValore(pronta) && <span className="valore">+{valore}</span>}
       </div>
       {children}
       <ul className="pastiglie">
@@ -209,7 +209,7 @@ export default function Sera() {
       <div className="carta">
         <div className="testa-carta">
           <h2>Compiti per domani</h2>
-          <span className="valore">+{R.CONFIG.passi.obbligatori.compiti} ciascuno</span>
+          {mostraValore(compiti.some((c) => c.fatto_il)) && <span className="valore">+{R.CONFIG.passi.obbligatori.compiti} ciascuno</span>}
         </div>
         {compiti.length === 0 && <p>Nessun compito su Nuvola per domani.</p>}
         <ul className="spunte">

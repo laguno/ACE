@@ -2,11 +2,16 @@
 // segreto GOOGLE_CALENDAR_ICS_URL), espande gli eventi ripetuti e copia in impegni_famiglia quelli
 // da ieri a 14 giorni avanti. Sola lettura: gli impegni si cambiano in Google, non nell'app.
 // Eventi con "privato" nel titolo esclusi. La chiamano il cron (ogni ora) o un genitore.
+// Dal 17/11 (signore) le partite di Lani le scrive solo la funzione classifiche dalla FIPAV (id "fipav:..."):
+// qui le partite del calendario si saltano, quelle FIPAV non si cancellano, e un giorno segnato
+// "[LANI ASSENTE]" toglie la partita FIPAV di quel giorno.
 import { apriRegistro, dbServizio } from '../_shared/ambiente.ts';
 import ICAL from 'npm:ical.js@2.1.0';
 import { avvisaSeFallita } from '../_shared/push.ts';
 import { chiChiama, cronOGenitore } from '../_shared/accesso.ts';
 import { impegni } from '../../../src/lib/calendario/ics.ts';
+import * as Cal from '../../../src/lib/calendario/index.ts';
+import { IMPEGNO_FIPAV, assenteDalCalendario, giornoRomaIso } from '../../../src/lib/classifiche/index.ts';
 
 const db = dbServizio();
 const GIORNO = 864e5;
@@ -25,7 +30,7 @@ Deno.serve(async (req) => {
     const r = await fetch(Deno.env.get('GOOGLE_CALENDAR_ICS_URL') ?? '');
     if (!r.ok) throw new Error(`calendario: ${r.status}`);
     const da = new Date(Date.now() - GIORNO);
-    const righe = impegni(ICAL, await r.text(), da, new Date(Date.now() + 14 * GIORNO));
+    const righe = impegni(ICAL, await r.text(), da, new Date(Date.now() + 14 * GIORNO)).filter((i) => Cal.tipoImpegno(i.titolo) !== 'partita');
     if (righe.length) {
       const { error } = await db.from('impegni_famiglia').upsert(righe);
       if (error) throw new Error(`impegni_famiglia: ${error.message}`);
@@ -35,8 +40,15 @@ Deno.serve(async (req) => {
       .from('impegni_famiglia')
       .delete()
       .gte('inizio', da.toISOString())
+      .not('id', 'like', `${IMPEGNO_FIPAV}%`)
       .lt('aggiornato_il', righe[0]?.aggiornato_il ?? new Date().toISOString());
     if (e2) throw new Error(`pulizia: ${e2.message}`);
+    // ponytail: giorno di Roma approssimato con +01:00, come in classifiche: le partite non sono a mezzanotte
+    for (const g of new Set(righe.filter((i) => assenteDalCalendario([i.titolo])).map((i) => giornoRomaIso(i.inizio)))) {
+      const dopo = new Date(Date.parse(`${g}T12:00:00Z`) + GIORNO).toISOString().slice(0, 10);
+      const { error: e3 } = await db.from('impegni_famiglia').delete().like('id', `${IMPEGNO_FIPAV}%`).gte('inizio', `${g}T00:00:00+01:00`).lt('inizio', `${dopo}T00:00:00+01:00`);
+      if (e3) throw new Error(`assente: ${e3.message}`);
+    }
     dettagli = { impegni: righe.length };
   } catch (e) {
     esito = 'errore';

@@ -29,6 +29,8 @@ test('Oggi: il saldo sale da 250 a 300 con +50, poi Astra è fermo', async ({ pa
   await expect(saldo.getByText('+50')).toBeVisible();
   await expect(saldo.locator('b')).toHaveText('300');
   await expect(saldo.getByText('300 passi')).toBeAttached();
+  // la meta accanto al totale: a 300 passi ne mancano 95 alla prossima tappa, come in Astra
+  await expect(saldo.getByText('mancano 95')).toBeVisible();
   await page.screenshot({ path: 'e2e/risultati/passi-oggi.png' });
   await page.getByRole('button', { name: 'Astra' }).click();
   await expect(page.locator('.astra-saldi .saldo b')).toHaveText('300');

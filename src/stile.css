@@ -20,6 +20,23 @@
   --carta-gialla: #fffbe6; /* biglietto dell'enigma */
   --verde: #2e7d32;       /* fatto, in salita */
   --notte: #2f2a6e;       /* cielo della sera */
+  --su-colore: #fff;      /* testo e segni sopra un colore pieno (bottoni, spunte) */
+  /* la notte: i colori della schermata Sera, più scura per l'uso a letto (contrasti controllati con axe) */
+  --notte-fondo: #17132f;
+  --notte-carta: #2a2552;
+  --notte-testo: #f3ecfb;
+  --notte-testo-2: #cdc2e3;
+  --notte-accento: #ff9ccb;
+  --notte-accento-chiaro: #ffc4df;
+  --notte-lilla: #3b3470;
+  --notte-rosa: #4b2f5e;
+  --notte-bordo: #9d8fe0;
+  /* solo R-Evolution (design/REvolution.html): i colori della divisa */
+  --granata: #7b2342;        /* maglia: testata, azioni, riga della squadra */
+  --granata-scuro: #561530;  /* tabellone, nastro, premuto */
+  --granata-chiaro: #f6d3de; /* testi secondari su granata: 7:1 */
+  --granata-velo: #f8e4ea;
+  --ombra-campo: 0 12px 26px rgba(86, 21, 48, 0.28);
   /* ombre: una tinta, tre altezze (carte; popup, flash card e flottanti; etichette della mappa) */
   --ombra: 0 10px 24px rgba(123, 106, 224, 0.14);
   --ombra-alta: 0 16px 36px rgba(123, 106, 224, 0.3);
@@ -39,7 +56,16 @@ body {
 /* sfondi per momento, come nelle bozze (le percentuali delle bozze su 844 px, in px) */
 body[data-sfondo='mattina'] { background: linear-gradient(180deg, var(--azzurrino) 0, var(--cielo-chiaro) 220px, var(--panna) 390px) no-repeat, var(--panna); }
 body[data-sfondo='pomeriggio'] { background: linear-gradient(180deg, var(--lilla) 0, var(--panna) 253px) no-repeat, var(--panna); }
-body[data-sfondo='sera'] { background: linear-gradient(180deg, var(--lilla-medio) 0, var(--lilla) 169px, var(--panna) 320px) no-repeat, var(--panna); }
+body[data-sfondo='sera'] { background: linear-gradient(180deg, var(--notte) 0, var(--notte-fondo) 320px) no-repeat, var(--notte-fondo); }
+/* Sera più scura: non si riscrivono le regole, si cambiano le variabili dentro la schermata e la barra
+   (i popup restano chiari). Lo sfondo "sera" lo mette solo la testata della Sera. */
+body[data-sfondo='sera'] main, body[data-sfondo='sera'] .barra {
+  --bianco: var(--notte-carta); --panna: var(--notte-fondo); --testo: var(--notte-testo); --testo-2: var(--notte-testo-2);
+  --accento: var(--notte-accento); --accento-premuto: var(--notte-accento-chiaro); --su-colore: var(--notte-fondo);
+  --lilla: var(--notte-lilla); --rosa: var(--notte-rosa); --lilla-medio: var(--notte-bordo); --lilla-bordo: var(--notte-bordo); --rosa-bordo: var(--notte-rosa);
+  --ombra: 0 10px 24px rgba(0, 0, 0, 0.3);
+  color: var(--testo);
+}
 body[data-sfondo='rosa'] { background: linear-gradient(180deg, var(--rosa) 0, var(--lilla) 380px, var(--panna) 844px) no-repeat, var(--panna); }
 body[data-sfondo='viola'] { background: linear-gradient(180deg, var(--viola) 0, var(--lilla-medio) 260px, var(--rosa) 620px) no-repeat, var(--rosa); }
 h1, h2 { font-family: 'Baloo 2', Nunito, sans-serif; font-weight: 800; }
@@ -91,11 +117,30 @@ body:has(.studio) .barra, body:has(.studio, .schermo-studio) .link-genitori { di
 body:has(.studio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
 
 /* Testata delle schermate: testo a sinistra, avatar sticker che sborda a destra */
-.testata { display: grid; grid-template-columns: 1fr auto; align-items: start; margin: 0 -16px 0 0; min-height: 170px; }
-.testata-testo { display: flex; flex-direction: column; gap: 4px; padding: 14px 0 12px 4px; }
+.testata { display: grid; grid-template-columns: 1fr auto; align-items: start; margin: 0 -16px 0 0; min-height: 150px; }
+.testata-testo { display: flex; flex-direction: column; gap: 4px; padding: 8px 0 8px 4px; }
 .testata h1 { margin: 0; font-size: 30px; line-height: 1.05; }
 .testata .riga, .testata .riga p { margin: 0; font-size: 15px; line-height: 1.4; color: var(--testo-2); }
-.testata-avatar { margin: -6px 0 -20px -24px; }
+.testata-avatar { margin: -6px 0 -20px -24px; max-width: 150px; max-height: 150px; }
+/* Testata compatta allo scorrere: resta in alto, il titolo e l'avatar rimpiccioliscono, il resto svanisce.
+   Solo CSS, solo transform e opacity: il posto che occupa non cambia, quindi la pagina non salta. Non prende
+   i tocchi (dentro non c'è niente da toccare). Senza animation-timeline, o col movimento ridotto, resta
+   com'è e scorre via con la pagina. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: scroll()) {
+    .testata { position: sticky; top: 0; z-index: 3; pointer-events: none; }
+    .testata::before { content: ''; position: absolute; z-index: -1; inset: 0 0 auto -16px; height: 64px; border-radius: 0 0 24px 24px; background: var(--panna); box-shadow: var(--ombra); opacity: 0; }
+    .testata::before, .testata h1, .testata .sopratitolo, .testata .riga, .testata-avatar { animation: linear both; animation-timeline: scroll(); }
+    .testata .sopratitolo, .testata .riga { animation-name: testata-svanisce; animation-range: 0 40px; }
+    .testata::before { animation-name: testata-compare; animation-range: 40px 96px; }
+    .testata h1 { transform-origin: 0 0; animation-name: testata-titolo; animation-range: 16px 96px; }
+    .testata-avatar { transform-origin: 100% 0; animation-name: testata-avatar; animation-range: 16px 96px; }
+  }
+}
+@keyframes testata-svanisce { to { opacity: 0; } }
+@keyframes testata-compare { to { opacity: 1; } }
+@keyframes testata-titolo { to { transform: translateY(-20px) scale(0.67); } }
+@keyframes testata-avatar { to { transform: translate(-12px, 12px) scale(0.37); } }
 .sopratitolo { margin: 0; min-height: 44px; display: flex; align-items: center; color: var(--testo-2); }
 .testata .sopratitolo { min-height: 0; display: block; margin: 0; font: 800 14px Nunito, sans-serif; color: var(--testo-2); }
 .sticker { display: block; object-fit: contain; pointer-events: none; user-select: none; }
@@ -127,7 +172,7 @@ body:has(.studio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom)
   border-radius: 999px;
   font: 800 17px Nunito, sans-serif;
 }
-.principale { border: 0; background: var(--accento); color: var(--bianco); box-shadow: inset 0 -4px 0 var(--accento-premuto); }
+.principale { border: 0; background: var(--accento); color: var(--su-colore); box-shadow: inset 0 -4px 0 var(--accento-premuto); }
 .principale:active { background: var(--accento-premuto); }
 .principale:disabled { opacity: 0.6; }
 .secondario { width: 100%; margin-top: 12px; border: 2px solid var(--accento); background: var(--bianco); color: var(--accento); }
@@ -188,18 +233,17 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .chiavi { display: flex; gap: 2px; }
 .collegamento { display: flex; align-items: center; gap: 4px; min-height: 44px; border: 0; background: none; color: var(--accento); font: 800 14px Nunito, sans-serif; }
 .piccola { display: flex; gap: 8px; align-items: flex-start; font-size: 13px !important; }
-/* pomeriggio: il numero dell'ordine fa da casella */
+/* una sola spunta per Pomeriggio e Sera (RigaCompito): un cerchio col bordo, che si capisce che si tocca;
+   nel pomeriggio dentro c'è il numero dell'ordine, con la spunta diventa pieno con ✓ */
 .spunte { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
 .spunte label { display: flex; gap: 12px; align-items: flex-start; min-height: 44px; padding: 8px 0; }
-.spunte input[type='checkbox'] { flex: none; width: 28px; height: 28px; margin: 0; accent-color: var(--accento); }
-.spunte input:checked + span { color: var(--testo-2); text-decoration: line-through; }
 .ordine li { padding: 8px 0; border-bottom: 2px dashed var(--lilla); }
 .ordine li:last-child { border-bottom: 0; }
 .ordine label { font-size: 15px; line-height: 1.35; }
 .numerata { position: relative; align-items: center !important; }
 .numerata input[type='checkbox'] { position: absolute; left: 0; top: 50%; translate: 0 -50%; width: 44px; height: 44px; opacity: 0; margin: 0; cursor: pointer; }
-.bollino { flex: none; width: 34px; height: 34px; margin: 5px; border-radius: 50%; display: grid; place-items: center; background: var(--rosa); color: var(--accento); font: 800 17px 'Baloo 2', Nunito, sans-serif; }
-.numerata input:checked ~ .bollino { background: var(--accento); color: var(--bianco); }
+.bollino { flex: none; width: 34px; height: 34px; margin: 5px; border-radius: 50%; display: grid; place-items: center; background: var(--bianco); border: 2px solid var(--accento); color: var(--accento); font: 800 17px 'Baloo 2', Nunito, sans-serif; }
+.numerata input:checked ~ .bollino { background: var(--accento); color: var(--su-colore); }
 .numerata input:focus-visible ~ .bollino { outline: 3px solid var(--accento); outline-offset: 2px; }
 .numerata input:checked ~ span:last-child { color: var(--testo-2); text-decoration: line-through; }
 .tondo { flex: none; width: 52px; height: 52px; border-radius: 50%; border: 3px solid var(--lilla-medio); background: var(--bianco); color: var(--testo); display: grid; place-items: center; }
@@ -222,23 +266,13 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .riga-pallini .secondario.compatto { align-self: auto; }
 
 /* Sera (bozza Domani) */
-.sera .testata { min-height: 150px; }
+.sera .testata { min-height: 132px; }
 .sera .testata-avatar { width: 140px; height: 140px; }
 .testata .avanzamento { width: 100%; max-width: 236px; height: 14px; margin-top: 4px; background: var(--bianco); border: 2px solid var(--lilla-bordo); box-sizing: content-box; }
 .testata .avanzamento span { background: var(--fucsia); }
 .testata .conto { margin: 4px 0 0; font: 800 13px/1.35 Nunito, sans-serif; color: var(--testo); }
 .sera .spunte label { min-height: 44px; padding: 4px 0; gap: 12px; align-items: center; font-size: 14px; }
-.sera .spunte input:checked + span { text-decoration-color: var(--lilla-medio); }
-.sera .spunte input[type='checkbox'] {
-  appearance: none; -webkit-appearance: none; display: grid; place-items: center;
-  width: 22px; height: 22px; margin: 0; border: 2px solid var(--testo-2); border-radius: 6px; background: var(--bianco);
-}
-.sera .spunte input[type='checkbox']:checked {
-  border-color: var(--fucsia); background: var(--fucsia)
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
-    center / 18px no-repeat;
-}
-.sera .spunte input[type='checkbox']:focus-visible { outline: 3px solid var(--accento); outline-offset: 2px; }
+.sera .numerata input:checked ~ span:last-child { text-decoration-color: var(--lilla-medio); }
 .con-lady { position: relative; padding: 8px 100px 8px 12px; border-radius: 16px; background: var(--rosa); font: 800 13px/1.35 Nunito, sans-serif; min-height: 64px; display: flex; align-items: center; }
 .lady-sticker { position: absolute; right: -10px; bottom: -14px; }
 .pastiglie { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 12px 8px; }
@@ -247,7 +281,7 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .chip-lilla { background: var(--lilla); }
 .chip-rosa { background: var(--rosa); }
 .chip .segno { display: none; }
-.chip:has(input:checked) { background: var(--accento); color: var(--bianco); }
+.chip:has(input:checked) { background: var(--accento); color: var(--su-colore); }
 .chip:has(input:checked) .segno { display: block; }
 .chip:has(input:focus-visible) { outline: 3px solid var(--accento); outline-offset: 2px; }
 .foglio { display: flex; gap: 12px; align-items: center; justify-content: space-between; min-height: 54px; }
@@ -261,6 +295,7 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .testa-carta { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
 .testa-carta h2 { margin: 0 0 4px; }
 .valore { flex: none; font: 800 13px Nunito, sans-serif; color: var(--accento); }
+.valore.quieto { color: var(--testo-2); }
 
 /* Studio (bozza Studio) */
 .schermo .carta p.data-verifica { font: 800 14px Nunito, sans-serif; color: var(--testo-2); }
@@ -288,7 +323,7 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .esiti button { min-height: 64px; border: 0; border-radius: 24px; color: var(--testo); font: 800 17px/1.1 'Baloo 2', Nunito, sans-serif; box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.1); }
 .esiti .esito-no { background: var(--rosa-bordo); }
 .esiti .esito-quasi { background: var(--lilla-medio); }
-.esiti .esito-si { background: var(--accento); color: var(--bianco); box-shadow: inset 0 -4px 0 var(--accento-premuto); }
+.esiti .esito-si { background: var(--accento); color: var(--su-colore); box-shadow: inset 0 -4px 0 var(--accento-premuto); }
 .esiti button:disabled { opacity: 0.45; box-shadow: none; }
 .studio .link { align-self: center; padding: 0 14px; color: var(--testo-2); font: 800 13px Nunito, sans-serif; }
 .regola { margin: 0; text-align: center; font: 700 13px/1.4 Nunito, sans-serif; color: var(--testo-2); }
@@ -326,10 +361,13 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .chiavi-settimana > span { display: flex; }
 .saldo { display: flex; align-items: center; gap: 6px; padding: 4px 11px; border: 3px solid var(--rosa-bordo); border-radius: 999px; }
 .saldo b { font: 800 20px/1 'Baloo 2', Nunito, sans-serif; color: var(--accento); font-variant-numeric: tabular-nums; }
-.testata .saldo { align-self: flex-start; display: inline-flex; margin-top: 8px; background: var(--bianco); }
+.testata .saldo { position: relative; align-self: flex-start; display: inline-flex; margin-top: 8px; background: var(--bianco); }
+/* accanto ai passi, quanti ne mancano alla prossima tappa (come "Sei qui" in Astra) */
+.saldo small { font: 800 13px/1 Nunito, sans-serif; color: var(--testo-2); white-space: nowrap; }
+.testata .contapassi { position: static; }
 /* passi che salgono: il numero conta da solo (Contapassi), il "+N" sale e svanisce */
 .contapassi { position: relative; display: inline-flex; }
-.contapassi-delta { position: absolute; left: 50%; bottom: 100%; padding: 2px 8px; border-radius: 999px; background: var(--accento); color: var(--bianco); font: 800 13px/1.2 Nunito, sans-serif; white-space: nowrap; pointer-events: none; opacity: 0; animation: delta-sale 1.6s ease-out forwards; }
+.contapassi-delta { position: absolute; left: 50%; bottom: 100%; padding: 2px 8px; border-radius: 999px; background: var(--accento); color: var(--su-colore); font: 800 13px/1.2 Nunito, sans-serif; white-space: nowrap; pointer-events: none; opacity: 0; animation: delta-sale 1.6s ease-out forwards; }
 .contapassi-delta.giu { background: var(--testo-2); }
 @keyframes delta-sale {
   0% { opacity: 0; transform: translate(-50%, 6px); }
@@ -337,7 +375,7 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
   100% { opacity: 0; transform: translate(-50%, -14px); }
 }
 /* nella testata di Oggi sopra c'è il testo: il "+N" esce a destra della pillola */
-.testata .contapassi-delta { left: calc(100% + 24px); bottom: auto; top: 50%; animation-name: delta-destra; }
+.testata .contapassi-delta { left: calc(100% + 8px); bottom: auto; top: 50%; animation-name: delta-destra; }
 @keyframes delta-destra {
   0% { opacity: 0; transform: translate(-8px, -50%); }
   15%, 60% { opacity: 1; transform: translate(0, -50%); }
@@ -349,7 +387,7 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .mappa { position: relative; margin: 8px -16px 0; overflow-x: clip; }
 .sentiero { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .sentiero path { fill: none; vector-effect: non-scaling-stroke; stroke-linecap: round; stroke-linejoin: round; }
-.sentiero .strada { stroke: var(--bianco); stroke-width: 30; opacity: 0.92; }
+.sentiero .strada { stroke: var(--su-colore); stroke-width: 30; opacity: 0.92; }
 .sentiero .puntini { stroke: var(--lilla-medio); stroke-width: 7; stroke-dasharray: 0 18; }
 .sentiero .fatta { stroke: var(--fucsia); stroke-width: 14; }
 .tappe { list-style: none; margin: 0; padding: 0; }
@@ -359,9 +397,9 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .tappe .destra { left: 40px; }
 .tappe .sinistra { right: 40px; }
 /* etichette della mappa: non prendono i tocchi */
-.tappe .qui, .tappe .bandiera, .tappe .traguardo, .lani-sentiero { pointer-events: none; }
+.tappe .bandiera, .tappe .traguardo, .lani-sentiero { pointer-events: none; }
 /* "Sei qui" sotto la tappa attuale, Lani accanto dal lato largo, mai sovrapposti */
-.qui { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: var(--bianco); box-shadow: var(--ombra-etichetta); font: 800 12px/1.2 Nunito, sans-serif; color: var(--accento); }
+.qui { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 44px; border: 0; padding: 3px 10px; border-radius: 999px; background: var(--bianco); box-shadow: var(--ombra-etichetta); font: 800 12px/1.2 Nunito, sans-serif; color: var(--accento); }
 .qui b { font: 800 17px/1.1 'Baloo 2', Nunito, sans-serif; color: var(--testo); }
 .tappe .qui { left: 0; top: 38px; translate: -50% 0; z-index: 2; }
 .lani-sentiero { position: absolute; top: -62px; z-index: 1; width: 96px; height: 96px; }
@@ -392,7 +430,7 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .premio-figura figcaption { font: 800 17px 'Baloo 2', Nunito, sans-serif; color: var(--accento); }
 .premio-immagine { display: grid; place-items: center; border-radius: 24px; object-fit: contain; }
 .premio-pacco { position: relative; background: var(--lilla); color: var(--viola); }
-.premio-pacco b { position: absolute; top: 12%; right: 16%; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; background: var(--accento); color: var(--bianco); font: 800 22px 'Baloo 2', Nunito, sans-serif; }
+.premio-pacco b { position: absolute; top: 12%; right: 16%; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; background: var(--accento); color: var(--su-colore); font: 800 22px 'Baloo 2', Nunito, sans-serif; }
 .popup-premio { width: 160px; height: 160px; object-fit: contain; border-radius: 24px; }
 .premio-genitori { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
 .premio-genitori .nota { margin: 0; }
@@ -406,8 +444,8 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .figurina-pagina .figurina { display: grid; padding: 0; overflow: hidden; gap: 0; border: 3px solid var(--rosa-bordo); background: var(--bianco); text-align: left; justify-items: stretch; }
 .figurina h1 { margin: 0; }
 .fascia { position: relative; height: 196px; background: linear-gradient(180deg, var(--accento) 0%, var(--fucsia) 70%, var(--bianco) 100%); }
-.fascia span { position: absolute; left: 16px; top: 14px; font: 800 14px Nunito, sans-serif; color: var(--bianco); }
-.fascia b { position: absolute; right: 16px; top: 4px; font: 800 52px/1 'Baloo 2', Nunito, sans-serif; color: var(--bianco); }
+.fascia span { position: absolute; left: 16px; top: 14px; font: 800 14px Nunito, sans-serif; color: var(--su-colore); }
+.fascia b { position: absolute; right: 16px; top: 4px; font: 800 52px/1 'Baloo 2', Nunito, sans-serif; color: var(--su-colore); }
 .fascia img { position: absolute; left: 50%; bottom: -8px; translate: -50% 0; }
 .figurina .nome { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 16px 8px; }
 .figurina .nome h1 { margin: 0; font-size: 26px; }
@@ -488,7 +526,7 @@ dialog.velo:focus { outline: none; }
 .frase-popup { width: 100%; margin: 0; }
 .frase-popup blockquote { font-size: 14px; }
 .riga-figurina { width: 100%; margin: 0; padding: 8px 0 0; border-top: 2px dashed var(--lilla); font: 800 13px Nunito, sans-serif !important; color: var(--testo-2); }
-.bollino-malus { position: absolute; right: 18px; top: 18px; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--testo); color: var(--bianco); font: 800 17px 'Baloo 2', Nunito, sans-serif; }
+.bollino-malus { position: absolute; right: 18px; top: 18px; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--testo); color: var(--su-colore); font: 800 17px 'Baloo 2', Nunito, sans-serif; }
 @media (prefers-reduced-motion: no-preference) {
   .popup { animation: entra 0.35s cubic-bezier(0.22, 1, 0.36, 1) both; }
   @keyframes entra { from { opacity: 0; transform: translateY(24px) scale(0.94); } to { opacity: 1; transform: none; } }
@@ -504,7 +542,7 @@ dialog.velo:focus { outline: none; }
 /* Genitori */
 .schede { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
 .schede button { flex: none; min-height: 44px; padding: 0 14px; border: 0; border-radius: 999px; background: var(--lilla); color: var(--testo-2); font: inherit; }
-.schede button[aria-current='page'] { background: var(--accento); color: var(--bianco); }
+.schede button[aria-current='page'] { background: var(--accento); color: var(--su-colore); }
 .griglia { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .griglia .secondario { margin-top: 0; min-height: 54px; padding: 0 8px; }
 .stretto { width: auto; margin-top: 0; padding: 0 16px; min-height: 44px; flex: none; }
@@ -559,7 +597,7 @@ body:has(.avvio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom))
 .avvio li { display: flex; align-items: center; gap: 12px; padding: 12px 16px; }
 .avvio li b { display: block; font-size: 15px; }
 .avvio .segno { flex: none; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--rosa); color: var(--accento); font: 800 17px 'Baloo 2', Nunito, sans-serif; }
-.avvio .fatto .segno { background: var(--accento); color: var(--bianco); }
+.avvio .fatto .segno { background: var(--accento); color: var(--su-colore); }
 .avvio small { display: block; font: 700 13px/1.35 Nunito, sans-serif; color: var(--testo-2); }
 .avvio-piede { margin-top: auto; display: flex; flex-direction: column; gap: 8px; }
 .avvio-piede .link { color: var(--testo-2); font: 800 14px Nunito, sans-serif; }
@@ -588,7 +626,7 @@ body:has(.avvio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom))
 .pillola-oro .numero { margin-left: auto; padding-left: 8px; font: 800 24px/1 'Baloo 2', Nunito, sans-serif; color: var(--accento); white-space: nowrap; }
 .riga-chiavi .collegamento { align-self: flex-end; }
 /* Pomeriggio: testata più bassa (ripasso e carte salgono), cerchi della stessa misura, "Inizia da qui" più quieto */
-.pomeriggio .testata { min-height: 150px; }
+.pomeriggio .testata { min-height: 132px; }
 .bollino { width: 44px; height: 44px; margin: 0; }
 .nota-riga { color: var(--testo-2); }
 .ordine label { padding: 0; }
@@ -632,8 +670,9 @@ body:has(.avvio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom))
    niente scorrimento orizzontale. Da 360 px in su non cambia niente. */
 @media (max-width: 359px) {
   .testata-avatar, .sera .testata-avatar { width: 38vw; height: auto; }
-  .astra-saldi, .riga-pallini { flex-wrap: wrap; }
+  .astra-saldi, .riga-pallini, .testata .saldo { flex-wrap: wrap; border-radius: 24px; }
   .tappe .traguardo { white-space: normal; max-width: 110px; }
+  .tappe .forziere small { white-space: normal; max-width: 84px; border-radius: 16px; line-height: 1.15; text-align: center; }
 }
 
 /* Dieci minuti (sprint 2): il timer grande al centro della carta */
@@ -652,19 +691,93 @@ body:has(.avvio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom))
 .classifica th:nth-child(2), .classifica td:nth-child(2) { text-align: left; overflow-wrap: anywhere; }
 .classifica tr.lani td { color: var(--accento-premuto); font-weight: 800; }
 
-/* R-Evolution (sprint 2) */
-.r-evolution .numeri { grid-template-columns: repeat(2, 1fr); }
+/* R-Evolution (sprint 2). Tema campo del 16/11 (design/REvolution.html): qui Lani è in divisa e la
+   schermata stacca dal resto: granata e bianco, tabellone, nastro dell'ultim'ora, emoji (solo qui). */
+.r-evolution { margin: -16px -16px 0; padding: 0 16px; overflow-x: clip; }
+.r-evolution ::selection { background: var(--granata); color: var(--bianco); }
+.r-evolution :focus-visible { outline-color: var(--granata); }
+.emoji { font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif; font-weight: 400; font-style: normal; }
+
+/* testata: campo granata tagliato in diagonale, il 9 della maglia dietro, lo sticker che sborda */
+.campo-testata { position: relative; isolation: isolate; margin: 0 -16px 4px; padding: 30px 20px 0; min-height: 268px; color: var(--bianco); }
+.campo-testata::before {
+  content: ''; position: absolute; inset: 0; z-index: -2;
+  background:
+    linear-gradient(var(--bianco), var(--bianco)) 0 196px / 100% 3px no-repeat,
+    linear-gradient(var(--bianco), var(--bianco)) 62px 0 / 3px 100% no-repeat,
+    var(--granata);
+  background-blend-mode: soft-light, soft-light, normal;
+  clip-path: polygon(0 0, 100% 0, 100% 78%, 0 100%);
+}
+.campo-numero { position: absolute; z-index: -1; right: 108px; top: -34px; font: 800 300px/1 'Baloo 2', sans-serif; color: var(--granata-scuro); opacity: 0.55; user-select: none; }
+.campo-testata h1 { margin: 0; font-size: 46px; line-height: 0.95; letter-spacing: -0.02em; }
+.campo-testata .conto { margin: 10px 0 0; max-width: 170px; font: 800 15px/1.35 Nunito, sans-serif; color: var(--granata-chiaro); }
+.campo-testata .conto b { display: block; font: 800 34px/1 'Baloo 2', sans-serif; color: var(--bianco); font-variant-numeric: tabular-nums; }
+.campo-sticker { position: absolute; right: -22px; bottom: -22px; filter: drop-shadow(0 10px 14px rgba(86, 21, 48, 0.35)); }
+@media (max-width: 359px) { .campo-sticker { width: 190px; height: 190px; } .campo-numero { display: none; } }
+@media (prefers-reduced-motion: no-preference) {
+  .campo-sticker { animation: scatta 0.55s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  @keyframes scatta { from { transform: translate(60px, 18px) rotate(8deg); } to { transform: none; } }
+}
+
+/* ultim'ora: nastro che scorre; si ferma al tocco, con il movimento ridotto si scorre col dito */
+.ultimora { display: flex; align-items: stretch; height: 44px; margin: 0 -16px; overflow: hidden; background: var(--granata-scuro); color: var(--bianco); font: 800 15px/44px Nunito, sans-serif; box-shadow: var(--ombra-campo); }
+.ultimora strong { position: relative; z-index: 1; flex: none; padding: 0 22px 0 16px; background: var(--burro); color: var(--granata-scuro); font: 800 13px/44px Nunito, sans-serif; letter-spacing: 0.05em; text-transform: uppercase; clip-path: polygon(0 0, 100% 0, calc(100% - 12px) 100%, 0 100%); }
+.nastro { display: flex; flex: none; white-space: nowrap; }
+.nastro span { padding-left: 14px; }
+.nastro .emoji { padding: 0 8px; }
+@media (prefers-reduced-motion: no-preference) {
+  .nastro { animation: scorre 22s linear infinite; }
+  .ultimora:hover .nastro, .ultimora:active .nastro, .ultimora:focus-visible .nastro { animation-play-state: paused; }
+  @keyframes scorre { to { transform: translateX(-50%); } }
+}
+@media (prefers-reduced-motion: reduce) { .ultimora { overflow-x: auto; } .nastro span + span { display: none; } }
+
+/* prossima partita: il giorno grande in granata, l'avversaria accanto */
+.r-evolution .carta.prossima-partita { display: grid; grid-template-columns: 84px 1fr; gap: 14px; align-items: center; padding: 12px; }
+.prossima-partita .giorno { display: grid; place-items: center; align-content: center; height: 96px; border-radius: 18px; background: var(--granata); color: var(--bianco); font: 800 13px/1.1 Nunito, sans-serif; }
+.prossima-partita .giorno b { font: 800 44px/0.95 'Baloo 2', sans-serif; font-variant-numeric: tabular-nums; }
+.r-evolution .prossima-partita h2 { margin: 0; font: 800 13px Nunito, sans-serif; color: var(--testo-2); }
+.r-evolution .prossima-partita .avversaria { margin: 2px 0 4px; font: 800 23px/1.1 'Baloo 2', Nunito, sans-serif; overflow-wrap: anywhere; }
+.prossima-partita .quanto { display: inline-block; margin-top: 8px; padding: 4px 12px; border-radius: 999px; background: var(--granata-velo); color: var(--granata-scuro); font: 800 13px Nunito, sans-serif; }
+
+/* tabellone: i tre numeri su un pannello scuro solo */
+.r-evolution .tabellone { gap: 0; padding: 14px 4px; border-radius: 24px; background: var(--granata-scuro); box-shadow: var(--ombra-campo); color: var(--bianco); text-align: center; }
+.r-evolution .tabellone div { display: flex; flex-direction: column-reverse; justify-content: flex-end; padding: 0 4px; border-radius: 0; background: none; }
+.r-evolution .tabellone div + div { border-left: 2px solid rgba(255, 255, 255, 0.16); }
+.r-evolution .tabellone dd { font: 800 46px/1 'Baloo 2', Nunito, sans-serif; font-variant-numeric: tabular-nums; }
+.r-evolution .tabellone dt { margin-top: 2px; font: 800 13px/1.2 Nunito, sans-serif; color: var(--granata-chiaro); }
+
+/* classifica: la riga della squadra è una fascia granata piena */
+.r-evolution .classifica { border-collapse: separate; border-spacing: 0; }
+.r-evolution .classifica td:first-child, .r-evolution .classifica th:first-child { padding-left: 10px; }
+.r-evolution .classifica td:last-child, .r-evolution .classifica th:last-child { padding-right: 10px; }
+.r-evolution .classifica tr.lani td { background: var(--granata); color: var(--bianco); border-top-color: transparent; }
+.r-evolution .classifica tr.lani + tr td { border-top-color: transparent; }
+.r-evolution .classifica tr.lani td:first-child { border-radius: 14px 0 0 14px; }
+.r-evolution .classifica tr.lani td:last-child { border-radius: 0 14px 14px 0; }
+
+/* azioni e voce della barra in granata, solo qui */
+.r-evolution .principale { background: var(--granata); box-shadow: inset 0 -4px 0 var(--granata-scuro); }
+.r-evolution .principale:active { background: var(--granata-scuro); }
+.r-evolution .modulo input:focus-visible { outline-color: var(--granata); }
+.r-evolution .modulo label.riga-spunta input { accent-color: var(--granata); }
+.r-evolution .valore { color: var(--granata); }
+body[data-sfondo='campo'] .barra button[aria-current='page'] { background: var(--granata); color: var(--bianco); }
+
 .partite { list-style: none; margin: 0; padding: 0; display: grid; }
 .partite li { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 10px 0; border-top: 2px dashed var(--lilla); }
 .partite li:first-child { border-top: 0; }
 .partite span { display: flex; flex-direction: column; gap: 2px; font-weight: 800; }
 .partite small { font: 700 13px Nunito, sans-serif; color: var(--testo-2); }
-.partite b { font: 800 22px 'Baloo 2', Nunito, sans-serif; color: var(--testo-2); }
-.partite b.vinta { color: var(--accento); }
-/* cinque voci (R-Evolution): etichette su una riga; sotto i 380 px "R-Evo" (il nome intero resta in aria-label) */
+/* il risultato come una targhetta da tabellone */
+.partite b { flex: none; min-width: 64px; padding: 4px 10px; border-radius: 12px; text-align: center; font: 800 22px/1.2 'Baloo 2', Nunito, sans-serif; font-variant-numeric: tabular-nums; background: var(--lilla); color: var(--testo-2); }
+.partite b.vinta { background: var(--granata); color: var(--bianco); }
+/* cinque voci (R-Evolution): etichette su una riga; sotto i 410 px "R-Evo" (il nome intero resta in aria-label).
+   17/11: tra 380 e 409 px "R-Evolution" usciva dalla pillola della voce selezionata (prova in e2e/r-evolution) */
 .barra.cinque button { white-space: nowrap; letter-spacing: -0.2px; }
 .barra .corto { display: none; }
-@media (max-width: 379px) {
+@media (max-width: 409px) {
   .barra .lungo { display: none; }
   .barra .corto { display: inline; }
 }
@@ -695,13 +808,15 @@ body:has(.avvio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom))
 .ga-testa .ga-btn { margin-left: auto; }
 .ga-sezione { display: grid; gap: 8px; }
 .ga-sezione > h2 { display: flex; align-items: baseline; gap: 8px; font-size: 18px; }
-.ga-conta { padding: 1px 8px; border-radius: 999px; background: var(--accento); color: var(--bianco); font: 800 13px Nunito, sans-serif; }
+.ga-conta { padding: 1px 8px; border-radius: 999px; background: var(--accento); color: var(--su-colore); font: 800 13px Nunito, sans-serif; }
 .ga-nota { margin: 0; font-size: 14px; color: var(--testo-2); }
-.ga-pillola { position: fixed; z-index: 9; left: 50%; bottom: calc(84px + env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(100% - 32px, 398px); display: flex; align-items: center; gap: 12px; margin: 0; padding: 12px 16px; min-height: 48px; border-radius: 16px; background: var(--testo); color: var(--bianco); font-weight: 700; box-shadow: var(--ombra-alta); }
+.ga-da-dirle { padding: 10px 14px; border-radius: 20px; background: var(--burro-chiaro); color: var(--testo); }
+.ga-da-dirle b { display: block; }
+.ga-pillola { position: fixed; z-index: 9; left: 50%; bottom: calc(84px + env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(100% - 32px, 398px); display: flex; align-items: center; gap: 12px; margin: 0; padding: 12px 16px; min-height: 48px; border-radius: 16px; background: var(--testo); color: var(--su-colore); font-weight: 700; box-shadow: var(--ombra-alta); }
 
 /* bottoni: pieno (uno per schermata), bordato, tenue */
 .ga-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 0 16px; border-radius: 999px; border: 2px solid var(--accento); background: var(--bianco); color: var(--accento); font: 800 14px Nunito, sans-serif; white-space: nowrap; flex: none; }
-.ga-btn.pieno { border-color: var(--accento); background: var(--accento); color: var(--bianco); box-shadow: inset 0 -3px 0 var(--accento-premuto); }
+.ga-btn.pieno { border-color: var(--accento); background: var(--accento); color: var(--su-colore); box-shadow: inset 0 -3px 0 var(--accento-premuto); }
 .ga-btn.pieno:active { background: var(--accento-premuto); }
 .ga-btn.tenue { border-color: var(--lilla-medio); color: var(--testo); }
 .ga-btn.largo { width: 100%; min-height: 52px; font-size: 16px; }
@@ -720,7 +835,7 @@ body:has(.avvio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom))
 .ga-icona.burro { background: var(--burro-chiaro); }
 .ga-freccia { flex: none; color: var(--testo-2); }
 .ga-spunta { flex: none; width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; border: 2px solid var(--lilla-bordo); }
-.ga-spunta.si { background: var(--verde); border-color: var(--verde); color: var(--bianco); }
+.ga-spunta.si { background: var(--verde); border-color: var(--verde); color: var(--su-colore); }
 
 /* due azioni rapide grandi */
 .ga-rapide { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -741,7 +856,7 @@ body:has(.avvio) main { padding-bottom: calc(24px + env(safe-area-inset-bottom))
 .ga-schede { position: fixed; z-index: 8; left: 50%; bottom: 0; transform: translateX(-50%); width: min(100%, 430px); display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 6px 6px calc(10px + env(safe-area-inset-bottom)); background: var(--bianco); border-top: 1px solid var(--linea); }
 .ga-schede button { position: relative; display: grid; justify-items: center; align-content: center; gap: 2px; min-height: 56px; border: 0; border-radius: 16px; background: none; color: var(--testo-2); font: 800 12.5px Nunito, sans-serif; }
 .ga-schede button[aria-current] { background: var(--rosa); color: var(--accento-premuto); }
-.ga-bollino { position: absolute; top: 4px; left: calc(50% + 6px); min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--accento); color: var(--bianco); font-size: 11px; line-height: 18px; text-align: center; }
+.ga-bollino { position: absolute; top: 4px; left: calc(50% + 6px); min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--accento); color: var(--su-colore); font-size: 11px; line-height: 18px; text-align: center; }
 body:has(.ga) .barra { display: none; }
 
 /* settimana */
@@ -825,7 +940,7 @@ dialog.ga-velo::backdrop { background: transparent; }
 .ga-giorno legend { float: left; width: 100%; padding: 0; font-size: 16px; }
 .ga-pillola { pointer-events: none; }
 .ga-pillola button { pointer-events: auto; margin: -8px -8px -8px auto; min-height: 44px; padding: 0 14px; border: 0; border-radius: 999px; background: transparent; color: var(--rosa-bordo); font: 800 15px Nunito, sans-serif; }
-.ga-ultimo { display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 4px 0 14px; border-radius: 14px; background: var(--testo); color: var(--bianco); font-weight: 700; }
+.ga-ultimo { display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 4px 0 14px; border-radius: 14px; background: var(--testo); color: var(--su-colore); font-weight: 700; }
 .ga-ultimo button { margin-left: auto; min-height: 44px; padding: 0 14px; border: 0; border-radius: 999px; background: transparent; color: var(--rosa-bordo); font: 800 14px Nunito, sans-serif; }
 /* controlli nativi nascosti sotto la veste della casa: tutto il campo è il bersaglio */
 .ga-data input, .ga-segmenti input, .ga-radio input { appearance: none; border-radius: inherit; }
@@ -850,7 +965,13 @@ dialog.ga-velo::backdrop { background: transparent; }
 .ga .fotografa { flex: 1 0 100%; flex-direction: row; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 8px; }
 .ga .fotografa .scatti { flex: 1 0 100%; flex-direction: row; align-items: center; justify-content: flex-end; gap: 8px; }
 .ga .fotografa .compatto { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; margin: 0; padding: 0 14px; border: 2px solid var(--lilla-medio); border-radius: 999px; background: var(--bianco); color: var(--testo); font: 800 15px Nunito, sans-serif; white-space: nowrap; }
-.ga .fotografa .compatto:not(.secondario) { border-color: var(--accento); background: var(--accento); color: var(--bianco); box-shadow: inset 0 -3px 0 var(--accento-premuto); }
+.ga .fotografa .compatto:not(.secondario) { border-color: var(--accento); background: var(--accento); color: var(--su-colore); box-shadow: inset 0 -3px 0 var(--accento-premuto); }
 .ga .fotografa .compatto:disabled { opacity: 0.55; }
 .ga .fotografa .compatto:focus-visible { outline: 3px solid var(--accento); outline-offset: 2px; }
 .ga .fotografa [role='alert'] { flex: 1 0 100%; text-align: right; }
+
+/* il coach in R-Evolution (17/11): avatar piccolo, una riga, collegamento ai dieci minuti in Oggi */
+.r-evolution .carta.coach { display: grid; grid-template-columns: 72px 1fr; gap: 12px; align-items: center; padding: 12px; }
+.r-evolution .coach h2 { margin: 0; font: 800 13px Nunito, sans-serif; color: var(--testo-2); }
+.r-evolution .coach p { margin: 2px 0 0; font-weight: 700; }
+.r-evolution .coach .collegamento { padding: 0; color: var(--granata); }

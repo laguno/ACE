@@ -4,7 +4,14 @@ import { CalendarBlank, CaretDown, CaretRight, Clock } from '@phosphor-icons/rea
 // Kit "zucchero filato" (design/Stile.html): i pezzi che si ripetono in tutte le schermate.
 // Colori e misure stanno in stile.css come variabili; qui solo i pezzi con un po' di struttura.
 
-export type Sfondo = 'mattina' | 'pomeriggio' | 'sera' | 'viola' | 'panna' | 'rosa';
+export type Sfondo = 'mattina' | 'pomeriggio' | 'sera' | 'viola' | 'panna' | 'rosa' | 'campo';
+
+/** Emoji decorativa: solo in R-Evolution (eccezione del 16/11), mai in popup e notifiche. Muta per i lettori di schermo. */
+export const Emoji = ({ e }: { e: string }) => (
+  <span className="emoji" aria-hidden>
+    {e}
+  </span>
+);
 
 /** Sfondo della schermata secondo il momento (bozze: mattina azzurro, pomeriggio lilla, sera lilla scuro). */
 export function useSfondo(sfondo: Sfondo) {
@@ -134,28 +141,6 @@ export function CampoData({ etichetta, aiuto, vuoto = 'Scegli', type = 'date', v
   );
 }
 
-/** Numero piccolo (set di una partita): − valore +, con un input nascosto per il modulo. */
-export function Numero({ etichetta, name, valore, min = 0, max = 3 }: { etichetta: string; name: string; valore: number; min?: number; max?: number }) {
-  const [n, setN] = useState(valore);
-  return (
-    <div className="ga-campo" role="group" aria-label={etichetta}>
-      <span className="ga-etichetta" aria-hidden>
-        {etichetta}
-      </span>
-      <span className="ga-passo">
-        <button type="button" aria-label={`${etichetta}: meno`} disabled={n <= min} onClick={() => setN(n - 1)}>
-          −
-        </button>
-        <span className="ga-passo-n" aria-live="polite">{n}</span>
-        <button type="button" aria-label={`${etichetta}: più`} disabled={n >= max} onClick={() => setN(n + 1)}>
-          +
-        </button>
-      </span>
-      <input type="hidden" name={name} value={n} />
-    </div>
-  );
-}
-
 /** Scelta da elenco: select nativa con la veste della casa. */
 export function Scelta({ etichetta, opzioni, ...p }: SelectHTMLAttributes<HTMLSelectElement> & { etichetta: ReactNode; opzioni: readonly (readonly [string, string])[] }) {
   return (
@@ -171,31 +156,6 @@ export function Scelta({ etichetta, opzioni, ...p }: SelectHTMLAttributes<HTMLSe
         <CaretDown size={18} weight="bold" aria-hidden />
       </span>
     </Campo>
-  );
-}
-
-/** Gruppo di opzioni a segmenti (radio veri, nascosti): "In campo / In panchina". */
-export function Segmenti({ etichetta, name, opzioni, valore, onChange }: { etichetta: string; name: string; opzioni: readonly (readonly [string, string])[]; valore?: string; onChange?: (v: string) => void }) {
-  const [v, setV] = useState(valore ?? opzioni[0][0]);
-  return (
-    <fieldset className="ga-segmenti">
-      <legend className="solo-lettori">{etichetta}</legend>
-      {opzioni.map(([val, testo]) => (
-        <label key={val}>
-          <input
-            type="radio"
-            name={name}
-            value={val}
-            checked={v === val}
-            onChange={() => {
-              setV(val);
-              onChange?.(val);
-            }}
-          />
-          <span>{testo}</span>
-        </label>
-      ))}
-    </fieldset>
   );
 }
 

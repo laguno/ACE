@@ -11,6 +11,14 @@ export const MESI = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno
 export const maiuscola = (s: string) => s.replace(/^./, (c) => c.toUpperCase());
 export const adesso = () => new Date().toISOString();
 
+/**
+ * Prova (revisione del 16/11, approvata dal signore): i "+N" in testa alle carte di Oggi e Sera si vedono solo
+ * dopo il primo gesto fatto in quella carta, non prima. I numeri non cambiano. Per spegnerla: false
+ * (tornano sempre in vista, come prima).
+ */
+export const VALORE_DOPO_IL_GESTO = true;
+export const mostraValore = (gestoFatto: boolean) => !VALORE_DOPO_IL_GESTO || gestoFatto;
+
 export const SELECT_COMPITI = 'id, testo, fatto_il, scadenza_spostata, materie(nome)';
 
 /** La funzione "passi" decide i passi dallo stato del database; restituisce quanti ne ha dati. */
@@ -34,14 +42,13 @@ export function RigaCompito({ c, numero, nota, onSpunta, onAiuto, onAnnulla }: {
 }) {
   return (
     <li className={onAiuto || onAnnulla ? 'con-aiuto' : undefined}>
-      <label className={numero !== undefined ? 'numerata' : undefined}>
+      <label className="numerata">
         <input type="checkbox" checked={!!c.fatto_il} disabled={!!c.fatto_il} onChange={onSpunta} />
-        {/* nel pomeriggio il numero dell'ordine fa da casella (bozza Pomeriggio): con la spunta diventa ✓ */}
-        {numero !== undefined && (
-          <span className="bollino" aria-hidden>
-            {c.fatto_il ? <Check size={18} weight="bold" /> : numero}
-          </span>
-        )}
+        {/* un solo bersaglio per Pomeriggio e Sera: il cerchio fa da casella, con la spunta diventa ✓;
+            nel pomeriggio dentro c'è il numero dell'ordine */}
+        <span className="bollino" aria-hidden>
+          {c.fatto_il ? <Check size={18} weight="bold" /> : numero}
+        </span>
         <span>
           <b>{c.materie?.nome ?? 'Compito'}</b>: {c.testo}
           {(nota ?? (c.scadenza_spostata && SPOSTATO)) && <small className="nota-riga">{nota ?? SPOSTATO}</small>}
@@ -88,6 +95,9 @@ export function useAnnulla() {
   return {
     inAttesa: (id: string) => id in attesa,
     avvia(id: string, invia: () => void) {
+      // ogni spunta passa di qui: una vibrazione breve dice "presa" (non su iPhone e iPad, che non vibrano;
+      // niente col movimento ridotto)
+      if (!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) navigator.vibrate?.(10);
       const t = window.setTimeout(() => {
         togli(id);
         invia();

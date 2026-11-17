@@ -135,3 +135,42 @@ export function pillolaPartita(inizio: Date, ora: Date): string | null {
   if (giorni === 0) return `Oggi partita · ${traQuanto(inizio, ora)}`;
   return null;
 }
+
+const POSTI = ['prime', 'seconde', 'terze', 'quarte', 'quinte', 'seste', 'settime', 'ottave', 'none', 'decime'];
+
+/**
+ * Due parole sulla classifica per il popup della partita in R-Evolution (17/11): dove siete e quanto
+ * manca dalla prima. Stringa vuota se la squadra non c'è nelle righe.
+ */
+export function riassuntoClassifica(righe: RigaClassifica[], squadra: string): string {
+  const noi = righe.find((r) => stessaSquadra(r.squadra, squadra));
+  if (!noi) return '';
+  if (noi.pos === 1) return 'Siete prime nel girone, continuate così.';
+  const prima = Math.max(...righe.map((r) => r.punti));
+  const posto = POSTI[noi.pos - 1] ?? `in ${noi.pos}ª posizione`;
+  const d = prima - noi.punti;
+  return d <= 0 ? `Siete ${posto}, a pari punti con la prima: si può fare.` : `Siete ${posto}, a ${d === 1 ? 'un punto' : `${d} punti`} dalla prima: si può fare.`;
+}
+
+/** Prefisso degli impegni scritti dalla funzione classifiche: sync-calendario non li tocca. */
+export const IMPEGNO_FIPAV = 'fipav:';
+
+/**
+ * Dal 17/11 (signore) giorno e ora delle partite li dice solo la FIPAV: le gare di R-Evolution
+ * diventano impegni di famiglia ("Partita Lani U13: CASA vs OSPITE"), così Oggi, Sera, notifiche,
+ * chiavi e studio le vedono come prima. Saltati i giorni segnati "[LANI ASSENTE]" nel calendario.
+ */
+export function impegniFipav(
+  gare: (Pick<Gara, 'numero' | 'casa' | 'ospite' | 'set_casa' | 'set_ospite'> & { cid: number; inizio: string })[],
+  campionati: readonly { cid: number; nome: string; squadra: string }[],
+  giorniAssente: ReadonlySet<string>,
+): { id: string; inizio: string; titolo: string }[] {
+  return gare.flatMap((g) => {
+    const c = campionati.find((x) => x.cid === g.cid);
+    if (!c || !garaDi(c.squadra, g) || giorniAssente.has(giornoRomaIso(g.inizio))) return [];
+    return [{ id: `${IMPEGNO_FIPAV}${g.cid}:${g.numero}`, inizio: g.inizio, titolo: `Partita Lani ${c.nome.replace(/^Under\s*/i, 'U')}: ${g.casa} vs ${g.ospite}` }];
+  });
+}
+
+/** Giorno di Roma (AAAA-MM-GG) di un istante. */
+export const giornoRomaIso = (t: string | Date) => new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome' }).format(new Date(t));

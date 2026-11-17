@@ -56,6 +56,21 @@ test('Oggi: si apre qui, con le cose da fare, le due azioni e Lani in tre righe'
   await expect(page.getByRole('navigation', { name: 'Sezioni genitori' }).getByRole('button', { name: /Oggi/ })).toContainText('1');
   // dopo le 14 niente domanda "a casa oggi?"
   await expect(page.getByRole('button', { name: 'Lani è a casa oggi?' })).toHaveCount(0);
+  // senza un fatto di ieri la riga "Una cosa da dirle oggi" non compare
+  await expect(page.getByText('Una cosa da dirle oggi')).toHaveCount(0);
+});
+
+test('Oggi: se ieri Lani ha chiuso la serata, una cosa da dirle oggi', async ({ page }) => {
+  // come nei dati veri: c'è l'ora della cartella pronta, chiusa_il resta vuota
+  await finto(page, { ...dati(), serate: [{ data: '2026-11-22', cartella_il: '2026-11-22T18:40:00Z', chiusa_il: null }] });
+  await page.goto('/');
+  await expect(page.locator('.ga-da-dirle')).toHaveText('Una cosa da dirle oggiIeri sera ha chiuso tutto alle 19:40. Per esempio: «Ho visto che ieri sera hai chiuso tutto.»');
+});
+
+test('Oggi: la riga Serata dice l’ora della cartella pronta di oggi', async ({ page }) => {
+  await finto(page, { ...dati(), serate: [{ data: '2026-11-23', cartella_il: '2026-11-23T19:05:00Z', chiusa_il: null }] });
+  await page.goto('/');
+  await expect(page.getByText('chiusa alle 20:05')).toBeVisible();
 });
 
 test('dare un gesto: due tocchi, il foglio resta aperto, Annulla storna e spegne il popup', async ({ page }) => {
@@ -185,62 +200,18 @@ test('aggiungere un foglio dalla Settimana', async ({ page }) => {
   await expect(page.getByText('Autorizzazione uscita')).toBeVisible();
 });
 
-test('approvare una partita da Oggi: il foglio mostra il risultato, si corregge o si rifiuta', async ({ page }) => {
+// dal 17/11 il risultato arriva solo dalla FIPAV: i genitori non approvano, non rifiutano e non segnano
+test('partite: niente da approvare in Oggi, in Settimana solo la correzione delle partite FIPAV', async ({ page }) => {
   const d = dati();
   d.impostazioni.push(ACCESA);
-  d.partite = [
-    { id: 'p1', data: '2026-11-21', avversaria: 'Foxes Volley', set_nostri: 3, set_loro: 1, in_campo: true, approvata_il: null },
-    { id: 'p2', data: '2026-11-22', avversaria: 'Arbor Itarca', set_nostri: 0, set_loro: 3, in_campo: true, approvata_il: null },
-    { id: 'p3', data: '2026-11-22', avversaria: 'Volley Bibbiano', set_nostri: 3, set_loro: 0, in_campo: true, approvata_il: null },
-  ];
-  const { t, chiamate } = await finto(page, d, { passi: { passi: 10 } });
-  await page.goto('/');
-  const riga = (nome: string) => daFare(page).getByRole('listitem').filter({ hasText: nome });
-  await riga('Foxes Volley').getByRole('button', { name: 'Approva' }).click();
-  await page.getByRole('dialog', { name: 'Partita con Foxes Volley' }).getByRole('button', { name: 'Approva' }).click();
-  await expect(page.getByRole('status')).toHaveText('Partita 3-1 con Foxes Volley approvata: +10 passi.');
-  expect(t.partite.find((p) => p.id === 'p1')?.approvata_il).toBeTruthy();
-  await expect.poll(() => chiamate).toEqual([{ tipo: 'partita', id: 'p1' }]);
-
-  await riga('Volley Bibbiano').getByRole('button', { name: 'Approva' }).click();
-  const foglio = page.getByRole('dialog', { name: 'Partita con Volley Bibbiano' });
-  await foglio.getByRole('button', { name: 'Set loro: più' }).click();
-  await foglio.getByLabel('In panchina').check();
-  await foglio.getByRole('button', { name: 'Approva' }).click();
-  await expect(page.getByRole('status')).toHaveText('Partita 3-1 con Volley Bibbiano approvata: +10 passi.');
-  expect(t.partite.find((p) => p.id === 'p3')).toMatchObject({ set_loro: 1, in_campo: false });
-
-  await riga('Arbor Itarca').getByRole('button', { name: 'Approva' }).click();
-  await page.getByRole('dialog').getByRole('button', { name: /^Rifiuta/ }).click();
-  await expect(page.getByRole('status')).toHaveText('Partita con Arbor Itarca rifiutata.');
-  expect(t.partite.map((p) => p.id)).toEqual(['p1', 'p3']);
-});
-
-test('partite: prima di R-Evolution non compaiono', async ({ page }) => {
-  const d = dati();
-  d.partite = [{ id: 'p1', data: '2026-11-21', avversaria: 'Foxes Volley', set_nostri: 3, set_loro: 1, in_campo: true, approvata_il: null }];
+  d.partite = [{ id: 'p1', data: '2026-11-21', avversaria: 'Foxes Volley', set_nostri: 3, set_loro: 1, in_campo: null, approvata_il: null }];
   await finto(page, d);
   await page.goto('/');
   await expect(daFare(page)).not.toContainText('Foxes');
-  await scheda(page, 'Settimana');
-  await expect(page.getByText('Partite', { exact: true })).toHaveCount(0);
-});
-
-test('segnare una partita dalla Settimana: già approvata, passi dal server', async ({ page }) => {
-  const d = dati();
-  d.impostazioni.push(ACCESA);
-  const { t, chiamate } = await finto(page, d, { passi: { passi: 25 } });
-  await page.goto('/');
+  await expect(page.getByRole('button', { name: 'Approva' })).toHaveCount(0);
   await scheda(page, 'Settimana');
   await page.getByText('Partite', { exact: true }).click();
-  await page.getByRole('button', { name: /^Segna una partita/ }).click();
-  await page.getByLabel('Contro').fill('Volley Bibbiano');
-  await page.getByRole('button', { name: 'Set loro: più' }).click();
-  await page.getByRole('button', { name: 'Segna la partita' }).click();
-  await expect(page.getByRole('status')).toContainText('Partita 3-1 con Volley Bibbiano');
-  expect(t.partite[0]).toMatchObject({ data: '2026-11-23', avversaria: 'Volley Bibbiano', set_nostri: 3, set_loro: 1, in_campo: true });
-  expect(t.partite[0].approvata_il).toBeTruthy();
-  await expect.poll(() => chiamate.map((c) => c.tipo)).toEqual(['partita']);
+  await expect(page.getByRole('button', { name: /Segna una partita/ })).toHaveCount(0);
 });
 
 test('correggere una spunta nel suo giorno della Settimana', async ({ page }) => {

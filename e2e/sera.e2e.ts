@@ -146,9 +146,16 @@ test('venerdì con partita sabato: chiusura breve con la sola borsa', async ({ p
 
 test('Annulla entro 5 secondi: la spunta non parte', async ({ page }) => {
   const { chiamate, t } = await finto(page, dati());
+  // la spunta dà una vibrazione breve (dove il telefono vibra)
+  await page.addInitScript(() => {
+    const w = window as unknown as { vibrazioni: unknown[] };
+    w.vibrazioni = [];
+    navigator.vibrate = (v) => (w.vibrazioni.push(v), true);
+  });
   await page.goto('/');
   await page.getByRole('button', { name: 'Sera' }).click();
   await page.getByRole('checkbox', { name: /Pag 12 es 3/ }).check();
+  expect(await page.evaluate(() => (window as unknown as { vibrazioni: unknown[] }).vibrazioni)).toEqual([10]);
   await page.clock.runFor(3000);
   await page.getByRole('button', { name: 'Annulla' }).click();
   await expect(page.getByRole('checkbox', { name: /Pag 12 es 3/ })).not.toBeChecked();

@@ -1,9 +1,9 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { CalendarBlank, Check, FileText, House, Volleyball } from '@phosphor-icons/react';
+import { CalendarBlank, Check, FileText, House } from '@phosphor-icons/react';
 import * as R from '../lib/regole';
 import { Attesa, CampoData, CampoTesto, Elenco, Foglio, Riga, Vuoto } from '../kit';
 import { FotoSalvate } from '../Foto';
-import { PartiteFipav, SegnaPartita } from '../Partita';
+import { PartiteFipav } from '../Partita';
 import { FoglioAssenza, SpostaVerifiche, togliAssenza } from '../Assenze';
 import { GIORNI } from '../spunte';
 import { bello, piu, type Props } from './comune';
@@ -22,7 +22,7 @@ export default function Settimana({ client, passi, avvisa }: Props) {
   const dom = piu(lun, 6);
   const [giorno, setGiorno] = useState(R.iso(oggi));
   const [d, setD] = useState<Dati>();
-  const [vista, setVista] = useState<'partita' | 'foglio'>();
+  const [vista, setVista] = useState<'foglio'>();
   const [chiede, setChiede] = useState<'casa' | 'togliCasa' | { togli: Compito } | { firma: Foglio_ } | { foto: () => void }>();
 
   async function carica() {
@@ -92,14 +92,6 @@ export default function Settimana({ client, passi, avvisa }: Props) {
       ‹ Settimana
     </button>
   );
-  if (vista === 'partita')
-    return (
-      <>
-        {indietro}
-        <h2>Segna una partita</h2>
-        <SegnaPartita client={client} passi={passi} avvisa={avvisa} quandoSegnata={() => setVista(undefined)} />
-      </>
-    );
   if (vista === 'foglio')
     return (
       <>
@@ -201,12 +193,11 @@ export default function Settimana({ client, passi, avvisa }: Props) {
       </section>
 
       {R.rEvolutionAttiva(oggi, d.rEvolutionDa) && (
-        // si usa di rado (correggere in campo / in panchina, segnarne una a mano): chiusa
+        // si usa di rado (correggere in campo / in panchina; il risultato arriva solo dalla FIPAV): chiusa
         <details className="ga-chiusa">
           <summary>Partite</summary>
           <Elenco>
             <PartiteFipav client={client} passi={passi} avvisa={avvisa} />
-            <Riga icona={<Volleyball size={20} weight="bold" aria-hidden />} titolo="Segna una partita" sotto="Se la FIPAV non la porta" vai={() => setVista('partita')} />
           </Elenco>
         </details>
       )}
