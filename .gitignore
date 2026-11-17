@@ -21,3 +21,6 @@ test-results/
 .claude/agents/
 .agents/
 .claude/worktrees/
+
+# Ambiente di prova locale (chiavi locali)
+.env.*.local

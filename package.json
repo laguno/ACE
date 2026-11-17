@@ -6,6 +6,7 @@
   "description": "ACE: l'app di famiglia per Lani (compiti, studio, organizzazione, percorso Astra)",
   "scripts": {
     "dev": "vite",
+    "dev:locale": "vite --mode locale",
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
