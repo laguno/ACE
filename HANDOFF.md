@@ -12,7 +12,7 @@ Il gioco è partito **lunedì 16/11/2026**: Lani usa ACE in produzione. `main` s
 - Prove sul ramo unito con `main`: `npm test` 323, `prova:schema` 298, Playwright 192 (axe compreso), build ok. Backup `ace-2026-11-17_09-44-44.sql`. `sync_log` dopo la pubblicazione: tutto ok.
 - 17/11 alle 10:40 (`200025e`, backup `ace-2026-11-17_10-36-27.sql`): area genitori, "Una cosa da dirle oggi" e riga Serata leggono `cartella_il` come l'Oggi di Lani. `chiusa_il` non la scrive nessuno (0 serate su 2): prima la riga non compariva mai. Ramo `revisione-ui-3` chiuso.
 - Da guardare sui telefoni veri: vibrazione, Sera scura a letto, testata compatta su Safari dell'iPad (senza supporto scorre via come prima).
-- Ramo `gioco` (`C:\progetti\ace\app-gioco`): motore, CSP in `vercel.ts`, ACE Prova, schermata di prova, plugin di orientamento e APK 1.3. Non unito: prima una preview per vedere che Vercel legga `vercel.ts`.
+- Ramo `gioco` (`C:\progetti\ace\app-gioco`, anche su GitHub): motore a tempo, ACE Prova, schermata di prova (accesa nelle preview), plugin di orientamento e APK 1.3, ambiente di prova locale. `vercel.ts` tolto il 17/11 (Vercel rifiutava il deploy): resta `vercel.json`. Non unito a `main`; stato nel suo `HANDOFF.md`.
 
 ## APK di ACE (16/11, ramo `apk` in `C:\progetti\ace\app-apk`, unito a `main`)
 
