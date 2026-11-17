@@ -94,6 +94,29 @@ test("Com'è andata?: non in Oggi, si apre in R-Evolution col coach, niente chiu
   expect(t.popup_coda[0].mostrato_il).toBeTruthy();
 });
 
+test("Com'è andata?: Assente chiude senza passi e la partita non conta tra le giocate", async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2027-01-23T21:00:00+01:00'));
+  const { t, chiamate } = await finto(page, { ...dati(), partite: [P4], popup_coda: [{ ...COM_E_ANDATA }] });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'R-Evolution' }).click();
+  const popup = page.getByRole('dialog', { name: 'Com’è andata?' });
+  await expect(popup.getByRole('button')).toHaveText(['In campo', 'In panchina', 'Assente']);
+  await popup.getByRole('button', { name: 'Assente' }).click();
+  await expect(popup).toHaveCount(0);
+  expect(t['rpc/rispondi_partita']?.[0]).toMatchObject({ p_id: 'p4', p_in_campo: null });
+  expect(chiamate).toEqual([]);
+  expect(t.popup_coda[0].mostrato_il).toBeTruthy();
+});
+
+test('partita risposta "Assente": nell’elenco con "assente", non tra le giocate', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2027-01-24T10:00:00+01:00'));
+  await finto(page, { ...dati(), partite: [{ ...P4, approvata_il: '2027-01-23T21:00:00Z' }] });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'R-Evolution' }).click();
+  await expect(page.getByText('23 gennaio, assente')).toBeVisible();
+  await expect(page.locator('.numeri dd').first()).toHaveText('0');
+});
+
 test("Com'è andata?: già risposta non si apre e si segna vista", async ({ page }) => {
   await page.clock.setFixedTime(new Date('2027-01-23T21:00:00+01:00'));
   const { t } = await finto(page, { ...dati(), partite: [{ ...P4, in_campo: true, approvata_il: '2027-01-23T20:40:00Z' }], popup_coda: [{ ...COM_E_ANDATA }] });

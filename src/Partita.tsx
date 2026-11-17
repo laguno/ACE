@@ -3,7 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import * as R from './lib/regole';
 import { Volleyball } from '@phosphor-icons/react';
 import { Riga } from './kit';
-import { PANCHINA, PopupVista, type Popup } from './Popup';
+import { ASSENTE, PANCHINA, PopupVista, type Popup } from './Popup';
 import { adesso } from './spunte';
 import { supabase } from './supabase';
 
@@ -11,7 +11,8 @@ import { supabase } from './supabase';
 // (funzione classifiche), Lani non lo scrive e i genitori non approvano né rifiutano niente.
 // Col risultato il server accoda "Com'è andata?": lo apre R-Evolution al primo tocco dopo la lettura
 // della FIPAV, con il coach, il risultato, due parole sulla classifica e la domanda in campo /
-// panchina. Niente "chiudi": la risposta fa i passi (funzione "passi", tipo partita).
+// panchina / assente (17/11). Niente "chiudi": la risposta fa i passi (funzione "passi", tipo
+// partita); "Assente" la chiude senza passi (approvata, in_campo vuoto) e non conta tra le giocate.
 // I genitori possono solo correggere in campo / panchina dopo (PartiteFipav).
 
 type Avvisa = (s: string) => void;
@@ -47,21 +48,22 @@ export function PopupPartita({ quandoRisposto, avvisa }: { quandoRisposto: () =>
   }, []);
 
   if (!p) return null;
-  const rispondi = (inCampo: boolean) => async () => {
+  const rispondi = (inCampo: boolean | null) => async () => {
     if (occupato) return;
     setOccupato(true);
-    const { error } = await supabase.rpc('rispondi_partita', { p_id: p.partita, p_in_campo: inCampo });
+    // null = assente: rispondi_partita lo accetta (in_campo resta vuoto, approvata_il segnata)
+    const { error } = await supabase.rpc('rispondi_partita', { p_id: p.partita, p_in_campo: inCampo as boolean });
     if (error) {
       setOccupato(false);
       return avvisa('Risposta non salvata. Riprova tra poco.');
     }
-    await supabase.functions.invoke('passi', { body: { tipo: 'partita', id: p.partita } });
+    if (inCampo !== null) await supabase.functions.invoke('passi', { body: { tipo: 'partita', id: p.partita } });
     await supabase.from('popup_coda').update({ mostrato_il: adesso() }).eq('id', p.id);
     setP(undefined);
     quandoRisposto();
   };
   // Esc non chiude: si risponde con uno dei due pulsanti (scelta del signore, 17/11)
-  return <PopupVista p={p} chiudi={() => {}} azione={rispondi(true)} altra={{ etichetta: PANCHINA, fai: rispondi(false) }} />;
+  return <PopupVista p={p} chiudi={() => {}} azione={rispondi(true)} altre={[{ etichetta: PANCHINA, fai: rispondi(false) }, { etichetta: ASSENTE, fai: rispondi(null) }]} />;
 }
 
 /** Partite col risultato FIPAV delle ultime due settimane: in campo o in panchina si corregge qui. */
@@ -73,6 +75,7 @@ export function PartiteFipav({ client, passi, avvisa }: { client: SupabaseClient
       .select('id, data, avversaria, set_nostri, set_loro, in_campo, approvata_il')
       .not('gara', 'is', null)
       .not('approvata_il', 'is', null)
+      .not('in_campo', 'is', null) // "Assente": niente da correggere
       .gte('data', R.iso(new Date(Date.now() - 14 * 86_400_000)))
       .order('data', { ascending: false })
       .then(({ data }) => setFipav((data ?? []) as PartitaFipav[]));

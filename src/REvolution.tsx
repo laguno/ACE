@@ -14,7 +14,7 @@ import { CartaProssimaPartita, notizieProssima, useProssimaPartita } from './Pro
 // classifiche dei campionati dal portale FIPAV (funzione "classifiche"). Si vede da quando i genitori accendono R-Evolution. La squadra e il forziere
 // d'oro arrivano dopo (docs/08-sprint-2.md).
 
-type Partita = { id: string; data: string; avversaria: string; set_nostri: number; set_loro: number; approvata_il: string | null };
+type Partita = { id: string; data: string; avversaria: string; set_nostri: number; set_loro: number; in_campo: boolean | null; approvata_il: string | null };
 type Classifica = { cid: number; campionato: string; girone: string; squadra: string; righe: RigaClassifica[]; aggiornata_il: string };
 
 export default function REvolution({ apri = () => {} }: { apri?: (v: 'Oggi') => void }) {
@@ -28,7 +28,7 @@ export default function REvolution({ apri = () => {} }: { apri?: (v: 'Oggi') => 
 
   const carica = () =>
     Promise.all([
-      supabase.from('partite').select('id, data, avversaria, set_nostri, set_loro, approvata_il').order('data', { ascending: false }).limit(20),
+      supabase.from('partite').select('id, data, avversaria, set_nostri, set_loro, in_campo, approvata_il').order('data', { ascending: false }).limit(20),
       supabase.from('serate').select('data', { count: 'exact', head: true }).gte('data', R.iso(inizioMese)).not('dieci_minuti_il', 'is', null),
       supabase.from('movimenti_passi').select('passi').in('motivo', ['partita', 'partita_vinta', 'dieci_minuti']),
       supabase.from('classifiche').select('cid, campionato, girone, squadra, righe, aggiornata_il').order('campionato'),
@@ -55,8 +55,8 @@ export default function REvolution({ apri = () => {} }: { apri?: (v: 'Oggi') => 
     );
   if (!d) return <Attesa />;
 
-  // giocate = con la risposta di Lani al popup (approvata_il la scrive rispondi_partita)
-  const giocate = d.partite.filter((p) => p.approvata_il);
+  // giocate = con la risposta di Lani al popup (approvata_il la scrive rispondi_partita); "Assente": in_campo vuoto
+  const giocate = d.partite.filter((p) => p.approvata_il && p.in_campo !== null);
   const vinte = giocate.filter((p) => p.set_nostri > p.set_loro).length;
   // nastro "Ultim'ora": prossima partita e quanto manca, ultimo risultato, posto in classifica
   const ultima = giocate[0];
@@ -186,7 +186,7 @@ export default function REvolution({ apri = () => {} }: { apri?: (v: 'Oggi') => 
                     {p.avversaria}
                     <small>
                       {g.getDate()} {MESI[g.getMonth()]}
-                      {!p.approvata_il && ', aspetta la tua risposta'}
+                      {!p.approvata_il ? ', aspetta la tua risposta' : p.in_campo === null && ', assente'}
                     </small>
                   </span>
                   <b className={vinta ? 'vinta' : 'persa'}>

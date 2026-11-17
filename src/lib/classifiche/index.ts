@@ -151,3 +151,26 @@ export function riassuntoClassifica(righe: RigaClassifica[], squadra: string): s
   const d = prima - noi.punti;
   return d <= 0 ? `Siete ${posto}, a pari punti con la prima: si può fare.` : `Siete ${posto}, a ${d === 1 ? 'un punto' : `${d} punti`} dalla prima: si può fare.`;
 }
+
+/** Prefisso degli impegni scritti dalla funzione classifiche: sync-calendario non li tocca. */
+export const IMPEGNO_FIPAV = 'fipav:';
+
+/**
+ * Dal 17/11 (signore) giorno e ora delle partite li dice solo la FIPAV: le gare di R-Evolution
+ * diventano impegni di famiglia ("Partita Lani U13: CASA vs OSPITE"), così Oggi, Sera, notifiche,
+ * chiavi e studio le vedono come prima. Saltati i giorni segnati "[LANI ASSENTE]" nel calendario.
+ */
+export function impegniFipav(
+  gare: (Pick<Gara, 'numero' | 'casa' | 'ospite' | 'set_casa' | 'set_ospite'> & { cid: number; inizio: string })[],
+  campionati: readonly { cid: number; nome: string; squadra: string }[],
+  giorniAssente: ReadonlySet<string>,
+): { id: string; inizio: string; titolo: string }[] {
+  return gare.flatMap((g) => {
+    const c = campionati.find((x) => x.cid === g.cid);
+    if (!c || !garaDi(c.squadra, g) || giorniAssente.has(giornoRomaIso(g.inizio))) return [];
+    return [{ id: `${IMPEGNO_FIPAV}${g.cid}:${g.numero}`, inizio: g.inizio, titolo: `Partita Lani ${c.nome.replace(/^Under\s*/i, 'U')}: ${g.casa} vs ${g.ospite}` }];
+  });
+}
+
+/** Giorno di Roma (AAAA-MM-GG) di un istante. */
+export const giornoRomaIso = (t: string | Date) => new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome' }).format(new Date(t));
