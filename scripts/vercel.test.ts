@@ -3,7 +3,7 @@ import { afterEach, expect, it, vi } from 'vitest';
 
 const csp = async () => {
   vi.resetModules();
-  const { config } = await import('./vercel');
+  const { config } = await import('../vercel');
   return config.headers[0].headers.find((h) => h.key === 'Content-Security-Policy')!.value;
 };
 
