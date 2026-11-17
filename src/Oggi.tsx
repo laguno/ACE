@@ -8,7 +8,7 @@ import { Fotografa, SELECT_RICHIESTE, descrizione, type RichiestaFoto } from './
 import * as C from './lib/calendario';
 import * as N from './lib/nuvola';
 import * as R from './lib/regole';
-import { GIORNI, MESI, RigaCompito, SELECT_COMPITI, adesso, maiuscola, spuntaCompito, useAnnulla, type Compito } from './spunte';
+import { GIORNI, MESI, RigaCompito, SELECT_COMPITI, adesso, maiuscola, mostraValore, spuntaCompito, useAnnulla, type Compito } from './spunte';
 import { attivaNotifiche, notifichePossibili } from './notifiche';
 import { supabase } from './supabase';
 import { DieciMinuti } from './DieciMinuti';
@@ -274,6 +274,10 @@ function Pomeriggio({ chiusura, apri }: { chiusura: string | null; apri: Apri })
   if (aiuto) return <Aiuto compito={aiuto} chiudi={() => setAiuto(undefined)} />;
   const daFare = compiti.filter((c) => !c.fatto_il);
   const segna = (id: string) => (fatto_il: string | null) => setCompiti((l) => l?.map((x) => (x.id === id ? { ...x, fatto_il } : x)));
+  // i fatti vanno in fondo, dopo quelli da fare; nei 5 secondi di "Annulla" la riga resta dov'è,
+  // così non scappa da sotto il dito (sort è stabile: l'ordine per peso resta)
+  const inFondo = (c: Compito) => Number(!!c.fatto_il && !attesa.inAttesa(c.id));
+  const ordinati = [...compiti].sort((a, b) => inFondo(a) - inFondo(b));
   const ver = ripasso?.verifiche;
 
   return (
@@ -300,15 +304,15 @@ function Pomeriggio({ chiusura, apri }: { chiusura: string | null; apri: Apri })
           <>
             <div className="testa-carta">
               <h2>In quest'ordine</h2>
-              <span className="valore">+{P.compiti} ciascuno</span>
+              {mostraValore(compiti.some((c) => c.fatto_il)) && <span className="valore">+{P.compiti} ciascuno</span>}
             </div>
             <ul className="spunte ordine">
-              {compiti.map((c, i) => (
+              {ordinati.map((c, i) => (
                 <RigaCompito
                   key={c.id}
                   c={c}
                   numero={i + 1}
-                  nota={i === 0 && !c.fatto_il ? 'Inizia da qui: è il più lungo' : undefined}
+                  nota={c === compiti[0] && !c.fatto_il ? 'Inizia da qui: è il più lungo' : undefined}
                   onSpunta={() => {
                     segna(c.id)(adesso());
                     attesa.avvia(c.id, () => spuntaCompito(c.id, segna(c.id), setErrore));
@@ -332,7 +336,7 @@ function Pomeriggio({ chiusura, apri }: { chiusura: string | null; apri: Apri })
         <div className="carta">
           <div className="testa-carta">
             <h2>Ripasso: {ver.materie?.nome?.toLowerCase() ?? 'verifica'}</h2>
-            <span className="valore">+{P.ripasso}</span>
+            {mostraValore(false) && <span className="valore">+{P.ripasso}</span>}
           </div>
           <p>
             Verifica {GIORNI[R.giorno(ver.data).getDay()]} {R.giorno(ver.data).getDate()}. Oggi la sessione {ripasso.numero}
@@ -367,7 +371,7 @@ function Pomeriggio({ chiusura, apri }: { chiusura: string | null; apri: Apri })
         <div className="carta">
           <div className="testa-carta">
             <h2>Da fotografare</h2>
-            <span className="valore">+{R.CONFIG.passi.foto_compito} ciascuna</span>
+            {mostraValore(!!fotoFatta) && <span className="valore">+{R.CONFIG.passi.foto_compito} ciascuna</span>}
           </div>
           {foto.length > 0 && <p className="nota">Le pagine del libro di carta che ACE ti chiede, mentre fai i compiti.</p>}
           <ul className="lista-foto">

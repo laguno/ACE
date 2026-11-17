@@ -56,6 +56,14 @@ test('Oggi: si apre qui, con le cose da fare, le due azioni e Lani in tre righe'
   await expect(page.getByRole('navigation', { name: 'Sezioni genitori' }).getByRole('button', { name: /Oggi/ })).toContainText('1');
   // dopo le 14 niente domanda "a casa oggi?"
   await expect(page.getByRole('button', { name: 'Lani è a casa oggi?' })).toHaveCount(0);
+  // senza un fatto di ieri la riga "Una cosa da dirle oggi" non compare
+  await expect(page.getByText('Una cosa da dirle oggi')).toHaveCount(0);
+});
+
+test('Oggi: se ieri Lani ha chiuso la serata, una cosa da dirle oggi', async ({ page }) => {
+  await finto(page, { ...dati(), serate: [{ data: '2026-11-22', chiusa_il: '2026-11-22T18:40:00Z' }] });
+  await page.goto('/');
+  await expect(page.locator('.ga-da-dirle')).toHaveText('Una cosa da dirle oggiIeri sera ha chiuso tutto alle 19:40. Per esempio: «Ho visto che ieri sera hai chiuso tutto.»');
 });
 
 test('dare un gesto: due tocchi, il foglio resta aperto, Annulla storna e spegne il popup', async ({ page }) => {

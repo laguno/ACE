@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from './supabase';
+import * as R from './lib/regole';
 
 // Passi che salgono (decisione del signore, 9/11): se il saldo è cambiato dall'ultima volta che Lani
 // l'ha visto (su qualsiasi dispositivo: lo ricorda il server con vedi_saldo), il numero va dal vecchio
@@ -45,10 +46,13 @@ export function PillolaSaldo() {
         <b>0</b>
       </span>
     );
+  const pos = R.posizione(saldo.adesso);
   return (
     <span className="saldo">
       <img src="/assets/oggetti/passo.webp" alt="" width={30} height={30} />
       <Contapassi {...saldo} />
+      {/* la meta accanto al totale: lo stesso conto di "Sei qui" in Astra */}
+      {!pos.inCima && <small>mancano {pos.mancanoPassi}</small>}
     </span>
   );
 }

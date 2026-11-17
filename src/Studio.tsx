@@ -133,7 +133,8 @@ export default function Studio() {
           <div className="carta studio-verifica" key={v.id}>
             <div className="testa-carta">
               <h2>{materia}</h2>
-              <span className="valore">{v.daRecuperare ? 'da recuperare' : v.recupero_vago ? 'settimana prossima' : fra === 0 ? 'oggi' : fra === 1 ? 'domani' : `fra ${fra} giorni`}</span>
+              {/* fucsia solo se è vicina (entro 2 giorni) o da recuperare; oltre, il colore dei testi secondari */}
+              <span className={`valore${v.daRecuperare || (!v.recupero_vago && fra <= 2) ? '' : ' quieto'}`}>{v.daRecuperare ? 'da recuperare' : v.recupero_vago ? 'settimana prossima' : fra === 0 ? 'oggi' : fra === 1 ? 'domani' : `fra ${fra} giorni`}</span>
             </div>
             <p className="data-verifica">
               {v.daRecuperare

@@ -30,7 +30,8 @@ test('Lani: più scatti uno alla volta, contatore, poi "Ho finito" dà +2 e chiu
   await page.goto('/');
   const carta = page.locator('.carta', { has: page.getByRole('heading', { name: 'Da fotografare' }) });
   await expect(carta).toContainText('Italiano: pagine 340–352');
-  await expect(carta).toContainText('+2 ciascuna');
+  // prova "+N dopo il gesto" (VALORE_DOPO_IL_GESTO in spunte.tsx): prima della foto il valore non si vede
+  await expect(carta).not.toContainText('+2 ciascuna');
   const camera = carta.getByLabel('Fotocamera: Italiano: pagine 340–352');
   // come sul Samsung: la fotocamera restituisce uno scatto per volta
   await camera.setInputFiles({ name: 'p1.jpg', mimeType: 'image/jpeg', buffer: JPEG });
@@ -50,6 +51,7 @@ test('Lani: più scatti uno alla volta, contatore, poi "Ho finito" dà +2 e chiu
   expect(chiamate).toEqual([]);
   await carta.getByRole('button', { name: 'Ho finito' }).click();
   await expect(carta.getByRole('status')).toHaveText('Foto salvata: +2.');
+  await expect(carta).toContainText('+2 ciascuna'); // dopo il gesto il valore compare
   await expect(carta).not.toContainText('pagine 340–352');
   expect(t.caricate[0].percorso).toMatch(/^foto-pagine\/r1\/\d+-0\.jpg$/);
   expect(t.foto_pagine[0]).toMatchObject({ richiesta_id: 'r1', materia_id: 'italiano', pagine: '340–352' });
