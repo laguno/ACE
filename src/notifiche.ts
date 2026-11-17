@@ -11,11 +11,14 @@ const pushNelBrowser = () => 'serviceWorker' in navigator && 'PushManager' in wi
 // Guscio Android (capacitor.config.ts): niente Web Push nella WebView, si usa Firebase Cloud Messaging.
 // Il gettone FCM va in push_iscrizioni con tipo 'fcm'; l'invio è in supabase/functions/_shared/push.ts.
 export const guscio = () => Capacitor.isNativePlatform();
+// ACE Prova non ha Firebase (docs/10-ambiente-di-prova.md): lì register() fa chiudere l'app, anche a
+// ogni apertura una volta dato il permesso. La build di prova (--mode locale) spegne le notifiche del guscio.
+const senzaFirebase = import.meta.env.MODE === 'locale';
 const RISPOSTA_GUSCIO = 'ace-notifiche-guscio';
 const leggi = () => { try { return localStorage.getItem(RISPOSTA_GUSCIO); } catch { return null; } };
 const scrivi = (v: string) => { try { localStorage.setItem(RISPOSTA_GUSCIO, v); } catch { /* resta da chiedere */ } };
 
-export const notifichePossibili = () => (guscio() ? leggi() === null : pushNelBrowser() && Notification.permission === 'default');
+export const notifichePossibili = () => (guscio() ? !senzaFirebase && leggi() === null : pushNelBrowser() && Notification.permission === 'default');
 
 /** Gettone FCM del dispositivo (arriva con l'evento registration) salvato sul server. */
 async function iscriviGuscio(): Promise<boolean> {
@@ -45,6 +48,7 @@ async function iscrivi(): Promise<boolean> {
 
 export async function attivaNotifiche(): Promise<boolean> {
   if (guscio()) {
+    if (senzaFirebase) return false;
     const { receive } = await PushNotifications.requestPermissions();
     scrivi(receive);
     return receive === 'granted' && iscriviGuscio();
@@ -60,7 +64,7 @@ export async function attivaNotifiche(): Promise<boolean> {
  */
 export async function rinnovaIscrizione() {
   if (guscio()) {
-    if ((await PushNotifications.checkPermissions()).receive === 'granted') await iscriviGuscio();
+    if (!senzaFirebase && (await PushNotifications.checkPermissions()).receive === 'granted') await iscriviGuscio();
     return;
   }
   if (pushNelBrowser() && Notification.permission === 'granted') await iscrivi();
