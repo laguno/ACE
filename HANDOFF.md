@@ -6,6 +6,13 @@ Storia delle sessioni, decisioni prese e scelte approvate: `docs/storico.md`.
 
 Il gioco è partito **lunedì 16/11/2026**: Lani usa ACE in produzione. `main` su `ace-passino.vercel.app`: sprint 1, sprint 2 (R-Evolution, **accesa dal 16/11**), **tema campo di R-Evolution** (16/11 alle 21:08, unione `49b087b`: granata della divisa, nastro "Ultim'ora", tabellone, emoji solo lì; bozza `design/REvolution.html`), assenze, "Come si fanno i passi", area genitori a quattro schede (Impeccable 34/40, obiettivo raggiunto), APK con FCM. Cron: `sync-nuvola` 14:30 e 19:30, `sync-calendario` ogni ora, `notifiche` ogni 15 minuti, `chiavi` domenica 21:30, `classifiche` 6:15, `partite` ogni mezz'ora il giorno della partita. Controlli del 16/11: partita spostata al 13/12 alle 9:00 letta dalla FIPAV; `sync-nuvola` delle 14:30 ok (4 s).
 
+## Revisione dell'interfaccia (17/11 alle 9:50, unione `4650ef0`, in produzione)
+
+- Ramo `revisione-ui-3`: testata compatta allo scorrere, "mancano N" accanto ai passi, un solo cerchio per spuntare, fatti in fondo in Pomeriggio, fucsia in Studio solo entro 2 giorni, "915 passi, 4 chiavi", vibrazione alla spunta, Sera scura, "Cambia sfondo" in Astra, "+N" solo dopo il primo gesto (`VALORE_DOPO_IL_GESTO` in `src/spunte.tsx`, si spegne lì), "Una cosa da dirle oggi" nell'Oggi dei genitori. Foto prima/dopo in `docs/confronto/` e `docs/confronto/prima/`.
+- Prove sul ramo unito con `main`: `npm test` 323, `prova:schema` 298, Playwright 192 (axe compreso), build ok. Backup `ace-2026-11-17_09-44-44.sql`. `sync_log` dopo la pubblicazione: tutto ok.
+- Da guardare sui telefoni veri: vibrazione, Sera scura a letto, testata compatta su Safari dell'iPad (senza supporto scorre via come prima).
+- Ramo `gioco` (`C:\progetti\ace\app-gioco`): motore, CSP in `vercel.ts`, ACE Prova, schermata di prova, plugin di orientamento e APK 1.3. Non unito: prima una preview per vedere che Vercel legga `vercel.ts`.
+
 ## APK di ACE (16/11, ramo `apk` in `C:\progetti\ace\app-apk`, unito a `main`)
 
 - Guscio Capacitor (non TWA) con `server.url` di produzione, id `it.messori.ace`, solo verticale, barra di stato rosa dipinta da `MainActivity` (insets nativi: la pagina web non si tocca). Le modifiche web arrivano da sole; un APK nuovo serve solo per icone, permessi, plugin (versionCode più alto, stessa chiave, "Aggiorna").
