@@ -23,6 +23,8 @@ Il gioco è partito **lunedì 16/11/2026**: Lani usa ACE in produzione. `main` s
 - Pubblicato il 17/11 alle 12:05-12:10 (backup `ace-2026-11-17_12-04-56.sql`): `classifiche` (lanciata a mano: ok, 9 partite `fipav:` negli impegni), `passi`, `sync-calendario` (ok, nessuna partita del calendario di casa rimasta), poi `main` su Vercel (stato success).
 - Da guardare: la lettura delle 6:15 di domani (`sync_log` classifiche) e il primo "Com'è andata?" vero, sabato 21/11 (U14 alle 16:00).
 - Testi del popup e del coach scelti dal signore il 17/11 (docs/05).
+- 17/11 pomeriggio, dopo la prova su ACE Prova (Motorola edge 60, 412 px), commit `f389723`: barra sempre "R-Evo" (a 412 px il nome intero toccava la pillola); testata compatta che oltre 96 px tornava grande sopra le carte (il minificatore riscriveva `animation: linear both` in `animation: none`, rotta anche prima in produzione). Backup `ace-2026-11-17_14-33-34.sql`. Prove: `npm test` 333, Playwright 205, `tsc` 0. Il test e2e della testata gira sul server di sviluppo (non minificato): il CSS compilato va guardato a mano.
+- ACE Prova: dati finti con la FIPAV (classifiche, gare, impegni `fipav:`, un "Com'è andata?" in attesa) in `scripts/dati-finti-locale.sql` del ramo `gioco`, non ancora nel commit. Dopo una build nuova, ACE Prova va chiusa del tutto e riaperta (sennò schermata bianca: la cache cerca file vecchi).
 
 ## APK di ACE (16/11, ramo `apk` in `C:\progetti\ace\app-apk`, unito a `main`)
 
