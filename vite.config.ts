@@ -6,18 +6,23 @@ import { VitePWA } from 'vite-plugin-pwa';
 // Icona provvisoria: pallone. Alternative pronte in public/icone/ (saluta, passo): la sceglie Lani.
 const ICONA = 'pallone';
 
+const LOCALE = {
+  allowedHosts: ['.ts.net'],
+  proxy: Object.fromEntries(
+    ['/rest', '/auth', '/storage', '/functions', '/realtime'].map((p) => [p, { target: 'http://127.0.0.1:54321', ws: p === '/realtime' }]),
+  ),
+};
+
 export default defineConfig({
   // Gioco di pallavolo (docs/09) acceso anche nelle preview di Vercel, per provarlo da ACE Prova sul
   // telefono; in produzione resta spento finché non ha la sua voce nell'app.
   define: { 'import.meta.env.VITE_GIOCO': JSON.stringify(process.env.VERCEL_ENV === 'preview' ? '1' : '') },
-  // Ambiente di prova locale sul telefono (docs/runbook.md): ACE Prova apre questo server via Tailscale
-  // (https://<pc>.ts.net) e Supabase locale passa dallo stesso indirizzo. Vale solo per npm run dev.
-  server: {
-    allowedHosts: ['.ts.net'],
-    proxy: Object.fromEntries(
-      ['/rest', '/auth', '/storage', '/functions', '/realtime'].map((p) => [p, { target: 'http://127.0.0.1:54321', ws: p === '/realtime' }]),
-    ),
-  },
+  // Ambiente di prova locale sul telefono (docs/runbook.md): ACE Prova apre questo PC via Tailscale
+  // (https://<pc>.ts.net) e Supabase locale passa dallo stesso indirizzo. Sul telefono si usa la build
+  // (npm run prova:telefono, vite preview): passando dal relay di Tailscale i mille file del server di
+  // sviluppo non arrivano e la pagina resta bianca.
+  server: LOCALE,
+  preview: LOCALE,
   // le copie di lavoro degli agenti (.claude/worktrees) non sono prove di questo ramo
   test: {
     exclude: [...configDefaults.exclude, '.claude/**'],
