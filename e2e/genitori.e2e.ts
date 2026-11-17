@@ -67,6 +67,12 @@ test('Oggi: se ieri Lani ha chiuso la serata, una cosa da dirle oggi', async ({ 
   await expect(page.locator('.ga-da-dirle')).toHaveText('Una cosa da dirle oggiIeri sera ha chiuso tutto alle 19:40. Per esempio: «Ho visto che ieri sera hai chiuso tutto.»');
 });
 
+test('Oggi: la riga Serata dice l’ora della cartella pronta di oggi', async ({ page }) => {
+  await finto(page, { ...dati(), serate: [{ data: '2026-11-23', cartella_il: '2026-11-23T19:05:00Z', chiusa_il: null }] });
+  await page.goto('/');
+  await expect(page.getByText('chiusa alle 20:05')).toBeVisible();
+});
+
 test('dare un gesto: due tocchi, il foglio resta aperto, Annulla storna e spegne il popup', async ({ page }) => {
   const d = dati();
   const { t, chiamate } = await finto(page, d, { passi: { passi: 2 } });

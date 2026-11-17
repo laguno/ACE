@@ -21,9 +21,10 @@ type Dati = {
   gestiOggi: number;
   date: { id: string; voce: string }[];
   passiOggi: number;
-  serata: { chiusa_il: string | null } | null;
+  serata: { cartella_il: string | null } | null;
   chiusura: string | null;
-  /** quando Lani ha chiuso la serata di ieri, se l'ha chiusa: il fatto vero per "Una cosa da dirle oggi" */
+  /** quando Lani ha chiuso la serata di ieri, se l'ha chiusa: il fatto vero per "Una cosa da dirle oggi".
+      Come in Oggi di Lani, "ha chiuso tutto" = cartella pronta: chiusa_il non la scrive nessuna parte dell'app. */
   ieriChiusa: string | null;
 };
 
@@ -43,9 +44,8 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
       client.from('movimenti_passi').select('passi, riferimento, motivo').in('motivo', ['gesto', 'storno']).eq('giorno', oggi),
       client.from('gesti_casa').select('id, voce').eq('data', oggi),
       client.from('movimenti_passi').select('passi').eq('giorno', oggi),
-      client.from('serate').select('chiusa_il').eq('data', oggi).maybeSingle(),
+      client.from('serate').select('cartella_il').eq('data', oggi).maybeSingle(),
       client.from('impostazioni').select('valore').eq('chiave', 'ora_chiusura').maybeSingle(),
-      // come Oggi di Lani: "ha chiuso tutto" = cartella pronta (chiusa_il non la scrive nessuno)
       client.from('serate').select('cartella_il').eq('data', R.iso(piu(R.giorno(oggi), -1))).maybeSingle(),
     ]);
     const mov = gm.data ?? [];
@@ -214,7 +214,7 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
           </div>
           <div>
             <dt>Serata</dt>
-            <dd>{aCasaOggi ? 'a casa da scuola' : d.serata?.chiusa_il ? `chiusa alle ${oraRoma(new Date(d.serata.chiusa_il))}` : d.chiusura ? `da chiudere entro le ${d.chiusura}` : 'niente chiusura oggi'}</dd>
+            <dd>{aCasaOggi ? 'a casa da scuola' : d.serata?.cartella_il ? `chiusa alle ${oraRoma(new Date(d.serata.cartella_il))}` : d.chiusura ? `da chiudere entro le ${d.chiusura}` : 'niente chiusura oggi'}</dd>
           </div>
           <div>
             <dt>Prossima verifica</dt>
