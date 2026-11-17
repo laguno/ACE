@@ -6,6 +6,8 @@ Redatto da Jarvis il 16/11/2026 dopo aver letto `HANDOFF.md`, `docs/storico.md`,
 
 **Fatto il 16/11 sera (ramo `gioco`, non pubblicato):** CSP in `vercel.ts` al posto di `vercel.json` (§2); `capacitor.config.ts`, tipo di build `prova` in Gradle e `scripts\apk.ps1 -Ambiente prova` (§3, comando in `docs/runbook.md`). **Da verificare alla prima preview, prima di unire a `main`:** che Vercel legga `vercel.ts` e che le intestazioni arrivino (`curl -I` sull'indirizzo della preview: `content-security-policy` col Supabase giusto). Se mancano, non unire: la produzione resterebbe senza intestazioni di sicurezza.
 
+**Aggiornamento 17/11.** Il secondo progetto in cloud non si fa (piano gratuito già occupato nell'organizzazione): il back-end di prova è **Supabase locale** in Docker sul PC (`docs/runbook.md`, "Ambiente di prova locale"). `vercel.ts` è stato tolto: Vercel rifiutava il deploy senza messaggio; resta `vercel.json` statico con la produzione. "ACE Prova" sul telefono apre la preview del ramo `gioco` solo per il gioco (`/#gioco` non usa il database); il resto dell'app in preview usa ancora il database vero, quindi lì non si entra.
+
 ## Cosa c'era già deciso
 
 Dal 13/11 il signore ha deciso un **ambiente di prova** (`docs/storico.md`, riga 40; `HANDOFF.md`, punto 5): non un utente di test (il database è di una sola bambina), ma un secondo progetto Supabase **`ace-prova`** con le stesse migrazioni e funzioni, la preview di Vercel collegata a quello, dati finti dal simulatore, ogni pubblicazione prima lì e poi in produzione. Il signore crea il progetto e mette le chiavi in Vercel.

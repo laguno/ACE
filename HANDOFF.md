@@ -18,8 +18,9 @@ Il gioco è partito **lunedì 16/11/2026**: Lani usa ACE in produzione. `main` `
 ## Ramo `gioco` (16/11 sera, `C:\progetti\ace\app-gioco`, non unito, non pubblicato)
 
 - **Motore di pallavolo** `src/gioco/motore/index.ts` (`docs/09`): puro, 60 Hz, seme, rally point, partita a tempo (`pallavolo.secondi` = 120 in `data/config-gioco.json`: scambio finito, in parità un punto in più), 3 tocchi, CPU (`ia`, con `errore`). Solo + - * / e `Math.sqrt`: stessa partita su ogni dispositivo. Misure in `M`, da tarare con la grafica.
-- **Schermata di prova** `src/gioco/Gioco.tsx`: Canvas, due pollici (e frecce + spazio dal computer), ciclo a passo fisso, in verticale chiede di girare. Solo in sviluppo: `npm run dev` e poi `/#gioco`; nella build di produzione non c'è. Personaggi e testi segnaposto (`lani-battuta`, `leo-tennis`, girati dalla parte sbagliata: arriveranno le figurine giuste). Provata dal signore il 16/11 sul computer: velocità buona, CPU e scambi vanno bene per ora. Mai provata su un telefono.
-- **CSP per ambiente**: `vercel.ts` al posto di `vercel.json` (Supabase da `VITE_SUPABASE_URL`, senza variabile la produzione). **Prima di unire a `main`**: una preview e `curl -I` per vedere che le intestazioni arrivano; se mancano non unire.
+- **Schermata di prova** `src/gioco/Gioco.tsx`: Canvas, due pollici (e frecce + spazio dal computer), ciclo a passo fisso, in verticale chiede di girare. In sviluppo (`npm run dev`, poi `/#gioco`) e nelle preview di Vercel (`VERCEL_ENV=preview` in `vite.config.ts`): `https://ace-git-gioco-lagunos-projects.vercel.app/#gioco`, provata il 17/11. Nella build di produzione non c'è. Personaggi e testi segnaposto (`lani-battuta`, `leo-tennis`, girati dalla parte sbagliata: arriveranno le figurine giuste). Provata dal signore il 16/11 sul computer: velocità buona, CPU e scambi vanno bene per ora. Mai provata su un telefono.
+- **CSP**: provato `vercel.ts`, Vercel rifiutava il deploy senza messaggio; tornato `vercel.json` statico (17/11), preview ok con le intestazioni. Niente CSP per ambiente: non c'è un Supabase di prova in cloud.
+- **Ambiente di prova locale** (17/11): Supabase in Docker, `npx supabase start`, `scripts/prova-locale.ps1`, `npm run dev:locale` (`docs/runbook.md`). Migrazioni tutte, cron spenti dal seed, account finti nel seed. Solo sul PC.
 - **ACE Prova**: `scripts\apk.ps1 -Ambiente prova -UrlProva https://...` (`docs/runbook.md`). Compilato senza firma: `it.messori.ace.prova`, "ACE Prova". Senza notifiche finché Firebase non ha la seconda app.
 - Worktree nuovo: serve `.env.local` (copiarlo da `app`), sennò `src/genitori/comune.test.ts` non parte.
 - Deciso dal signore: partita a tempo di 2 minuti (`docs/09` §5). Plugin di orientamento aggiunto (`@capacitor/screen-orientation`, `Gioco.tsx`), `versionCode 4` / 1.3 in Gradle: APK 1.3 da compilare, firmare e provare sul telefono.
@@ -30,7 +31,7 @@ Il gioco è partito **lunedì 16/11/2026**: Lani usa ACE in produzione. `main` `
 2. Signore: Accendi R-Evolution in Impostazioni (`r_evolution_da` vuoto); spostare geografia e spagnolo; approvare la partita del 14/11 segnata da Lani (prima dell'inizio: 0 passi).
 3. Signore: cancellare il JSON del service account FCM da Download (è già nel segreto `FCM_SERVICE_ACCOUNT`).
 4. Area genitori a 34/40 (16/11, ramo `genitori-ux` unito): restano P3 di sola interfaccia in fondo a `docs/genitori-ux.md` (rosso su "mai sincronizzato", "0 su 0 serate", gergo); errore di `passi()` letto come "tetto pieno" in Dai passi (§8, punti 3-4: tocca la logica, chiedere).
-5. Ambiente di prova `ace-prova` (secondo progetto Supabase, preview Vercel): lo crea il signore.
+5. Ambiente di prova: niente `ace-prova` in cloud (limite del piano gratuito, decisione del signore 17/11); Supabase locale sul PC.
 6. Domenica 22/11 alle 21:30 le prime chiavi (`sync_log` fonte chiavi). Debiti: assenze da Nuvola, protezione password trapelate, CSV passi a inizio dicembre (`npm run esporta:passi`).
 
 ## Attenzione
