@@ -41,8 +41,8 @@ export const POPUP = {
   partita_vinta: { priorita: 4, posa: 'papa-festeggia', titolo: 'Partita vinta', testo: 'Vinta {risultato}! +{passi}. Papà ha già la felpa viola addosso.' },
   partita_persa: { priorita: 4, posa: 'lani-partita-persa', titolo: 'Partita persa', testo: 'Persa {risultato}. +{passi} per averla giocata. Si riparte al prossimo allenamento.' },
   // 17/11 (signore): risultato FIPAV e due parole sulla classifica, col coach; si apre in R-Evolution
-  // (REvolution.tsx), due pulsanti e niente "chiudi". Testo di prova: le parole esatte non sono decise.
-  partita_com_e_andata: { priorita: 3, posa: 'allenatore-pollice', titolo: 'Com’è andata?', testo: '{esito} {noi}-{loro} con {avversaria}. {riassunto} Sei entrata in campo?' },
+  // (REvolution.tsx), due pulsanti e niente "chiudi". Testi scelti dal signore il 17/11 (esito: "vinta!" o "persa.").
+  partita_com_e_andata: { priorita: 3, posa: 'allenatore-pollice', titolo: 'Com’è andata?', testo: 'R-Evolution {noi}, {avversaria} {loro}: {esito} {riassunto} Sei entrata in campo?' },
   balla: { priorita: 1, posa: 'mamma-arrabbiata', titolo: 'Balla scoperta', testo: '{cosa}. {passi}. Con la verità si perde sempre meno.' },
   // Astra
   tappa: { priorita: 3, posa: 'lani-contenta', titolo: 'Tappa raggiunta', testo: 'Tappa {tappa}! Alla prossima: {mancano_passi:un passo:# passi}.' },

@@ -66,7 +66,7 @@ const COM_E_ANDATA = {
   situazione: 'partita_com_e_andata',
   posa: 'allenatore-pollice',
   titolo: 'Com’è andata?',
-  testo: 'Vinta 3-1 con Arbor Itarca. Siete prime nel girone, continuate così. Sei entrata in campo?',
+  testo: 'R-Evolution 3, Arbor Itarca 1: vinta! Siete prime nel girone, continuate così. Sei entrata in campo?',
   figurina: null,
   mostrato_il: null,
   creato_il: '2027-01-23T20:30:00Z',
@@ -81,13 +81,13 @@ test("Com'è andata?: non in Oggi, si apre in R-Evolution col coach, niente chiu
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await page.getByRole('button', { name: 'R-Evolution' }).click();
   const popup = page.getByRole('dialog', { name: 'Com’è andata?' });
-  await expect(popup).toContainText('Vinta 3-1 con Arbor Itarca. Siete prime nel girone, continuate così. Sei entrata in campo?');
+  await expect(popup).toContainText('R-Evolution 3, Arbor Itarca 1: vinta! Siete prime nel girone, continuate così. Sei entrata in campo?');
   await expect(popup.locator('.popup-avatar img')).toHaveAttribute('src', /allenatore-applaude/);
   // niente modulo per scrivere il risultato
   await expect(page.getByRole('heading', { name: /Segna la partita/ })).toHaveCount(0);
   await page.keyboard.press('Escape');
   await expect(popup).toBeVisible();
-  await popup.getByRole('button', { name: 'Sono rimasta in panchina' }).click();
+  await popup.getByRole('button', { name: 'In panchina' }).click();
   await expect(popup).toHaveCount(0);
   expect(t['rpc/rispondi_partita']?.[0]).toMatchObject({ p_id: 'p4', p_in_campo: false });
   expect(chiamate).toEqual([{ tipo: 'partita', id: 'p4' }]);
@@ -110,9 +110,9 @@ test('il coach: dieci minuti del mattino, il collegamento porta alla carta in Og
   await page.goto('/');
   await page.getByRole('button', { name: 'R-Evolution' }).click();
   const coach = page.getByLabel('Il coach');
-  await expect(coach).toContainText('Stamattina ci sono i dieci minuti di allenamento, entro le 13:00.');
+  await expect(coach).toContainText('Dieci minuti di allenamento prima delle 13:00. Forza, ti aspetto.');
   await expect(coach.locator('img')).toHaveAttribute('src', /allenatore/);
-  await coach.getByRole('button', { name: 'Vai ai dieci minuti in Oggi' }).click();
+  await coach.getByRole('button', { name: 'Si parte' }).click();
   await expect(page.getByRole('button', { name: 'Oggi' })).toHaveAttribute('aria-current', 'page');
   await expect(page.locator('#dieci-minuti')).toBeInViewport();
   await page.screenshot({ path: 'e2e/risultati/coach-oggi.png' });

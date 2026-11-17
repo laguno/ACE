@@ -20,7 +20,7 @@ Il gioco è partito **lunedì 16/11/2026**: Lani usa ACE in produzione. `main` s
 - Dati: tolta la riga doppia del 14/11 (backup `ace-2026-11-17_11-03-26.sql`, 0 passi coinvolti).
 - Prove: `npm test` 328, `prova:schema` 298, Playwright 200 (31 saltate come sempre), `tsc` 0, build ok.
 - Da pubblicare insieme: unione in `main` (Vercel) e funzione `classifiche` (`npx supabase functions deploy classifiche`). Nessuna migrazione. Finestre senza pubblicazioni come sotto.
-- Testi del popup e del coach: di prova, da far scegliere al signore (docs/05).
+- Testi del popup e del coach scelti dal signore il 17/11 (docs/05).
 
 ## APK di ACE (16/11, ramo `apk` in `C:\progetti\ace\app-apk`, unito a `main`)
 

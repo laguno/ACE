@@ -71,7 +71,7 @@ Fatto il 15/11 su `main`, non pubblicato: i testi per Lani sono una proposta (do
 
 ## Revisione del 17/11 (signore, dopo la prova sul telefono)
 
-- **Popup "Com'è andata?"**: non si apre più all'apertura dell'app (`CodaPopup` lo salta) ma in R-Evolution al primo tocco dopo la lettura FIPAV (`PopupPartita` in `src/Partita.tsx`). Coach al posto di Lani, risultato e due parole sulla classifica appena letta (`riassuntoClassifica` in `src/lib/classifiche`), niente "chiudi" (anche Esc): si risponde in campo / panchina e la risposta fa i passi. Testi di prova (docs/05).
+- **Popup "Com'è andata?"**: non si apre più all'apertura dell'app (`CodaPopup` lo salta) ma in R-Evolution al primo tocco dopo la lettura FIPAV (`PopupPartita` in `src/Partita.tsx`). Coach al posto di Lani, risultato e due parole sulla classifica appena letta (`riassuntoClassifica` in `src/lib/classifiche`), niente "chiudi" (anche Esc): si risponde in campo / panchina e la risposta fa i passi. Testi scelti dal signore il 17/11 (docs/05).
 - **Niente approvazione dei genitori**: tolti `SegnaPartita`, "Da approvare" in Oggi dei genitori e "Segna una partita" in Settimana. Resta "Partite dalla FIPAV" per correggere in campo / panchina.
 - **Il coach** in R-Evolution, con la riga sui dieci minuti del mattino e il collegamento alla carta in Oggi (i dieci minuti restano in Oggi).
 - **Barra**: "R-Evo" sotto i 410 px (tra 380 e 409 il nome selezionato usciva dalla pillola).

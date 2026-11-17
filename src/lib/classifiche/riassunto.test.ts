@@ -9,16 +9,16 @@ describe('riassunto della classifica per il popup della partita', () => {
     expect(riassuntoClassifica([riga(1, 'U14R-EVOLUTION', 9), riga(2, 'FOXES VOLLEY', 6)], 'U14R-EVOLUTION')).toBe('Siete prime nel girone, continuate così.');
   });
   it('seconde a un punto, ignorando maiuscole e spazi', () => {
-    expect(riassuntoClassifica(girone, ' u14r-evolution ')).toBe('Siete seconde, a un punto dalla prima.');
+    expect(riassuntoClassifica(girone, ' u14r-evolution ')).toBe('Siete seconde, a un punto dalla prima: si può fare.');
   });
   it('più punti di distanza', () => {
-    expect(riassuntoClassifica(girone, 'ALTRA')).toBe('Siete quarte, a 3 punti dalla prima.');
+    expect(riassuntoClassifica(girone, 'ALTRA')).toBe('Siete quarte, a 3 punti dalla prima: si può fare.');
   });
   it('a pari punti con la prima', () => {
-    expect(riassuntoClassifica([riga(1, 'FOXES VOLLEY', 9), riga(2, 'U14R-EVOLUTION', 9)], 'U14R-EVOLUTION')).toBe('Siete seconde, a pari punti con la prima.');
+    expect(riassuntoClassifica([riga(1, 'FOXES VOLLEY', 9), riga(2, 'U14R-EVOLUTION', 9)], 'U14R-EVOLUTION')).toBe('Siete seconde, a pari punti con la prima: si può fare.');
   });
   it('oltre il decimo posto e squadra assente', () => {
-    expect(riassuntoClassifica([riga(1, 'A', 20), riga(11, 'NOI', 2)], 'NOI')).toBe('Siete in 11ª posizione, a 18 punti dalla prima.');
+    expect(riassuntoClassifica([riga(1, 'A', 20), riga(11, 'NOI', 2)], 'NOI')).toBe('Siete in 11ª posizione, a 18 punti dalla prima: si può fare.');
     expect(riassuntoClassifica(girone, 'NESSUNA')).toBe('');
   });
 });

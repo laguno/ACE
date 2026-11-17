@@ -95,7 +95,7 @@ async function risultato(c: Campionato, g: Gara, righe: RigaClassifica[]): Promi
   if (e3) throw new Error(`partite: ${e3.message}`);
   // il popup lo apre R-Evolution: risultato, due parole sulla classifica appena letta, la domanda
   const riassunto = riassuntoClassifica(righe, c.squadra);
-  await accoda(db, `partita_fipav:${p.id}`, 'partita_com_e_andata', { esito: x.nostri > x.loro ? 'Vinta' : 'Persa', noi: x.nostri, loro: x.loro, avversaria: x.avversaria, riassunto });
+  await accoda(db, `partita_fipav:${p.id}`, 'partita_com_e_andata', { esito: x.nostri > x.loro ? 'vinta!' : 'persa.', noi: x.nostri, loro: x.loro, avversaria: x.avversaria, riassunto });
   return 'popup';
 }
 

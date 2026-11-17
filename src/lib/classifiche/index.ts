@@ -149,5 +149,5 @@ export function riassuntoClassifica(righe: RigaClassifica[], squadra: string): s
   const prima = Math.max(...righe.map((r) => r.punti));
   const posto = POSTI[noi.pos - 1] ?? `in ${noi.pos}ª posizione`;
   const d = prima - noi.punti;
-  return d <= 0 ? `Siete ${posto}, a pari punti con la prima.` : `Siete ${posto}, a ${d === 1 ? 'un punto' : `${d} punti`} dalla prima.`;
+  return d <= 0 ? `Siete ${posto}, a pari punti con la prima: si può fare.` : `Siete ${posto}, a ${d === 1 ? 'un punto' : `${d} punti`} dalla prima: si può fare.`;
 }

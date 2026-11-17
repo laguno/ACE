@@ -174,7 +174,7 @@ export default function REvolution({ apri = () => {} }: { apri?: (v: 'Oggi') => 
           </h2>
         </div>
         {d.partite.length === 0 ? (
-          <p>Ancora nessuna partita. Il risultato arriva da solo dalla FIPAV.</p>
+          <p>Ancora nessuna partita. Dopo la gara il risultato compare qui.</p>
         ) : (
           <ul className="partite">
             {d.partite.map((p) => {
@@ -215,7 +215,7 @@ const ora = (hhmm: string) => hhmm.replace(/^0/, '');
 /**
  * Il coach (pose dell'allenatore, sprint 2): una riga sui dieci minuti del mattino e il collegamento
  * alla carta in Oggi, dove si fanno. Il collegamento c'è solo quando quella carta si vede (dentro la
- * finestra del mattino, o timer già avviato). Testi di prova del 17/11: le parole non sono decise.
+ * finestra del mattino, o timer già avviato). Testi scelti dal signore il 17/11 (docs/05).
  */
 function Coach({ mattino, ultima, apri }: { mattino: { da: string | null; il: string | null } | null; ultima?: Partita; apri: (v: 'Oggi') => void }) {
   const fatti = !!mattino?.il;
@@ -224,11 +224,11 @@ function Coach({ mattino, ultima, apri }: { mattino: { da: string | null; il: st
   const vinta = ultima && ultima.set_nostri > ultima.set_loro;
   const posa = fatti ? 'allenatore-applaude' : vinta === false ? 'allenatore-timeout' : 'allenatore-pollice';
   const riga = fatti
-    ? 'Dieci minuti fatti stamattina. È così che si cresce.'
+    ? 'Allenamento fatto. Brava, così si lavora.'
     : avviati
-      ? 'Hai avviato i dieci minuti: arriva in fondo e spunta.'
+      ? 'Timer partito. Fino in fondo, poi spunta.'
       : finestra
-        ? `Stamattina ci sono i dieci minuti di allenamento, entro le ${ora(FINESTRA.a)}.`
+        ? `Dieci minuti di allenamento prima delle ${ora(FINESTRA.a)}. Forza, ti aspetto.`
         : `I dieci minuti si fanno al mattino, dalle ${ora(FINESTRA.da)} alle ${ora(FINESTRA.a)}. Domani ti aspetto.`;
   return (
     <div className="carta coach" aria-label="Il coach">
@@ -240,7 +240,7 @@ function Coach({ mattino, ultima, apri }: { mattino: { da: string | null; il: st
         <p>{riga}</p>
         {(finestra || avviati) && (
           <button className="collegamento" onClick={() => (vaiAiDieciMinuti(), apri('Oggi'))}>
-            {fatti ? 'Guarda in Oggi' : 'Vai ai dieci minuti in Oggi'}
+            {fatti ? 'Guarda in Oggi' : 'Si parte'}
           </button>
         )}
       </div>

@@ -60,9 +60,9 @@ const PULSANTI: Record<string, string> = {
   serie_nera: 'Ci riprovo',
   figurina_nera: 'Ci riprovo',
   r_evolution_accesa: 'Vediamo',
-  partita_com_e_andata: 'Sì', // l'altro pulsante: PANCHINA
+  partita_com_e_andata: 'In campo', // l'altro pulsante: PANCHINA (scelti dal signore il 17/11)
 };
-export const PANCHINA = 'Sono rimasta in panchina';
+export const PANCHINA = 'In panchina';
 /** I pulsanti "il piano" portano a Studio, dove c'è il ripasso. */
 const AL_PIANO = (p: Popup) => /piano$/.test(pulsante(p));
 /** Numero del forziere dalla chiave dell'evento ("forziere:3:enigma"). */
