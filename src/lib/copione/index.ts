@@ -40,8 +40,9 @@ export const POPUP = {
   r_evolution_accesa: { priorita: 4, posa: 'lani-divisa', titolo: 'Arriva R-Evolution', testo: 'Da oggi anche la pallavolo fa camminare Astra: dieci minuti al mattino, le tue partite e le classifiche del campionato.' },
   partita_vinta: { priorita: 4, posa: 'papa-festeggia', titolo: 'Partita vinta', testo: 'Vinta {risultato}! +{passi}. Papà ha già la felpa viola addosso.' },
   partita_persa: { priorita: 4, posa: 'lani-partita-persa', titolo: 'Partita persa', testo: 'Persa {risultato}. +{passi} per averla giocata. Si riparte al prossimo allenamento.' },
-  // approvato dal signore il 15/11 (docs/08, Risultato automatico); due pulsanti in Popup.tsx
-  partita_com_e_andata: { priorita: 3, posa: 'lani-divisa', titolo: 'Com’è andata?', testo: 'R-Evolution {noi}, {avversaria} {loro}. Sei entrata in campo?' },
+  // 17/11 (signore): risultato FIPAV e due parole sulla classifica, col coach; si apre in R-Evolution
+  // (REvolution.tsx), due pulsanti e niente "chiudi". Testi scelti dal signore il 17/11 (esito: "vinta!" o "persa.").
+  partita_com_e_andata: { priorita: 3, posa: 'allenatore-pollice', titolo: 'Com’è andata?', testo: 'R-Evolution {noi}, {avversaria} {loro}: {esito} {riassunto} Sei entrata in campo?' },
   balla: { priorita: 1, posa: 'mamma-arrabbiata', titolo: 'Balla scoperta', testo: '{cosa}. {passi}. Con la verità si perde sempre meno.' },
   // Astra
   tappa: { priorita: 3, posa: 'lani-contenta', titolo: 'Tappa raggiunta', testo: 'Tappa {tappa}! Alla prossima: {mancano_passi:un passo:# passi}.' },

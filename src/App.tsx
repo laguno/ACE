@@ -162,7 +162,7 @@ function Lani() {
           ) : voce === 'Studio' ? (
             <Studio />
           ) : voce === 'R-Evolution' ? (
-            <REvolution />
+            <REvolution apri={setVoce} />
           ) : voce === 'Figurina' ? (
             <Figurina chiudi={() => setVoce('Astra')} />
           ) : voce === 'Album' ? (

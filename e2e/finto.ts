@@ -1,4 +1,4 @@
-// Supabase finto per le prove: tabelle in memoria, filtri eq/is/gte/in, select/update/upsert.
+// Supabase finto per le prove: tabelle in memoria, filtri eq/neq/is/gte/in, select/update/upsert.
 // Basta per le schermate; le regole vere stanno nei test di src/lib e in prova:schema.
 import type { Page } from '@playwright/test';
 
@@ -12,6 +12,7 @@ function filtra(righe: Record<string, unknown>[], q: URLSearchParams) {
       const val = resto.join('.');
       const x = r[k];
       if (op === 'eq') return String(x) === val;
+      if (op === 'neq') return String(x) !== val;
       if (op === 'is') return val === 'null' ? x == null : String(x) === val;
       if (op === 'gte') return String(x) >= val;
       if (op === 'lte') return String(x) <= val;

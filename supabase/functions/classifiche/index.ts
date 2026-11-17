@@ -2,15 +2,16 @@
 // campionati di Lani (config classifiche.campionati) e le copia in classifiche; dal 15/11 legge anche
 // calendario e risultati delle gare (gare_fipav). Pagine pubbliche, nessun segreto.
 // La chiamano il cron (alle 6:15 tutto; ogni mezz'ora con {"solo":"partite"}) o un genitore.
-// Col risultato ufficiale di una partita a cui Lani è convocata (calendario di famiglia) crea la
-// partita e accoda "Com'è andata?": la risposta di Lani fa i passi, senza genitori (docs/08).
+// Dal 17/11 (signore) la FIPAV è l'unico calendario delle partite: le gare di R-Evolution diventano
+// impegni di famiglia (id "fipav:...") e Lani è convocata a tutte, tranne i giorni "[LANI ASSENTE]"
+// del calendario di casa. Col risultato ufficiale crea la partita e accoda "Com'è andata?" (lo apre
+// R-Evolution): la risposta di Lani fa i passi, senza genitori (docs/08).
 import { apriRegistro, dbServizio } from '../_shared/ambiente.ts';
 import { avvisaSeFallita } from '../_shared/push.ts';
 import { accoda } from '../_shared/popup.ts';
 import { chiChiama, cronOGenitore, leggiCorpo } from '../_shared/accesso.ts';
 import * as R from '../../../src/lib/regole/index.ts';
-import * as Cal from '../../../src/lib/calendario/index.ts';
-import { garaDi, leggiClassifica, leggiGare, type Gara } from '../../../src/lib/classifiche/index.ts';
+import { assenteDalCalendario, garaDi, giornoRomaIso, impegniFipav, leggiClassifica, leggiGare, riassuntoClassifica, type Gara, type RigaClassifica } from '../../../src/lib/classifiche/index.ts';
 
 const db = dbServizio();
 const C = R.CONFIG.classifiche;
@@ -60,30 +61,44 @@ async function titoliDel(giorno: string): Promise<string[]> {
   return (data ?? []).map((x) => x.titolo);
 }
 
+/** Le gare di R-Evolution da ieri in avanti negli impegni di famiglia (spostate: la riga si aggiorna). */
+async function copiaNegliImpegni(c: Campionato, gare: Gara[]) {
+  const ieri = new Date(Date.now() - 24 * ORA).toISOString();
+  const nostre = gare.filter((g) => g.inizio >= ieri && garaDi(c.squadra, g)).map((g) => ({ cid: c.cid, ...g }));
+  const { data: assenti, error: ea } = await db.from('impegni_famiglia').select('titolo, inizio').gte('inizio', ieri);
+  if (ea) throw new Error(`impegni_famiglia: ${ea.message}`);
+  const giorni = new Set((assenti ?? []).filter((i) => assenteDalCalendario([i.titolo])).map((i) => giornoRomaIso(i.inizio)));
+  const righe = impegniFipav(nostre, [c], giorni).map((i) => ({ ...i, aggiornato_il: new Date().toISOString() }));
+  if (righe.length) {
+    const { error } = await db.from('impegni_famiglia').upsert(righe);
+    if (error) throw new Error(`impegni_famiglia: ${error.message}`);
+  }
+  // spostata in un giorno "[LANI ASSENTE]": via la riga del giorno vecchio
+  const tenute = new Set(righe.map((r) => r.id));
+  const via = impegniFipav(nostre, [c], new Set()).filter((i) => !tenute.has(i.id)).map((i) => i.id);
+  if (via.length) await db.from('impegni_famiglia').delete().in('id', via);
+}
+
 /** Risultato ufficiale arrivato: partita nuova e popup per Lani. Restituisce cosa ha fatto. */
-async function risultato(c: Campionato, g: Gara): Promise<string | null> {
+async function risultato(c: Campionato, g: Gara, righe: RigaClassifica[]): Promise<string | null> {
   const x = garaDi(c.squadra, g);
   if (!x || x.nostri === null || x.loro === null || x.nostri === x.loro) return null;
   const giorno = giornoDi(g.inizio);
-  // dopo le 6:15 del giorno dopo la partita la segna Lani come prima (regole del 15/11)
-  const ieri = R.giornoRoma(new Date());
-  ieri.setDate(ieri.getDate() - 1);
-  if (giorno < R.iso(ieri)) return null;
+  // solo gare già iniziate: senza il calendario di casa niente più filtra un risultato sbagliato nel futuro
+  if (new Date(g.inizio).getTime() > Date.now()) return null;
+  // dal 17/11 il risultato arriva solo dalla FIPAV: uno pubblicato in ritardo si prende ancora per
+  // risultato_entro_giorni (config); più vecchio no, Lani non saprebbe più rispondere
+  const limite = R.giornoRoma(new Date());
+  limite.setDate(limite.getDate() - C.risultato_entro_giorni);
+  if (giorno < R.iso(limite)) return null;
   // prima dell'inizio del gioco niente popup (accoda): la partita resterebbe senza risposta
   if (giorno < R.CONFIG.periodo.inizio) return null;
 
   const { data: gia } = await db.from('partite').select('id').eq('gara_cid', c.cid).eq('gara', g.numero).maybeSingle();
   if (gia) return null;
-  // convocata: una partita di Lani nel calendario quel giorno ("[LANI ASSENTE]" non conta)
+  // convocata a tutte le partite FIPAV, tranne i giorni "[LANI ASSENTE]" del calendario di casa (17/11)
   // ponytail: non guarda quale squadra dice il titolo; due partite di Lani nello stesso giorno non capitano
-  if (!(await titoliDel(giorno)).some((t) => Cal.tipoImpegno(t) === 'partita')) return 'non convocata';
-  // segnata a mano da Lani prima del risultato: si lega alla gara, niente doppione né popup
-  const { data: aMano, error: e1 } = await db.from('partite').select('id').eq('data', giorno).is('gara', null).limit(1);
-  if (e1) throw new Error(`partite: ${e1.message}`);
-  if (aMano?.length) {
-    await db.from('partite').update({ gara_cid: c.cid, gara: g.numero }).eq('id', aMano[0].id);
-    return 'già segnata';
-  }
+  if (assenteDalCalendario(await titoliDel(giorno))) return 'assente';
   const { data: lani, error: e2 } = await db.from('profili').select('id').eq('ruolo', 'lani').single();
   if (e2) throw new Error(`profili: ${e2.message}`);
   const { data: p, error: e3 } = await db
@@ -92,7 +107,9 @@ async function risultato(c: Campionato, g: Gara): Promise<string | null> {
     .select('id')
     .single();
   if (e3) throw new Error(`partite: ${e3.message}`);
-  await accoda(db, `partita_fipav:${p.id}`, 'partita_com_e_andata', { noi: x.nostri, loro: x.loro, avversaria: x.avversaria });
+  // il popup lo apre R-Evolution: risultato, due parole sulla classifica appena letta, la domanda
+  const riassunto = riassuntoClassifica(righe, c.squadra);
+  await accoda(db, `partita_fipav:${p.id}`, 'partita_com_e_andata', { esito: x.nostri > x.loro ? 'vinta!' : 'persa.', noi: x.nostri, loro: x.loro, avversaria: x.avversaria, riassunto });
   return 'popup';
 }
 
@@ -126,9 +143,10 @@ Deno.serve(async (req) => {
       if (!gare.length) throw new Error(`${c.nome}: gare non trovate nella pagina`);
       const { error: eg } = await db.from('gare_fipav').upsert(gare.map((g) => ({ cid: c.cid, ...g, letta_il: new Date().toISOString() })));
       if (eg) throw new Error(`gare_fipav: ${eg.message}`);
+      await copiaNegliImpegni(c, gare);
       const fatte: string[] = [];
       for (const g of gare) {
-        const f = await risultato(c, g);
+        const f = await risultato(c, g, righe);
         if (f) fatte.push(`${g.numero} ${f}`);
       }
       dettagli[c.nome] = { classifica: righe.length, gare: gare.length, ...(fatte.length ? { risultati: fatte } : {}) };

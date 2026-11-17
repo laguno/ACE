@@ -124,6 +124,17 @@ describe('sync-calendario', () => {
     expect(await valore(`select titolo from impegni_famiglia`)).toBe('Allenamento Lani');
     expect(await valore(`select esito from sync_log where fonte = 'calendario'`)).toBe('ok');
   });
+  it('17/11: le partite del calendario si saltano, quelle FIPAV restano, il giorno assente le toglie', async () => {
+    alle('2026-11-23T10:00:00+01:00');
+    const ics = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nBEGIN:VEVENT\r\nUID:pa\r\nDTSTART:20261125T190000Z\r\nSUMMARY:Partita Lani U14: FOXES vs U14R-EVOLUTION\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:as\r\nDTSTART:20261128T150000Z\r\nSUMMARY:[LANI ASSENTE] Partita U14: U14R-EVOLUTION vs GAZZE\r\nEND:VEVENT\r\nEND:VCALENDAR`;
+    vi.stubGlobal('fetch', async () => new Response(ics));
+    const c = stato.banco!.come;
+    await c(null, `insert into impegni_famiglia (id, inizio, titolo) values ('fipav:93399:870', '2026-11-25T20:00:00+01:00', 'Partita Lani U14: FOXES vs U14R-EVOLUTION'), ('fipav:93399:869', '2026-11-28T16:00:00+01:00', 'Partita Lani U14: U14R-EVOLUTION vs GAZZE')`);
+    const f = await carica('sync-calendario');
+    expect((await json(await f(richiesta({}, { cron: true })))).corpo).toMatchObject({ esito: 'ok', impegni: 1 });
+    expect(await valore(`select string_agg(id, ',' order by id) from impegni_famiglia`)).toBe('as,fipav:93399:870');
+    vi.useRealTimers();
+  });
   it('calendario giù: esito errore senza l\'indirizzo segreto, avviso ai genitori una volta', async () => {
     vi.stubGlobal('fetch', async () => {
       throw new Error('connessione rifiutata a https://calendar.google.test/segreto-123/basic.ics');
@@ -198,7 +209,7 @@ describe('classifiche', () => {
     expect((await lancia({ solo: 'partite' })).corpo).toMatchObject({ esito: 'ok', 'Under 13': { risultati: ['1239 popup'] } });
     expect(await valore(`select set_nostri || '-' || set_loro || ' ' || coalesce(in_campo::text, 'senza risposta') from partite where gara = 1239`)).toBe('3-1 senza risposta');
     const id = String(await valore(`select id from partite where gara = 1239`));
-    expect(await valore(`select titolo || ' ' || testo from popup_coda where chiave = 'partita_fipav:${id}'`)).toBe('Com’è andata? R-Evolution 3, RUBIERESE U13 1. Sei entrata in campo?');
+    expect(await valore(`select titolo || ' ' || testo from popup_coda where chiave = 'partita_fipav:${id}'`)).toBe('Com’è andata? R-Evolution 3, RUBIERESE U13 1: vinta! Siete prime nel girone, continuate così. Sei entrata in campo?');
     // il giro dopo non la rifà
     alle('2026-11-29T20:30:00+01:00');
     await lancia();
@@ -222,17 +233,45 @@ describe('classifiche', () => {
     expect(await somma()).toBe(10);
   });
 
-  it('Lani assente, o la partita già segnata da lei: nessun popup', async () => {
+  // 17/11: la FIPAV è l'unico calendario delle partite; il calendario di casa conta solo per "[LANI ASSENTE]"
+  it('"[LANI ASSENTE]": nessuna partita; senza niente nel calendario: convocata, partita e popup', async () => {
     await convocata(`[LANI ASSENTE] Partita U13: RUBIERESE U13 vs ${U13}`);
     alle('2026-11-29T20:00:00+01:00');
     await lancia();
     expect(await valore(`select count(*)::int from partite`)).toBe(0);
+    expect(await valore(`select count(*)::int from impegni_famiglia where id = 'fipav:93436:1239'`)).toBe(0);
 
-    await stato.banco!.come(null, `update impegni_famiglia set titolo = 'Partita Lani U13: RUBIERESE U13 vs ${U13}'`);
-    await stato.banco!.come(LANI, `insert into partite (data, avversaria, set_nostri, set_loro) values ('2026-11-29', 'RUBIERESE', 3, 1)`);
+    await stato.banco!.come(null, `delete from impegni_famiglia`);
     await lancia();
     expect(await valore(`select count(*)::int || ' ' || max(gara) from partite`)).toBe('1 1239');
-    expect(await valore(`select count(*)::int from popup_coda where situazione = 'partita_com_e_andata'`)).toBe(0);
+    expect(await valore(`select count(*)::int from popup_coda where situazione = 'partita_com_e_andata'`)).toBe(1);
+  });
+
+  it('le gare diventano impegni di famiglia; spostata dalla FIPAV, la riga si sposta', async () => {
+    alle('2026-11-24T06:15:00+01:00');
+    await lancia();
+    expect(await valore(`select string_agg(id || ' ' || titolo, ' | ' order by id) from impegni_famiglia`)).toBe(
+      `fipav:93399:869 Partita Lani U14: ${U14} vs A.S.D. GAZZE CANOSSA | fipav:93436:1239 Partita Lani U13: RUBIERESE U13 vs ${U13} | fipav:93436:1243 Partita Lani U13: ${U13} vs DENTI ALBINETANA PANTHERS`,
+    );
+    vi.stubGlobal('fetch', async (u: string) =>
+      new Response(String(u).includes('risultati-classifiche') ? (String(u).endsWith('93436') ? gare([[1243, '13/12/26 09:00', U13, 'DENTI ALBINETANA PANTHERS', '-', 'da disputare']]) : gare([])) : pagina(String(u).endsWith('93436') ? U13 : U14)),
+    );
+    alle('2026-11-25T06:15:00+01:00');
+    await lancia();
+    expect(new Date(String(await valore(`select inizio from impegni_famiglia where id = 'fipav:93436:1243'`))).toISOString()).toBe('2026-12-13T08:00:00.000Z');
+  });
+
+  it('risposta "Assente": approvata senza in_campo, niente passi, non si risponde due volte', async () => {
+    alle('2026-11-29T20:00:00+01:00');
+    await lancia();
+    const id = String(await valore(`select id from partite where gara = 1239`));
+    await stato.banco!.come(LANI, `select rispondi_partita('${id}', null)`);
+    expect(await valore(`select (approvata_il is not null)::text || ' ' || coalesce(in_campo::text, 'assente') from partite where id = '${id}'`)).toBe('true assente');
+    const passi = await carica('passi');
+    await passi(richiesta({ tipo: 'partita', id }, { gettone: 'gettone-lani' }));
+    expect(await valore(`select count(*)::int from movimenti_passi where riferimento like '%${id}%'`)).toBe(0);
+    await stato.banco!.come(LANI, `select rispondi_partita('${id}', true)`);
+    expect(await valore(`select in_campo from partite where id = '${id}'`)).toBeNull();
   });
 
   it('partita prima dell’inizio del gioco: niente partita né popup', async () => {
@@ -242,11 +281,15 @@ describe('classifiche', () => {
     expect(await valore(`select count(*)::int from partite`)).toBe(0);
   });
 
-  it('il giorno dopo le 6:15 niente più popup: la segna Lani come prima', async () => {
+  // dal 17/11 nessuno la segna a mano: un risultato in ritardo si prende per risultato_entro_giorni (7)
+  it('risultato in ritardo: entro 7 giorni partita e popup, dopo no', async () => {
     await convocata();
-    alle('2026-12-01T06:15:00+01:00');
+    alle('2026-12-07T06:15:00+01:00');
     await lancia();
     expect(await valore(`select count(*)::int from partite`)).toBe(0);
+    alle('2026-12-01T06:15:00+01:00');
+    await lancia();
+    expect(await valore(`select count(*)::int from partite`)).toBe(1);
   });
 
   it('ogni mezz’ora legge il portale solo da inizio + 2 ore, il giorno della partita', async () => {

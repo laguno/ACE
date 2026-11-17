@@ -60,9 +60,10 @@ const PULSANTI: Record<string, string> = {
   serie_nera: 'Ci riprovo',
   figurina_nera: 'Ci riprovo',
   r_evolution_accesa: 'Vediamo',
-  partita_com_e_andata: 'Sì', // l'altro pulsante: PANCHINA
+  partita_com_e_andata: 'In campo', // l'altro pulsante: PANCHINA (scelti dal signore il 17/11)
 };
-const PANCHINA = 'Sono rimasta in panchina';
+export const PANCHINA = 'In panchina';
+export const ASSENTE = 'Assente';
 /** I pulsanti "il piano" portano a Studio, dove c'è il ripasso. */
 const AL_PIANO = (p: Popup) => /piano$/.test(pulsante(p));
 /** Numero del forziere dalla chiave dell'evento ("forziere:3:enigma"). */
@@ -80,6 +81,8 @@ export default function CodaPopup({ apriEnigma, apriStudio, apriREvolution }: { 
         .from('popup_coda')
         .select('id, priorita, situazione, posa, titolo, testo, figurina, chiave')
         .is('mostrato_il', null)
+        // "Com'è andata?" non si apre qui: la apre R-Evolution al primo tocco (17/11, Partita.tsx)
+        .neq('situazione', 'partita_com_e_andata')
         .gte('creato_il', da)
         .order('priorita')
         .order('creato_il')
@@ -108,18 +111,6 @@ export default function CodaPopup({ apriEnigma, apriStudio, apriREvolution }: { 
     setP(undefined);
   };
   const n = forziereDi(p);
-  if (p.situazione === 'partita_com_e_andata') {
-    // risultato FIPAV (docs/08): la risposta di Lani approva la partita e fa i passi. Senza risposta
-    // (Esc, errore) il popup non si segna visto: torna alla prossima apertura.
-    const id = p.chiave?.split(':')[1] ?? '';
-    const rispondi = (inCampo: boolean) => async () => {
-      const { error } = await supabase.rpc('rispondi_partita', { p_id: id, p_in_campo: inCampo });
-      if (error) return setP(undefined);
-      await supabase.functions.invoke('passi', { body: { tipo: 'partita', id } });
-      chiudi();
-    };
-    return <PopupVista p={p} chiudi={() => setP(undefined)} azione={rispondi(true)} altra={{ etichetta: PANCHINA, fai: rispondi(false) }} />;
-  }
   const azione =
     p.situazione === 'enigma_comparso' && apriEnigma && n
       ? () => (chiudi(), apriEnigma(n))
@@ -132,7 +123,7 @@ export default function CodaPopup({ apriEnigma, apriStudio, apriREvolution }: { 
 }
 
 /** Il popup com'è davvero: lo usano la coda di Lani e la Vetrina dei genitori (che non scrive niente). */
-export function PopupVista({ p, chiudi, azione, altra }: { p: Popup; chiudi: () => void; azione?: () => void; altra?: { etichetta: string; fai: () => void } }) {
+export function PopupVista({ p, chiudi, azione, altre }: { p: Popup; chiudi: () => void; azione?: () => void; altre?: { etichetta: string; fai: () => void }[] }) {
   const t = tono(p);
   const src = immagine(p.posa);
   const malus = t === 'bastone' ? p.testo.match(/[−-]\d+/)?.[0] : undefined;
@@ -172,11 +163,12 @@ export function PopupVista({ p, chiudi, azione, altra }: { p: Popup; chiudi: () 
         <button className="principale largo" onClick={azione ?? chiudi}>
           {pulsante(p)}
         </button>
-        {(altra || p.situazione === 'partita_com_e_andata') && (
-          <button className="secondario largo" onClick={altra?.fai ?? chiudi}>
-            {altra?.etichetta ?? PANCHINA}
+        {/* la Vetrina dei genitori mostra i pulsanti della partita senza azioni */}
+        {(altre ?? (p.situazione === 'partita_com_e_andata' ? [PANCHINA, ASSENTE].map((etichetta) => ({ etichetta, fai: chiudi })) : [])).map((a) => (
+          <button key={a.etichetta} className="secondario largo" onClick={a.fai}>
+            {a.etichetta}
           </button>
-        )}
+        ))}
         {p.figurina && <p className="riga-figurina">{p.figurina}</p>}
       </div>
     </dialog>

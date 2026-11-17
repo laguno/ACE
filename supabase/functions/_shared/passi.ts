@@ -282,7 +282,8 @@ export function creaGestori(db: SupabaseClient) {
       const p = await riga('partite', 'id', id);
       const g = R.giorno(p.data);
       if (!p.approvata_il) return niente('da approvare');
-      if (p.in_campo === null) return niente('aspetta la risposta di Lani');
+      // risposta "Assente" (17/11): approvata senza in_campo, niente passi
+      if (p.in_campo === null) return niente('assente');
       if (!R.rEvolutionAttiva(g, await rEvolutionDa())) return niente('R-Evolution spenta');
       const { giocata, vinta } = R.passiPartita(p.set_nostri, p.set_loro, p.in_campo);
       const firma = p.approvata_da ?? p.dato_da;

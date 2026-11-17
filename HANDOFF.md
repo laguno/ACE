@@ -14,6 +14,15 @@ Il gioco è partito **lunedì 16/11/2026**: Lani usa ACE in produzione. `main` s
 - Da guardare sui telefoni veri: vibrazione, Sera scura a letto, testata compatta su Safari dell'iPad (senza supporto scorre via come prima).
 - Ramo `gioco` (`C:\progetti\ace\app-gioco`, anche su GitHub): motore a tempo, ACE Prova, schermata di prova (accesa nelle preview), plugin di orientamento e APK 1.3, ambiente di prova locale. `vercel.ts` tolto il 17/11 (Vercel rifiutava il deploy): resta `vercel.json`. Non unito a `main`; stato nel suo `HANDOFF.md`.
 
+## R-Evolution rivista (17/11, ramo `revolution-fipav`, **non unito né pubblicato**)
+
+- Richieste del signore dopo la prova sul telefono: barra (nome selezionato tagliato tra 380 e 409 px), partita doppia, coach, dieci minuti collegati a Oggi, risultato solo dalla FIPAV con popup in R-Evolution, niente approvazione dei genitori. Dettagli in `docs/08-sprint-2.md`, "Revisione del 17/11".
+- Dati: tolta la riga doppia del 14/11 (backup `ace-2026-11-17_11-03-26.sql`, 0 passi coinvolti).
+- Prove: `npm test` 333, `prova:schema` 298, Playwright 202 (31 saltate come sempre), `tsc` 0, build ok.
+- 17/11 dopo: la FIPAV è l'unico calendario delle partite (righe `fipav:` in `impegni_famiglia`), pulsante "Assente" nel popup.
+- Da pubblicare insieme, in quest'ordine: funzioni `classifiche`, `passi` e `sync-calendario` (`npx supabase functions deploy <nome>`), poi lanciare `classifiche` una volta (scrive le righe `fipav:` prima che `sync-calendario` tolga le partite del calendario di casa), poi unione in `main` (Vercel). Nessuna migrazione. Finestre senza pubblicazioni come sotto.
+- Testi del popup e del coach scelti dal signore il 17/11 (docs/05).
+
 ## APK di ACE (16/11, ramo `apk` in `C:\progetti\ace\app-apk`, unito a `main`)
 
 - Guscio Capacitor (non TWA) con `server.url` di produzione, id `it.messori.ace`, solo verticale, barra di stato rosa dipinta da `MainActivity` (insets nativi: la pagina web non si tocca). Le modifiche web arrivano da sole; un APK nuovo serve solo per icone, permessi, plugin (versionCode più alto, stessa chiave, "Aggiorna").
