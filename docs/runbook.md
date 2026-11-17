@@ -65,4 +65,4 @@ ACE sul telefono di Lani è un APK (guscio Capacitor in `android/`, configurazio
 - **Le notifiche al telefono non arrivano**: `push_iscrizioni` con `tipo = 'fcm'` deve avere una riga del telefono (si crea quando Lani tocca "Attiva i promemoria" o a ogni apertura con il permesso dato); log della funzione `notifiche` (`push fcm …`); sul telefono Impostazioni → App → ACE → Notifiche e Batteria "Senza restrizioni".
 
 ## Ambiente di prova locale
-Con Docker acceso: `powershell scripts/prova-locale.ps1` avvia Supabase locale e scrive `.env.locale.local`; poi `npm run dev:locale`. Per spegnere: `npx supabase stop`. Mai collegato ai dati veri; i cron sono spenti dal seed.
+Con Docker acceso: `powershell scripts/prova-locale.ps1` avvia Supabase locale e scrive `.env.locale.local`; poi `npm run dev:locale`. Per spegnere: `npx supabase stop`. Mai collegato ai dati veri; i cron sono spenti dal seed. Account finti dal seed: `genitore@prova.test` e `lani@prova.test` (password nel seed, `supabase/seed.sql`).
