@@ -135,3 +135,19 @@ export function pillolaPartita(inizio: Date, ora: Date): string | null {
   if (giorni === 0) return `Oggi partita · ${traQuanto(inizio, ora)}`;
   return null;
 }
+
+const POSTI = ['prime', 'seconde', 'terze', 'quarte', 'quinte', 'seste', 'settime', 'ottave', 'none', 'decime'];
+
+/**
+ * Due parole sulla classifica per il popup della partita in R-Evolution (17/11): dove siete e quanto
+ * manca dalla prima. Stringa vuota se la squadra non c'è nelle righe.
+ */
+export function riassuntoClassifica(righe: RigaClassifica[], squadra: string): string {
+  const noi = righe.find((r) => stessaSquadra(r.squadra, squadra));
+  if (!noi) return '';
+  if (noi.pos === 1) return 'Siete prime nel girone, continuate così.';
+  const prima = Math.max(...righe.map((r) => r.punti));
+  const posto = POSTI[noi.pos - 1] ?? `in ${noi.pos}ª posizione`;
+  const d = prima - noi.punti;
+  return d <= 0 ? `Siete ${posto}, a pari punti con la prima.` : `Siete ${posto}, a ${d === 1 ? 'un punto' : `${d} punti`} dalla prima.`;
+}

@@ -773,10 +773,11 @@ body[data-sfondo='campo'] .barra button[aria-current='page'] { background: var(-
 /* il risultato come una targhetta da tabellone */
 .partite b { flex: none; min-width: 64px; padding: 4px 10px; border-radius: 12px; text-align: center; font: 800 22px/1.2 'Baloo 2', Nunito, sans-serif; font-variant-numeric: tabular-nums; background: var(--lilla); color: var(--testo-2); }
 .partite b.vinta { background: var(--granata); color: var(--bianco); }
-/* cinque voci (R-Evolution): etichette su una riga; sotto i 380 px "R-Evo" (il nome intero resta in aria-label) */
+/* cinque voci (R-Evolution): etichette su una riga; sotto i 410 px "R-Evo" (il nome intero resta in aria-label).
+   17/11: tra 380 e 409 px "R-Evolution" usciva dalla pillola della voce selezionata (prova in e2e/r-evolution) */
 .barra.cinque button { white-space: nowrap; letter-spacing: -0.2px; }
 .barra .corto { display: none; }
-@media (max-width: 379px) {
+@media (max-width: 409px) {
   .barra .lungo { display: none; }
   .barra .corto { display: inline; }
 }
@@ -968,3 +969,9 @@ dialog.ga-velo::backdrop { background: transparent; }
 .ga .fotografa .compatto:disabled { opacity: 0.55; }
 .ga .fotografa .compatto:focus-visible { outline: 3px solid var(--accento); outline-offset: 2px; }
 .ga .fotografa [role='alert'] { flex: 1 0 100%; text-align: right; }
+
+/* il coach in R-Evolution (17/11): avatar piccolo, una riga, collegamento ai dieci minuti in Oggi */
+.r-evolution .carta.coach { display: grid; grid-template-columns: 72px 1fr; gap: 12px; align-items: center; padding: 12px; }
+.r-evolution .coach h2 { margin: 0; font: 800 13px Nunito, sans-serif; color: var(--testo-2); }
+.r-evolution .coach p { margin: 2px 0 0; font-weight: 700; }
+.r-evolution .coach .collegamento { padding: 0; color: var(--granata); }

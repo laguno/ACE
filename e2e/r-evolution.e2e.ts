@@ -52,31 +52,80 @@ test('R-Evolution: classifica, partite con il risultato e passi presi in campo',
   await expect(partite.getByText('3-1')).toHaveClass(/vinta/);
   await expect(partite.getByText('2-3')).toHaveClass(/persa/);
   await expect(page.locator('.ultimora .solo-lettori')).toHaveText("Ultim'ora. ultima partita: 3-1 con Volley Bibbiano. 1° posto in Under 13.");
-  // quella da approvare si vede ma non conta tra le giocate
-  await expect(page.getByText('17 gennaio, da approvare')).toBeVisible();
+  // quella senza risposta si vede ma non conta tra le giocate
+  await expect(page.getByText('17 gennaio, aspetta la tua risposta')).toBeVisible();
   await expect(page.locator('.numeri dd').first()).toHaveText('2');
   await page.screenshot({ path: 'e2e/risultati/r-evolution.png', fullPage: true });
 });
 
-test('R-Evolution: Lani segna la partita, va da approvare e non chiama i passi', async ({ page }) => {
+// dal 17/11: il risultato arriva dalla FIPAV, "Com'è andata?" si apre al primo tocco su R-Evolution
+const COM_E_ANDATA = {
+  id: 'q1',
+  chiave: 'partita_fipav:p4',
+  priorita: 3,
+  situazione: 'partita_com_e_andata',
+  posa: 'allenatore-pollice',
+  titolo: 'Com’è andata?',
+  testo: 'Vinta 3-1 con Arbor Itarca. Siete prime nel girone, continuate così. Sei entrata in campo?',
+  figurina: null,
+  mostrato_il: null,
+  creato_il: '2027-01-23T20:30:00Z',
+};
+const P4 = { id: 'p4', data: '2027-01-23', avversaria: 'Arbor Itarca', set_nostri: 3, set_loro: 1, in_campo: null, approvata_il: null, gara: 7, gara_cid: 93436 };
+
+test("Com'è andata?: non in Oggi, si apre in R-Evolution col coach, niente chiudi, la risposta fa i passi", async ({ page }) => {
   await page.clock.setFixedTime(new Date('2027-01-23T21:00:00+01:00'));
-  const { t, chiamate } = await finto(page, { ...dati(), partite: [] });
+  const { t, chiamate } = await finto(page, { ...dati(), partite: [P4, ...dati().partite], popup_coda: [{ ...COM_E_ANDATA }] });
+  await page.goto('/');
+  await expect(page.getByRole('button', { name: 'R-Evolution' })).toBeVisible();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await page.getByRole('button', { name: 'R-Evolution' }).click();
+  const popup = page.getByRole('dialog', { name: 'Com’è andata?' });
+  await expect(popup).toContainText('Vinta 3-1 con Arbor Itarca. Siete prime nel girone, continuate così. Sei entrata in campo?');
+  await expect(popup.locator('.popup-avatar img')).toHaveAttribute('src', /allenatore-applaude/);
+  // niente modulo per scrivere il risultato
+  await expect(page.getByRole('heading', { name: /Segna la partita/ })).toHaveCount(0);
+  await page.keyboard.press('Escape');
+  await expect(popup).toBeVisible();
+  await popup.getByRole('button', { name: 'Sono rimasta in panchina' }).click();
+  await expect(popup).toHaveCount(0);
+  expect(t['rpc/rispondi_partita']?.[0]).toMatchObject({ p_id: 'p4', p_in_campo: false });
+  expect(chiamate).toEqual([{ tipo: 'partita', id: 'p4' }]);
+  expect(t.popup_coda[0].mostrato_il).toBeTruthy();
+});
+
+test("Com'è andata?: già risposta non si apre e si segna vista", async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2027-01-23T21:00:00+01:00'));
+  const { t } = await finto(page, { ...dati(), partite: [{ ...P4, in_campo: true, approvata_il: '2027-01-23T20:40:00Z' }], popup_coda: [{ ...COM_E_ANDATA }] });
   await page.goto('/');
   await page.getByRole('button', { name: 'R-Evolution' }).click();
-  const carta = page.locator('.carta', { has: page.getByRole('heading', { name: 'Segna la partita' }) });
-  await carta.getByLabel('Contro').fill('Arbor Itarca');
-  await carta.getByLabel('Set nostri').selectOption('3');
-  await carta.getByLabel('Set loro').selectOption('3');
-  await carta.getByRole('button', { name: 'Manda da approvare' }).click();
-  await expect(page.getByRole('status')).toHaveText('Nella pallavolo non c’è il pareggio: controlla i set.');
-  await carta.getByLabel('Set loro').selectOption('2');
-  await carta.getByLabel('Sono entrata in campo').uncheck();
-  await carta.getByRole('button', { name: 'Manda da approvare' }).click();
-  await expect(page.getByRole('status')).toHaveText('Partita 3-2 segnata. I passi arrivano quando mamma o papà la approvano.');
-  expect(t.partite[0]).toMatchObject({ data: '2027-01-23', avversaria: 'Arbor Itarca', set_nostri: 3, set_loro: 2, in_campo: false });
-  expect(t.partite[0].approvata_il).toBeUndefined();
-  await expect(page.getByText('23 gennaio, da approvare')).toBeVisible();
-  expect(chiamate).toEqual([]);
+  await expect(page.getByRole('heading', { name: 'In campo' })).toBeVisible();
+  await expect.poll(() => t.popup_coda[0].mostrato_il).toBeTruthy();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+});
+
+test('il coach: dieci minuti del mattino, il collegamento porta alla carta in Oggi', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2027-01-18T07:30:00+01:00'));
+  await finto(page, { ...dati(), esercizi_dieci_minuti: [{ id: 'e1', nome: 'Plank', tipo: 'forza', creato_il: '2027-01-01' }] });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'R-Evolution' }).click();
+  const coach = page.getByLabel('Il coach');
+  await expect(coach).toContainText('Stamattina ci sono i dieci minuti di allenamento, entro le 13:00.');
+  await expect(coach.locator('img')).toHaveAttribute('src', /allenatore/);
+  await coach.getByRole('button', { name: 'Vai ai dieci minuti in Oggi' }).click();
+  await expect(page.getByRole('button', { name: 'Oggi' })).toHaveAttribute('aria-current', 'page');
+  await expect(page.locator('#dieci-minuti')).toBeInViewport();
+  await page.screenshot({ path: 'e2e/risultati/coach-oggi.png' });
+});
+
+test('il coach fuori dal mattino: niente collegamento a una carta che non c’è', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2027-01-18T16:00:00+01:00'));
+  await finto(page, dati());
+  await page.goto('/');
+  await page.getByRole('button', { name: 'R-Evolution' }).click();
+  const coach = page.getByLabel('Il coach');
+  await expect(coach).toContainText('I dieci minuti si fanno al mattino, dalle 6:00 alle 13:00. Domani ti aspetto.');
+  await expect(coach.getByRole('button')).toHaveCount(0);
 });
 
 test('R-Evolution spenta: la voce non c’è', async ({ page }) => {
@@ -87,16 +136,35 @@ test('R-Evolution spenta: la voce non c’è', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'R-Evolution' })).toHaveCount(0);
 });
 
-test('barra a cinque voci: a 360 px nessuna etichetta esce dal suo pulsante', async ({ page }) => {
-  await page.setViewportSize({ width: 360, height: 740 });
-  await page.clock.setFixedTime(new Date('2027-01-18T10:00:00+01:00'));
-  await finto(page, dati());
-  await page.goto('/');
-  const voci = page.locator('.barra button');
-  await expect(voci).toHaveCount(5);
-  for (const b of await voci.all()) expect(await b.evaluate((e) => e.scrollWidth <= e.clientWidth)).toBe(true);
-  await page.locator('.barra').screenshot({ path: 'e2e/risultati/barra-360.png' });
-});
+// 17/11: sul telefono il nome selezionato usciva dalla pillola colorata. Si prova a più larghezze,
+// toccando ogni voce: il testo deve stare dentro il pulsante, con un piccolo margine.
+for (const larga of [320, 360, 375, 384, 390, 393, 412, 430])
+  test(`barra a cinque voci: a ${larga} px nessuna etichetta esce dal suo pulsante, anche selezionata`, async ({ page }) => {
+    await page.setViewportSize({ width: larga, height: 800 });
+    await page.clock.setFixedTime(new Date('2027-01-18T16:00:00+01:00'));
+    await finto(page, dati());
+    await page.goto('/');
+    const voci = page.locator('.barra button');
+    await expect(voci).toHaveCount(5);
+    for (const b of await voci.all()) {
+      await b.click();
+      await expect(b).toHaveAttribute('aria-current', 'page');
+      const fuori = await b.evaluate((e) => {
+        const box = e.getBoundingClientRect();
+        const testi: Node[] = [];
+        const giro = document.createTreeWalker(e, NodeFilter.SHOW_TEXT);
+        while (giro.nextNode()) if (giro.currentNode.textContent?.trim()) testi.push(giro.currentNode);
+        return testi.some((c) => {
+          const r = document.createRange();
+          r.selectNodeContents(c);
+          const t = r.getBoundingClientRect();
+          return t.width > 0 && (t.left < box.left + 2 || t.right > box.right - 2);
+        });
+      });
+      expect(fuori, (await b.getAttribute('aria-label')) ?? '').toBe(false);
+    }
+    if (larga === 390) await page.locator('.barra').screenshot({ path: 'e2e/risultati/barra-390.png' });
+  });
 
 test("annuncio il giorno dell'accensione: Vediamo porta su R-Evolution", async ({ page }) => {
   await page.clock.setFixedTime(new Date('2027-01-07T16:00:00+01:00'));
@@ -109,15 +177,6 @@ test("annuncio il giorno dell'accensione: Vediamo porta su R-Evolution", async (
   await expect(page.getByRole('heading', { name: 'Arriva R-Evolution' })).toBeVisible();
   await page.getByRole('button', { name: 'Vediamo' }).click();
   await expect(page.getByRole('heading', { name: 'In campo' })).toBeVisible();
-});
-
-test('segna la partita: giorno e avversaria proposti dal calendario di famiglia', async ({ page }) => {
-  await page.clock.setFixedTime(new Date('2027-01-18T10:00:00+01:00'));
-  await finto(page, { ...dati(), impegni_famiglia: [{ titolo: 'Partita Lani: FOXES VOLLEY vs U14R-EVOLUTION', inizio: '2027-01-16T17:45:00Z' }] });
-  await page.goto('/');
-  await page.getByRole('button', { name: 'R-Evolution' }).click();
-  await expect(page.getByLabel('Contro')).toHaveValue('FOXES VOLLEY');
-  await expect(page.getByLabel('Giorno')).toHaveValue('2027-01-16');
 });
 
 test('tema campo: carta della prossima partita e nastro Ultim’ora dal calendario FIPAV', async ({ page }) => {

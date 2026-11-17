@@ -62,7 +62,7 @@ const PULSANTI: Record<string, string> = {
   r_evolution_accesa: 'Vediamo',
   partita_com_e_andata: 'Sì', // l'altro pulsante: PANCHINA
 };
-const PANCHINA = 'Sono rimasta in panchina';
+export const PANCHINA = 'Sono rimasta in panchina';
 /** I pulsanti "il piano" portano a Studio, dove c'è il ripasso. */
 const AL_PIANO = (p: Popup) => /piano$/.test(pulsante(p));
 /** Numero del forziere dalla chiave dell'evento ("forziere:3:enigma"). */
@@ -80,6 +80,8 @@ export default function CodaPopup({ apriEnigma, apriStudio, apriREvolution }: { 
         .from('popup_coda')
         .select('id, priorita, situazione, posa, titolo, testo, figurina, chiave')
         .is('mostrato_il', null)
+        // "Com'è andata?" non si apre qui: la apre R-Evolution al primo tocco (17/11, Partita.tsx)
+        .neq('situazione', 'partita_com_e_andata')
         .gte('creato_il', da)
         .order('priorita')
         .order('creato_il')
@@ -108,18 +110,6 @@ export default function CodaPopup({ apriEnigma, apriStudio, apriREvolution }: { 
     setP(undefined);
   };
   const n = forziereDi(p);
-  if (p.situazione === 'partita_com_e_andata') {
-    // risultato FIPAV (docs/08): la risposta di Lani approva la partita e fa i passi. Senza risposta
-    // (Esc, errore) il popup non si segna visto: torna alla prossima apertura.
-    const id = p.chiave?.split(':')[1] ?? '';
-    const rispondi = (inCampo: boolean) => async () => {
-      const { error } = await supabase.rpc('rispondi_partita', { p_id: id, p_in_campo: inCampo });
-      if (error) return setP(undefined);
-      await supabase.functions.invoke('passi', { body: { tipo: 'partita', id } });
-      chiudi();
-    };
-    return <PopupVista p={p} chiudi={() => setP(undefined)} azione={rispondi(true)} altra={{ etichetta: PANCHINA, fai: rispondi(false) }} />;
-  }
   const azione =
     p.situazione === 'enigma_comparso' && apriEnigma && n
       ? () => (chiudi(), apriEnigma(n))

@@ -10,7 +10,7 @@
 - **Percorso**: con l'avvio anticipato va **ricalcolato**; proposta sotto, la approva il signore.
 - **Dieci minuti al mattino**, non la sera: si avviano **dalle 6:00 alle 13:00**, tutti i giorni.
 - **Menu dei dieci minuti**: la bozza resta come partenza; lo cambiano i genitori in Impostazioni.
-- **Partite**: le **segna Lani**; un genitore **corregge** il punteggio se serve e **approva** (passi solo dopo) oppure **rifiuta** (la partita sparisce).
+- **Partite** (cambiato il 17/11 dal signore): il risultato arriva **solo dalla FIPAV**. Lani non lo scrive, i genitori non approvano né rifiutano. Vedi "Risultato automatico" e "Revisione del 17/11" sotto.
 - **Panchina** tutta la gara: **5 passi, +5 se vinta** (in campo +10, +15 se vinta).
 - **Classifiche** dal portale FIPAV Reggio Emilia, una volta al giorno: **U13 Femminile girone C** ("13R-EVOLUT. POLO DIGITALE", CId 93436) e **U14 Femminile girone A** ("U14R-EVOLUTION", CId 93399). Se passano alla fase dopo cambia il girone: come gestirlo è da decidere (oggi si cambia il CId nel config).
 - **Allenatore**: niente altri permessi. **La squadra**: più avanti, automatica, insieme agli avatar.
@@ -67,7 +67,15 @@ Fatto il 15/11 su `main`, non pubblicato: i testi per Lani sono una proposta (do
 - **Convocata o assente**: dal calendario di famiglia. Una partita di Lani quel giorno (`tipoImpegno` = partita) vuol dire convocata; "[LANI ASSENTE]" o niente nel calendario: nessuna partita creata.
 - **Risultato arrivato**: il server crea la partita (`partite.gara`, `in_campo` vuoto) e accoda "Com'è andata?". La risposta di Lani (`rispondi_partita`) è l'approvazione: i passi li calcola `passi` dal risultato ufficiale e dalla risposta, senza genitori. Se Lani l'aveva già segnata a mano quel giorno, la partita si lega alla gara e il popup non parte.
 - **Correzione**: in Genitori, "Partite dalla FIPAV" (ultimi 14 giorni), "Era in panchina" / "Era in campo". Come le spunte: storno dei passi dati e giro nuovo (`correggi_partita`, riferimento `id:1`, `id:2`...). Non dopo le chiavi di quella settimana.
-- **Senza risultato alle 6:15 del giorno dopo**: niente più popup, la segna Lani e la approvano i genitori come prima. Se Lani non risponde, il popup scade dopo 3 giorni e la partita compare tra quelle da approvare.
+- ~~Senza risultato alle 6:15 del giorno dopo: la segna Lani e la approvano i genitori~~ tolto il 17/11: un risultato in ritardo si prende fino a `classifiche.risultato_entro_giorni` (7) dopo la partita; il popup non scade.
+
+## Revisione del 17/11 (signore, dopo la prova sul telefono)
+
+- **Popup "Com'è andata?"**: non si apre più all'apertura dell'app (`CodaPopup` lo salta) ma in R-Evolution al primo tocco dopo la lettura FIPAV (`PopupPartita` in `src/Partita.tsx`). Coach al posto di Lani, risultato e due parole sulla classifica appena letta (`riassuntoClassifica` in `src/lib/classifiche`), niente "chiudi" (anche Esc): si risponde in campo / panchina e la risposta fa i passi. Testi di prova (docs/05).
+- **Niente approvazione dei genitori**: tolti `SegnaPartita`, "Da approvare" in Oggi dei genitori e "Segna una partita" in Settimana. Resta "Partite dalla FIPAV" per correggere in campo / panchina.
+- **Il coach** in R-Evolution, con la riga sui dieci minuti del mattino e il collegamento alla carta in Oggi (i dieci minuti restano in Oggi).
+- **Barra**: "R-Evo" sotto i 410 px (tra 380 e 409 il nome selezionato usciva dalla pillola).
+- **Partita doppia del 14/11**: due righe a mano, tutte e due approvate, 0 passi. Tolta la seconda (segnata da un genitore il 16/11) col permesso del signore, backup `ace-2026-11-17_11-03-26.sql`.
 - **Prossima partita**: carta in cima a R-Evolution (giorno, ora, avversaria, casa o trasferta, "tra N giorni", il giorno stesso "tra N ore") e pillola in Oggi il giorno prima e il giorno stesso, prima dell'inizio. Salta i giorni "[LANI ASSENTE]".
 - Limite noto (`ponytail` in `classifiche/index.ts`): la convocazione guarda solo se c'è una partita di Lani quel giorno, non quale campionato. Due partite nello stesso giorno non capitano.
 

@@ -10,7 +10,7 @@ import { accoda } from '../_shared/popup.ts';
 import { chiChiama, cronOGenitore, leggiCorpo } from '../_shared/accesso.ts';
 import * as R from '../../../src/lib/regole/index.ts';
 import * as Cal from '../../../src/lib/calendario/index.ts';
-import { garaDi, leggiClassifica, leggiGare, type Gara } from '../../../src/lib/classifiche/index.ts';
+import { garaDi, leggiClassifica, leggiGare, riassuntoClassifica, type Gara, type RigaClassifica } from '../../../src/lib/classifiche/index.ts';
 
 const db = dbServizio();
 const C = R.CONFIG.classifiche;
@@ -61,14 +61,15 @@ async function titoliDel(giorno: string): Promise<string[]> {
 }
 
 /** Risultato ufficiale arrivato: partita nuova e popup per Lani. Restituisce cosa ha fatto. */
-async function risultato(c: Campionato, g: Gara): Promise<string | null> {
+async function risultato(c: Campionato, g: Gara, righe: RigaClassifica[]): Promise<string | null> {
   const x = garaDi(c.squadra, g);
   if (!x || x.nostri === null || x.loro === null || x.nostri === x.loro) return null;
   const giorno = giornoDi(g.inizio);
-  // dopo le 6:15 del giorno dopo la partita la segna Lani come prima (regole del 15/11)
-  const ieri = R.giornoRoma(new Date());
-  ieri.setDate(ieri.getDate() - 1);
-  if (giorno < R.iso(ieri)) return null;
+  // dal 17/11 il risultato arriva solo dalla FIPAV: uno pubblicato in ritardo si prende ancora per
+  // risultato_entro_giorni (config); più vecchio no, Lani non saprebbe più rispondere
+  const limite = R.giornoRoma(new Date());
+  limite.setDate(limite.getDate() - C.risultato_entro_giorni);
+  if (giorno < R.iso(limite)) return null;
   // prima dell'inizio del gioco niente popup (accoda): la partita resterebbe senza risposta
   if (giorno < R.CONFIG.periodo.inizio) return null;
 
@@ -92,7 +93,9 @@ async function risultato(c: Campionato, g: Gara): Promise<string | null> {
     .select('id')
     .single();
   if (e3) throw new Error(`partite: ${e3.message}`);
-  await accoda(db, `partita_fipav:${p.id}`, 'partita_com_e_andata', { noi: x.nostri, loro: x.loro, avversaria: x.avversaria });
+  // il popup lo apre R-Evolution: risultato, due parole sulla classifica appena letta, la domanda
+  const riassunto = riassuntoClassifica(righe, c.squadra);
+  await accoda(db, `partita_fipav:${p.id}`, 'partita_com_e_andata', { esito: x.nostri > x.loro ? 'Vinta' : 'Persa', noi: x.nostri, loro: x.loro, avversaria: x.avversaria, riassunto });
   return 'popup';
 }
 
@@ -128,7 +131,7 @@ Deno.serve(async (req) => {
       if (eg) throw new Error(`gare_fipav: ${eg.message}`);
       const fatte: string[] = [];
       for (const g of gare) {
-        const f = await risultato(c, g);
+        const f = await risultato(c, g, righe);
         if (f) fatte.push(`${g.numero} ${f}`);
       }
       dettagli[c.nome] = { classifica: righe.length, gare: gare.length, ...(fatte.length ? { risultati: fatte } : {}) };

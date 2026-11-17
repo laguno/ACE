@@ -40,7 +40,7 @@ const ESEMPI: Partial<Record<K.ChiavePopup, Record<string, string | number>>> = 
   bagno_3: { passi: M.bagno },
   antisportivo: { passi: M.antisportivo },
   balla: { cosa: 'compiti fatti, ma non era vero', passi: M.balla_o_imbroglio },
-  partita_com_e_andata: { noi: 3, loro: 1, avversaria: 'FOXES VOLLEY' },
+  partita_com_e_andata: { esito: 'Vinta', noi: 3, loro: 1, avversaria: 'FOXES VOLLEY', riassunto: 'Siete prime nel girone, continuate così.' },
   partita_vinta: { risultato: '3-1', passi: P.partite.giocata + P.partite.vinta_in_piu },
   partita_persa: { risultato: '1-3', passi: P.partite.giocata },
   tappa: { tappa: 2, mancano_passi: PRIMO_COSTO },

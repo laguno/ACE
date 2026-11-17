@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Check } from '@phosphor-icons/react';
 import * as C from './lib/calendario';
 import * as R from './lib/regole';
@@ -20,7 +20,14 @@ const MARGINE = 5;
 const FINESTRA = R.CONFIG.dieci_minuti.finestra;
 const mmss = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 
+// il collegamento del coach in R-Evolution: Oggi si apre e la carta scorre in vista appena c'è
+let cercata = false;
+export const vaiAiDieciMinuti = () => {
+  cercata = true;
+};
+
 export function DieciMinuti({ oggi }: { oggi: Date }) {
+  const carta = useRef<HTMLDivElement>(null);
   const [stato, setStato] = useState<Stato>();
   const [menu, setMenu] = useState<R.EsercizioDieciMinuti[]>([]);
   const [pallavolo, setPallavolo] = useState(false);
@@ -48,6 +55,12 @@ export function DieciMinuti({ oggi }: { oggi: Date }) {
     const t = setInterval(() => setOra(Date.now()), 1000);
     return () => clearInterval(t);
   }, [inCorso]);
+
+  useEffect(() => {
+    if (!cercata || !carta.current) return;
+    cercata = false;
+    carta.current.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  });
 
   if (!stato) return null;
   const proposto = R.esercizioDelGiorno(oggi, pallavolo, menu);
@@ -78,7 +91,7 @@ export function DieciMinuti({ oggi }: { oggi: Date }) {
   }
 
   return (
-    <div className="carta dieci-minuti">
+    <div className="carta dieci-minuti" id="dieci-minuti" ref={carta}>
       <div className="testa-carta">
         <h2>Dieci minuti</h2>
         <span className="valore">+{R.CONFIG.passi.obbligatori.dieci_minuti}</span>

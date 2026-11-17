@@ -198,7 +198,7 @@ describe('classifiche', () => {
     expect((await lancia({ solo: 'partite' })).corpo).toMatchObject({ esito: 'ok', 'Under 13': { risultati: ['1239 popup'] } });
     expect(await valore(`select set_nostri || '-' || set_loro || ' ' || coalesce(in_campo::text, 'senza risposta') from partite where gara = 1239`)).toBe('3-1 senza risposta');
     const id = String(await valore(`select id from partite where gara = 1239`));
-    expect(await valore(`select titolo || ' ' || testo from popup_coda where chiave = 'partita_fipav:${id}'`)).toBe('Com’è andata? R-Evolution 3, RUBIERESE U13 1. Sei entrata in campo?');
+    expect(await valore(`select titolo || ' ' || testo from popup_coda where chiave = 'partita_fipav:${id}'`)).toBe('Com’è andata? Vinta 3-1 con RUBIERESE U13. Siete prime nel girone, continuate così. Sei entrata in campo?');
     // il giro dopo non la rifà
     alle('2026-11-29T20:30:00+01:00');
     await lancia();
@@ -242,11 +242,15 @@ describe('classifiche', () => {
     expect(await valore(`select count(*)::int from partite`)).toBe(0);
   });
 
-  it('il giorno dopo le 6:15 niente più popup: la segna Lani come prima', async () => {
+  // dal 17/11 nessuno la segna a mano: un risultato in ritardo si prende per risultato_entro_giorni (7)
+  it('risultato in ritardo: entro 7 giorni partita e popup, dopo no', async () => {
     await convocata();
-    alle('2026-12-01T06:15:00+01:00');
+    alle('2026-12-07T06:15:00+01:00');
     await lancia();
     expect(await valore(`select count(*)::int from partite`)).toBe(0);
+    alle('2026-12-01T06:15:00+01:00');
+    await lancia();
+    expect(await valore(`select count(*)::int from partite`)).toBe(1);
   });
 
   it('ogni mezz’ora legge il portale solo da inizio + 2 ore, il giorno della partita', async () => {
