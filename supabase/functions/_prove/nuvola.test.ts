@@ -114,14 +114,14 @@ describe('sync-nuvola', () => {
     const f = await carica('sync-nuvola');
     expect((await json(await f(richiesta({}, { cron: true })))).corpo).toMatchObject({ esito: 'errore', errore: 'Nuvola non risponde' });
   });
-  it('password sbagliata o Nuvola giù: esito errore con il passo, avviso ai genitori alla prima', async () => {
+  it('password sbagliata o Nuvola giù: esito errore con il passo; l\'avviso lo manda il cron delle notifiche', async () => {
     nuvolaFinta({ password: 'sbagliata' });
     const f = await carica('sync-nuvola');
     const r = await json(await f(richiesta({}, { cron: true })));
     expect(r).toMatchObject({ stato: 502, corpo: { esito: 'errore', errore: expect.stringContaining('utente o password') } });
     nuvolaFinta({ giu: true });
     expect((await json(await f(richiesta({}, { cron: true })))).corpo.errore).toMatch(/modulo di accesso/);
-    expect(inviate.filter((i) => i.endpoint.includes('papa'))).toHaveLength(1);
+    expect(inviate).toHaveLength(0); // dal 17/11 nessun push da qui (cron.test.ts, "Nuvola ferma")
     expect(await valore(`select count(*)::int from sync_log where fonte = 'nuvola' and esito = 'errore'`)).toBe(2);
     expect((await f(richiesta({}, { gettone: 'gettone-lani' }))).status).toBe(401);
   });

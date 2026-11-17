@@ -77,6 +77,7 @@ export const NOTIFICHE = {
   genitori_riepilogo: 'Riepilogo della settimana di Lani: {chiavi:una chiave:# chiavi}',
   genitori_foto: '{cosa} {materia}: foto pagine {pagine}',
   genitori_foto_tante: '{n} richieste di foto nuove: le trovate in ACE',
+  genitori_nuvola: 'Nuvola non si aggiorna da due giri: lo stato è in ACE',
 } as const;
 
 export type ChiaveNotifica = keyof typeof NOTIFICHE;

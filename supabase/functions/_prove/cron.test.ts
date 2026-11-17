@@ -77,6 +77,51 @@ describe('notifiche', () => {
     expect((await json(await f(richiesta({}, { cron: true })))).corpo.inviate).toMatchObject({ genitori_riepilogo: 1 });
     expect(await valore(`select count(*)::int from push_iscrizioni where endpoint like '%scaduto%'`)).toBe(0);
   });
+  it('Nuvola ferma: avviso ai soli genitori al secondo giro non ok di fila, una volta per serie', async () => {
+    const c = stato.banco!.come;
+    const giro = (quando: string, esito: string) =>
+      c(null, `insert into sync_log (fonte, iniziato_il, finito_il, esito) values ('nuvola', '${quando}', '${quando}', '${esito}')`);
+    const f = await carica('notifiche');
+    const turno = async () => (await json(await f(richiesta({}, { cron: true })))).corpo.inviate;
+    alle('2026-11-24T10:00:00+01:00');
+    await giro('2026-11-23T19:30:00+01:00', 'ok');
+    await giro('2026-11-24T08:00:00+01:00', 'errore');
+    expect(await turno()).toEqual({}); // un giro solo: niente
+    await giro('2026-11-24T09:00:00+01:00', 'interrotta');
+    expect(await turno()).toEqual({ genitori_nuvola: 1 });
+    expect(inviate.map((i) => i.endpoint)).toEqual(['https://push.test/papa']); // niente a Lani
+    const testo = (inviate[0].corpo as { testo: string }).testo;
+    expect(testo.length).toBeLessThanOrEqual(60);
+    expect(testo).not.toMatch(/\n/);
+    // la serie continua, anche nei giorni dopo: nessun altro avviso
+    await giro('2026-11-24T14:30:00+01:00', 'errore');
+    alle('2026-11-25T10:00:00+01:00');
+    await giro('2026-11-25T08:00:00+01:00', 'errore');
+    expect(await turno()).toEqual({});
+    // torna un ok, poi una serie nuova in un altro giorno: un avviso nuovo
+    await giro('2026-11-25T14:30:00+01:00', 'ok');
+    alle('2026-11-26T10:00:00+01:00');
+    await giro('2026-11-26T08:00:00+01:00', 'errore');
+    expect(await turno()).toEqual({});
+    await giro('2026-11-26T09:00:00+01:00', 'errore');
+    expect(await turno()).toEqual({ genitori_nuvola: 1 });
+    expect(await turno()).toEqual({}); // il cron ripassa dopo 15 minuti: niente doppioni
+    expect(inviate).toHaveLength(2);
+  });
+  it('Nuvola ferma con Lani a casa: l\'avviso ai genitori parte lo stesso', async () => {
+    const c = stato.banco!.come;
+    await c(null, `insert into assenze (giorno) values ('2026-11-24')`);
+    await c(null, `insert into sync_log (fonte, iniziato_il, finito_il, esito) values ('nuvola', '2026-11-24T08:00:00+01:00', '2026-11-24T08:01:00+01:00', 'errore'), ('nuvola', '2026-11-24T09:00:00+01:00', '2026-11-24T09:01:00+01:00', 'errore')`);
+    alle('2026-11-24T10:00:00+01:00');
+    const f = await carica('notifiche');
+    expect((await json(await f(richiesta({}, { cron: true })))).corpo).toMatchObject({ a_casa: true, inviate: { genitori_nuvola: 1 } });
+  });
+  it('altre fonti ferme (calendario): nessun avviso da questo controllo', async () => {
+    await stato.banco!.come(null, `insert into sync_log (fonte, iniziato_il, finito_il, esito) values ('calendario', '2026-11-24T08:00:00+01:00', '2026-11-24T08:01:00+01:00', 'errore'), ('calendario', '2026-11-24T09:00:00+01:00', '2026-11-24T09:01:00+01:00', 'errore')`);
+    alle('2026-11-24T10:00:00+01:00');
+    const f = await carica('notifiche');
+    expect((await json(await f(richiesta({}, { cron: true })))).corpo.inviate).toEqual({});
+  });
   it('prova di consegna: solo ai genitori, senza segnare niente in notifiche_inviate', async () => {
     const f = await carica('notifiche');
     expect((await json(await f(richiesta({ prova: 'genitori' }, { cron: true })))).corpo).toEqual({ prova: 1 });

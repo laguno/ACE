@@ -23,12 +23,33 @@ async function manda(ruolo: 'lani' | 'genitore', tipo: string, testo: { titolo: 
   return inviaPush(db, ruolo, { ...testo, tipo });
 }
 
+/**
+ * Nuvola ferma: due giri di fila non ok (errore o interrotta) dopo l'ultimo ok. Un avviso ai soli
+ * genitori, una volta per serie (finché non torna un ok), sempre attraverso manda() (17/11).
+ */
+async function avvisoNuvola(giorno: string) {
+  const { data: ok } = await db.from('sync_log').select('iniziato_il').eq('fonte', 'nuvola').eq('esito', 'ok').order('iniziato_il', { ascending: false }).limit(1).maybeSingle();
+  let falliti = db.from('sync_log').select('iniziato_il').eq('fonte', 'nuvola').in('esito', ['errore', 'interrotta']);
+  if (ok) falliti = falliti.gt('iniziato_il', ok.iniziato_il);
+  const { data: serie } = await falliti.order('iniziato_il', { ascending: true }).limit(2);
+  if (!serie || serie.length < 2) return undefined;
+  // già avvisati per questa serie: la notifica è partita dal giorno del primo giro fallito in poi
+  // (a giorni, come la chiave di notifiche_inviate: due serie nello stesso giorno danno un avviso solo)
+  const dal = R.iso(R.giornoRoma(new Date(serie[0].iniziato_il)));
+  const { data: gia } = await db.from('notifiche_inviate').select('giorno').eq('tipo', 'genitori_nuvola').gte('giorno', dal).limit(1);
+  if (gia?.length) return undefined;
+  return manda('genitore', 'genitori_nuvola', K.notifica('genitori_nuvola'), giorno);
+}
+
 async function turno() {
   const adesso = new Date();
   const ora = C.oraRoma(adesso.toISOString());
   const oggi = R.giornoRoma(adesso);
   const giorno = R.iso(oggi);
   const inviate: Record<string, number> = {};
+  // prima dell'assenza: Lani a casa non ferma l'avviso ai genitori
+  const nuvola = await avvisoNuvola(giorno);
+  if (nuvola !== undefined) inviate.genitori_nuvola = nuvola;
   const { data: assenza } = await db.from('assenze').select('giorno').eq('giorno', giorno).maybeSingle();
   if (assenza) {
     // a casa: niente notifiche a Lani; solo il riepilogo della domenica ai genitori, più sotto

@@ -8,7 +8,7 @@
 import { apriRegistro, dbServizio, registraErroreServer } from '../_shared/ambiente.ts';
 import * as N from '../../../src/lib/nuvola/index.ts';
 import * as R from '../../../src/lib/regole/index.ts';
-import { avvisaSeFallita, inviaPush } from '../_shared/push.ts';
+import { inviaPush } from '../_shared/push.ts';
 import { passiEForzieri, Passo } from '../_shared/voti.ts';
 import { riscatti } from '../_shared/riscatto.ts';
 import * as K from '../../../src/lib/copione/index.ts';
@@ -277,7 +277,7 @@ Deno.serve(async (req) => {
     esito = 'errore';
     dettagli = { errore: e instanceof Passo ? e.message : 'errore imprevisto' };
     if (!(e instanceof Passo)) await registraErroreServer(db, 'sync-nuvola', e);
-    await avvisaSeFallita(db, 'nuvola', 'Nuvola', log.id).catch((x) => console.error('avviso', x));
+    // l'avviso ai genitori lo manda il cron delle notifiche, al secondo giro fallito di fila (17/11)
   }
   await db.from('sync_log').update({ finito_il: new Date().toISOString(), esito, dettagli }).eq('id', log.id);
   return risposta({ esito, ...dettagli }, esito === 'ok' ? 200 : 502);
