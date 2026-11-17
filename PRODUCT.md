@@ -35,7 +35,7 @@ Non deve sembrare un registro elettronico o un gestionale scolastico (tabelle gr
 1. **Le bozze comandano.** `design/*.html` e `design/Stile.html` sono la fonte autorevole: sticker grandi degli avatar che sbordano dalle testate e dai popup, riquadri colorati con le icone Phosphor, pillole, sfondo che cambia con il momento (mattina azzurro, pomeriggio lilla, sera lilla scuro, Astra viola) sono scelte volute, non difetti.
 2. **Una cosa alla volta.** Ogni schermata ha un compito principale e lo mette in cima; un popup per apertura.
 3. **La costanza si vede.** Ogni spunta ha una conseguenza visibile (passi, barra, tappa), ma i numeri del gioco li decide il server, mai Lani.
-4. **Calore senza rumore.** Il carattere viene dalla famiglia disegnata e dai colori del kit, non da animazioni o decorazioni in più.
+4. **Calore che risponde, senza rumore.** Il carattere viene dalla famiglia disegnata e dai colori del kit. Ogni gesto di Lani riceve una risposta proporzionata a quante volte lo fa: piccola e veloce per la spunta, grande solo per tappa, forziere, chiave e partita vinta. Movimento, suono e vibrazione servono a dire "fatto" e "bravo il gesto", mai ad attirarla nell'app. Niente animazioni decorative senza un gesto dietro, niente ansia né conti alla rovescia, nessun suono nelle notifiche. Con "riduci movimento" restano solo i cambi di stato; il suono si spegne dalle Impostazioni dei genitori, per ogni dispositivo. (Aggiornato il 17/11.)
 5. **Lani non si sente controllata.** I genitori correggono e premiano dalla loro area; davanti a Lani resta solo quello che la aiuta.
 
 ## Accessibility & Inclusion
