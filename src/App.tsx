@@ -183,14 +183,8 @@ function Lani() {
           return (
             <button key={v} aria-current={attiva ? 'page' : undefined} aria-label={v} onClick={() => (setForziere(undefined), setVoce(v))}>
               <Icona size={24} weight={attiva ? 'fill' : 'bold'} aria-hidden />
-              {v === 'R-Evolution' ? (
-                <>
-                  <span className="lungo">{v}</span>
-                  <span className="corto">R-Evo</span>
-                </>
-              ) : (
-                v
-              )}
+              {/* 17/11: la barra non supera 402 px, "R-Evolution" intero non ci sta mai bene (aria-label lo dice intero) */}
+              {v === 'R-Evolution' ? 'R-Evo' : v}
             </button>
           );
         })}

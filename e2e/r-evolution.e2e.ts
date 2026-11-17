@@ -160,8 +160,9 @@ test('R-Evolution spenta: la voce non c’è', async ({ page }) => {
 });
 
 // 17/11: sul telefono il nome selezionato usciva dalla pillola colorata. Si prova a più larghezze,
-// toccando ogni voce: il testo deve stare dentro il pulsante, con un piccolo margine.
-for (const larga of [320, 360, 375, 384, 390, 393, 412, 430])
+// toccando ogni voce: il testo deve stare dentro il pulsante, con almeno 6 px di margine
+// (a 412 px, con 3 px, sul Samsung "R-Evolution" sembrava ancora attaccata ai bordi).
+for (const larga of [320, 360, 375, 384, 390, 393, 412, 430, 480, 768])
   test(`barra a cinque voci: a ${larga} px nessuna etichetta esce dal suo pulsante, anche selezionata`, async ({ page }) => {
     await page.setViewportSize({ width: larga, height: 800 });
     await page.clock.setFixedTime(new Date('2027-01-18T16:00:00+01:00'));
@@ -181,7 +182,7 @@ for (const larga of [320, 360, 375, 384, 390, 393, 412, 430])
           const r = document.createRange();
           r.selectNodeContents(c);
           const t = r.getBoundingClientRect();
-          return t.width > 0 && (t.left < box.left + 2 || t.right > box.right - 2);
+          return t.width > 0 && (t.left < box.left + 6 || t.right > box.right - 6);
         });
       });
       expect(fuori, (await b.getAttribute('aria-label')) ?? '').toBe(false);
@@ -219,4 +220,20 @@ test('tema campo: carta della prossima partita e nastro Ultim’ora dal calendar
   // il nastro non allarga la pagina
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: 'e2e/risultati/r-evolution-prossima.png' });
+});
+
+// 17/11: oltre 96 px di scorrimento la testata tornava grande sopra le carte (il minificatore toglieva il fill)
+test('testata compatta anche in fondo alla pagina, a 412 px', async ({ page }) => {
+  await page.setViewportSize({ width: 412, height: 400 });
+  await page.clock.setFixedTime(new Date('2027-01-18T16:00:00+01:00'));
+  await finto(page, dati());
+  await page.goto('/');
+  await expect(page.locator('.testata h1')).toBeVisible();
+  // pagina finta quasi vuota: si allunga per scorrere oltre i 96 px dell'animazione (si prova solo il CSS)
+  await page.evaluate(() => document.querySelector('main')!.insertAdjacentHTML('beforeend', '<div style="height:1200px"></div>'));
+  await page.evaluate(() => window.scrollTo(0, document.scrollingElement!.scrollHeight));
+  await expect
+    .poll(() => page.locator('.testata h1').evaluate((h) => getComputedStyle(h).transform))
+    .not.toBe('none');
+  await expect(page.locator('.testata .riga').first()).toHaveCSS('opacity', '0');
 });
