@@ -66,3 +66,4 @@ ACE sul telefono di Lani è un APK (guscio Capacitor in `android/`, configurazio
 
 ## Ambiente di prova locale
 Con Docker acceso: `powershell scripts/prova-locale.ps1` avvia Supabase locale e scrive `.env.locale.local`; poi `npm run dev:locale` (sul PC) o `npm run prova:telefono` (build servita a ACE Prova via Tailscale, https://wsa2365.taile6dda8.ts.net; `tailscale serve --bg 5187` già fatto una volta). Per spegnere: `npx supabase stop`. Mai collegato ai dati veri; i cron sono spenti dal seed. Account finti dal seed: `genitore@prova.test` e `lani@prova.test` (password nel seed, `supabase/seed.sql`).
+Dati finti di una Lani a metà novembre (compiti, verifiche, passi, forzieri, partite): `npm run prova:dati` dopo `npx supabase db reset`, ripetibile; si rifiuta se l'API non è 127.0.0.1/localhost.
