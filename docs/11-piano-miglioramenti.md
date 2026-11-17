@@ -123,6 +123,21 @@ Il signore vuole più sensorialità e dinamismo. Il principio 4 di PRODUCT.md ("
 
 Principio 4 di PRODUCT.md aggiornato e approvato dal signore il 17/11 ("Calore che risponde, senza rumore"); ok del signore al passo 5 il 17/11.
 
+### Esito del passo 5 (17/11)
+
+- **Un solo file di valori:** `data/config-sensi.json` (durate, curve, scale, vibrazioni, volumi, file). `src/sensi.ts` li passa al CSS come variabili `--sensi-*` e li usa per suono e vibrazione; i test (`src/sensi.test.ts`) controllano le proporzioni (spunta minuscola, momenti grandi più lunghi e forti, errore muto, cambio schermata tra 150 e 200 ms).
+- **Spunta:** il cerchio si riempie con un rimbalzo, "+N" sale e svanisce, tic di 0,06 s, vibrazione di 10 ms. Anche le pastiglie della Sera (cartella, borsa) suonano e il loro "+N" rimbalza.
+- **Tappa e chiave** (popup `tappa`, `chiavi_1`-`chiavi_3`; non `chiavi_0`, la settimana storta): sticker che arriva con un rimbalzo, jingle breve, doppia vibrazione corta.
+- **Forziere** (`forziere_aperto`, `cima`): scossa, apertura, premio che emerge con un brillio, suono di apertura e di vetro, una vibrazione lunga; restano i coriandoli di prima.
+- **Partita vinta** (popup `partita_vinta`): sticker che salta, titolo che gira come un tabellone, fischio (sintetizzato) e jingle.
+- **Errore** (ogni `role="alert"`): piccola scossa, nessun suono né vibrazione.
+- **Cambio schermata:** dissolvenza di 180 ms, solo opacità (una trasformazione sposterebbe gli elementi fissi come l'Album).
+- **Movimento ridotto:** niente movimento né vibrazione, il "+N" sparisce; restano i cambi di stato.
+- **Suono:** un solo AudioContext, sbloccato al primo tocco e ripreso al rientro in primo piano; se resta fermo (iPad) si prova con un `<audio>`. Interruttore "Suoni su questo dispositivo" nelle Impostazioni dei genitori (memoria del browser, acceso di partenza). Nessun suono nelle notifiche: la funzione `notifiche` non è stata toccata. Col tasto silenzioso di iPhone e iPad il suono tace: rispetta la scelta del dispositivo.
+- **File:** Kenney "Interface Sounds" e "Music Jingles", licenza CC0 (copia in `public/suoni/LICENZA-Kenney.txt`), presi dalla pagina OpenGameArt di Kenney perché kenney.nl da questa rete non risponde. Convertiti in WAV mono 22 kHz (l'Ogg non è sicuro su iPad): 97 kB in tutto, nel service worker.
+- **Non c'è:** l'applauso (nessun applauso nei pacchetti Kenney CC0 trovati). Il fischio è sintetizzato.
+- **Da provare sull'iPad vero:** il suono dopo il rientro dal background e dentro la PWA installata. Finché il signore non lo prova, su iPad vale solo come "dovrebbe".
+
 ## A fine sessione
 
 Aggiornare HANDOFF.md (massimo una pagina), commit e push. Riferire in 5 righe: cosa è fatto, cosa fallisce ancora, cosa serve dal signore.
