@@ -7,6 +7,9 @@ import { VitePWA } from 'vite-plugin-pwa';
 const ICONA = 'pallone';
 
 export default defineConfig({
+  // Gioco di pallavolo (docs/09) acceso anche nelle preview di Vercel, per provarlo da ACE Prova sul
+  // telefono; in produzione resta spento finché non ha la sua voce nell'app.
+  define: { 'import.meta.env.VITE_GIOCO': JSON.stringify(process.env.VERCEL_ENV === 'preview' ? '1' : '') },
   // le copie di lavoro degli agenti (.claude/worktrees) non sono prove di questo ramo
   test: {
     exclude: [...configDefaults.exclude, '.claude/**'],
