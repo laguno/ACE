@@ -80,6 +80,36 @@ Solo difetti, non gusti. Un commit per punto.
 
 Controllare se il piano Supabase del progetto offre già backup giornalieri. Proporre (non fare) una GitHub Action notturna con `pg_dump` cifrato e conservazione di 14 giorni; la stringa di connessione la inserisce il signore come segreto del repository. Scrivere la proposta in questo documento e fermarsi.
 
+### Esito del passo 3 (17/11)
+
+Nessuna correzione: il passo 1 non ha trovato difetti di accessibilità (axe zero violazioni, Lighthouse 100, corsivo vero, nomi dei forzieri già allineati). L'unico guasto, lo script delle misure dei genitori, non è un difetto di accessibilità: la correzione è proposta sopra e aspetta l'ok.
+
+## Proposta di backup pianificato (17/11, da approvare: niente è stato fatto)
+
+### Cosa offre oggi Supabase
+
+L'organizzazione `laguno` è sul piano **Free**. Supabase fa i backup giornalieri solo dai piani Pro (7 giorni), Team (14) ed Enterprise (fino a 30); per il Free consiglia di esportare i dati da soli con `db dump` e tenerli altrove. Il PITR è un'aggiunta a pagamento dei piani Pro e superiori (circa 100 $ al mese per 7 giorni). Oggi l'unico backup di ACE è `npm run backup` lanciato a mano dal signore (dati dello schema `public`, in `Documenti\ACE-backup`).
+
+Alternativa senza codice: passare a Pro (25 $ al mese) dà 7 giorni di backup giornalieri, ma non 14, e i file restano dentro Supabase. La GitHub Action qui sotto costa zero e tiene una copia fuori da Supabase.
+
+### La GitHub Action proposta
+
+File `.github/workflows/backup-notte.yml`:
+
+- **Quando**: ogni notte alle 3:15 ora di Roma (`cron: '15 2 * * *'` in UTC d'inverno), fuori dalle finestre dei cron (14:20-14:45, 19:45-21:00). Anche a mano con `workflow_dispatch`.
+- **Cosa**: `pg_dump` versione 17, la stessa del server (dal repository `apt.postgresql.org`), con `--schema=public --no-owner --no-privileges`. Esporta struttura e dati: il file si ripristina da solo, senza rilanciare le migrazioni. Niente `auth`, niente Vault, niente foto (lo Storage resta fuori, come in `npm run backup`; vedi `docs/runbook.md`).
+- **Cifratura**: con `age` e una **chiave pubblica** scritta nel workflow. La chiave privata la genera il signore sul suo PC (`age-keygen`) e la tiene accanto al keystore dell'APK, mai nel repository né in GitHub. Così il server di GitHub può cifrare ma non decifrare. Se la chiave privata si perde, i backup non si aprono più.
+- **Conservazione**: il file cifrato va negli artefatti dell'esecuzione con `retention-days: 14`; GitHub cancella da solo quelli più vecchi. Un backup pesa pochi kB (i file di `npm run backup` stanno sotto 1 MB), molto sotto i 500 MB di artefatti del piano gratuito per i repository privati.
+- **Controllo**: il passo fallisce se il dump è vuoto o non contiene `CREATE TABLE`, come `backup.mjs` per i file vuoti. Un'esecuzione fallita manda la mail di GitHub al proprietario del repository.
+- **Segreto**: uno solo, `SUPABASE_DB_URL`, che il signore inserisce in GitHub (Settings → Secrets and variables → Actions). Va usata la stringa del **Session pooler** (porta 5432, utente `postgres.qonullxzhqvbfpiibqye`): l'indirizzo diretto `db.…supabase.co` sul piano Free è solo IPv6 e i runner di GitHub non lo raggiungono. Meglio ancora un utente Postgres di sola lettura dedicato al backup (una migrazione nuova, `0040`, senza password nel file: la password la imposta il signore).
+- **Ripristino** (da provare una volta, su Supabase locale): scaricare l'artefatto, `age -d -i chiave-ace.txt backup.sql.age > backup.sql`, poi `psql` sul database locale. La procedura finirebbe in `docs/runbook.md`.
+
+### Decisioni del signore prima di partire
+
+1. GitHub Action gratuita oppure piano Pro di Supabase.
+2. Utente Postgres di sola lettura, oppure la stringa di `postgres` così com'è.
+3. Dove tenere la chiave privata di `age`.
+
 ## Passo 5: sensorialità (non iniziare senza l'ok esplicito del signore)
 
 Il signore vuole più sensorialità e dinamismo. Il principio 4 di PRODUCT.md ("Calore senza rumore") va aggiornato prima di toccare l'interfaccia. Quando il signore dà l'ok:
