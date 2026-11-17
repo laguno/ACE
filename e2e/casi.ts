@@ -156,7 +156,7 @@ export const CASI: Record<string, Caso> = {
       d.fogli_firma = [{ id: 'f1', titolo: 'Gita del benessere', scadenza: '2026-12-03', dato_il: '2026-11-09T14:00:00Z', consegnato_il: null }];
       d.forzieri = Array.from({ length: 9 }, (_, i) => ({ n: i + 1, premio: i === 0 ? 'Pizza con le amiche' : null, stato: i === 0 ? 'aperto' : 'chiuso' }));
       // ieri la serata chiusa: compare "Una cosa da dirle oggi"
-      d.serate = [{ data: '2026-11-08', cartella_il: '2026-11-08T19:40:00Z', chiusa_il: '2026-11-08T19:40:00Z' }];
+      d.serate = [{ data: '2026-11-08', cartella_il: '2026-11-08T19:40:00Z' }];
     },
   },
   'Genitori-dai-passi': { bozza: 'Genitori-v2', quando: LUNEDI_POMERIGGIO, genitore: true, vai: async (p) => p.getByRole('button', { name: /^Dai passi/ }).click() },

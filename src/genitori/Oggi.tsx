@@ -45,7 +45,8 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
       client.from('movimenti_passi').select('passi').eq('giorno', oggi),
       client.from('serate').select('chiusa_il').eq('data', oggi).maybeSingle(),
       client.from('impostazioni').select('valore').eq('chiave', 'ora_chiusura').maybeSingle(),
-      client.from('serate').select('chiusa_il').eq('data', R.iso(piu(R.giorno(oggi), -1))).maybeSingle(),
+      // come Oggi di Lani: "ha chiuso tutto" = cartella pronta (chiusa_il non la scrive nessuno)
+      client.from('serate').select('cartella_il').eq('data', R.iso(piu(R.giorno(oggi), -1))).maybeSingle(),
     ]);
     const mov = gm.data ?? [];
     // gesti dati oggi e non annullati (storno "gesto:<id>")
@@ -64,7 +65,7 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
       passiOggi: (mp.data ?? []).reduce((a, m) => a + m.passi, 0),
       serata: se.data ?? null,
       chiusura: (im.data?.valore as Record<string, string> | undefined)?.[R.giorno(oggi).getDay()] ?? null,
-      ieriChiusa: ie.data?.chiusa_il ?? null,
+      ieriChiusa: ie.data?.cartella_il ?? null,
     };
     setD(nuovi);
     conta(daFare(nuovi).length);
