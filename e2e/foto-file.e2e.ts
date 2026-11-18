@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import sharp from 'sharp';
-import { carica, finto } from './finto';
+import { carica, finito, finto } from './finto';
 
 // Da fotografare con file veri, generati qui con sharp (niente foto vere): 12 MP, EXIF ruotato,
 // PNG enorme, HEIC che Chromium non apre, file che non è una foto, più pagine, caricamento
@@ -46,7 +46,7 @@ test('12 MP orizzontale (4000×3000): JPEG 1600×1200, leggero', async ({ page }
   const { t, carta, input } = await apri(page);
   const foto = await (await pagina(4000, 3000)).jpeg({ quality: 92 }).toBuffer();
   await carica(page, input, { name: 'IMG_0001.jpg', mimeType: 'image/jpeg', buffer: foto });
-  await carta.getByRole('button', { name: 'Ho finito' }).click();
+  await finito(page, carta);
   await expect(carta.getByRole('status')).toHaveText('Foto salvata: +2.');
   const [c] = t.caricate as { percorso: string; tipo: string; byte: Buffer }[];
   expect(c.tipo).toBe('image/jpeg');
@@ -60,7 +60,7 @@ test('12 MP caso peggiore (tutto grana): resta sotto i 10 MB', async ({ page }) 
   const { t, carta, input } = await apri(page);
   const foto = await sharp({ create: { width: 3000, height: 4000, channels: 3, noise: { type: 'gaussian', mean: 128, sigma: 40 } } }).jpeg({ quality: 92 }).toBuffer();
   await carica(page, input, { name: 'rumore.jpg', mimeType: 'image/jpeg', buffer: foto });
-  await carta.getByRole('button', { name: 'Ho finito' }).click();
+  await finito(page, carta);
   await expect(carta.getByRole('status')).toHaveText('Foto salvata: +2.');
   const [c] = t.caricate as { byte: Buffer }[];
   expect(await sharp(c.byte).metadata()).toMatchObject({ width: 1200, height: 1600 });
@@ -78,7 +78,7 @@ test('EXIF ruotato (orientation 6): la foto arriva dritta', async ({ page }) => 
   const salvata = await sharp(dritta).rotate(-90).withMetadata({ orientation: 6 }).jpeg().toBuffer();
   expect(await sharp(salvata).metadata()).toMatchObject({ width: 800, height: 600, orientation: 6 });
   await carica(page, input, { name: 'girata.jpg', mimeType: 'image/jpeg', buffer: salvata });
-  await carta.getByRole('button', { name: 'Ho finito' }).click();
+  await finito(page, carta);
   await expect(carta.getByRole('status')).toHaveText('Foto salvata: +2.');
   const [c] = t.caricate as { byte: Buffer }[];
   const m = await sharp(c.byte).metadata();
@@ -98,7 +98,7 @@ test('PNG enorme (6000×4000, oltre 10 MB): diventa un JPEG leggero', async ({ p
   const png = await (await pagina(6000, 4000, 12)).png().toBuffer();
   expect(png.length).toBeGreaterThan(10 * MB);
   await carica(page, input, { name: 'schermata.png', mimeType: 'image/png', buffer: png });
-  await carta.getByRole('button', { name: 'Ho finito' }).click();
+  await finito(page, carta);
   await expect(carta.getByRole('status')).toHaveText('Foto salvata: +2.');
   const [c] = t.caricate as { tipo: string; byte: Buffer }[];
   expect(c.tipo).toBe('image/jpeg');
@@ -110,7 +110,7 @@ test('HEIC che il browser non apre: si carica l’originale, come HEIC', async (
   const { t, carta, input, chiamate } = await apri(page);
   // Chromium non decodifica HEIC: bastano byte qualsiasi con il nome dell'iPad e senza tipo (come su Windows)
   await carica(page, input, { name: 'IMG_0002.HEIC', mimeType: '', buffer: Buffer.alloc(200_000, 7) });
-  await carta.getByRole('button', { name: 'Ho finito' }).click();
+  await finito(page, carta);
   await expect(carta.getByRole('status')).toHaveText('Foto salvata: +2.');
   const [c] = t.caricate as { percorso: string; tipo: string; byte: Buffer }[];
   expect(c.percorso).toMatch(/^foto-pagine\/r1\/\d+-0\.heic$/);
@@ -151,7 +151,7 @@ test('più pagine in un colpo, con la stessa foto due volte: una sola chiamata a
     { name: 'b.jpg', mimeType: 'image/jpeg', buffer: b },
     { name: 'a-di-nuovo.jpg', mimeType: 'image/jpeg', buffer: a },
   ]);
-  await carta.getByRole('button', { name: 'Ho finito' }).click();
+  await finito(page, carta);
   await expect(carta.getByRole('status')).toHaveText('Foto salvata: +2.');
   expect((t.caricate as { percorso: string }[]).map((c) => c.percorso.replace(/\d{6,}/, 'T'))).toEqual(['foto-pagine/r1/T-0.jpg', 'foto-pagine/r1/T-1.jpg', 'foto-pagine/r1/T-2.jpg']);
   expect(t.foto_pagine).toHaveLength(3);
@@ -178,7 +178,7 @@ test('caricamento interrotto a metà: le foto salvate restano, "Riprova", poi si
   await expect(carta.getByRole('button', { name: "Un'altra pagina" })).toBeEnabled();
   // si riprova con le stesse foto: tutto salvato, una chiamata ai passi
   await carica(page, input, tre);
-  await carta.getByRole('button', { name: 'Ho finito' }).click();
+  await finito(page, carta);
   await expect(carta.getByRole('status')).toHaveText('Foto salvata: +2.');
   await expect(carta.getByRole('alert')).toHaveCount(0);
   expect(t.caricate).toHaveLength(4);
@@ -206,7 +206,7 @@ test('niente rete: messaggio chiaro, poi con la rete si carica', async ({ page, 
   expect(t.caricate ?? []).toHaveLength(0);
   senzaRete = false;
   await carica(page, input, { name: 'p.jpg', mimeType: 'image/jpeg', buffer: foto });
-  await carta.getByRole('button', { name: 'Ho finito' }).click();
+  await finito(page, carta);
   await expect(carta.getByRole('status')).toHaveText('Foto salvata: +2.');
 });
 

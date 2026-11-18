@@ -1081,3 +1081,11 @@ button.tabellina-vai { cursor: pointer; }
 .pagine-pallini { display: inline-flex; flex-wrap: wrap; gap: 3px; vertical-align: middle; }
 .pagine-pallini i { width: 10px; height: 10px; border-radius: 50%; background: var(--lilla-medio); }
 .pagine-pallini i.c-e { background: var(--verde); }
+
+/* Chip delle pagine: mancanti (si toccano per toglierle) e scelte nella scheda */
+.pagine-chip-lista { display: flex; flex-wrap: wrap; gap: 6px; width: 100%; }
+.chip-pagina { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; padding: 0 12px; border: 2px solid var(--lilla-bordo); border-radius: 22px; background: var(--bianco); color: var(--testo); font: inherit; font-weight: 700; }
+button.chip-pagina { cursor: pointer; }
+.chip-pagina.scelta { background: var(--accento); border-color: var(--accento); color: var(--su-colore, #fff); }
+.chip-pagina:focus-visible { outline: 3px solid var(--accento); outline-offset: 2px; }
+.carico-foto-scheda .pagine-chip-lista { justify-content: center; max-height: 40vh; overflow-y: auto; }

@@ -142,7 +142,9 @@ export function Fotografa({ client, richiesta, etichetta = 'Fotografa', studio =
   // pagine da avere: quelle date dal genitore, o (Lani) quelle della prossima prova della materia
   const [attesePerProva, setAttesePerProva] = useState<string>();
   const [inAttesa, setInAttesa] = useState<File[] | null>(null);
-  const [proposta, setProposta] = useState('');
+  const [scelte_, setScelte] = useState<number[]>([]); // pagine scelte nella scheda "Che pagine sono?"
+  const [esito, setEsito] = useState<{ titolo: string; testo: string } | null>(null);
+  const passiDopo = useRef(0);
   useEffect(() => {
     if (attesePassate !== undefined || !richiesta.materia_id) return;
     let vivo = true;
@@ -181,15 +183,15 @@ export function Fotografa({ client, richiesta, etichetta = 'Fotografa', studio =
   // dopo la scelta delle foto: se si sa quali pagine mancano, si propongono (in ordine) e si confermano
   function proponi(lista: File[]) {
     if (!mancano.length) return void elabora(lista, lista.map(() => null));
-    setProposta(mancano.slice(0, lista.length).join(', '));
+    setScelte(mancano.slice(0, lista.length));
     setInAttesa(lista);
   }
-  function confermaPagine(testo: string) {
+  function confermaPagine() {
     const lista = inAttesa;
     if (!lista) return;
-    const numeri = numeriPagine(testo);
-    // una pagina per foto se i conti tornano; una sola foto prende tutto il testo; se no le legge l'IA
-    const viste = lista.map((_, i) => (numeri.length === lista.length ? String(numeri[i]) : lista.length === 1 && numeri.length ? testo.trim() : null));
+    const numeri = [...scelte_].sort((a, b) => a - b);
+    // una pagina per foto se i conti tornano; una sola foto prende tutte le pagine scelte; se no le legge l'IA
+    const viste = lista.map((_, i) => (numeri.length === lista.length ? String(numeri[i]) : lista.length === 1 && numeri.length ? numeri.join(', ') : null));
     setInAttesa(null);
     void elabora(lista, viste);
   }
@@ -222,13 +224,14 @@ export function Fotografa({ client, richiesta, etichetta = 'Fotografa', studio =
     if (typeof navigator.mediaDevices?.getUserMedia === 'function') setLive(true);
     else camera.current?.click();
   }
-  // un genitore scrive a mano le pagine che l'IA non ha letto (vanno sull'ultima foto)
-  async function segna(testo: string) {
+  // un genitore tocca una pagina mancante che in realtà c'è già: si segna sull'ultima foto e la chip sparisce
+  async function segna(pagina: number) {
     const ultima = scatti.at(-1);
-    if (!ultima?.id || !numeriPagine(testo).length) return;
-    const nuove = [ultima.viste, testo].filter(Boolean).join(', ');
+    if (!ultima?.id) return;
+    const nuove = [ultima.viste, String(pagina)].filter(Boolean).join(', ');
+    setScatti((s) => s.map((x) => (x.id === ultima.id ? { ...x, viste: nuove } : x)));
     const { error } = await client.from('foto_pagine').update({ pagine_viste: nuove }).eq('id', ultima.id);
-    if (!error) giaSalvate(client, richiesta).then(setScatti, () => {});
+    if (error) giaSalvate(client, richiesta).then(setScatti, () => {});
   }
   async function finito() {
     setStato('chiudo');
@@ -239,21 +242,46 @@ export function Fotografa({ client, richiesta, etichetta = 'Fotografa', studio =
       if (studio) {
         // la funzione legge al massimo 8 foto per volta: si richiama finché restano foto da leggere
         setStudiando(0);
+        let carte = 0;
+        let domande = 0;
+        let motivo = '';
+        let fallito = false;
         try {
           const { count } = await client.from('foto_pagine').select('id', { count: 'exact', head: true }).eq('richiesta_id', richiesta.id).is('studio_il', null);
           const totale = Math.max(1, count ?? 1);
           for (let giro = 0; giro < 10; giro++) {
             const { data, error } = await client.functions.invoke('foto-studio', { body: { richiesta_id: richiesta.id } });
             if (error) throw error;
-            const restano = (data as { restano?: number } | null)?.restano ?? 0;
+            const r = (data ?? {}) as { restano?: number; carte?: number; domande?: number; motivo?: string };
+            carte += r.carte ?? 0;
+            domande += r.domande ?? 0;
+            motivo = r.motivo ?? motivo;
+            const restano = r.restano ?? 0;
             setStudiando(Math.min(100, Math.round(((totale - restano) / totale) * 100)));
             if (!restano) break;
           }
         } catch (e) {
           console.error('foto-studio', e);
+          fallito = true;
         }
         setStudiando(null);
+        // l'IA ha scritto i numeri di pagina: il contatore li mostra subito
+        await giaSalvate(client, richiesta).then(setScatti, () => {});
+        // l'esito si vede sempre; "fatto" parte quando si tocca "Ok" (la richiesta può uscire dalla lista)
+        passiDopo.current = passi;
+        setEsito(
+          fallito
+            ? { titolo: 'Quiz non creati', testo: "Qualcosa non ha funzionato. Le foto sono salvate: tocca Ho finito per riprovare, o ci penso io entro un'ora." }
+            : carte || domande
+              ? { titolo: 'Quiz pronti', testo: `Ho aggiunto ${carte} carte e ${domande} domande dalle pagine fotografate.` }
+              : /nessuna verifica/.test(motivo)
+                ? { titolo: 'Niente di nuovo', testo: 'Per questa materia non c’è una prova in arrivo. Le foto restano salvate.' }
+                : { titolo: 'Niente di nuovo', testo: 'Non ho trovato pagine leggibili. Prova con foto più nitide.' },
+        );
+        setStato('pronto');
+        return;
       }
+      setStato('pronto');
       fatto(passi);
     } catch (e) {
       console.error('foto', e);
@@ -317,12 +345,26 @@ export function Fotografa({ client, richiesta, etichetta = 'Fotografa', studio =
             className="carico-foto-scheda"
             onSubmit={(e) => {
               e.preventDefault();
-              confermaPagine(proposta);
+              confermaPagine();
             }}
           >
             <h2 id="pagine-foto-titolo">Che pagine sono?</h2>
-            <input value={proposta} onChange={(e) => setProposta(e.target.value)} inputMode="numeric" aria-label="Numeri di pagina delle foto" />
-            <small>Ti propongo le prossime che mancano. Se non sono giuste, correggile.</small>
+            <span className="pagine-chip-lista">
+              {mancano.map((p) => (
+                <button
+                  type="button"
+                  key={p}
+                  className={`chip-pagina${scelte_.includes(p) ? ' scelta' : ''}`}
+                  aria-pressed={scelte_.includes(p)}
+                  onClick={() => setScelte((s) => (s.includes(p) ? s.filter((x) => x !== p) : [...s, p]))}
+                >
+                  {p}
+                </button>
+              ))}
+            </span>
+            <small aria-live="polite">
+              {inAttesa.length === 1 ? '1 foto' : `${inAttesa.length} foto`}, {scelte_.length === 1 ? '1 pagina scelta' : `${scelte_.length} pagine scelte`}. Tocca le pagine per cambiarle.
+            </small>
             <button>Carica</button>
             <button type="button" className="secondario" onClick={() => setInAttesa(null)}>
               Annulla
@@ -343,21 +385,40 @@ export function Fotografa({ client, richiesta, etichetta = 'Fotografa', studio =
               ))}
             </span>
           )}{' '}
-          {mancano.length ? `Mancano: ${mancano.join(', ')}` : 'Tutte le pagine chieste ci sono'}
+          {mancano.length ? 'Mancano:' : 'Tutte le pagine chieste ci sono'}
         </small>
       )}
-      {genitore && n > 0 && mancano.length > 0 && (
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            const campo = e.currentTarget.elements.namedItem('fatte') as HTMLInputElement;
-            segna(campo.value);
-            campo.value = '';
-          }}
-        >
-          <input name="fatte" inputMode="numeric" placeholder="Pagine già caricate" aria-label="Pagine già caricate" />
-          <button className="secondario compatto">Segna</button>
-        </form>
+      {n > 0 && mancano.length > 0 && (
+        <span className="pagine-chip-lista" role="group" aria-label="Pagine mancanti">
+          {mancano.map((p) =>
+            genitore ? (
+              <button key={p} type="button" className="chip-pagina" aria-label={`Pagina ${p}: già caricata`} onClick={() => segna(p)}>
+                {p}
+              </button>
+            ) : (
+              <span key={p} className="chip-pagina">
+                {p}
+              </span>
+            ),
+          )}
+        </span>
+      )}
+      {genitore && n > 0 && mancano.length > 0 && <small className="pagine-stato">Se una pagina c’è già, toccala: sparisce.</small>}
+      {esito && (
+        <div className="carico-foto" role="dialog" aria-modal="true" aria-labelledby="esito-foto-titolo">
+          <div className="carico-foto-scheda">
+            <h2 id="esito-foto-titolo">{esito.titolo}</h2>
+            <small>{esito.testo}</small>
+            <button
+              onClick={() => {
+                setEsito(null);
+                fatto(passiDopo.current);
+              }}
+            >
+              Ok
+            </button>
+          </div>
+        </div>
       )}
       <button className="secondario compatto" disabled={occupato} onClick={apriCamera}>
         <Camera size={20} weight="bold" aria-hidden />

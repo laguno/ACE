@@ -193,3 +193,10 @@ export async function carica(page: Page, input: Locator, file: Parameters<Locato
   const conferma = page.getByRole('dialog', { name: 'Che pagine sono?' }).getByRole('button', { name: 'Carica' });
   await conferma.waitFor({ timeout: 1500 }).then(() => conferma.click(), () => {});
 }
+
+/** "Ho finito" di Lani: poi si chiude il popup con l'esito dei quiz ("Ok"), come farebbe lei. */
+export async function finito(page: Page, carta: Locator) {
+  await carta.getByRole('button', { name: 'Ho finito' }).click();
+  const esito = page.getByRole('dialog', { name: /Quiz pronti|Quiz non creati|Niente di nuovo/ });
+  await esito.getByRole('button', { name: 'Ok' }).click({ timeout: 8000 });
+}

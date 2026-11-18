@@ -51,20 +51,15 @@ test('genitori: richiesta chiusa, pagine mancanti, campo a mano, caricamento e q
   await expect(riga).toContainText('Chiusa da Lani');
 
   // mancano le pagine della PROVA (100-107, 110-117), non solo le quattro della richiesta
-  await expect(riga).toContainText('Mancano: 107, 110, 111, 112, 113, 116, 117');
+  const mancanti = riga.getByRole('group', { name: 'Pagine mancanti' }).getByRole('button');
+  await expect(mancanti).toHaveText(['107', '110', '111', '112', '113', '116', '117']);
 
-  // campo a mano: disegnato (bordo, altezza da dito), non il campo nudo del browser
-  const campo = riga.getByLabel('Pagine già caricate');
-  const stile = await campo.evaluate((e) => {
-    const s = getComputedStyle(e);
-    return { bordo: parseFloat(s.borderTopWidth), alto: e.getBoundingClientRect().height, raggio: parseFloat(s.borderTopLeftRadius) };
-  });
-  expect(stile.bordo).toBeGreaterThanOrEqual(2);
-  expect(stile.alto).toBeGreaterThanOrEqual(44);
-  expect(stile.raggio).toBeGreaterThanOrEqual(8);
-  await campo.fill('110-113');
-  await riga.getByRole('button', { name: 'Segna' }).click();
-  await expect(riga).toContainText('Mancano: 107, 116, 117');
+  // le pagine mancanti sono chip da dito: toccata, la pagina "c'è già" e la chip sparisce
+  const chip = riga.getByRole('button', { name: 'Pagina 110: già caricata' });
+  expect((await chip.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  for (const p of [110, 111, 112, 113]) await riga.getByRole('button', { name: `Pagina ${p}: già caricata` }).click();
+  await expect(mancanti).toHaveText(['107', '116', '117']);
+  expect(t.foto_pagine[1].pagine_viste).toBe('114, 115, 110, 111, 112, 113');
 
   // carico una foto: popup con barra e percentuale
   await carica(page, riga.getByLabel('Galleria: Scienze: pagine 100, 107, 110, 117'), { name: 'p.jpg', mimeType: 'image/jpeg', buffer: JPEG });
@@ -82,7 +77,14 @@ test('genitori: richiesta chiusa, pagine mancanti, campo a mano, caricamento e q
   await expect(quiz).toBeVisible();
   await expect(quiz).toContainText('%');
   await expect(quiz).toBeHidden();
+  // l'esito si vede sempre: quante carte e domande, poi "Ok"
+  const esito = page.getByRole('dialog', { name: 'Quiz pronti' });
+  await expect(esito).toContainText('Ho aggiunto 8 carte e 6 domande');
+  await esito.getByRole('button', { name: 'Ok' }).click();
   await expect(page.getByRole('status')).toContainText('Foto aggiunte: Scienze');
+  // la richiesta resta in lista: il pulsante non resta bloccato su "Chiudo…"
+  await expect(riga.getByRole('button', { name: 'Ho finito' })).toBeEnabled();
+  await expect(riga.getByRole('button', { name: 'Chiudo…' })).toHaveCount(0);
 });
 
 test('genitori: la fotocamera si apre davvero (non la galleria) e lo scatto si carica', async ({ page }) => {
@@ -118,4 +120,27 @@ test('genitori: la fotocamera si apre davvero (non la galleria) e lo scatto si c
   const scelta = page.waitForEvent('filechooser');
   await riga.getByRole('button', { name: 'Dalla galleria' }).click();
   expect((await scelta).isMultiple()).toBe(true);
+});
+
+test('genitori: se la funzione dei quiz fallisce, lo si dice e le foto restano', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-11-18T21:20:00+01:00'));
+  const { t } = await finto(page, dati(), {});
+  await page.route('https://finto.supabase.test/functions/v1/foto-studio', (r) => r.fulfill({ status: 500, contentType: 'application/json', body: '{"errore":"errore del server"}' }));
+  await page.goto('/');
+  const riga = page.getByRole('list', { name: 'Aggiungi foto' }).getByRole('listitem').filter({ hasText: 'Scienze' });
+  await riga.getByRole('button', { name: 'Ho finito' }).click();
+  const esito = page.getByRole('dialog', { name: 'Quiz non creati' });
+  await expect(esito).toContainText('Le foto sono salvate');
+  await esito.getByRole('button', { name: 'Ok' }).click();
+  await expect(riga.getByRole('button', { name: 'Ho finito' })).toBeEnabled();
+  expect(t.foto_pagine).toHaveLength(2);
+});
+
+test('genitori: nessuna prova in arrivo, lo si dice', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-11-18T21:20:00+01:00'));
+  await finto(page, dati(), { 'foto-studio': { carte: 0, domande: 0, motivo: 'nessuna verifica in arrivo per la materia' } });
+  await page.goto('/');
+  const riga = page.getByRole('list', { name: 'Aggiungi foto' }).getByRole('listitem').filter({ hasText: 'Scienze' });
+  await riga.getByRole('button', { name: 'Ho finito' }).click();
+  await expect(page.getByRole('dialog', { name: 'Niente di nuovo' })).toContainText('non c’è una prova in arrivo');
 });

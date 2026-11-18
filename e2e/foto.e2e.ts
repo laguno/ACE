@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { carica, finto } from './finto';
+import { carica, finito, finto } from './finto';
 
 // Da fotografare: le richieste aperte nel Pomeriggio di Lani e nella settimana dei genitori.
 // Ogni scatto va nel bucket e in foto_pagine; "Ho finito" chiede i passi alla funzione (tipo foto).
@@ -49,7 +49,7 @@ test('Lani: più scatti uno alla volta, contatore, poi "Ho finito" dà +2 e chiu
   await expect(carta.locator('.miniature img')).toHaveCount(4);
   expect(t.foto_pagine).toHaveLength(4);
   expect(chiamate).toEqual([]);
-  await carta.getByRole('button', { name: 'Ho finito' }).click();
+  await finito(page, carta);
   await expect(carta.getByRole('status')).toHaveText('Foto salvata: +2.');
   await expect(carta).toContainText('+2 ciascuna'); // dopo il gesto il valore compare
   await expect(carta).not.toContainText('pagine 340–352');
@@ -95,7 +95,7 @@ test('genitori: foto mancante in Oggi (Da sapere), dopo le 20', async ({ page })
     { name: 'b.jpg', mimeType: 'image/jpeg', buffer: JPEG },
   ]);
   await expect(carta).toContainText('2 pagine');
-  await carta.getByRole('button', { name: 'Ho finito' }).click();
+  await finito(page, carta);
   await expect(page.getByRole('status')).toContainText('Foto salvata: Italiano: pagine 340–352.');
   expect(t.caricate).toHaveLength(2);
   expect(t.foto_pagine).toHaveLength(2);
@@ -123,24 +123,29 @@ test('Lani: ACE propone le pagine, contatore 3/13, "Ho finito" prepara i quiz co
   await page.goto('/');
   const carta = page.locator('.carta', { has: page.getByRole('heading', { name: 'Da fotografare' }) });
   const scheda = page.getByRole('dialog', { name: 'Che pagine sono?' });
-  const campo = scheda.getByLabel('Numeri di pagina delle foto');
+  const scelta = scheda.getByRole('button', { pressed: true });
+  const mancanti = carta.getByRole('group', { name: 'Pagine mancanti' }).locator('.chip-pagina');
 
   // due foto in galleria: ACE propone le prime due pagine che mancano
   await carta.getByLabel('Galleria: Italiano: pagine 340–352').setInputFiles([
     { name: 'a.jpg', mimeType: 'image/jpeg', buffer: JPEG },
     { name: 'b.jpg', mimeType: 'image/jpeg', buffer: JPEG },
   ]);
-  await expect(campo).toHaveValue('340, 341');
+  await expect(scelta).toHaveText(['340', '341']);
+  await expect(scheda).toContainText('2 foto, 2 pagine scelte');
   await scheda.getByRole('button', { name: 'Carica' }).click();
   await expect(carta).toContainText('2/13 pagine');
-  await expect(carta).toContainText('Mancano: 342, 343');
+  await expect(mancanti.first()).toHaveText('342');
+  await expect(mancanti).toHaveCount(11);
   await expect(carta.locator('.pagine-pallini i.c-e')).toHaveCount(2);
   await expect(carta.locator('.pagine-pallini i.manca')).toHaveCount(11);
 
   // una foto: la proposta è la prossima che manca; la correggo a mano
   await carta.getByLabel('Fotocamera: Italiano: pagine 340–352').setInputFiles({ name: 'c.jpg', mimeType: 'image/jpeg', buffer: JPEG });
-  await expect(campo).toHaveValue('342');
-  await campo.fill('350');
+  await expect(scelta).toHaveText(['342']);
+  await scheda.getByRole('button', { name: '342', exact: true }).click();
+  await scheda.getByRole('button', { name: '350', exact: true }).click();
+  await expect(scelta).toHaveText(['350']);
   await scheda.getByRole('button', { name: 'Carica' }).click();
   await expect(carta).toContainText('3/13 pagine');
   expect(t.foto_pagine.map((f: { pagine_viste: string }) => f.pagine_viste)).toEqual(['340', '341', '350']);
@@ -156,5 +161,8 @@ test('Lani: ACE propone le pagine, contatore 3/13, "Ho finito" prepara i quiz co
   await expect(popup).toContainText('%');
   await expect(popup).toBeHidden();
   expect(chiamateStudio).toEqual([{ richiesta_id: 'r1' }]);
+  const esito = page.getByRole('dialog', { name: 'Quiz pronti' });
+  await expect(esito).toContainText('Ho aggiunto 8 carte e 6 domande');
+  await esito.getByRole('button', { name: 'Ok' }).click();
   await expect(carta.getByRole('status')).toHaveText('Foto salvata: +2.');
 });
