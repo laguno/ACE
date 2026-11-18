@@ -107,3 +107,16 @@ export const pagineMancanti = (chieste: string | null, viste: (string | null)[])
 /** Pagine da avere: quelle della richiesta più quelle della prova in arrivo (Nuvola: "pag. 100-107, 110-117"). */
 export const pagineAttese = (richiesta: string | null, daProva: string | null): string =>
   [richiesta, estraiPagine(daProva ?? '')].filter(Boolean).join(', ');
+
+/** Numeri di pagina come intervalli leggibili: [4,5,6,10,11,13] → "4–6, 10–11, 13". */
+export function intervalli(numeri: number[]): string {
+  const fuori: string[] = [];
+  const ord = [...new Set(numeri)].sort((a, b) => a - b);
+  for (let i = 0; i < ord.length; ) {
+    let j = i;
+    while (ord[j + 1] === ord[j] + 1) j++;
+    fuori.push(j === i ? String(ord[i]) : `${ord[i]}–${ord[j]}`);
+    i = j + 1;
+  }
+  return fuori.join(', ');
+}

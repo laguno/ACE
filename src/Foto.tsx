@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Camera, Images } from '@phosphor-icons/react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { Elenco, Riga } from './kit';
-import { caricaConAvanzamento, erroreDi, MESSAGGI, misure, numeriPagine, pagineAttese, pagineMancanti, percentuale, scegli, type ErroreFoto, type Pronta } from './lib/foto';
+import { caricaConAvanzamento, erroreDi, intervalli, MESSAGGI, misure, numeriPagine, pagineAttese, pagineMancanti, percentuale, scegli, type ErroreFoto, type Pronta } from './lib/foto';
 
 // Da fotografare: pagine chieste da ACE (sincronizzazione di Nuvola). Le foto vanno nel bucket
 // privato foto-pagine; con "Ho finito" la funzione "passi" chiude la richiesta e dà i passi a Lani se la foto è sua.
@@ -527,15 +527,20 @@ export function FotoRichieste({ client, avvisa }: { client: SupabaseClient; avvi
   if (!lista?.length) return null;
   return (
     <Elenco etichetta="Aggiungi foto">
-      {lista.map((r) => (
-        <Riga
-          key={r.id}
-          icona={<Camera size={20} weight="bold" aria-hidden />}
-          titolo={descrizione(r)}
-          sotto={r.stato === 'aperta' ? 'Aperta' : r.stato === 'fatta' ? 'Chiusa da Lani: potete aggiungere pagine' : 'Scaduta: potete aggiungere pagine'}
-          azione={<Fotografa client={client} richiesta={r} studio genitore chiusa={r.stato !== 'aperta'} attese={pagineAttese(r.pagine, r.materia_id ? (prove.get(r.materia_id) ?? null) : null)} etichetta="Aggiungi" fatto={() => avvisa(`Foto aggiunte: ${descrizione(r)}.`)} />}
-        />
-      ))}
+      {lista.map((r) => {
+        const attese = pagineAttese(r.pagine, r.materia_id ? (prove.get(r.materia_id) ?? null) : null);
+        // titolo: le pagine della prova (4–16), non solo quelle del compito (6)
+        const titolo = r.materie?.nome && prove.has(r.materia_id ?? '') ? `${r.materie.nome}: pagine ${intervalli(numeriPagine(attese))}` : descrizione(r);
+        return (
+          <Riga
+            key={r.id}
+            icona={<Camera size={20} weight="bold" aria-hidden />}
+            titolo={titolo}
+            sotto={r.stato === 'aperta' ? 'Aperta' : r.stato === 'fatta' ? 'Chiusa da Lani: potete aggiungere pagine' : 'Scaduta: potete aggiungere pagine'}
+            azione={<Fotografa client={client} richiesta={r} studio genitore chiusa={r.stato !== 'aperta'} attese={attese} etichetta="Aggiungi" fatto={() => avvisa(`Foto aggiunte: ${titolo}.`)} />}
+          />
+        );
+      })}
     </Elenco>
   );
 }

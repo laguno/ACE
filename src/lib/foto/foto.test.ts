@@ -76,3 +76,12 @@ describe('pagine attese dalla prova', () => {
     expect(pagineMancanti(attese, ['100-106', '114, 115'])).toEqual([107, 110, 111, 112, 113, 116, 117]);
   });
 });
+
+describe('intervalli di pagine', () => {
+  test('unisce le pagine di fila', async () => {
+    const { intervalli } = await import('.');
+    expect(intervalli([4, 5, 6, 10, 11, 13])).toBe('4–6, 10–11, 13');
+    expect(intervalli([6])).toBe('6');
+    expect(intervalli([])).toBe('');
+  });
+});
