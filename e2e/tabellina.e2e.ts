@@ -62,6 +62,10 @@ test('area genitori: stessa tabellina, con chi ha dato i passi e senza collegame
   await page.goto('/');
   const t = page.locator('.tabellina');
   await expect(t.locator('.tabellina-conto')).toHaveText('Oggi Lani ha preso 10 passi su 20 disponibili');
+  // area genitori: una sola freccia (la "::after" di ".ga summary" sarebbe la seconda)
+  const riassunto = t.locator('.tabellina-dettagli > summary');
+  await expect(riassunto.locator('svg')).toHaveCount(1);
+  expect(await riassunto.evaluate((e) => getComputedStyle(e, '::after').content)).toBe('none');
   await t.getByText('Guarda cosa manca').click();
   await expect(t.getByText('17:00 · da Papà')).toBeVisible();
   await expect(t.getByRole('button', { name: /Letto fatto/ })).toHaveCount(0);

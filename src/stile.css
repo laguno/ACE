@@ -1090,3 +1090,6 @@ button.chip-pagina { cursor: pointer; }
 .chip-pagina:focus-visible { outline: 3px solid var(--accento); outline-offset: 2px; }
 .carico-foto-scheda .pagine-chip-lista { justify-content: center; max-height: 40vh; overflow-y: auto; }
 .pagine-stato.elaborate { color: var(--verde); font-weight: 700; }
+
+/* Area genitori: la tabellina ha già la sua freccia, quella di ".ga summary" sarebbe la seconda */
+.ga .tabellina-dettagli > summary::after { content: none; }

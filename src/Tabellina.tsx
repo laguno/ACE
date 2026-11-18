@@ -47,7 +47,7 @@ export default function Tabellina({ vai, genitori = false, client = supabase }: 
       <p className="tabellina-conto" role="status">
         {genitori ? 'Oggi Lani ha preso' : 'Oggi hai preso'} <b>{dati.presi}</b> passi su <b>{dati.disponibili}</b> disponibili
       </p>
-      <details>
+      <details className="tabellina-dettagli">
         <summary>
           <span>Guarda cosa manca</span>
           <CaretDown className="freccia-famiglia" size={20} weight="bold" aria-hidden />
