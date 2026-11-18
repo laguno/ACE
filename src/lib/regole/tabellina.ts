@@ -1,4 +1,4 @@
-import { CONFIG, passiCompito, giorno as daIso, type VoceGesto } from './index';
+import { CONFIG, passiCompito, giorno as daIso, type VoceGesto } from './index.ts';
 
 // Tabellina dei passi (18/11): cosa si può prendere oggi e cosa si è già preso.
 // Funzioni pure: i fatti del giorno li raccoglie la Edge Function "tabellina" dal database, qui si
