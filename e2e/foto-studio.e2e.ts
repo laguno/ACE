@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { finto } from './finto';
+import { carica, finto } from './finto';
 
 // Genitori: aggiungere foto a una richiesta già chiusa da Lani (Scienze), con i dati veri di Nuvola
 // del 18/11: la prova chiede pag. 100-107 e 110-117, la richiesta ne ha solo quattro.
@@ -67,7 +67,7 @@ test('genitori: richiesta chiusa, pagine mancanti, campo a mano, caricamento e q
   await expect(riga).toContainText('Mancano: 107, 116, 117');
 
   // carico una foto: popup con barra e percentuale
-  await riga.getByLabel('Galleria: Scienze: pagine 100, 107, 110, 117').setInputFiles({ name: 'p.jpg', mimeType: 'image/jpeg', buffer: JPEG });
+  await carica(page, riga.getByLabel('Galleria: Scienze: pagine 100, 107, 110, 117'), { name: 'p.jpg', mimeType: 'image/jpeg', buffer: JPEG });
   const popup = page.getByRole('dialog', { name: 'Carico le foto' });
   await expect(popup).toBeVisible();
   await expect(popup.getByRole('progressbar')).toBeVisible();
@@ -112,6 +112,7 @@ test('genitori: la fotocamera si apre davvero (non la galleria) e lo scatto si c
   expect(galleriaAperta).toBe(false);
   await camera.getByRole('button', { name: 'Scatta' }).click();
   await expect(camera).toBeHidden();
+  await page.getByRole('dialog', { name: 'Che pagine sono?' }).getByRole('button', { name: 'Carica' }).click();
   await expect.poll(() => t.caricate?.length ?? 0).toBe(1);
   // l'altro pulsante apre la galleria
   const scelta = page.waitForEvent('filechooser');

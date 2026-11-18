@@ -1,6 +1,6 @@
 // Supabase finto per le prove: tabelle in memoria, filtri eq/neq/is/gte/in, select/update/upsert.
 // Basta per le schermate; le regole vere stanno nei test di src/lib e in prova:schema.
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 
 export type Tabelle = Record<string, Record<string, unknown>[]>;
 
@@ -182,4 +182,14 @@ function ordina(righe: Record<string, unknown>[], order: string | null) {
     }
     return 0;
   });
+}
+
+/**
+ * Sceglie le foto e, se l'app propone le pagine ("Che pagine sono?"), conferma la proposta:
+ * il flusso vero, con la scheda in mezzo. Senza scheda (pagine non note) non fa altro.
+ */
+export async function carica(page: Page, input: Locator, file: Parameters<Locator['setInputFiles']>[0]) {
+  await input.setInputFiles(file);
+  const conferma = page.getByRole('dialog', { name: 'Che pagine sono?' }).getByRole('button', { name: 'Carica' });
+  await conferma.waitFor({ timeout: 1500 }).then(() => conferma.click(), () => {});
 }

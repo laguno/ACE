@@ -1,8 +1,8 @@
 // Edge Function "foto-studio": dopo "Ho finito" su una richiesta di foto (compito o verifica), legge
 // le pagine fotografate e le aggiunge a flash card e quiz della prossima verifica della stessa
-// materia; poi avvisa Lani con una notifica. Le foto sono dal libro di carta: l'IA ne ricava
+// materia; poi manda una notifica (a Lani se carica un genitore, ai genitori se carica Lani). Le foto sono dal libro di carta: l'IA ne ricava
 // domande con parole sue, non ricopia il testo (CLAUDE.md, regole).
-// La chiamano l'app dei genitori o di Lani con { richiesta_id }; ripeterla non duplica niente.
+// La chiamano l'app (con { richiesta_id }) o il cron ogni ora (foto ferme da più di un'ora); ripeterla non duplica niente.
 import Anthropic from 'npm:@anthropic-ai/sdk';
 import { dbServizio, registraErroreServer } from '../_shared/ambiente.ts';
 import { chiChiama, CorpoNonValido, cors, leggiCorpo, risposte } from '../_shared/accesso.ts';
@@ -63,7 +63,7 @@ Restituisci:
 - per ogni foto i numeri di pagina stampati che vedi (vale anche per gli appunti scritti a mano se riportano il numero di pagina); vuoto se non si leggono, mai indovinati.
 Se una foto è illeggibile, saltala. Se nessuna foto è leggibile, restituisci liste vuote.`;
 
-async function aggiungiDaFoto(richiestaId: string) {
+async function aggiungiDaFoto(richiestaId: string, avvisa: 'lani' | 'genitore') {
   const { data: r, error } = await db.from('richieste_foto').select('id, materia_id, pagine, verifica_id, materie(nome)').eq('id', richiestaId).maybeSingle();
   if (error) throw new Error(`richiesta: ${error.message}`);
   if (!r) throw new CorpoNonValido('richiesta sconosciuta');
@@ -134,7 +134,8 @@ async function aggiungiDaFoto(richiestaId: string) {
   await db.from('foto_pagine').update({ studio_il: new Date().toISOString() }).in('id', idFoto);
   if (carte.length || nuove.length) {
     // niente rimproveri nelle notifiche, ≤ 60 caratteri
-    await inviaPush(db, 'lani', { titolo: 'ACE', testo: `Nuove pagine di ${materia} da ripassare`, tipo: 'studio' }).catch((e) => console.error('push studio', e));
+    const testo = avvisa === 'lani' ? `Nuove pagine di ${materia} da ripassare` : `Lani ha caricato pagine di ${materia}`;
+    await inviaPush(db, avvisa, { titolo: 'ACE', testo: testo.slice(0, 60), tipo: 'studio' }).catch((e) => console.error('push studio', e));
   }
   const { count } = await db.from('foto_pagine').select('id', { count: 'exact', head: true }).eq('richiesta_id', richiestaId).is('studio_il', null);
   return { carte: carte.length, domande: nuove.length, verifica_id: verifica.id, restano: count ?? 0 };
@@ -144,10 +145,26 @@ Deno.serve(async (req) => {
   const rispondi = risposte(req);
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors(req) });
   try {
-    if (!(await chiChiama(db, req, undefined))) return rispondi({ errore: 'accesso richiesto' }, 401);
+    const chi = await chiChiama(db, req, Deno.env.get('CRON_SEGRETO'));
+    if (!chi) return rispondi({ errore: 'accesso richiesto' }, 401);
+    if (chi.tipo === 'cron') {
+      // rete di sicurezza (ogni ora): foto ferme da più di un'ora perché nessuno ha premuto "Ho finito"
+      const { data: ferme } = await db.from('foto_pagine').select('richiesta_id').is('studio_il', null).not('richiesta_id', 'is', null).lt('caricata_il', new Date(Date.now() - 36e5).toISOString()).order('caricata_il').limit(200);
+      const richieste = [...new Set((ferme ?? []).map((f) => f.richiesta_id as string))].slice(0, 3);
+      const esiti = [];
+      for (const id of richieste) {
+        try {
+          esiti.push({ richiesta_id: id, ...(await aggiungiDaFoto(id, 'lani')) });
+        } catch (e) {
+          await registraErroreServer(db, 'foto-studio', e);
+        }
+      }
+      return rispondi({ richieste: esiti });
+    }
     const { richiesta_id } = await leggiCorpo<{ richiesta_id: string }>(req);
     if (typeof richiesta_id !== 'string' || !/^[0-9a-f-]{36}$/i.test(richiesta_id)) throw new CorpoNonValido('richiesta_id non valido');
-    return rispondi(await aggiungiDaFoto(richiesta_id));
+    // chi carica non riceve l'avviso: se è Lani lo ricevono i genitori, se è un genitore lo riceve Lani
+    return rispondi(await aggiungiDaFoto(richiesta_id, chi.ruolo === 'lani' ? 'genitore' : 'lani'));
   } catch (e) {
     if (e instanceof CorpoNonValido) return rispondi({ errore: e.message }, 400);
     await registraErroreServer(db, 'foto-studio', e);

@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { finto } from './finto';
+import { carica, finto } from './finto';
 
 // Area genitori dal restyling del 16/11 (docs/genitori-ux.md): una prova per ognuno dei compiti
 // dello studio, con le quattro schede (Oggi, Settimana, Forzieri, Impostazioni).
@@ -242,7 +242,7 @@ test('foto mancante: la fa Lani e la riga non compare; dopo le 20 o dalla scaden
   await expect(riga.getByRole('button', { name: 'Fotografa' })).toBeVisible();
 
   // dopo il primo scatto: Un'altra pagina, Dalla galleria e Ho finito in fila sotto il testo, con la veste dei genitori
-  await riga.getByLabel(/^Fotocamera/).setInputFiles({ name: 'p.jpg', mimeType: 'image/jpeg', buffer: Buffer.from(JPEG_1PX, 'base64') });
+  await carica(page, riga.getByLabel(/^Fotocamera/), { name: 'p.jpg', mimeType: 'image/jpeg', buffer: Buffer.from(JPEG_1PX, 'base64') });
   const finito = riga.getByRole('button', { name: 'Ho finito' });
   await expect(finito).toBeVisible();
   const testo = await riga.locator('.ga-riga-testo').boundingBox();

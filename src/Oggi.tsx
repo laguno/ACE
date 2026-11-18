@@ -386,6 +386,7 @@ function Pomeriggio({ chiusura, apri, vai }: { chiusura: string | null; apri: Ap
                 <Fotografa
                   client={supabase}
                   richiesta={r}
+                  studio
                   fatto={(p) => {
                     setFoto((l) => l.filter((x) => x.id !== r.id));
                     setFotoFatta(p > 0 ? `Foto salvata: +${p}.` : 'Foto salvata.');

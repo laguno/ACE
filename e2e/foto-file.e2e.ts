@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import sharp from 'sharp';
-import { finto } from './finto';
+import { carica, finto } from './finto';
 
 // Da fotografare con file veri, generati qui con sharp (niente foto vere): 12 MP, EXIF ruotato,
 // PNG enorme, HEIC che Chromium non apre, file che non è una foto, più pagine, caricamento
@@ -45,7 +45,7 @@ const kb = (n: number) => `${Math.round(n / 1024)} KB`;
 test('12 MP orizzontale (4000×3000): JPEG 1600×1200, leggero', async ({ page }) => {
   const { t, carta, input } = await apri(page);
   const foto = await (await pagina(4000, 3000)).jpeg({ quality: 92 }).toBuffer();
-  await input.setInputFiles({ name: 'IMG_0001.jpg', mimeType: 'image/jpeg', buffer: foto });
+  await carica(page, input, { name: 'IMG_0001.jpg', mimeType: 'image/jpeg', buffer: foto });
   await carta.getByRole('button', { name: 'Ho finito' }).click();
   await expect(carta.getByRole('status')).toHaveText('Foto salvata: +2.');
   const [c] = t.caricate as { percorso: string; tipo: string; byte: Buffer }[];
@@ -59,7 +59,7 @@ test('12 MP orizzontale (4000×3000): JPEG 1600×1200, leggero', async ({ page }
 test('12 MP caso peggiore (tutto grana): resta sotto i 10 MB', async ({ page }) => {
   const { t, carta, input } = await apri(page);
   const foto = await sharp({ create: { width: 3000, height: 4000, channels: 3, noise: { type: 'gaussian', mean: 128, sigma: 40 } } }).jpeg({ quality: 92 }).toBuffer();
-  await input.setInputFiles({ name: 'rumore.jpg', mimeType: 'image/jpeg', buffer: foto });
+  await carica(page, input, { name: 'rumore.jpg', mimeType: 'image/jpeg', buffer: foto });
   await carta.getByRole('button', { name: 'Ho finito' }).click();
   await expect(carta.getByRole('status')).toHaveText('Foto salvata: +2.');
   const [c] = t.caricate as { byte: Buffer }[];
@@ -77,7 +77,7 @@ test('EXIF ruotato (orientation 6): la foto arriva dritta', async ({ page }) => 
     .toBuffer();
   const salvata = await sharp(dritta).rotate(-90).withMetadata({ orientation: 6 }).jpeg().toBuffer();
   expect(await sharp(salvata).metadata()).toMatchObject({ width: 800, height: 600, orientation: 6 });
-  await input.setInputFiles({ name: 'girata.jpg', mimeType: 'image/jpeg', buffer: salvata });
+  await carica(page, input, { name: 'girata.jpg', mimeType: 'image/jpeg', buffer: salvata });
   await carta.getByRole('button', { name: 'Ho finito' }).click();
   await expect(carta.getByRole('status')).toHaveText('Foto salvata: +2.');
   const [c] = t.caricate as { byte: Buffer }[];
@@ -97,7 +97,7 @@ test('PNG enorme (6000×4000, oltre 10 MB): diventa un JPEG leggero', async ({ p
   const { t, carta, input } = await apri(page);
   const png = await (await pagina(6000, 4000, 12)).png().toBuffer();
   expect(png.length).toBeGreaterThan(10 * MB);
-  await input.setInputFiles({ name: 'schermata.png', mimeType: 'image/png', buffer: png });
+  await carica(page, input, { name: 'schermata.png', mimeType: 'image/png', buffer: png });
   await carta.getByRole('button', { name: 'Ho finito' }).click();
   await expect(carta.getByRole('status')).toHaveText('Foto salvata: +2.');
   const [c] = t.caricate as { tipo: string; byte: Buffer }[];
@@ -109,7 +109,7 @@ test('PNG enorme (6000×4000, oltre 10 MB): diventa un JPEG leggero', async ({ p
 test('HEIC che il browser non apre: si carica l’originale, come HEIC', async ({ page }) => {
   const { t, carta, input, chiamate } = await apri(page);
   // Chromium non decodifica HEIC: bastano byte qualsiasi con il nome dell'iPad e senza tipo (come su Windows)
-  await input.setInputFiles({ name: 'IMG_0002.HEIC', mimeType: '', buffer: Buffer.alloc(200_000, 7) });
+  await carica(page, input, { name: 'IMG_0002.HEIC', mimeType: '', buffer: Buffer.alloc(200_000, 7) });
   await carta.getByRole('button', { name: 'Ho finito' }).click();
   await expect(carta.getByRole('status')).toHaveText('Foto salvata: +2.');
   const [c] = t.caricate as { percorso: string; tipo: string; byte: Buffer }[];
@@ -121,7 +121,7 @@ test('HEIC che il browser non apre: si carica l’originale, come HEIC', async (
 
 test('HEIC oltre 10 MB: messaggio chiaro, niente caricamento', async ({ page }) => {
   const { t, carta, input, chiamate } = await apri(page);
-  await input.setInputFiles({ name: 'IMG_0003.heic', mimeType: 'image/heic', buffer: Buffer.alloc(11 * MB, 7) });
+  await carica(page, input, { name: 'IMG_0003.heic', mimeType: 'image/heic', buffer: Buffer.alloc(11 * MB, 7) });
   await expect(carta.getByRole('alert')).toHaveText('Foto troppo grande: massimo 10 MB.');
   expect(t.caricate).toBeUndefined();
   expect(chiamate).toEqual([]);
@@ -131,7 +131,7 @@ test('HEIC oltre 10 MB: messaggio chiaro, niente caricamento', async ({ page }) 
 test('un file che non è una foto: rifiutato, e se è in mezzo ad altre non parte niente', async ({ page }) => {
   const { t, carta, input, chiamate } = await apri(page);
   const foto = await (await pagina(800, 600)).jpeg().toBuffer();
-  await input.setInputFiles([
+  await carica(page, input, [
     { name: 'pagina.jpg', mimeType: 'image/jpeg', buffer: foto },
     { name: 'compiti.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 finto') },
   ]);
@@ -146,7 +146,7 @@ test('più pagine in un colpo, con la stessa foto due volte: una sola chiamata a
   const { t, carta, input, chiamate } = await apri(page);
   const a = await (await pagina(1200, 900)).jpeg().toBuffer();
   const b = await (await pagina(900, 1200)).jpeg().toBuffer();
-  await input.setInputFiles([
+  await carica(page, input, [
     { name: 'a.jpg', mimeType: 'image/jpeg', buffer: a },
     { name: 'b.jpg', mimeType: 'image/jpeg', buffer: b },
     { name: 'a-di-nuovo.jpg', mimeType: 'image/jpeg', buffer: a },
@@ -167,7 +167,7 @@ test('caricamento interrotto a metà: le foto salvate restano, "Riprova", poi si
   );
   const foto = await (await pagina(800, 600)).jpeg().toBuffer();
   const tre = ['1', '2', '3'].map((x) => ({ name: `${x}.jpg`, mimeType: 'image/jpeg', buffer: foto }));
-  await input.setInputFiles(tre);
+  await carica(page, input, tre);
   await expect(carta.getByRole('alert')).toHaveText('Foto non caricata. Riprova.');
   // la prima è salvata (file e riga), niente passi, la richiesta resta aperta e il pulsante pronto
   expect(t.caricate).toHaveLength(1);
@@ -177,7 +177,7 @@ test('caricamento interrotto a metà: le foto salvate restano, "Riprova", poi si
   await expect(carta).toContainText('1 pagina');
   await expect(carta.getByRole('button', { name: "Un'altra pagina" })).toBeEnabled();
   // si riprova con le stesse foto: tutto salvato, una chiamata ai passi
-  await input.setInputFiles(tre);
+  await carica(page, input, tre);
   await carta.getByRole('button', { name: 'Ho finito' }).click();
   await expect(carta.getByRole('status')).toHaveText('Foto salvata: +2.');
   await expect(carta.getByRole('alert')).toHaveCount(0);
@@ -192,7 +192,7 @@ test('niente rete: messaggio chiaro, poi con la rete si carica', async ({ page, 
   let senzaRete = true;
   await page.route('https://finto.supabase.test/**', (r) => (senzaRete ? r.abort('internetdisconnected') : r.fallback()));
   await context.setOffline(true);
-  await input.setInputFiles({ name: 'p.jpg', mimeType: 'image/jpeg', buffer: foto });
+  await carica(page, input, { name: 'p.jpg', mimeType: 'image/jpeg', buffer: foto });
   await expect(carta.getByRole('alert')).toHaveText('Niente rete. Riprova quando torna.');
   expect(t.caricate ?? []).toHaveLength(0);
   expect(chiamate).toEqual([]);
@@ -200,12 +200,12 @@ test('niente rete: messaggio chiaro, poi con la rete si carica', async ({ page, 
   const errori: string[] = [];
   page.on('console', (m) => m.type() === 'error' && m.text().startsWith('foto') && errori.push(m.text()));
   await context.setOffline(false);
-  await input.setInputFiles({ name: 'p.jpg', mimeType: 'image/jpeg', buffer: foto });
+  await carica(page, input, { name: 'p.jpg', mimeType: 'image/jpeg', buffer: foto });
   await expect.poll(() => errori.length).toBe(1);
   await expect(carta.getByRole('alert')).toHaveText('Niente rete. Riprova quando torna.');
   expect(t.caricate ?? []).toHaveLength(0);
   senzaRete = false;
-  await input.setInputFiles({ name: 'p.jpg', mimeType: 'image/jpeg', buffer: foto });
+  await carica(page, input, { name: 'p.jpg', mimeType: 'image/jpeg', buffer: foto });
   await carta.getByRole('button', { name: 'Ho finito' }).click();
   await expect(carta.getByRole('status')).toHaveText('Foto salvata: +2.');
 });

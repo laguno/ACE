@@ -1075,3 +1075,9 @@ button.tabellina-vai { cursor: pointer; }
 .fotografa form input { flex: 1 1 140px; min-width: 0; min-height: 44px; padding: 8px 12px; border: 2px solid var(--lilla-bordo); border-radius: 14px; background: var(--bianco); color: var(--testo); font: inherit; }
 .fotografa form input:focus-visible { outline: 3px solid var(--accento); outline-offset: 2px; }
 .carico-foto-scheda small { color: var(--testo-2); font-size: 14px; line-height: 1.4; }
+
+/* Scheda "Che pagine sono?" e contatore a pallini delle pagine */
+.fotografa form.carico-foto-scheda { display: grid; margin: 0; }
+.pagine-pallini { display: inline-flex; flex-wrap: wrap; gap: 3px; vertical-align: middle; }
+.pagine-pallini i { width: 10px; height: 10px; border-radius: 50%; background: var(--lilla-medio); }
+.pagine-pallini i.c-e { background: var(--verde); }
