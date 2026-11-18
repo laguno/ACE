@@ -1,5 +1,6 @@
 // Foto delle pagine: le scelte che non dipendono dal browser (misure, tipi, errori), con le prove.
 // Il disegno sulla tela sta in src/Foto.tsx; le prove con immagini vere in e2e/foto-file.e2e.ts.
+import { pagine as estraiPagine } from '../nuvola';
 
 /** Lato lungo della foto caricata: basta per leggere una pagina, pesa poco. */
 const LATO_MAX = 1600;
@@ -102,3 +103,7 @@ export const pagineMancanti = (chieste: string | null, viste: (string | null)[])
   const fatte = new Set(viste.flatMap(numeriPagine));
   return numeriPagine(chieste).filter((n) => !fatte.has(n));
 };
+
+/** Pagine da avere: quelle della richiesta più quelle della prova in arrivo (Nuvola: "pag. 100-107, 110-117"). */
+export const pagineAttese = (richiesta: string | null, daProva: string | null): string =>
+  [richiesta, estraiPagine(daProva ?? '')].filter(Boolean).join(', ');

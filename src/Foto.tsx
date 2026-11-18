@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Camera, Images } from '@phosphor-icons/react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { Elenco, Riga } from './kit';
-import { caricaConAvanzamento, erroreDi, MESSAGGI, misure, numeriPagine, pagineMancanti, percentuale, scegli, type ErroreFoto, type Pronta } from './lib/foto';
+import { caricaConAvanzamento, erroreDi, MESSAGGI, misure, numeriPagine, pagineAttese, pagineMancanti, percentuale, scegli, type ErroreFoto, type Pronta } from './lib/foto';
 
 // Da fotografare: pagine chieste da ACE (sincronizzazione di Nuvola). Le foto vanno nel bucket
 // privato foto-pagine; con "Ho finito" la funzione "passi" chiude la richiesta e dà i passi a Lani se la foto è sua.
@@ -92,6 +92,7 @@ export const descrizione = (r: RichiestaFoto) => `${r.materie?.nome ?? (r.motivo
 function FotocameraDal({ scatta, chiudi, ripiega }: { scatta: (f: File) => void; chiudi: () => void; ripiega: () => void }) {
   const video = useRef<HTMLVideoElement>(null);
   const flusso = useRef<MediaStream | null>(null);
+  const [pronta, setPronta] = useState(false);
   useEffect(() => {
     let vivo = true;
     navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false }).then(
@@ -118,12 +119,12 @@ function FotocameraDal({ scatta, chiudi, ripiega }: { scatta: (f: File) => void;
   }
   return (
     <div className="carico-foto camera-foto" role="dialog" aria-modal="true" aria-label="Fotocamera">
-      <video ref={video} autoPlay playsInline muted />
+      <video ref={video} autoPlay playsInline muted onLoadedData={() => setPronta(true)} />
       <div className="camera-foto-comandi">
         <button className="secondario compatto" onClick={chiudi}>
           Annulla
         </button>
-        <button className="compatto" onClick={scatto}>
+        <button className="compatto" disabled={!pronta} onClick={scatto}>
           <Camera size={20} weight="bold" aria-hidden />
           Scatta
         </button>
@@ -137,11 +138,11 @@ function FotocameraDal({ scatta, chiudi, ripiega }: { scatta: (f: File) => void;
  * (Samsung), quindi la richiesta resta aperta con contatore e miniature, "Un'altra pagina"
  * (fotocamera), "Dalla galleria" (più foto insieme) e "Ho finito", che chiude e dà i passi.
  */
-export function Fotografa({ client, richiesta, etichetta = 'Fotografa', studio = false, chiusa = false, fatto }: { client: SupabaseClient; richiesta: RichiestaFoto; etichetta?: string; studio?: boolean; chiusa?: boolean; fatto: (passi: number) => void }) {
+export function Fotografa({ client, richiesta, etichetta = 'Fotografa', studio = false, chiusa = false, attese, fatto }: { client: SupabaseClient; richiesta: RichiestaFoto; etichetta?: string; studio?: boolean; chiusa?: boolean; attese?: string; fatto: (passi: number) => void }) {
   const camera = useRef<HTMLInputElement>(null);
   const galleria = useRef<HTMLInputElement>(null);
   const [live, setLive] = useState(false);
-  const [studiando, setStudiando] = useState(false);
+  const [studiando, setStudiando] = useState<number | null>(null);
   const [progresso, setProgresso] = useState<number | null>(null);
   const [scatti, setScatti] = useState<Scatto[]>([]);
   const [stato, setStato] = useState<'pronto' | 'carico' | 'chiudo' | ErroreFoto>('pronto');
@@ -201,18 +202,22 @@ export function Fotografa({ client, richiesta, etichetta = 'Fotografa', studio =
       const passi = chiusa ? 0 : await chiudi(client, richiesta);
       // le pagine entrano nelle carte e nel quiz della prossima prova; Lani riceve l'avviso (lo fa la funzione)
       if (studio) {
-        // la funzione legge al massimo 12 foto per volta: si richiama finché restano foto da leggere
-        setStudiando(true);
+        // la funzione legge al massimo 8 foto per volta: si richiama finché restano foto da leggere
+        setStudiando(0);
         try {
-          for (let giro = 0; giro < 6; giro++) {
+          const { count } = await client.from('foto_pagine').select('id', { count: 'exact', head: true }).eq('richiesta_id', richiesta.id).is('studio_il', null);
+          const totale = Math.max(1, count ?? 1);
+          for (let giro = 0; giro < 10; giro++) {
             const { data, error } = await client.functions.invoke('foto-studio', { body: { richiesta_id: richiesta.id } });
             if (error) throw error;
-            if (!((data as { restano?: number } | null)?.restano ?? 0)) break;
+            const restano = (data as { restano?: number } | null)?.restano ?? 0;
+            setStudiando(Math.min(100, Math.round(((totale - restano) / totale) * 100)));
+            if (!restano) break;
           }
         } catch (e) {
           console.error('foto-studio', e);
         }
-        setStudiando(false);
+        setStudiando(null);
       }
       fatto(passi);
     } catch (e) {
@@ -222,7 +227,8 @@ export function Fotografa({ client, richiesta, etichetta = 'Fotografa', studio =
   }
   const occupato = stato === 'carico' || stato === 'chiudo';
   const n = scatti.length;
-  const mancano = pagineMancanti(richiesta.pagine, scatti.map((x) => x.viste ?? null));
+  const daAvere = attese ?? richiesta.pagine;
+  const mancano = pagineMancanti(daAvere, scatti.map((x) => x.viste ?? null));
   return (
     <span className="fotografa">
       <input ref={camera} type="file" accept="image/*" capture="environment" hidden onChange={(e) => scelte(e.target)} aria-label={`Fotocamera: ${descrizione(richiesta)}`} />
@@ -246,12 +252,13 @@ export function Fotografa({ client, richiesta, etichetta = 'Fotografa', studio =
           </div>
         </div>
       )}
-      {studiando && (
+      {studiando !== null && (
         <div className="carico-foto" role="dialog" aria-modal="true" aria-labelledby="studio-foto-titolo">
           <div className="carico-foto-scheda">
             <h2 id="studio-foto-titolo">Preparo i quiz</h2>
-            <progress aria-label="Preparazione dei quiz" />
-            <p>Ci vuole un minuto.</p>
+            <progress max={100} value={studiando} aria-label="Preparazione dei quiz" />
+            <p aria-live="polite">{studiando}%</p>
+            <small>Leggo le pagine e preparo carte e domande: può volerci qualche minuto.</small>
           </div>
         </div>
       )}
@@ -268,7 +275,7 @@ export function Fotografa({ client, richiesta, etichetta = 'Fotografa', studio =
           }}
         />
       )}
-      {n > 0 && numeriPagine(richiesta.pagine).length > 0 && (
+      {n > 0 && numeriPagine(daAvere).length > 0 && (
         <small className="pagine-stato" aria-live="polite">
           {mancano.length ? `Mancano: ${mancano.join(', ')}` : 'Tutte le pagine chieste ci sono'}
         </small>
@@ -373,6 +380,7 @@ type RichiestaRecente = RichiestaFoto & { stato: string };
  */
 export function FotoRichieste({ client, avvisa }: { client: SupabaseClient; avvisa: (s: string) => void }) {
   const [lista, setLista] = useState<RichiestaRecente[]>();
+  const [prove, setProve] = useState<Map<string, string>>(new Map());
   useEffect(() => {
     const da = new Date(Date.now() - 21 * 864e5).toISOString();
     client
@@ -381,6 +389,13 @@ export function FotoRichieste({ client, avvisa }: { client: SupabaseClient; avvi
       .gte('creato_il', da)
       .order('creato_il', { ascending: false })
       .then(({ data }) => setLista((data ?? []) as unknown as RichiestaRecente[]));
+    // pagine della prossima prova di ogni materia: la richiesta ne ha spesso solo alcune
+    client
+      .from('verifiche')
+      .select('materia_id, pagine_probabili, data')
+      .gte('data', new Date().toISOString().slice(0, 10))
+      .order('data', { ascending: false })
+      .then(({ data }) => setProve(new Map((data ?? []).filter((v) => v.materia_id && v.pagine_probabili).map((v) => [v.materia_id as string, v.pagine_probabili as string]))));
   }, [client]);
   if (!lista?.length) return null;
   return (
@@ -391,7 +406,7 @@ export function FotoRichieste({ client, avvisa }: { client: SupabaseClient; avvi
           icona={<Camera size={20} weight="bold" aria-hidden />}
           titolo={descrizione(r)}
           sotto={r.stato === 'aperta' ? 'Aperta' : r.stato === 'fatta' ? 'Chiusa da Lani: potete aggiungere pagine' : 'Scaduta: potete aggiungere pagine'}
-          azione={<Fotografa client={client} richiesta={r} studio chiusa={r.stato !== 'aperta'} etichetta="Aggiungi" fatto={() => avvisa(`Foto aggiunte: ${descrizione(r)}.`)} />}
+          azione={<Fotografa client={client} richiesta={r} studio chiusa={r.stato !== 'aperta'} attese={pagineAttese(r.pagine, r.materia_id ? (prove.get(r.materia_id) ?? null) : null)} etichetta="Aggiungi" fatto={() => avvisa(`Foto aggiunte: ${descrizione(r)}.`)} />}
         />
       ))}
     </Elenco>

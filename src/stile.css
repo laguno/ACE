@@ -1068,3 +1068,10 @@ button.tabellina-vai { cursor: pointer; }
 .camera-foto { grid-template-rows: 1fr auto; place-items: stretch; padding: 0; background: #000; }
 .camera-foto video { width: 100%; height: 100%; object-fit: contain; min-height: 0; }
 .camera-foto-comandi { display: flex; justify-content: center; gap: 16px; padding: 16px; }
+
+/* Pagine caricate e mancanti (area genitori) */
+.pagine-stato { display: block; width: 100%; color: var(--testo-2); font-size: 14px; line-height: 1.4; }
+.fotografa form { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; width: 100%; margin: 4px 0; }
+.fotografa form input { flex: 1 1 140px; min-width: 0; min-height: 44px; padding: 8px 12px; border: 2px solid var(--lilla-bordo); border-radius: 14px; background: var(--bianco); color: var(--testo); font: inherit; }
+.fotografa form input:focus-visible { outline: 3px solid var(--accento); outline-offset: 2px; }
+.carico-foto-scheda small { color: var(--testo-2); font-size: 14px; line-height: 1.4; }

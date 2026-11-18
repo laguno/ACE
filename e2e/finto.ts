@@ -93,8 +93,11 @@ export async function finto(page: Pick<Page, 'addInitScript' | 'route'>, t: Tabe
         t.caricate = (t.caricate ?? []).filter((c) => !via.includes(String(c.percorso)));
         return json(via.map((name) => ({ name })));
       }
-      const parti = await new Response(req.postDataBuffer(), { headers: { 'content-type': req.headers()['content-type'] ?? '' } }).formData();
-      const file = [...parti.values()].find((v) => typeof v !== 'string') as Blob | undefined;
+      // supabase-js manda multipart; l'avanzamento (XHR, src/lib/foto) manda il file come corpo grezzo
+      const tipoCorpo = req.headers()['content-type'] ?? '';
+      const file = tipoCorpo.startsWith('multipart/')
+        ? ([...(await new Response(req.postDataBuffer(), { headers: { 'content-type': tipoCorpo } }).formData()).values()].find((v) => typeof v !== 'string') as Blob | undefined)
+        : new Blob([req.postDataBuffer() ?? new Uint8Array()], { type: tipoCorpo });
       (t.caricate ??= []).push({ percorso, tipo: file?.type ?? '', byte: file ? Buffer.from(await file.arrayBuffer()) : null });
       return json({ Key: percorso, Id: percorso });
     }

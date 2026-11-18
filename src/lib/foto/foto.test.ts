@@ -67,3 +67,12 @@ describe('pagine caricate e mancanti', () => {
     expect(pagineMancanti('4-6', [])).toEqual([4, 5, 6]);
   });
 });
+
+describe('pagine attese dalla prova', () => {
+  test('Scienze: 100-107 e 110-117 anche se la richiesta ne ha solo quattro', async () => {
+    const { pagineAttese } = await import('.');
+    const attese = pagineAttese('100, 107, 110, 117', 'pag. 100-107, 110-117 (vol. A). Alle pag. 116-117 studia solo i 5 tipi di reazioni. Ripassa anche le mappe di pag. 114-115 sul registro.');
+    expect(numeriPagine(attese)).toEqual([100, 101, 102, 103, 104, 105, 106, 107, 110, 111, 112, 113, 114, 115, 116, 117]);
+    expect(pagineMancanti(attese, ['100-106', '114, 115'])).toEqual([107, 110, 111, 112, 113, 116, 117]);
+  });
+});

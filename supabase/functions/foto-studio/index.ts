@@ -11,7 +11,7 @@ import * as R from '../../../src/lib/regole/index.ts';
 
 const db = dbServizio();
 const claude = new Anthropic({ apiKey: Deno.env.get('ANTHROPIC_API_KEY') });
-const MAX_FOTO = 12;
+const MAX_FOTO = 8; // foto per chiamata: tempi e avanzamento dell’app
 
 const SCHEMA = {
   type: 'object',
