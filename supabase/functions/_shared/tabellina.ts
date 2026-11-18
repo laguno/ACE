@@ -7,9 +7,9 @@ import * as C from '../../../src/lib/calendario/index.ts';
 import * as T from '../../../src/lib/regole/tabellina.ts';
 
 /** Giorni dello storico, oggi compreso. */
-export const GIORNI_STORICO = 7;
+const GIORNI_STORICO = 7;
 
-export type Preso = { giorno: string; ora: string; testo: string; passi: number; chi?: string };
+type Preso = { giorno: string; ora: string; testo: string; passi: number; chi?: string };
 export type Tabellina = { giorno: string; voci: T.VoceTabellina[]; presi: number; disponibili: number; storico: Preso[] };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

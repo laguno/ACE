@@ -2,6 +2,12 @@
 
 Storia delle sessioni, decisioni prese e scelte approvate: `docs/storico.md`.
 
+## Tabellina dei passi (18/11, ramo `tabellina-prova`, worktree `C:\progetti\ace\app-tabellina`, non in produzione)
+
+- Oggi di Lani e Oggi dei genitori: "Oggi hai preso Y passi su X disponibili", sotto "Guarda cosa manca" (da prendere, con il tocco che porta dove si fa; presi degli ultimi 7 giorni; ai genitori anche chi li ha dati). Edge Function nuova `tabellina` (sola lettura), regole in `src/lib/regole/tabellina.ts`. Fonti scelte dal signore: ogni giorno, studio in più, gesti di casa uno per uno, partita.
+- Da fare: glossario (allargare "Come si fanno i passi" con icone e una riga per voce, gesti divisi): testi da far approvare per il copione. Per pubblicare: backup, `npx supabase functions deploy tabellina --use-api --yes`, poi unione su `main`.
+- Ambiente di prova mai indietro rispetto a `main`: `npm run prova:allinea`, `rilascio:controlla`, controllo in `npm test` (runbook, "Ambiente di prova"). Su `gioco` manca ancora la riga in `scripts/prova-locale.ps1`.
+
 ## Dove siamo (16/11 sera)
 
 Il gioco è partito **lunedì 16/11/2026**: Lani usa ACE in produzione. `main` su `ace-passino.vercel.app`: sprint 1, sprint 2 (R-Evolution, **accesa dal 16/11**), **tema campo di R-Evolution** (16/11 alle 21:08, unione `49b087b`: granata della divisa, nastro "Ultim'ora", tabellone, emoji solo lì; bozza `design/REvolution.html`), assenze, "Come si fanno i passi", area genitori a quattro schede (Impeccable 34/40, obiettivo raggiunto), APK con FCM. Cron: `sync-nuvola` 14:30 e 19:30, `sync-calendario` ogni ora, `notifiche` ogni 15 minuti, `chiavi` domenica 21:30, `classifiche` 6:15, `partite` ogni mezz'ora il giorno della partita. Controlli del 16/11: partita spostata al 13/12 alle 9:00 letta dalla FIPAV; `sync-nuvola` delle 14:30 ok (4 s).

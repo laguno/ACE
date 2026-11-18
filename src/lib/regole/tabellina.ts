@@ -9,7 +9,7 @@ import { CONFIG, passiCompito, giorno as daIso, type VoceGesto } from './index';
 
 const P = CONFIG.passi;
 
-export type Gruppo = 'ogni-giorno' | 'studio' | 'casa' | 'partita';
+type Gruppo = 'ogni-giorno' | 'studio' | 'casa' | 'partita';
 
 export type VoceTabellina = {
   id: string;

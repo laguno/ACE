@@ -47,6 +47,15 @@ Stato di ACE → Calendario. Se fallisce: l'indirizzo iCal privato di Google è 
 
 Stato di ACE → Errori: dove e messaggio. Se si ripete, aprire una sessione con Claude con il messaggio (non le righe di Lani). Le funzioni si pubblicano con `npx supabase functions deploy --use-api --yes`; le migrazioni con `npx supabase db push --remote --yes`, sempre dopo `npm run backup`.
 
+## Ambiente di prova: mai indietro rispetto a main
+
+Convenzione del 18/11. L'app di prova serve a provare le novità, su qualunque ramo: il ramo servito in quel momento (il **ramo di prova**) deve contenere tutto `main` e può solo essere più avanti.
+
+- **Prima di ogni prova**: `npm run prova:allinea` fa `git fetch` e unisce `origin/main` nel ramo attivo. Se l'unione non riesce (conflitti) la annulla, elenca i file e si ferma: la prova non parte finché non si risolve a mano (`git merge origin/main`, commit) e si riavvia. Annota il ramo servito in `ace-prova-ramo.json`, nella cartella comune di git (vale per tutti i worktree).
+- `npm run prova:telefono` lo fa da solo (script `preprova:telefono` di npm). `scripts/prova-locale.ps1` (ramo `gioco`) va aperto con questa riga, da aggiungere quando `gioco` riceve `main`: `node scripts/allinea-main.mjs; if ($LASTEXITCODE -ne 0) { exit 1 }`
+- **Prima di pubblicare in produzione**: `npm run rilascio:controlla` (oppure `npm run rilascio:controlla -- <commit>`; di solito il commit è `main`). Si ferma nelle finestre senza pubblicazioni (14:20-14:45 e 19:45-21:00) e se il ramo di prova non contiene il commit da pubblicare: allora si allinea il ramo di prova, si prova e si rilancia. Solo controlli: backup (`npm run backup`), prove verdi, ok del signore e pubblicazione restano a mano.
+- **Nei test**: `npm test` fallisce (`scripts/allinea-main.test.ts`, "questo ramo") se `origin/main`, com'era all'ultimo fetch, non è antenato del ramo. Non c'è una CI: questo controllo ne fa le veci. Fuori da git o senza `origin/main` salta.
+
 ## L'app sul telefono è vecchia
 
 Chiudere ACE del tutto e riaprirla: il service worker scarica la versione nuova. Se non basta, Impostazioni del browser → Dati del sito → ace-passino → cancella (poi rifare l'accesso).
