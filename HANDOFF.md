@@ -61,7 +61,8 @@ Il gioco è partito **lunedì 16/11/2026**: Lani usa ACE in produzione. `main` s
 
 - Prova e2e "PNG enorme (6000×4000)" di `foto-file`: fallita una volta nel giro completo del 16/11 sera, da sola passa (carico della macchina). Se si ripete, guardarla.
 - **Finestre senza pubblicazioni**: 14:20-14:45 e 19:45-21:00. Ogni pubblicazione: backup (`npm run backup`, serve Docker acceso), prove verdi, poi controllo di `sync_log` e Stato di ACE. Niente dati veri di Lani in chat, solo conteggi.
-- Schema `0001`-`0039` e `20261115173113_libreria_risorse` applicati: la prossima migrazione è `0040`. `db push` vuole `--remote --yes --include-all`. Mai cambiare una migrazione applicata; quelle con "cron" non girano su PGlite.
+- **Foto → quiz (18/11)**: "Ho finito" (Lani e genitori) chiama `foto-studio` (una chiamata IA per richiesta, max 8 foto per giro); prima la scheda "Che pagine sono?" propone le pagine che mancano (`foto_pagine.pagine_viste`), contatore 3/13 a pallini. Cron `foto-studio` (minuto 40, ogni ora) prepara le foto ferme da più di un'ora. Notifica: a Lani se carica un genitore, ai genitori se carica Lani. Da provare su telefono vero: fotocamera, push. Il signore deve ripremere "Ho finito" su Scienze (9 foto) e Geografia (10), o aspetta il cron.
+- Schema `0001`-`0043` e `20261115173113_libreria_risorse` applicati: la prossima migrazione è `0044`. `db push` vuole `--remote --yes --include-all`. Mai cambiare una migrazione applicata; quelle con "cron" non girano su PGlite.
 - APK: `scripts\apk.ps1` (SDK `C:\progetti\ace\android-sdk`, JDK 21); la password del keystore la scrive il signore nel suo terminale, mai in chat. Dopo il pull di `main` serve `npm install`.
 - Supabase rifiuta UPDATE e DELETE senza WHERE anche nelle funzioni (safeupdate). Avvisi su `forzieri_lani` e sulle RPC: voluti.
 - `sync_log.esito`: `ok`, `errore`, `interrotta`. `richieste_foto.stato`: `aperta`, `fatta`, `scaduta`.
