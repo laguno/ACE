@@ -6,7 +6,11 @@ Storia delle sessioni, decisioni prese e scelte approvate: `docs/storico.md`.
 
 - Oggi di Lani e Oggi dei genitori: "Oggi hai preso Y passi su X disponibili", sotto "Guarda cosa manca" (da prendere, con il tocco che porta dove si fa; presi degli ultimi 7 giorni; ai genitori anche chi li ha dati). Edge Function nuova `tabellina` (sola lettura), regole in `src/lib/regole/tabellina.ts`. Fonti scelte dal signore: ogni giorno, studio in più, gesti di casa uno per uno, partita.
 - Glossario (approvato il 18/11, docs/05): "Come si fanno i passi" con un'icona e una riga "cosa fare" per voce, gesti di casa uno per uno. La tabellina si legge con GET (la vetrina conta i POST come scritture). Per pubblicare: backup, `npx supabase functions deploy tabellina --use-api --yes`, poi unione su `main`.
-- Ambiente di prova mai indietro rispetto a `main`: `npm run prova:allinea`, `rilascio:controlla`, controllo in `npm test` (runbook, "Ambiente di prova"). Su `gioco` manca ancora la riga in `scripts/prova-locale.ps1`.
+- Ambiente di prova mai indietro rispetto a `main`: `npm run prova:allinea`, `rilascio:controlla`, controllo in `npm test` (runbook, "Ambiente di prova"). La riga in `scripts/prova-locale.ps1` c'è solo sul ramo `gioco-con-tabellina` (vedi sotto): `gioco` vero non l'ha ancora.
+- Pubblicata il 18/11 alle 17:00: backup `ace-2026-11-18_16-59-49.sql` (fatto da `C:progettiaceapp`: il worktree non è collegato a Supabase), deploy `tabellina` con `--project-ref` (progetto ACE), `main` portato a `eca22c1` con avanzamento semplice. Vercel ha pubblicato `eca22c1`. **Non ancora controllati**: `sync_log`, Stato di ACE, il telefono di Lani (contatore, tocchi, layout 360-412 px).
+- Due correzioni trovate provando in locale (la funzione non partiva in Deno, la tabella restava nascosta senza errori): `./index.ts` in `src/lib/regole/tabellina.ts` e `allowImportingTsExtensions` in `tsconfig.json`.
+- Ambiente di prova: il ramo servito oggi è `gioco-con-tabellina` (worktree `C:progettiaceapp-tmp-merge`, non pushato): `gioco` (5d5645a) + `tabellina-prova` + `main`. `gioco` vero ha modifiche non salvate di un'altra sessione (App.tsx, stile.css, dati-finti-locale.sql): quando è pulito, `git merge --ff-only gioco-con-tabellina` lo porta avanti. Poi, dopo la prova, `gioco` riceve `main`.
+- Worktree da togliere: `app-rilascio`, `app-tmp-merge` (dopo aver spento `npx supabase functions serve` e `prova:telefono`).
 
 ## Dove siamo (16/11 sera)
 
