@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { CalendarBlank, Camera, FileText, PencilSimple, ThumbsUp, TreasureChest } from '@phosphor-icons/react';
 import * as R from '../lib/regole';
 import { Attesa, AreaTesto, Elenco, Foglio, Riga, Vuoto } from '../kit';
-import { Fotografa, SELECT_RICHIESTE, descrizione, type RichiestaFoto } from '../Foto';
+import { Fotografa, FotoRichieste, SELECT_RICHIESTE, descrizione, type RichiestaFoto } from '../Foto';
 import { FoglioAssenza, FoglioSposta, caricaVerifiche, daRecuperare, giorniDiScuola, type Verifica } from '../Assenze';
 import Tabellina from '../Tabellina';
 import { BALLA_MAX, FRASI_BALLA, SGRIDATE, VOCI_GESTI, bello, meno, notaBalla, oraRoma, piu, type Props } from './comune';
@@ -169,6 +169,7 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
           </Elenco>
           </>
         )}
+        <FotoRichieste client={client} avvisa={fatto} />
       </section>
 
       <div className="ga-rapide">

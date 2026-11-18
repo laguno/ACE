@@ -76,7 +76,7 @@ async function aggiungiDaFoto(richiestaId: string) {
   const verifica = ver?.[0];
   if (!verifica) return { carte: 0, domande: 0, motivo: 'nessuna verifica in arrivo per la materia' };
 
-  const { data: foto } = await db.from('foto_pagine').select('id, percorso_storage').eq('richiesta_id', richiestaId).order('caricata_il').limit(MAX_FOTO);
+  const { data: foto } = await db.from('foto_pagine').select('id, percorso_storage').eq('richiesta_id', richiestaId).is('studio_il', null).order('caricata_il').limit(MAX_FOTO);
   const idFoto: string[] = [];
   const immagini: { type: 'image'; source: { type: 'base64'; media_type: string; data: string } }[] = [];
   for (const f of foto ?? []) {
@@ -88,12 +88,10 @@ async function aggiungiDaFoto(richiestaId: string) {
     idFoto.push(f.id);
     immagini.push({ type: 'image', source: { type: 'base64', media_type: blob.type || 'image/jpeg', data: btoa(bin) } });
   }
-  if (!immagini.length) return { carte: 0, domande: 0, motivo: 'nessuna foto leggibile' };
+  if (!immagini.length) return { carte: 0, domande: 0, motivo: 'nessuna foto nuova' };
 
-  // già fatto per questa richiesta: niente doppioni
   const { data: quiz } = await db.from('quiz').select('id, domande').eq('verifica_id', verifica.id).limit(1);
-  const esistenti = (quiz?.[0]?.domande ?? []) as { richiesta_foto?: string }[];
-  if (esistenti.some((d) => d.richiesta_foto === richiestaId)) return { carte: 0, domande: 0, motivo: 'già aggiunte' };
+  const esistenti = (quiz?.[0]?.domande ?? []) as unknown[];
 
   const materia = (r.materie as unknown as { nome: string } | null)?.nome ?? 'scuola';
   const contesto = { prova: { tipo: verifica.tipo, materia, data: verifica.data, argomento: verifica.argomento }, pagine_richieste: r.pagine };
@@ -132,6 +130,8 @@ async function aggiungiDaFoto(richiestaId: string) {
       if (e2) throw new Error(`quiz: ${e2.message}`);
     }
   }
+  // queste foto sono passate: un nuovo lancio guarda solo quelle aggiunte dopo
+  await db.from('foto_pagine').update({ studio_il: new Date().toISOString() }).in('id', idFoto);
   if (carte.length || nuove.length) {
     // niente rimproveri nelle notifiche, ≤ 60 caratteri
     await inviaPush(db, 'lani', { titolo: 'ACE', testo: `Nuove pagine di ${materia} da ripassare`, tipo: 'studio' }).catch((e) => console.error('push studio', e));

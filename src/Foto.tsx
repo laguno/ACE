@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Camera, Images } from '@phosphor-icons/react';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { Elenco, Riga } from './kit';
 import { caricaConAvanzamento, erroreDi, MESSAGGI, misure, numeriPagine, pagineMancanti, percentuale, scegli, type ErroreFoto, type Pronta } from './lib/foto';
 
 // Da fotografare: pagine chieste da ACE (sincronizzazione di Nuvola). Le foto vanno nel bucket
@@ -136,7 +137,7 @@ function FotocameraDal({ scatta, chiudi, ripiega }: { scatta: (f: File) => void;
  * (Samsung), quindi la richiesta resta aperta con contatore e miniature, "Un'altra pagina"
  * (fotocamera), "Dalla galleria" (più foto insieme) e "Ho finito", che chiude e dà i passi.
  */
-export function Fotografa({ client, richiesta, etichetta = 'Fotografa', studio = false, fatto }: { client: SupabaseClient; richiesta: RichiestaFoto; etichetta?: string; studio?: boolean; fatto: (passi: number) => void }) {
+export function Fotografa({ client, richiesta, etichetta = 'Fotografa', studio = false, chiusa = false, fatto }: { client: SupabaseClient; richiesta: RichiestaFoto; etichetta?: string; studio?: boolean; chiusa?: boolean; fatto: (passi: number) => void }) {
   const camera = useRef<HTMLInputElement>(null);
   const galleria = useRef<HTMLInputElement>(null);
   const [live, setLive] = useState(false);
@@ -195,7 +196,8 @@ export function Fotografa({ client, richiesta, etichetta = 'Fotografa', studio =
   async function finito() {
     setStato('chiudo');
     try {
-      const passi = await chiudi(client, richiesta);
+      // richiesta già chiusa (da Lani o scaduta): niente passi, solo le nuove foto nello studio
+      const passi = chiusa ? 0 : await chiudi(client, richiesta);
       // le pagine entrano nelle carte e nel quiz della prossima prova; Lani riceve l'avviso (lo fa la funzione)
       if (studio) client.functions.invoke('foto-studio', { body: { richiesta_id: richiesta.id } }).catch((e) => console.error('foto-studio', e));
       fatto(passi);
@@ -337,5 +339,38 @@ export function FotoSalvate({ client, avvisa, conferma }: { client: SupabaseClie
         })}
       </ul>
     </details>
+  );
+}
+
+type RichiestaRecente = RichiestaFoto & { stato: string };
+
+/**
+ * Genitori: aggiungere foto a una richiesta di qualsiasi stato (anche chiusa da Lani o scaduta):
+ * appunti, pagine mancanti. Le nuove foto entrano nelle carte e nel quiz della prossima prova.
+ */
+export function FotoRichieste({ client, avvisa }: { client: SupabaseClient; avvisa: (s: string) => void }) {
+  const [lista, setLista] = useState<RichiestaRecente[]>();
+  useEffect(() => {
+    const da = new Date(Date.now() - 21 * 864e5).toISOString();
+    client
+      .from('richieste_foto')
+      .select(`${SELECT_RICHIESTE}, stato`)
+      .gte('creato_il', da)
+      .order('creato_il', { ascending: false })
+      .then(({ data }) => setLista((data ?? []) as unknown as RichiestaRecente[]));
+  }, [client]);
+  if (!lista?.length) return null;
+  return (
+    <Elenco etichetta="Aggiungi foto">
+      {lista.map((r) => (
+        <Riga
+          key={r.id}
+          icona={<Camera size={20} weight="bold" aria-hidden />}
+          titolo={descrizione(r)}
+          sotto={r.stato === 'aperta' ? 'Aperta' : r.stato === 'fatta' ? 'Chiusa da Lani: potete aggiungere pagine' : 'Scaduta: potete aggiungere pagine'}
+          azione={<Fotografa client={client} richiesta={r} studio chiusa={r.stato !== 'aperta'} etichetta="Aggiungi" fatto={() => avvisa(`Foto aggiunte: ${descrizione(r)}.`)} />}
+        />
+      ))}
+    </Elenco>
   );
 }
