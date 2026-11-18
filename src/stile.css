@@ -1089,3 +1089,4 @@ button.chip-pagina { cursor: pointer; }
 .chip-pagina.scelta { background: var(--accento); border-color: var(--accento); color: var(--su-colore, #fff); }
 .chip-pagina:focus-visible { outline: 3px solid var(--accento); outline-offset: 2px; }
 .carico-foto-scheda .pagine-chip-lista { justify-content: center; max-height: 40vh; overflow-y: auto; }
+.pagine-stato.elaborate { color: var(--verde); font-weight: 700; }

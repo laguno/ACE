@@ -80,7 +80,16 @@ test('genitori: richiesta chiusa, pagine mancanti, campo a mano, caricamento e q
   // l'esito si vede sempre: quante carte e domande, poi "Ok"
   const esito = page.getByRole('dialog', { name: 'Quiz pronti' });
   await expect(esito).toContainText('Ho aggiunto 8 carte e 6 domande');
-  await esito.getByRole('button', { name: 'Ok' }).click();
+  // "Ok" è un pulsante dell'app, non quello nudo del browser: pieno, tondo, da dito
+  const ok = esito.getByRole('button', { name: 'Ok' });
+  const stile = await ok.evaluate((e) => {
+    const s = getComputedStyle(e);
+    return { alto: e.getBoundingClientRect().height, raggio: parseFloat(s.borderTopLeftRadius), sfondo: s.backgroundColor };
+  });
+  expect(stile.alto).toBeGreaterThanOrEqual(44);
+  expect(stile.raggio).toBeGreaterThanOrEqual(22);
+  expect(stile.sfondo).not.toBe('rgba(0, 0, 0, 0)');
+  await ok.click();
   await expect(page.getByRole('status')).toContainText('Foto aggiunte: Scienze');
   // la richiesta resta in lista: il pulsante non resta bloccato su "Chiudo…"
   await expect(riga.getByRole('button', { name: 'Ho finito' })).toBeEnabled();
@@ -143,4 +152,28 @@ test('genitori: nessuna prova in arrivo, lo si dice', async ({ page }) => {
   const riga = page.getByRole('list', { name: 'Aggiungi foto' }).getByRole('listitem').filter({ hasText: 'Scienze' });
   await riga.getByRole('button', { name: 'Ho finito' }).click();
   await expect(page.getByRole('dialog', { name: 'Niente di nuovo' })).toContainText('non c’è una prova in arrivo');
+});
+
+test('genitori: sulla card resta il riepilogo dei quiz già pronti, senza "Ho finito" da ripremere', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-11-18T21:20:00+01:00'));
+  const d = dati();
+  d.foto_pagine = d.foto_pagine.map((f) => ({ ...f, studio_il: '2026-11-18T21:07:00Z' }));
+  const carte = Array.from({ length: 5 }, (_, i) => ({ id: `c${i}`, verifica_id: 'v1', fonte: 'foto', fronte: `d${i}`, retro: 'r' }));
+  const finta = { ...d, flashcard: carte, quiz: [{ id: 'q1', verifica_id: 'v1', domande: [{ testo: 'a', richiesta_foto: 'r1' }, { testo: 'b', richiesta_foto: 'r1' }, { testo: 'c' }] }] };
+  await finto(page, finta, {});
+  await page.goto('/');
+  const riga = page.getByRole('list', { name: 'Aggiungi foto' }).getByRole('listitem').filter({ hasText: 'Scienze' });
+  await expect(riga).toContainText('Quiz pronti: 2/2 foto elaborate, 5 carte e 2 domande dalle foto.');
+  // già tutto elaborato: niente "Ho finito" da ripremere per sbaglio
+  await expect(riga.getByRole('button', { name: 'Ho finito' })).toHaveCount(0);
+  await expect(riga.getByRole('button', { name: 'Aggiungi' }).or(riga.getByRole('button', { name: "Un'altra pagina" })).first()).toBeVisible();
+});
+
+test('genitori: foto non ancora elaborate, lo dice la card', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-11-18T21:20:00+01:00'));
+  await finto(page, dati(), {});
+  await page.goto('/');
+  const riga = page.getByRole('list', { name: 'Aggiungi foto' }).getByRole('listitem').filter({ hasText: 'Scienze' });
+  await expect(riga).toContainText('Foto non ancora elaborate: tocca Ho finito.');
+  await expect(riga.getByRole('button', { name: 'Ho finito' })).toBeVisible();
 });

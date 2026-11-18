@@ -35,7 +35,7 @@ class Rifiutata extends Error {
   }
 }
 
-type Scatto = { percorso: string; url: string; id?: string; viste?: string | null };
+type Scatto = { percorso: string; url: string; id?: string; viste?: string | null; elaborata?: boolean };
 
 /**
  * Carica alcune foto di una richiesta (aperta). Prima le prepara tutte: se una non va, non si
@@ -78,12 +78,12 @@ async function chiudi(client: SupabaseClient, r: RichiestaFoto): Promise<number>
 
 /** Foto già salvate per la richiesta (uscita a metà), con l'anteprima firmata. */
 async function giaSalvate(client: SupabaseClient, r: RichiestaFoto): Promise<Scatto[]> {
-  const { data } = await client.from('foto_pagine').select('id, percorso_storage, pagine_viste').eq('richiesta_id', r.id).order('caricata_il');
+  const { data } = await client.from('foto_pagine').select('id, percorso_storage, pagine_viste, studio_il').eq('richiesta_id', r.id).order('caricata_il');
   const righe = data ?? [];
   const percorsi = righe.map((f) => f.percorso_storage as string);
   if (!percorsi.length) return [];
   const firmati = await client.storage.from('foto-pagine').createSignedUrls(percorsi, 3600);
-  return percorsi.map((percorso, i) => ({ percorso, url: firmati.data?.[i]?.signedUrl ?? '', id: righe[i].id as string, viste: righe[i].pagine_viste as string | null }));
+  return percorsi.map((percorso, i) => ({ percorso, url: firmati.data?.[i]?.signedUrl ?? '', id: righe[i].id as string, viste: righe[i].pagine_viste as string | null, elaborata: !!righe[i].studio_il }));
 }
 
 export const descrizione = (r: RichiestaFoto) => `${r.materie?.nome ?? (r.motivo === 'verifica' ? 'Verifica' : 'Compito')}: pagine ${r.pagine}`;
@@ -145,6 +145,7 @@ export function Fotografa({ client, richiesta, etichetta = 'Fotografa', studio =
   const [scelte_, setScelte] = useState<number[]>([]); // pagine scelte nella scheda "Che pagine sono?"
   const [esito, setEsito] = useState<{ titolo: string; testo: string } | null>(null);
   const passiDopo = useRef(0);
+  const [riepilogo, setRiepilogo] = useState<{ carte: number; domande: number } | null>(null);
   useEffect(() => {
     if (attesePassate !== undefined || !richiesta.materia_id) return;
     let vivo = true;
@@ -167,6 +168,27 @@ export function Fotografa({ client, richiesta, etichetta = 'Fotografa', studio =
   const [studiando, setStudiando] = useState<number | null>(null);
   const [progresso, setProgresso] = useState<number | null>(null);
   const [scatti, setScatti] = useState<Scatto[]>([]);
+  const elaborate = scatti.filter((x) => x.elaborata).length;
+  // riepilogo che resta sulla card: quante carte e domande dalle foto ci sono per la prossima prova
+  useEffect(() => {
+    if (!elaborate || !richiesta.materia_id) return;
+    let vivo = true;
+    (async () => {
+      const oggi = new Date().toISOString().slice(0, 10);
+      const { data: v } = await client.from('verifiche').select('id').eq('materia_id', richiesta.materia_id).gte('data', oggi).order('data').limit(1);
+      const vid = v?.[0]?.id as string | undefined;
+      if (!vid) return;
+      const [carte, quiz] = await Promise.all([
+        client.from('flashcard').select('id', { count: 'exact', head: true }).eq('verifica_id', vid).eq('fonte', 'foto'),
+        client.from('quiz').select('domande').eq('verifica_id', vid).limit(1),
+      ]);
+      const domande = ((quiz.data?.[0]?.domande ?? []) as { richiesta_foto?: string }[]).filter((d) => d.richiesta_foto).length;
+      if (vivo) setRiepilogo({ carte: carte.count ?? 0, domande });
+    })().catch(() => {});
+    return () => {
+      vivo = false;
+    };
+  }, [client, richiesta.materia_id, elaborate]);
   const [stato, setStato] = useState<'pronto' | 'carico' | 'chiudo' | ErroreFoto>('pronto');
   useEffect(() => {
     let vivo = true;
@@ -274,7 +296,9 @@ export function Fotografa({ client, richiesta, etichetta = 'Fotografa', studio =
             ? { titolo: 'Quiz non creati', testo: "Qualcosa non ha funzionato. Le foto sono salvate: tocca Ho finito per riprovare, o ci penso io entro un'ora." }
             : carte || domande
               ? { titolo: 'Quiz pronti', testo: `Ho aggiunto ${carte} carte e ${domande} domande dalle pagine fotografate.` }
-              : /nessuna verifica/.test(motivo)
+              : /nessuna foto nuova/.test(motivo)
+                ? { titolo: 'Niente di nuovo', testo: 'Tutte le foto erano già state elaborate: carte e quiz ci sono già.' }
+                : /nessuna verifica/.test(motivo)
                 ? { titolo: 'Niente di nuovo', testo: 'Per questa materia non c’è una prova in arrivo. Le foto restano salvate.' }
                 : { titolo: 'Niente di nuovo', testo: 'Non ho trovato pagine leggibili. Prova con foto più nitide.' },
         );
@@ -365,7 +389,7 @@ export function Fotografa({ client, richiesta, etichetta = 'Fotografa', studio =
             <small aria-live="polite">
               {inAttesa.length === 1 ? '1 foto' : `${inAttesa.length} foto`}, {scelte_.length === 1 ? '1 pagina scelta' : `${scelte_.length} pagine scelte`}. Tocca le pagine per cambiarle.
             </small>
-            <button>Carica</button>
+            <button className="principale">Carica</button>
             <button type="button" className="secondario" onClick={() => setInAttesa(null)}>
               Annulla
             </button>
@@ -410,6 +434,7 @@ export function Fotografa({ client, richiesta, etichetta = 'Fotografa', studio =
             <h2 id="esito-foto-titolo">{esito.titolo}</h2>
             <small>{esito.testo}</small>
             <button
+              className="principale"
               onClick={() => {
                 setEsito(null);
                 fatto(passiDopo.current);
@@ -428,7 +453,16 @@ export function Fotografa({ client, richiesta, etichetta = 'Fotografa', studio =
         <Images size={20} weight="bold" aria-hidden />
         Dalla galleria
       </button>
-      {n > 0 && (
+      {n > 0 && studio && (
+        <small className={`pagine-stato${elaborate === n ? ' elaborate' : ''}`} aria-live="polite">
+          {elaborate === n
+            ? `Quiz pronti: ${n}/${n} foto elaborate${riepilogo ? `, ${riepilogo.carte} carte e ${riepilogo.domande} domande dalle foto` : ''}.`
+            : elaborate > 0
+              ? `${elaborate}/${n} foto elaborate. Per le altre ${n - elaborate} tocca Ho finito.`
+              : `Foto non ancora elaborate: tocca Ho finito.`}
+        </small>
+      )}
+      {n > 0 && (!chiusa || elaborate < n) && (
         <button className="compatto" disabled={occupato} onClick={finito}>
           {stato === 'chiudo' ? 'Chiudo…' : 'Ho finito'}
         </button>
