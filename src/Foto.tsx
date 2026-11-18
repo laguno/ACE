@@ -141,6 +141,7 @@ export function Fotografa({ client, richiesta, etichetta = 'Fotografa', studio =
   const camera = useRef<HTMLInputElement>(null);
   const galleria = useRef<HTMLInputElement>(null);
   const [live, setLive] = useState(false);
+  const [studiando, setStudiando] = useState(false);
   const [progresso, setProgresso] = useState<number | null>(null);
   const [scatti, setScatti] = useState<Scatto[]>([]);
   const [stato, setStato] = useState<'pronto' | 'carico' | 'chiudo' | ErroreFoto>('pronto');
@@ -199,7 +200,20 @@ export function Fotografa({ client, richiesta, etichetta = 'Fotografa', studio =
       // richiesta già chiusa (da Lani o scaduta): niente passi, solo le nuove foto nello studio
       const passi = chiusa ? 0 : await chiudi(client, richiesta);
       // le pagine entrano nelle carte e nel quiz della prossima prova; Lani riceve l'avviso (lo fa la funzione)
-      if (studio) client.functions.invoke('foto-studio', { body: { richiesta_id: richiesta.id } }).catch((e) => console.error('foto-studio', e));
+      if (studio) {
+        // la funzione legge al massimo 12 foto per volta: si richiama finché restano foto da leggere
+        setStudiando(true);
+        try {
+          for (let giro = 0; giro < 6; giro++) {
+            const { data, error } = await client.functions.invoke('foto-studio', { body: { richiesta_id: richiesta.id } });
+            if (error) throw error;
+            if (!((data as { restano?: number } | null)?.restano ?? 0)) break;
+          }
+        } catch (e) {
+          console.error('foto-studio', e);
+        }
+        setStudiando(false);
+      }
       fatto(passi);
     } catch (e) {
       console.error('foto', e);
@@ -229,6 +243,15 @@ export function Fotografa({ client, richiesta, etichetta = 'Fotografa', studio =
             <h2 id="carico-foto-titolo">Carico le foto</h2>
             <progress max={100} value={progresso} aria-label="Avanzamento del caricamento" />
             <p aria-live="polite">{progresso}%</p>
+          </div>
+        </div>
+      )}
+      {studiando && (
+        <div className="carico-foto" role="dialog" aria-modal="true" aria-labelledby="studio-foto-titolo">
+          <div className="carico-foto-scheda">
+            <h2 id="studio-foto-titolo">Preparo i quiz</h2>
+            <progress aria-label="Preparazione dei quiz" />
+            <p>Ci vuole un minuto.</p>
           </div>
         </div>
       )}

@@ -136,7 +136,8 @@ async function aggiungiDaFoto(richiestaId: string) {
     // niente rimproveri nelle notifiche, ≤ 60 caratteri
     await inviaPush(db, 'lani', { titolo: 'ACE', testo: `Nuove pagine di ${materia} da ripassare`, tipo: 'studio' }).catch((e) => console.error('push studio', e));
   }
-  return { carte: carte.length, domande: nuove.length, verifica_id: verifica.id };
+  const { count } = await db.from('foto_pagine').select('id', { count: 'exact', head: true }).eq('richiesta_id', richiestaId).is('studio_il', null);
+  return { carte: carte.length, domande: nuove.length, verifica_id: verifica.id, restano: count ?? 0 };
 }
 
 Deno.serve(async (req) => {
