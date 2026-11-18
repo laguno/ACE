@@ -32,7 +32,7 @@ test('contatore sempre in vista, cosa manca e già presi, il gesto porta alle re
   await page.getByText('Guarda cosa manca').click();
   // il compito già preso non manca più: resta solo tra i presi
   await expect(page.locator('.tabellina-voci li')).toHaveCount(2);
-  await expect(page.locator('.tabellina-giorno h3')).toHaveText(['Oggi', 'Ieri']);
+  await expect(page.locator('.tabellina-data')).toHaveText(['Oggi', 'Ieri']);
   await expect(page.getByText('Compiti fatti: Inglese')).toBeVisible();
   expect((await new AxeBuilder({ page }).include('.tabellina').analyze()).violations).toEqual([]);
 
@@ -49,4 +49,21 @@ test('senza risposta del server la tabellina non compare', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Buongiorno, Lani' })).toBeVisible();
   await expect(page.locator('.tabellina')).toHaveCount(0);
+});
+
+test('area genitori: stessa tabellina, con chi ha dato i passi e senza collegamenti', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-11-09T18:00:00+01:00'));
+  const conChi = { ...TABELLINA, storico: [{ giorno: '2026-11-09', ora: '17:00', testo: 'Gesto di casa: letto', passi: 2, chi: 'Papà' }, ...TABELLINA.storico] };
+  await finto(
+    page,
+    { profili: [{ id: 'lani', ruolo: 'genitore', nome: 'Papà' }], movimenti_passi: [], compiti: [], fogli_firma: [], serate: [], impegni_famiglia: [], gesti_casa: [], sgridate: [], note: [], voti: [], verifiche: [], richieste_foto: [], partite: [], assenze: [], popup_coda: [], impostazioni: [] },
+    { tabellina: conChi },
+  );
+  await page.goto('/');
+  const t = page.locator('.tabellina');
+  await expect(t.locator('.tabellina-conto')).toHaveText('Oggi Lani ha preso 10 passi su 20 disponibili');
+  await t.getByText('Guarda cosa manca').click();
+  await expect(t.getByText('17:00 · da Papà')).toBeVisible();
+  await expect(t.getByRole('button', { name: /Letto fatto/ })).toHaveCount(0);
+  expect((await new AxeBuilder({ page }).include('.tabellina').analyze()).violations).toEqual([]);
 });

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { CaretDown, CaretRight, CheckCircle } from '@phosphor-icons/react';
 import { supabase } from './supabase';
 import * as R from './lib/regole';
@@ -23,11 +24,11 @@ function nomeGiorno(giorno: string, oggi: string) {
   return `${GIORNI[g.getDay()]} ${g.getDate()}`;
 }
 
-export default function Tabellina({ vai, genitori = false }: { vai?: (d: Dove) => void; genitori?: boolean }) {
+export default function Tabellina({ vai, genitori = false, client = supabase }: { vai?: (d: Dove) => void; genitori?: boolean; client?: SupabaseClient }) {
   const [dati, setDati] = useState<DatiTabellina | null>();
   useEffect(() => {
-    supabase.functions.invoke('tabellina').then(({ data, error }) => setDati(error || !data?.voci ? null : (data as DatiTabellina)));
-  }, []);
+    client.functions.invoke('tabellina').then(({ data, error }) => setDati(error || !data?.voci ? null : (data as DatiTabellina)));
+  }, [client]);
 
   if (dati === undefined) return <div className="carta tabellina" aria-busy="true" style={{ minHeight: 64 }} />;
   if (dati === null) return null;
@@ -37,6 +38,9 @@ export default function Tabellina({ vai, genitori = false }: { vai?: (d: Dove) =
   const casaPiena = casa.reduce((a, v) => a + v.presi, 0) >= R.CONFIG.passi.gesti_casa.tetto_giornaliero;
   const mancano = dati.voci.filter((v) => v.presi < v.valore && !(v.gruppo === 'casa' && casaPiena));
   const giorni = [...new Set(dati.storico.map((p) => p.giorno))];
+  // nell'area genitori la tabellina sta dentro "Lani oggi" (h2): i titoli scendono di un livello
+  const Titolo = genitori ? 'h3' : 'h2';
+  const Data = genitori ? 'h4' : 'h3';
 
   return (
     <div className="carta tabellina">
@@ -49,7 +53,7 @@ export default function Tabellina({ vai, genitori = false }: { vai?: (d: Dove) =
           <CaretDown className="freccia-famiglia" size={20} weight="bold" aria-hidden />
         </summary>
 
-        <h2>Da prendere oggi</h2>
+        <Titolo className="tabellina-titolo">Da prendere oggi</Titolo>
         {mancano.length === 0 ? (
           <p className="nota">{genitori ? 'Oggi Lani ha preso tutto.' : 'Oggi hai preso tutto.'}</p>
         ) : (
@@ -81,13 +85,13 @@ export default function Tabellina({ vai, genitori = false }: { vai?: (d: Dove) =
         )}
         {casaPiena && <p className="nota">Gesti di casa: per oggi il massimo è preso.</p>}
 
-        <h2>Già presi</h2>
+        <Titolo className="tabellina-titolo">Già presi</Titolo>
         {giorni.length === 0 ? (
           <p className="nota">Ancora nessun passo in questi giorni.</p>
         ) : (
           giorni.map((g) => (
             <section key={g} className="tabellina-giorno">
-              <h3>{nomeGiorno(g, dati.giorno)}</h3>
+              <Data className="tabellina-data">{nomeGiorno(g, dati.giorno)}</Data>
               <ul>
                 {dati.storico
                   .filter((p) => p.giorno === g)

@@ -1041,8 +1041,8 @@ dialog.ga-velo::backdrop { background: transparent; }
 .tabellina summary { list-style: none; cursor: pointer; min-height: 44px; display: flex; align-items: center; gap: 8px; font: 800 14px Nunito, sans-serif; color: var(--accento); }
 .tabellina summary::-webkit-details-marker { display: none; }
 .tabellina details:not([open]) .freccia-famiglia { rotate: -90deg; }
-.tabellina h2 { margin: 12px 0 6px; font: 800 13px Nunito, sans-serif; color: var(--testo-2); }
-.tabellina h3 { margin: 8px 0 4px; font: 800 13px Nunito, sans-serif; }
+.tabellina-titolo { margin: 12px 0 6px; font: 800 13px Nunito, sans-serif; color: var(--testo-2); }
+.tabellina-data { margin: 8px 0 4px; font: 800 13px Nunito, sans-serif; }
 .tabellina ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
 .tabellina-vai { width: 100%; min-height: 44px; display: flex; align-items: center; gap: 8px; padding: 6px 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; }
 button.tabellina-vai { cursor: pointer; }

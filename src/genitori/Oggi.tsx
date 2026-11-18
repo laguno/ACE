@@ -4,6 +4,7 @@ import * as R from '../lib/regole';
 import { Attesa, AreaTesto, Elenco, Foglio, Riga, Vuoto } from '../kit';
 import { Fotografa, SELECT_RICHIESTE, descrizione, type RichiestaFoto } from '../Foto';
 import { FoglioAssenza, FoglioSposta, caricaVerifiche, daRecuperare, giorniDiScuola, type Verifica } from '../Assenze';
+import Tabellina from '../Tabellina';
 import { BALLA_MAX, FRASI_BALLA, SGRIDATE, VOCI_GESTI, bello, meno, notaBalla, oraRoma, piu, type Props } from './comune';
 
 // Oggi (si apre qui): cosa c'è da fare per i genitori, le due azioni di ogni giorno, Lani in tre righe.
@@ -202,6 +203,8 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
             <dd>{prossima ? `${prossima.materie?.nome ?? 'Verifica'}, ${bello(prossima.data)}` : 'nessuna'}</dd>
           </div>
         </dl>
+        {/* la stessa tabellina di Lani, con chi ha dato i passi; si rilegge quando cambiano i passi di oggi */}
+        <Tabellina key={d.passiOggi} genitori client={client} />
         {/* una riga da un fatto vero di ieri, che loda il gesto e non la persona; senza il fatto non compare
             (revisione del 16/11, testo approvato dal signore) */}
         {d.ieriChiusa && (
