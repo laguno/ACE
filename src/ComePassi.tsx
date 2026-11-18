@@ -20,7 +20,7 @@ export default function ComePassi({ chiudi, completa = false, indietro = 'Astra'
       )}
       {!completa && <h1>Come si fanno i passi</h1>}
       {blocchi.map((b) => (
-        <article key={b.id} className="carta blocco-passi">
+        <article key={b.id} className="carta blocco-passi" data-ancora={`blocco-${b.id}`}>
           <header>
             <Sticker posa={b.posa} cartella={b.cartella} misura={56} />
             <h2>{b.titolo}</h2>

@@ -14,6 +14,8 @@ import { attivaNotifiche, guscio, notifichePossibili, rinnovaIscrizione } from '
 import { CHIAVE_SESSIONE, supabase, type Profilo } from './supabase';
 import { useREvolutionDa } from './accensione';
 import { cambioSchermata } from './sensi';
+import { cercaAncora } from './ancora';
+import type { Dove } from './lib/regole/tabellina';
 
 // L'app si apre su Oggi o Sera: le altre schermate si caricano al primo tocco (il service worker
 // le tiene già in memoria, anche senza rete).
@@ -23,13 +25,14 @@ const Astra = lazy(() => import('./Astra'));
 const REvolution = lazy(() => import('./REvolution'));
 const Figurina = lazy(() => import('./Figurine').then((m) => ({ default: m.Figurina })));
 const Album = lazy(() => import('./Figurine').then((m) => ({ default: m.Album })));
+const ComePassi = lazy(() => import('./ComePassi'));
 
 // R-Evolution (sprint 2) compare nella barra da quando i genitori la accendono (Impostazioni).
 const TUTTE = ['Oggi', 'Studio', 'Sera', 'R-Evolution', 'Astra'] as const;
 const voci = (rEvolutionDa: string | null) => TUTTE.filter((v) => v !== 'R-Evolution' || R.rEvolutionAttiva(R.giornoRoma(new Date()), rEvolutionDa));
 // icone di servizio Phosphor (design/Stile.html): bold, la sezione attiva piena in fucsia scuro
 const ICONE = { Oggi: Sun, Studio: BookOpen, Sera: MoonStars, 'R-Evolution': Volleyball, Astra: Star };
-type Voce = (typeof TUTTE)[number] | 'Genitori' | 'Figurina' | 'Album';
+type Voce = (typeof TUTTE)[number] | 'Genitori' | 'Figurina' | 'Album' | 'Regole';
 
 // Senza rete e con il gettone scaduto Supabase non riesce a rinnovarlo e risponde "nessuna sessione",
 // ma la tiene salvata (la toglie solo uscendo o con un rinnovo rifiutato): finché c'è, si resta dentro
@@ -150,6 +153,8 @@ function Lani() {
     if (primaVoce.current) primaVoce.current = false;
     else cambioSchermata(contenuto.current);
   }, [voce]);
+  // dalla tabellina dei passi: la schermata dove si fa la cosa, e il punto preciso
+  const vai = (d: Dove) => (setVoce(d.schermata), cercaAncora(d.ancora));
   if (accogli) return <Benvenuta fine={() => setAccogli(false)} />;
   if (!voce) return <Attesa />;
 
@@ -167,13 +172,15 @@ function Lani() {
           {voce === 'Sera' ? (
             <Sera />
           ) : voce === 'Oggi' ? (
-            <Oggi apri={setVoce} />
+            <Oggi apri={setVoce} vai={vai} />
           ) : voce === 'Studio' ? (
             <Studio />
           ) : voce === 'R-Evolution' ? (
             <REvolution apri={setVoce} />
           ) : voce === 'Figurina' ? (
             <Figurina chiudi={() => setVoce('Astra')} />
+          ) : voce === 'Regole' ? (
+            <ComePassi chiudi={() => setVoce('Oggi')} indietro="Oggi" />
           ) : voce === 'Album' ? (
             <Album chiudi={() => setVoce('Astra')} />
           ) : (

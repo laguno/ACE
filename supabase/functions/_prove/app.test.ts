@@ -2,7 +2,7 @@
 process.env.TZ = 'Europe/Rome';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ia } from './anthropic-finto';
-import { carica, creaBanco, LANI, richiesta, stato, valore } from './banco';
+import { carica, creaBanco, LANI, PAPA, richiesta, stato, valore } from './banco';
 
 vi.mock('../_shared/ambiente.ts', async (originale) => {
   const vero = await originale<typeof import('../_shared/ambiente.ts')>();
@@ -133,5 +133,36 @@ describe('chiavi', () => {
     const f = await carica('chiavi');
     expect((await json(await f(richiesta({ lunedi: '2026-11-09' }, { cron: true })))).corpo).toMatchObject({ saltato: expect.stringContaining('prima') });
     expect(LANI).toBeTruthy();
+  });
+});
+
+describe('tabellina', () => {
+  const GESTO = '00000000-0000-0000-0000-0000000000e1';
+  it('passi di oggi: disponibili, presi e storico; "chi" solo per i genitori', async () => {
+    // martedì 24/11: compito per mercoledì fatto, un gesto di papà, un movimento di ieri
+    await stato.banco!.come(null, `insert into compiti (id, testo, scadenza, fatto_il) values ('${COMPITO}', 'Es. 1', '2026-11-25', '2026-11-24T16:00:00+01:00')`);
+    await stato.banco!.come(null, `insert into gesti_casa (id, voce, data, dato_da) values ('${GESTO}', 'letto', '2026-11-24', '${PAPA}')`);
+    await stato.banco!.come(
+      null,
+      `insert into movimenti_passi (giorno, motivo, riferimento, passi, dato_da) values
+        ('2026-11-24', 'compito', '${COMPITO}', 10, null),
+        ('2026-11-24', 'gesto', '${GESTO}', 2, '${PAPA}'),
+        ('2026-11-23', 'cartella', 'serata:2026-11-23', 5, null),
+        ('2026-11-10', 'cartella', 'serata:2026-11-10', 5, null)`,
+    );
+    const f = await carica('tabellina');
+    expect((await f(richiesta({}))).status).toBe(401);
+    const lani = await json(await f(richiesta({}, { gettone: 'gettone-lani' })));
+    expect(lani.stato).toBe(200);
+    expect(lani.corpo.giorno).toBe('2026-11-24');
+    expect(lani.corpo.voci.find((v: { id: string }) => v.id === `compito:${COMPITO}`)).toMatchObject({ presi: 10, dove: { schermata: 'Oggi' } });
+    expect(lani.corpo.voci.find((v: { id: string }) => v.id === 'gesto:letto')).toMatchObject({ presi: 2, dove: { schermata: 'Regole' } });
+    expect(lani.corpo.presi).toBe(12);
+    expect(lani.corpo.disponibili).toBeGreaterThan(12);
+    // storico di sette giorni: il 10/11 resta fuori
+    expect(lani.corpo.storico.map((p: { giorno: string }) => p.giorno).sort()).toEqual(['2026-11-23', '2026-11-24', '2026-11-24']);
+    expect(lani.corpo.storico.some((p: { chi?: string }) => p.chi)).toBe(false);
+    const papa = await json(await f(richiesta({}, { gettone: 'gettone-papa' })));
+    expect(papa.corpo.storico.find((p: { testo: string }) => p.testo.startsWith('Gesto'))).toMatchObject({ testo: 'Gesto di casa: letto', chi: 'Papà', passi: 2 });
   });
 });

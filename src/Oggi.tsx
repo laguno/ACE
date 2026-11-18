@@ -14,6 +14,8 @@ import { supabase } from './supabase';
 import { DieciMinuti } from './DieciMinuti';
 import { PillolaPartita } from './ProssimaPartita';
 import { useREvolutionDa } from './accensione';
+import Tabellina from './Tabellina';
+import type { Dove } from './lib/regole/tabellina';
 
 // Oggi — design/Oggi.html (mattina) e design/Pomeriggio.html (pomeriggio).
 // ponytail: riga dell'umore facoltativa e foto dei compiti, più avanti.
@@ -38,7 +40,7 @@ const ICONE = {
   ),
 };
 
-export default function Oggi({ apri = () => {} }: { apri?: Apri }) {
+export default function Oggi({ apri = () => {}, vai }: { apri?: Apri; vai?: (d: Dove) => void }) {
   const giornata = useGiornata();
   const rEvolutionDa = useREvolutionDa();
   if (!giornata) return <Attesa />;
@@ -46,9 +48,9 @@ export default function Oggi({ apri = () => {} }: { apri?: Apri }) {
   return (
     <>
       {C.momento(oraAdesso(), giornata.chiusura) === 'mattina' ? (
-        <Mattina impegni={giornata.impegni} apri={apri} />
+        <Mattina impegni={giornata.impegni} apri={apri} vai={vai} />
       ) : (
-        <Pomeriggio chiusura={giornata.chiusura} apri={apri} />
+        <Pomeriggio chiusura={giornata.chiusura} apri={apri} vai={vai} />
       )}
       {R.rEvolutionAttiva(oggi, rEvolutionDa) && (
         <section className="schermo dopo">
@@ -61,7 +63,7 @@ export default function Oggi({ apri = () => {} }: { apri?: Apri }) {
   );
 }
 
-function Mattina({ impegni, apri }: { impegni: Impegno[]; apri: Apri }) {
+function Mattina({ impegni, apri, vai }: { impegni: Impegno[]; apri: Apri; vai?: (d: Dove) => void }) {
   const oggi = R.giornoRoma(new Date());
   const [cose, setCose] = useState<Cosa[]>();
   const [ieri, setIeri] = useState(0);
@@ -137,6 +139,7 @@ function Mattina({ impegni, apri }: { impegni: Impegno[]; apri: Apri }) {
           </>
         }
       />
+      <Tabellina vai={vai} />
 
       <div className="carta">
         <h2>Tre cose per oggi</h2>
@@ -221,7 +224,7 @@ type Pallino = { id: string; numero: number; data_prevista: string; fatta_il: st
 const COSA_SESSIONE: Record<string, string> = { rilettura_flashcard: 'rilettura e flash card', flashcard_mappa: 'flash card e mappa', quiz: 'quiz', quiz_errori: 'quiz breve sugli errori' };
 const P = R.CONFIG.passi.obbligatori;
 
-function Pomeriggio({ chiusura, apri }: { chiusura: string | null; apri: Apri }) {
+function Pomeriggio({ chiusura, apri, vai }: { chiusura: string | null; apri: Apri; vai?: (d: Dove) => void }) {
   const oggi = R.giornoRoma(new Date());
   const domani = R.prossimoGiornoDiScuola(oggi);
   const [compiti, setCompiti] = useState<Compito[]>();
@@ -295,6 +298,7 @@ function Pomeriggio({ chiusura, apri }: { chiusura: string | null; apri: Apri })
           </>
         }
       />
+      <Tabellina vai={vai} />
       {errore && <p role="alert">{errore}</p>}
 
       <div className="carta">
@@ -302,7 +306,7 @@ function Pomeriggio({ chiusura, apri }: { chiusura: string | null; apri: Apri })
           <p>Nessun compito su Nuvola per {GIORNI[domani.getDay()]}.</p>
         ) : (
           <>
-            <div className="testa-carta">
+            <div className="testa-carta" data-ancora="compiti">
               <h2>In quest'ordine</h2>
               {mostraValore(compiti.some((c) => c.fatto_il)) && <span className="valore">+{P.compiti} ciascuno</span>}
             </div>
@@ -369,7 +373,7 @@ function Pomeriggio({ chiusura, apri }: { chiusura: string | null; apri: Apri })
       )}
 
       {(foto.length > 0 || fotoFatta) && (
-        <div className="carta">
+        <div className="carta" data-ancora="foto">
           <div className="testa-carta">
             <h2>Da fotografare</h2>
             {mostraValore(!!fotoFatta) && <span className="valore">+{R.CONFIG.passi.foto_compito} ciascuna</span>}
