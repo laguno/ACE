@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { erroreDi, misure, PESO_MAX, scegli, tipoOriginale } from '.';
+import { erroreDi, misure, numeriPagine, pagineMancanti, PESO_MAX, scegli, tipoOriginale } from '.';
 
 const file = (name: string, type: string, byte = 10) => Object.assign(new Blob([new Uint8Array(byte)], { type }), { name });
 
@@ -54,5 +54,16 @@ describe('erroreDi', () => {
   test('il resto', () => {
     expect(erroreDi({ message: 'new row violates row-level security policy' }, true)).toBe('altro');
     expect(erroreDi(null, true)).toBe('altro');
+  });
+});
+
+describe('pagine caricate e mancanti', () => {
+  test('espande elenchi e intervalli', () => {
+    expect(numeriPagine('100, 107, 110–112')).toEqual([100, 107, 110, 111, 112]);
+    expect(numeriPagine(null)).toEqual([]);
+  });
+  test('dice quali pagine mancano', () => {
+    expect(pagineMancanti('100, 107, 110, 117', ['100, 107', null, '110'])).toEqual([117]);
+    expect(pagineMancanti('4-6', [])).toEqual([4, 5, 6]);
   });
 });

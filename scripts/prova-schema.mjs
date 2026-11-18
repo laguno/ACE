@@ -235,7 +235,7 @@ for (const t of tabelle) {
 const larghe = (await come(null, `select tablename || ' ' || cmd || ' ' || policyname p from pg_policies where schemaname = 'public' and cmd in ('DELETE', 'ALL') and coalesce(qual, '') not like '%e_genitore()%' and policyname <> 'proprie'`)).rows;
 verifica('nessuna regola di cancellazione oltre ai genitori', larghe.length === 0 || (console.log(larghe), false));
 // funzioni chiamabili da un utente: solo queste (registra_passi, tenta_enigma... solo dal server)
-const FUNZIONI = ['controlla_pin', 'correggi_partita', 'e_famiglia', 'e_genitore', 'frase_del_giorno', 'imposta_pin', 'oggi', 'rispondi_partita', 'sposta_verifica', 'storna_spunta', 'vedi_saldo', 'verifica_pin'];
+const FUNZIONI = ['controlla_pin', 'correggi_partita', 'e_famiglia', 'e_genitore', 'frase_del_giorno', 'imposta_pin', 'oggi', 'rispondi_partita', 'segna_tipo_verifica', 'sposta_verifica', 'storna_spunta', 'vedi_saldo', 'verifica_pin'];
 const chiamabili = (await come(null, `select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.prorettype <> 'trigger'::regtype and has_function_privilege('authenticated', p.oid, 'execute') order by 1`)).rows.map((r) => r.proname);
 verifica('funzioni chiamabili da Lani e genitori: solo quelle previste', JSON.stringify(chiamabili) === JSON.stringify(FUNZIONI) || (console.log(chiamabili), false));
 const perAnon = (await come(null, `select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.prorettype <> 'trigger'::regtype and has_function_privilege('anon', p.oid, 'execute')`)).rows;
@@ -301,6 +301,7 @@ verifica('Lani legge le assenze', (await come(LANI, 'select * from assenze')).ro
 await come(null, `insert into verifiche (nuvola_id, tipo, data) values ('v-assenza', 'verifica', '2026-11-24')`);
 const VERIFICA = await val(null, `select id from verifiche where nuvola_id = 'v-assenza'`);
 await come(null, `insert into sessioni_ripasso (verifica_id, numero, data_prevista, tipo) values ('${VERIFICA}', 1, '2026-11-23', 'quiz')`);
+await fallisce('Lani non cambia il tipo di una prova', LANI, `select segna_tipo_verifica('${VERIFICA}', 'interrogazione')`);
 await fallisce('Lani non sposta una verifica', LANI, `select sposta_verifica('${VERIFICA}', '2026-12-01')`);
 await come(PAPA, `select sposta_verifica('${VERIFICA}', '2026-11-30', true)`);
 await come(null, `update verifiche set data = '2026-11-24' where id = '${VERIFICA}'`);

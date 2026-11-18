@@ -162,7 +162,7 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
                   icona={<Camera size={20} weight="bold" aria-hidden />}
                   titolo={`Foto: ${descrizione(r)}`}
                   sotto="Se la fate voi, Lani non prende i passi"
-                  azione={<Fotografa client={client} richiesta={r} fatto={() => fatto(`Foto salvata: ${descrizione(r)}.`)} />}
+                  azione={<Fotografa client={client} richiesta={r} studio fatto={() => fatto(`Foto salvata: ${descrizione(r)}.`)} />}
                 />
               );
             })}

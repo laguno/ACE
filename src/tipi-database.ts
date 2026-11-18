@@ -398,6 +398,7 @@ export type Database = {
           id: string
           materia_id: string | null
           pagine: string | null
+          pagine_viste: string | null
           percorso_storage: string
           richiesta_id: string | null
         }
@@ -407,6 +408,7 @@ export type Database = {
           id?: string
           materia_id?: string | null
           pagine?: string | null
+          pagine_viste?: string | null
           percorso_storage: string
           richiesta_id?: string | null
         }
@@ -416,6 +418,7 @@ export type Database = {
           id?: string
           materia_id?: string | null
           pagine?: string | null
+          pagine_viste?: string | null
           percorso_storage?: string
           richiesta_id?: string | null
         }
@@ -1273,6 +1276,7 @@ export type Database = {
       verifiche: {
         Row: {
           data_spostata: string | null
+          tipo_scelto: Database["public"]["Enums"]["tipo_verifica"] | null
           recupero_vago: boolean
           argomento: string | null
           creato_il: string
@@ -1285,6 +1289,7 @@ export type Database = {
         }
         Insert: {
           data_spostata?: string | null
+          tipo_scelto?: Database["public"]["Enums"]["tipo_verifica"] | null
           recupero_vago?: boolean
           argomento?: string | null
           creato_il?: string
@@ -1297,6 +1302,7 @@ export type Database = {
         }
         Update: {
           data_spostata?: string | null
+          tipo_scelto?: Database["public"]["Enums"]["tipo_verifica"] | null
           recupero_vago?: boolean
           argomento?: string | null
           creato_il?: string
@@ -1519,6 +1525,10 @@ export type Database = {
       rispondi_partita: {
         Args: { p_id: string; p_in_campo: boolean }
         Returns: boolean
+      }
+      segna_tipo_verifica: {
+        Args: { p_id: string; p_tipo: Database["public"]["Enums"]["tipo_verifica"] }
+        Returns: undefined
       }
       sposta_verifica: {
         Args: { p_data: string; p_id: string; p_vago?: boolean }

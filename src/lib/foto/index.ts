@@ -56,3 +56,49 @@ export function erroreDi(e: unknown, inLinea: boolean): ErroreFoto {
   const testo = `${String(x?.message ?? '')} ${String((x?.originalError as { message?: unknown } | undefined)?.message ?? '')}`;
   return /failed to fetch|load failed|networkerror/i.test(testo) ? 'rete' : 'altro';
 }
+
+/**
+ * Carica un file nello Storage riportando i byte inviati (fetch non dà l'avanzamento, XHR sì).
+ * Stesso endpoint di supabase-js (corpo grezzo + tipo): le regole del bucket valgono uguale.
+ */
+export function caricaConAvanzamento(
+  { url, chiave, gettone, bucket, percorso, blob, tipo }: { url: string; chiave: string; gettone: string; bucket: string; percorso: string; blob: Blob; tipo: string },
+  inviati: (byte: number) => void,
+): Promise<void> {
+  return new Promise((risolvi, rifiuta) => {
+    const x = new XMLHttpRequest();
+    x.open('POST', `${url}/storage/v1/object/${bucket}/${percorso.split('/').map(encodeURIComponent).join('/')}`);
+    x.setRequestHeader('Authorization', `Bearer ${gettone}`);
+    x.setRequestHeader('apikey', chiave);
+    x.setRequestHeader('Content-Type', tipo);
+    x.setRequestHeader('x-upsert', 'false');
+    x.upload.onprogress = (e) => inviati(e.lengthComputable ? e.loaded : 0);
+    x.onload = () => {
+      if (x.status >= 200 && x.status < 300) return risolvi();
+      rifiuta(Object.assign(new Error(`storage ${x.status}`), { statusCode: x.status }));
+    };
+    x.onerror = () => rifiuta(new Error('Failed to fetch'));
+    x.ontimeout = () => rifiuta(new Error('Failed to fetch'));
+    x.send(blob);
+  });
+}
+
+/** Percentuale intera 0–100 (mai 100 prima della fine: lo dà il chiamante). */
+export const percentuale = (fatti: number, totale: number) => (totale > 0 ? Math.min(99, Math.floor((fatti / totale) * 100)) : 0);
+
+/** Numeri di pagina di un testo ("100, 107", "110–112", "pag. 4-16"): ogni intervallo si espande, niente doppioni. */
+export function numeriPagine(testo: string | null | undefined): number[] {
+  const fuori = new Set<number>();
+  for (const [, da, a] of (testo ?? '').matchAll(/(\d+)(?:\s*[-–]\s*(\d+))?/g)) {
+    const x = Number(da);
+    const y = a ? Number(a) : x;
+    if (y >= x && y - x <= 200) for (let n = x; n <= y; n++) fuori.add(n);
+  }
+  return [...fuori].sort((p, q) => p - q);
+}
+
+/** Pagine chieste che nessuna foto mostra ancora. */
+export const pagineMancanti = (chieste: string | null, viste: (string | null)[]): number[] => {
+  const fatte = new Set(viste.flatMap(numeriPagine));
+  return numeriPagine(chieste).filter((n) => !fatte.has(n));
+};

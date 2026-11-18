@@ -109,11 +109,21 @@ export function FoglioSposta({ client, verifica: v, avvisa, chiudi }: { client: 
     await client.functions.invoke('genera-studio').catch(() => {});
     avvisa(`${v.materie?.nome ?? 'Verifica'}: ${vago ? 'settimana prossima' : bello(nuova)}. Piano di ripasso rifatto.`);
   }
+  // il tipo scelto qui resta anche dopo la sincronizzazione di Nuvola (migrazione 0040)
+  async function cambiaTipo(tipo: 'verifica' | 'interrogazione') {
+    chiudi();
+    const { error } = await client.rpc('segna_tipo_verifica', { p_id: v.id, p_tipo: tipo });
+    avvisa(error ? 'Tipo non cambiato. Riprova.' : `${v.materie?.nome ?? 'Prova'}: ${tipo === 'interrogazione' ? 'interrogazione' : 'verifica scritta'}.`);
+  }
   return (
     <Foglio titolo={`Sposta ${v.materie?.nome ?? 'la verifica'}`} azione="Salva la data" pronto={!!data} conferma={() => sposta(data, false)} chiudi={chiudi}>
       <CampoData etichetta="Nuova data" value={data} min={R.iso(oggi)} onChange={(e) => setData(e.target.value)} />
       <button type="button" className="ga-btn tenue largo" onClick={() => sposta(R.iso(piu(R.lunedi(oggi), 7)), true)}>
         Settimana prossima, giorno da sapere
+      </button>
+      <p className="ga-nota">Tipo di prova: {v.tipo === 'interrogazione' ? 'interrogazione' : 'verifica scritta'}</p>
+      <button type="button" className="ga-btn tenue largo" onClick={() => cambiaTipo(v.tipo === 'interrogazione' ? 'verifica' : 'interrogazione')}>
+        {v.tipo === 'interrogazione' ? 'È una verifica scritta' : 'È un’interrogazione'}
       </button>
     </Foglio>
   );
