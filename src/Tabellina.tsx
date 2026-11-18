@@ -27,7 +27,7 @@ function nomeGiorno(giorno: string, oggi: string) {
 export default function Tabellina({ vai, genitori = false, client = supabase }: { vai?: (d: Dove) => void; genitori?: boolean; client?: SupabaseClient }) {
   const [dati, setDati] = useState<DatiTabellina | null>();
   useEffect(() => {
-    client.functions.invoke('tabellina').then(({ data, error }) => setDati(error || !data?.voci ? null : (data as DatiTabellina)));
+    client.functions.invoke('tabellina', { method: 'GET' }).then(({ data, error }) => setDati(error || !data?.voci ? null : (data as DatiTabellina)));
   }, [client]);
 
   if (dati === undefined) return <div className="carta tabellina" aria-busy="true" style={{ minHeight: 64 }} />;

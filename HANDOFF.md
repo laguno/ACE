@@ -5,7 +5,7 @@ Storia delle sessioni, decisioni prese e scelte approvate: `docs/storico.md`.
 ## Tabellina dei passi (18/11, ramo `tabellina-prova`, worktree `C:\progetti\ace\app-tabellina`, non in produzione)
 
 - Oggi di Lani e Oggi dei genitori: "Oggi hai preso Y passi su X disponibili", sotto "Guarda cosa manca" (da prendere, con il tocco che porta dove si fa; presi degli ultimi 7 giorni; ai genitori anche chi li ha dati). Edge Function nuova `tabellina` (sola lettura), regole in `src/lib/regole/tabellina.ts`. Fonti scelte dal signore: ogni giorno, studio in più, gesti di casa uno per uno, partita.
-- Da fare: glossario (allargare "Come si fanno i passi" con icone e una riga per voce, gesti divisi): testi da far approvare per il copione. Per pubblicare: backup, `npx supabase functions deploy tabellina --use-api --yes`, poi unione su `main`.
+- Glossario (approvato il 18/11, docs/05): "Come si fanno i passi" con un'icona e una riga "cosa fare" per voce, gesti di casa uno per uno. La tabellina si legge con GET (la vetrina conta i POST come scritture). Per pubblicare: backup, `npx supabase functions deploy tabellina --use-api --yes`, poi unione su `main`.
 - Ambiente di prova mai indietro rispetto a `main`: `npm run prova:allinea`, `rilascio:controlla`, controllo in `npm test` (runbook, "Ambiente di prova"). Su `gioco` manca ancora la riga in `scripts/prova-locale.ps1`.
 
 ## Dove siamo (16/11 sera)

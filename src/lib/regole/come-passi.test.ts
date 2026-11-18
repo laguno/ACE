@@ -57,6 +57,18 @@ describe('Come si fanno i passi', () => {
     expect(spenta.map((b) => b.id)).toEqual(['ogni-giorno', 'studio', 'voti', 'casa', 'meno', 'chiavi']);
     expect(accesa.map((b) => b.id)).toContain('r-evolution');
     expect(spenta.flatMap((b) => b.voci).every((v) => v.testo && v.valore)).toBe(true);
-    expect(spenta[0].voci[0]).toEqual({ testo: 'Compiti per domani fatti', valore: `+${CONFIG.passi.obbligatori.compiti}` });
+    expect(spenta[0].voci[0]).toMatchObject({ testo: 'Compiti per domani fatti', valore: `+${CONFIG.passi.obbligatori.compiti}` });
+  });
+
+  it('glossario (18/11): icona e cosa fare per ogni voce, gesti di casa uno per uno', () => {
+    const blocchi = blocchiPassi(CONFIG, { rEvolution: true });
+    const voci = blocchi.filter((b) => b.id !== 'chiavi').flatMap((b) => b.voci);
+    expect(voci.every((v) => v.icona)).toBe(true);
+    // i voti hanno una sola spiegazione, sulla prima riga
+    expect(voci.filter((v) => !v.spiega).every((v) => v.testo.startsWith('Voto da'))).toBe(true);
+    const casa = blocchi.find((b) => b.id === 'casa')!;
+    expect(casa.voci.map((v) => v.testo)).toEqual(['Scrivania in ordine', 'Lavastoviglie', 'Letto fatto', 'Vestiti in ordine']);
+    expect(casa.voci.map((v) => v.valore)).toEqual(Object.values(CONFIG.passi.gesti_casa.voci).map((n) => `+${n}`));
+    expect(casa.dettagli.join(' ')).toContain(`+${CONFIG.passi.gesti_casa.tetto_giornaliero}`);
   });
 });

@@ -789,6 +789,11 @@ body[data-sfondo='campo'] .barra button[aria-current='page'] { background: var(-
 .blocco-passi ul { list-style: none; margin: 8px 0 0; padding: 0; }
 .blocco-passi li { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; border-top: 2px dashed var(--lilla); }
 .blocco-passi li:first-child { border-top: 0; }
+/* glossario (18/11): icona a sinistra, nome e cosa fare al centro, numero a destra */
+.blocco-passi li.con-icona { justify-content: flex-start; padding: 6px 0; }
+.blocco-passi li.con-icona .riquadro { width: 40px; height: 40px; border-radius: 14px; }
+.blocco-passi li > span:not(.riquadro) { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.blocco-passi li small { font-size: 13px; line-height: 1.35; color: var(--testo-2); }
 .blocco-passi .valore { flex: none; font: 800 22px Nunito, sans-serif; }
 .blocco-passi details { margin-top: 8px; }
 .blocco-passi summary { min-height: 44px; display: flex; align-items: center; font-weight: 800; cursor: pointer; }

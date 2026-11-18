@@ -276,9 +276,43 @@ Pagina di Astra (pulsante "Come si fanno i passi" sotto il contapassi), raggiung
 | Studio in più (lani-concentrata) | "Solo dopo i compiti del giorno, al massimo {4} al giorno per tipo." | Giro di flash card; Video visto fino in fondo; Quiz al primo tentativo | "Ogni flash card si gira dopo {7} secondi." "Quiz: con almeno il {90%} giusto, 1° tentativo +{10}, … 4° tentativo e dopo +{1}; sotto, +{6}, …" |
 | Voti e traguardi (lani-festeggia) | | Voto da 9 o 10; Voto da 8; Voto da 7; Voto migliore del precedente, almeno 6; Sufficienza dopo un'insufficienza; Enigma del forziere risolto; Nota di merito | "Un voto basso non toglie passi: si guarda avanti con il piano." "Enigma: {3} tentativi." "Pagella del primo quadrimestre: +{100} con la media del 7, +{200} con il 7 e mezzo. Una materia che torna sufficiente: +{25}." |
 | R-Evolution (lani-divisa), solo se accesa | | Dieci minuti di allenamento; Partita giocata; Partita vinta, in più; In panchina tutta la partita | "I dieci minuti valgono solo finiti, dalle {06:00} alle {13:00}." "Vinta stando in panchina: +{5} in più." |
-| Gesti di casa (mamma-pollice) | "Li danno mamma e papà quando li notano, non si chiedono." | Scrivania, lavastoviglie, letto, vestiti | "Al massimo +{6} al giorno." |
+| Gesti di casa (mamma-pollice) | "Li danno mamma e papà quando li notano, non si chiedono." | Scrivania in ordine; Lavastoviglie; Letto fatto; Vestiti in ordine (una riga per gesto dal 18/11, +{2} ciascuno) | "Al massimo +{6} al giorno." |
 | Cosa fa perdere passi (papa-ci-pensiamo) | | Nota disciplinare; Tre note per dimenticanza; Bagno in disordine dopo la doccia; Gesto antisportivo in campo (solo con R-Evolution); Balla o imbroglio | "Il saldo non va mai sotto zero. Una spunta sbagliata tolta da mamma o papà non è un castigo: si torna com'era." |
 | Chiavi e forzieri (mazzo-chiavi) | "Ogni domenica sera, da zero a tre chiavi. Le chiavi aprono i forzieri." | Prima chiave: passi di ogni giorno {70%}; Seconda chiave: nessuna nota (zero note); Terza chiave: cose fatte {95%} | "Prima chiave con almeno il {70%} dei passi di ogni giorno; seconda se in più non ci sono note; terza con almeno il {95%} delle cose fatte." "Lo studio in più dà passi, non chiavi." "Forzieri: {2, 4, 7, …} chiavi." |
+
+### Glossario: icona e cosa fare per ogni voce
+
+Approvato dal signore il 18/11. Ogni voce ha un'icona Phosphor in un riquadro colorato a sinistra (un colore del kit per blocco) e, sotto il nome, una riga su cosa fare. La pagina è anche il glossario della tabellina dei passi di Oggi: un gesto di casa che manca porta qui, al blocco Gesti di casa. Chiavi e forzieri resta senza icone.
+
+| Voce | Icona | Riga sotto il nome |
+|---|---|---|
+| Compiti per domani fatti | Notebook | "Tutti gli esercizi di Nuvola, poi la spunta in Pomeriggio." |
+| Cartella pronta la sera | Backpack | "Libri e quaderni di domani dentro, con la lista di Sera." |
+| Borsa pronta per allenamento o partita | Handbag | "Divisa, scarpe e borraccia, la sera prima." |
+| Foglio da firmare consegnato | Signature | "Lo dai a mamma o papà, poi lo riporti a scuola firmato." |
+| Ripasso prima di una verifica | ArrowsClockwise | "La sessione di Studio nel giorno previsto." |
+| Foto delle pagine che ACE ti chiede | Camera | "Fotografi le pagine richieste, tutte in una volta." |
+| Giro di flash card | Cards | "Leggi, pensi la risposta, giri la carta dopo {7} secondi." |
+| Video visto fino in fondo | PlayCircle | "Lo guardi tutto, senza saltare." |
+| Quiz al primo tentativo | ListChecks | "Più risposte giuste al primo giro, più passi." |
+| Voto da 9 o 10, da 8, da 7 | Star | "Arrivano da soli da Nuvola." (solo sulla prima riga) |
+| Voto migliore del precedente, almeno 6 | TrendUp | "Più alto dell'ultimo voto nella stessa materia." |
+| Sufficienza dopo un'insufficienza | ArrowFatLineUp | "Torni sopra il 6 dopo un voto sotto." |
+| Enigma del forziere risolto | PuzzlePiece | "Lo trovi in Astra vicino al forziere: {3} tentativi." |
+| Nota di merito | Certificate | "La scrive un prof quando fai una cosa bella." |
+| Dieci minuti di allenamento | Timer | "Il timer di Oggi fino in fondo, dalle {06:00} alle {13:00}." |
+| Partita giocata | Volleyball | "Dopo la partita rispondi a “Com'è andata?”." |
+| Partita vinta, in più | Trophy | "In più, se la squadra vince." |
+| In panchina tutta la partita | Armchair | "Vale anche se resti in panchina." |
+| Scrivania in ordine | Desk | "Piano libero, libri e penne al loro posto." |
+| Lavastoviglie | ForkKnife | "La carichi o la svuoti senza che te lo chiedano." |
+| Letto fatto | Bed | "Lenzuola tirate e cuscino a posto, prima di uscire." |
+| Vestiti in ordine | TShirt | "Piegati nell'armadio o nel cesto, non sulla sedia." |
+| Nota disciplinare | Warning | "La scrive un prof per il comportamento." |
+| Tre note per dimenticanza | NoteBlank | "Ogni tre volte che a scuola manca qualcosa." |
+| Bagno in disordine dopo la doccia | Shower | "Asciugamano appeso, niente vestiti per terra." |
+| Gesto antisportivo in campo | HandPalm | "Con compagne, avversarie o arbitro." |
+| Balla o imbroglio | ChatCircleSlash | "Dire una cosa non vera, o spuntare una cosa non fatta." |
 
 ## Notifiche
 
