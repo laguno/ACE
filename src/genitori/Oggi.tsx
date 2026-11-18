@@ -91,13 +91,19 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
   }
 
   const righe = daFare(d);
+  // correzione del signore del 16/11: la foto la fa Lani (+2); ai genitori la riga compare solo quando
+  // tocca a loro (dalla scadenza o dopo le 20), cioè quando c'è il pulsante: prima sembrava una cosa da fare non spuntabile
+  const fotoTocca = d.foto.filter((r) => {
+    const scade = r.compiti?.scadenza ?? r.verifiche?.data;
+    return ora >= '20:00' || (!!scade && scade <= oggi);
+  });
   return (
     <>
       <section className="ga-sezione" aria-labelledby="da-fare">
         <h2 id="da-fare">
           Da fare per voi {righe.length > 0 && <span className="ga-conta">{righe.length}</span>}
         </h2>
-        {righe.length === 0 && d.foto.length === 0 ? (
+        {righe.length === 0 && fotoTocca.length === 0 ? (
           <Vuoto titolo="Niente da fare per voi" testo="Fogli, foto e forzieri sono a posto." />
         ) : righe.length > 0 && (
           <Elenco etichetta="Da fare per voi">
@@ -144,22 +150,19 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
             ))}
           </Elenco>
         )}
-        {d.foto.length > 0 && (
+        {fotoTocca.length > 0 && (
           <>
           <p className="ga-nota">Da sapere</p>
           <Elenco etichetta="Da sapere">
-            {d.foto.map((r) => {
-              // correzione del signore del 16/11: la foto la fa Lani (+2); i genitori solo dalla scadenza o dopo le 20
-              const scade = r.compiti?.scadenza ?? r.verifiche?.data;
-              const tocca = ora >= '20:00' || (!!scade && scade <= oggi);
+            {fotoTocca.map((r) => {
               return (
                 <Riga
                   key={r.id}
                   colore="burro"
                   icona={<Camera size={20} weight="bold" aria-hidden />}
                   titolo={`Foto: ${descrizione(r)}`}
-                  sotto={tocca ? 'Se la fate voi, Lani non prende i passi' : `La fa Lani · +${R.CONFIG.passi.foto_compito}`}
-                  azione={tocca ? <Fotografa client={client} richiesta={r} fatto={() => fatto(`Foto salvata: ${descrizione(r)}.`)} /> : undefined}
+                  sotto="Se la fate voi, Lani non prende i passi"
+                  azione={<Fotografa client={client} richiesta={r} fatto={() => fatto(`Foto salvata: ${descrizione(r)}.`)} />}
                 />
               );
             })}
