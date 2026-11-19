@@ -139,9 +139,22 @@ async function scarica(token: string) {
   const quadrimestri = await leggi(token, `${a}/frazioni-temporali`, alunno.id);
   const corrente = quadrimestri.find((q) => q.corrente) ?? quadrimestri.at(-1);
   const voti = corrente ? await leggi(token, `${a}/frazione-temporale/${corrente.id}/voti/materie`, alunno.id) : [];
+  // peso, "calcolato nella media" e tipo stanno solo nel dettaglio per materia (voti/materia/{id}).
+  // Se una materia non risponde si usa l'elenco: i voti entrano lo stesso, senza toccare peso e media già salvati.
+  const votiDettaglio: DaNuvola[] = [];
+  for (const m of voti) {
+    if (!m.voti?.length) continue;
+    try {
+      const [dettaglio] = await leggi(token, `${a}/frazione-temporale/${corrente.id}/voti/materia/${m.id}`, alunno.id);
+      votiDettaglio.push(dettaglio?.voti?.length === m.voti.length ? dettaglio : m);
+    } catch (e) {
+      console.error('voti/materia', m.materia, e instanceof Error ? e.message : e);
+      votiDettaglio.push(m);
+    }
+  }
   const note = await leggi(token, `${a}/note`, alunno.id);
   const argomenti = lezioni.flatMap((v) => v.ore.flatMap((o: DaNuvola) => o.argomenti));
-  return { compiti, giorniLezioni: lezioni, lezioni: argomenti, eventi, voti, note };
+  return { compiti, giorniLezioni: lezioni, lezioni: argomenti, eventi, voti, votiDettaglio, note };
 }
 
 // ---------------------------------------------------------------- scrittura
@@ -164,7 +177,10 @@ async function sincronizza() {
   const ids = new Set((esistenti ?? []).map((m) => m.id));
   const verifiche = N.verifiche(d.eventi, docenti);
   for (const v of verifiche) if (v.materia_id && !ids.has(v.materia_id)) v.materia_id = null;
-  const voti = N.voti(d.voti);
+  const voti = N.voti(d.votiDettaglio);
+  // con il dettaglio le righe hanno peso e fa_media, senza no: due scritture, così l'elenco non azzera nulla
+  const votiConDettaglio = voti.filter((v) => 'fa_media' in v);
+  const votiSoloElenco = voti.filter((v) => !('fa_media' in v));
   const note = N.note(d.note).map((n) => ({ ...n, materia_id: n.materia_id && ids.has(n.materia_id) ? n.materia_id : null }));
   const compiti = N.compiti(d.compiti);
 
@@ -172,7 +188,7 @@ async function sincronizza() {
     materie,
     compiti: await scrivi('compiti', compiti),
     verifiche: await scrivi('verifiche', verifiche),
-    voti: await scrivi('voti', voti),
+    voti: (await scrivi('voti', votiConDettaglio)) + (await scrivi('voti', votiSoloElenco)),
     note: await scrivi('note', note),
     lezioni: await scrivi('lezioni', N.lezioni(d.giorniLezioni).filter((l) => ids.has(l.materia_id))),
     ...(await passiEForzieri(db)),
@@ -207,14 +223,15 @@ async function chiudiScadute(oggi: string) {
 /**
  * Da fotografare: per ogni compito o verifica in arrivo con pagine scritte e mai fotografate (stessa
  * materia, stesse pagine) una richiesta, una sola volta; ai genitori un push per giro.
- * ponytail: con il solo argomento servirebbero le pagine probabili dalla mappa dei libri.
+ * Per le verifiche le pagine si cercano nell'argomento e in pagine_probabili (scritte da genera-studio,
+ * che parte dopo: una verifica nuova riceve la richiesta al giro successivo).
  */
 async function richiesteFoto() {
   const oggi = R.iso(R.giornoRoma(new Date()));
   await chiudiScadute(oggi);
   const [c, v, r, f, m] = await Promise.all([
     db.from('compiti').select('id, materia_id, testo').gte('scadenza', oggi),
-    db.from('verifiche').select('id, materia_id, argomento').gte('data', oggi),
+    db.from('verifiche').select('id, materia_id, argomento, pagine_probabili').gte('data', oggi),
     db.from('richieste_foto').select('compito_id, verifica_id, materia_id, pagine'),
     db.from('foto_pagine').select('materia_id, pagine'),
     db.from('materie').select('id, nome'),
@@ -230,7 +247,8 @@ async function richiesteFoto() {
     gia.add(chiave(materia, pagine));
     nuove.push({ motivo, materia_id: materia, pagine, ...(motivo === 'compito' ? { compito_id: id } : { verifica_id: id }) });
   };
-  for (const x of v.data ?? []) aggiungi('verifica', x.id, x.materia_id, x.argomento);
+  // le pagine di una verifica stanno spesso solo in pagine_probabili, non nell'argomento
+  for (const x of v.data ?? []) aggiungi('verifica', x.id, x.materia_id, `${x.argomento ?? ''} ${x.pagine_probabili ?? ''}`);
   for (const x of c.data ?? []) aggiungi('compito', x.id, x.materia_id, x.testo);
   if (!nuove.length) return 0;
   const { error } = await db.from('richieste_foto').insert(nuove);

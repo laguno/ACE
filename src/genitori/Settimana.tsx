@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { CalendarBlank, Check, FileText, House } from '@phosphor-icons/react';
 import * as R from '../lib/regole';
+import { mediaGenerale } from '../lib/media';
 import { Attesa, CampoData, CampoTesto, Elenco, Foglio, Riga, Vuoto } from '../kit';
 import { FotoSalvate } from '../Foto';
 import { PartiteFipav } from '../Partita';
@@ -27,7 +28,7 @@ export default function Settimana({ client, passi, avvisa }: Props) {
 
   async function carica() {
     const [v, o, n, s, c, a, f, re, ch] = await Promise.all([
-      client.from('voti').select('voto'),
+      client.from('voti').select('materia_id, voto, peso, fa_media'),
       client.from('impostazioni').select('valore').eq('chiave', 'obiettivo_media').maybeSingle(),
       client.from('note').select('id', { count: 'exact', head: true }).gte('data', R.iso(lun)).lte('data', R.iso(dom)),
       client.from('serate').select('data').gte('data', R.iso(lun)).lte('data', R.iso(dom)).not('cartella_il', 'is', null),
@@ -38,9 +39,8 @@ export default function Settimana({ client, passi, avvisa }: Props) {
       client.from('impostazioni').select('valore').eq('chiave', R.CHIAVE_R_EVOLUTION).maybeSingle(),
       client.from('impostazioni').select('valore').eq('chiave', 'ora_chiusura').maybeSingle(),
     ]);
-    const voti = (v.data ?? []).map((x) => Number(x.voto));
     setD({
-      media: voti.length ? voti.reduce((x, y) => x + y, 0) / voti.length : null,
+      media: mediaGenerale(v.data ?? []),
       obiettivo: Number(o.data?.valore ?? 7.35),
       note: n.count ?? 0,
       serate: (s.data ?? []).map((x) => x.data as string),

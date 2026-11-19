@@ -38,11 +38,13 @@ export function votoNumero(s: string): number | null {
   return v >= 0 && v <= 10 ? v : null;
 }
 
-export function tipoNota(tipologia: string): 'disciplinare' | 'didattica' | 'merito' | 'altro' {
+export function tipoNota(tipologia: string, descrizione?: string | null): 'disciplinare' | 'didattica' | 'merito' | 'altro' {
   const t = tipologia.toLowerCase();
   if (t.includes('disciplinar')) return 'disciplinare';
   if (t.includes('didattic')) return 'didattica';
   if (t.includes('merito')) return 'merito';
+  // i docenti usano "Altro tipo di nota" e scrivono "NOTA DI MERITO:" all'inizio del testo (18/11/2026)
+  if (/^\s*nota\s+di\s+merito\b/i.test(descrizione ?? '')) return 'merito';
   return 'altro';
 }
 
@@ -130,9 +132,23 @@ export function verifiche(valori: EventoNuvola[], docenti: Map<string, Set<strin
   }));
 }
 
-type MateriaVoti = { materia: string; voti: { data: string; valutazione: string }[] };
+/** '20%' -> 20, '100%' -> 100; senza numero o fuori 0-100 -> null (vale come 100 nella media). */
+export function pesoNumero(s: string | null | undefined): number | null {
+  const m = (s ?? '').trim().replace(',', '.').match(/^(\d+(?:\.\d+)?)\s*%?$/);
+  if (!m) return null;
+  const p = Number(m[1]);
+  return p >= 0 && p <= 100 ? p : null;
+}
 
-/** I voti non hanno id: materia + giorno + posizione nel giorno. Giudizi senza numero saltati. */
+/** Il dettaglio (voti/materia/{id}) ha peso, faMedia e tipologia; l'elenco (voti/materie) solo data e valutazione. */
+type VotoNuvola = { data: string; valutazione: string; peso?: string | null; faMedia?: boolean; tipologia?: string | null };
+type MateriaVoti = { materia: string; voti: VotoNuvola[] };
+
+/**
+ * I voti non hanno id: materia + giorno + posizione nel giorno. Giudizi senza numero saltati.
+ * Con il dettaglio escono anche peso, fa_media e tipo; con il solo elenco quelle chiavi mancano, così
+ * un giro in cui il dettaglio non risponde non cancella quello che c'è già (le due righe si scrivono a parte).
+ */
 export function voti(valori: MateriaVoti[]) {
   return valori.flatMap((m) => {
     const id = materiaId(m.materia);
@@ -142,7 +158,10 @@ export function voti(valori: MateriaVoti[]) {
       const n = visti.get(g) ?? 0;
       visti.set(g, n + 1);
       const voto = votoNumero(v.valutazione);
-      return voto === null ? [] : [{ nuvola_id: `${id}-${g}-${n}`, materia_id: id, data: g, voto }];
+      if (voto === null) return [];
+      const base = { nuvola_id: `${id}-${g}-${n}`, materia_id: id, data: g, voto };
+      if (v.faMedia === undefined) return [base];
+      return [{ ...base, peso: pesoNumero(v.peso), fa_media: v.faMedia !== false, tipo: v.tipologia?.toLowerCase() ?? null }];
     });
   });
 }
@@ -153,7 +172,7 @@ export function note(valori: NotaNuvola[]) {
   return valori.map((n) => ({
     nuvola_id: String(n.id),
     data: giorno(n.data),
-    tipo: tipoNota(n.tipologia),
+    tipo: tipoNota(n.tipologia, n.descrizione),
     testo: n.descrizione,
     materia_id: n.materia ? materiaId(n.materia) : null,
   }));

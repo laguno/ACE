@@ -55,7 +55,9 @@ function nuvolaFinta(o: { password?: string; giu?: boolean } = {}) {
     if (api.includes('/eventi-classe'))
       return j({ valori: [{ id: 1, tipo: 'Avviso', nome: 'Verifica di matematica', descrizione: 'Frazioni pag. 50-55', dataInizio: '2026-11-30T09:00:00+01:00', docente: null }] });
     if (api.endsWith('/frazioni-temporali')) return j({ valori: [{ id: 1, corrente: true }] });
-    if (api.includes('/voti/materie')) return j({ valori: [{ materia: 'MATEMATICA', voti: [{ data: '2026-11-24T00:00:00+01:00', valutazione: '8' }] }] });
+    if (api.includes('/voti/materie')) return j({ valori: [{ id: 1034, materia: 'MATEMATICA', conteggioVoti: 1, voti: [{ data: '2026-11-24T00:00:00+01:00', valutazione: '8' }] }] });
+    if (api.endsWith('/voti/materia/1034'))
+      return j({ valori: [{ materia: 'MATEMATICA', voti: [{ data: '2026-11-24T00:00:00+01:00', valutazione: '8', valutazioneMatematica: '8', faMedia: true, peso: '50%', tipologia: 'ORALE' }] }] });
     if (api.endsWith('/note')) return j({ valori: [{ id: 9, data: '2026-11-24T10:00:00+01:00', tipologia: 'Nota di merito', descrizione: 'Brava', materia: 'MATEMATICA' }] });
     return new Response('?', { status: 404 });
   });
@@ -79,6 +81,8 @@ describe('sync-nuvola', () => {
     expect(r.corpo).toMatchObject({ esito: 'ok', compiti: 1, verifiche: 1, voti: 1, note: 1, lezioni: 1, foto: 2, studio: 'avviato' });
     expect(r.corpo.passi).toBeGreaterThan(0); // voto 8 e nota di merito, dal 23/11
     expect(await valore(`select testo from compiti`)).toBe('Es. 3 pag. 40-42');
+    expect(await valore(`select peso::int || ' ' || fa_media || ' ' || tipo from voti`)).toBe('50 true orale'); // dal dettaglio della materia
+    expect(chiamate.some((u) => u.includes('/voti/materia/1034'))).toBe(true);
     expect(await valore(`select count(*)::int from richieste_foto`)).toBe(2);
     expect(inviate.filter((i) => i.endpoint.includes('papa'))).toHaveLength(1); // un push per giro
     expect(chiamate.some((u) => u.includes('/functions/v1/genera-studio'))).toBe(true);

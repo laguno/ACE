@@ -25,6 +25,17 @@ describe('normalizzazione di Nuvola', () => {
     expect(N.tipoNota('AlTRO TIPO DI NOTA')).toBe('altro');
   });
 
+  it('note: la nota di merito scritta nel testo di un "altro tipo di nota"', () => {
+    const testo = 'NOTA DI MERITO: \nGli alunni hanno partecipato molto positivamente all’incontro.';
+    expect(N.tipoNota('AlTRO TIPO DI NOTA', testo)).toBe('merito');
+    expect(N.tipoNota('AlTRO TIPO DI NOTA', '  nota di merito: brava')).toBe('merito');
+    expect(N.tipoNota('AlTRO TIPO DI NOTA', 'Comunicazione: nota di merito della classe a settembre')).toBe('altro');
+    expect(N.tipoNota('AlTRO TIPO DI NOTA', null)).toBe('altro');
+    // la tipologia di Nuvola vince sul testo
+    expect(N.tipoNota('NOTA DISCIPLINARE', 'nota di merito')).toBe('disciplinare');
+    expect(N.note([{ id: 15247, data: '2026-11-18T00:00:00+01:00', tipologia: 'AlTRO TIPO DI NOTA', descrizione: testo, materia: 'INGLESE' }])[0].tipo).toBe('merito');
+  });
+
   it('verifiche: dal tipo o dal nome, non le gite', () => {
     expect(N.eVerifica({ tipo: 'Avviso', nome: 'Verifica di Geografia: Unione Europea' })).toBe(true);
     expect(N.eVerifica({ tipo: 'VERIFICA', nome: 'ARTE e IMMAGINE' })).toBe(true);
@@ -75,6 +86,37 @@ describe('normalizzazione di Nuvola', () => {
       { nuvola_id: 'italiano-2026-09-21-0', materia_id: 'italiano', data: '2026-09-21', voto: 7.5 },
       { nuvola_id: 'italiano-2026-09-21-1', materia_id: 'italiano', data: '2026-09-21', voto: 6 },
     ]);
+  });
+
+  it('peso: "20%" diventa 20, il resto null', () => {
+    expect(N.pesoNumero('20%')).toBe(20);
+    expect(N.pesoNumero('100%')).toBe(100);
+    expect(N.pesoNumero('12,5%')).toBe(12.5);
+    expect(N.pesoNumero('0%')).toBe(0);
+    for (const x of ['', null, undefined, 'alto', '150%', '-5%']) expect(N.pesoNumero(x)).toBeNull();
+  });
+
+  it('voti dal dettaglio: peso, fa_media e tipo (risposta vera di Nuvola, Inglese 2026)', () => {
+    const v = N.voti([
+      {
+        materia: 'INGLESE',
+        voti: [
+          { data: '2026-11-05T00:00:00+01:00', valutazione: '9', faMedia: true, peso: '20%', tipologia: 'ORALE' },
+          { data: '2026-11-04T00:00:00+01:00', valutazione: '5½', faMedia: true, peso: '50%', tipologia: 'ORALE' },
+          { data: '2026-10-14T00:00:00+02:00', valutazione: '8', faMedia: false, peso: '100%', tipologia: 'SCRITTO' },
+        ],
+      },
+    ]);
+    expect(v).toEqual([
+      { nuvola_id: 'inglese-2026-11-05-0', materia_id: 'inglese', data: '2026-11-05', voto: 9, peso: 20, fa_media: true, tipo: 'orale' },
+      { nuvola_id: 'inglese-2026-11-04-0', materia_id: 'inglese', data: '2026-11-04', voto: 5.5, peso: 50, fa_media: true, tipo: 'orale' },
+      { nuvola_id: 'inglese-2026-10-14-0', materia_id: 'inglese', data: '2026-10-14', voto: 8, peso: 100, fa_media: false, tipo: 'scritto' },
+    ]);
+  });
+
+  it('voti dal solo elenco: niente chiavi di peso, per non azzerare quelle già salvate', () => {
+    const [r] = N.voti([{ materia: 'INGLESE', voti: [{ data: '2026-11-05T00:00:00+01:00', valutazione: '9' }] }]);
+    expect(Object.keys(r)).toEqual(['nuvola_id', 'materia_id', 'data', 'voto']);
   });
 });
 

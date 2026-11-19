@@ -2,6 +2,13 @@
 
 Storia delle sessioni, decisioni prese e scelte approvate: `docs/storico.md`.
 
+## Foto delle verifiche e voti pesati (19/11, in produzione)
+
+- Le verifiche non avevano richieste di foto. `richiesteFoto()` in `sync-nuvola` cercava le pagine solo nell'argomento. Ora legge anche `pagine_probabili`. Quando una verifica è nuova, `genera-studio` scrive le pagine dopo `richiesteFoto()`, quindi la richiesta arriva al giro successivo.
+- Medie pesate come Nuvola: peso, `fa_media` e tipo dal dettaglio `voti/materia/{id}` (migrazione 0044, già applicata). La formula è in `src/lib/media.ts`, usata in Figurina e Settimana.
+- `sync-nuvola` è stata pubblicata il 19/11 alle 18:05 e poi lanciata a mano con `net.http_post` e il segreto del Vault. `lancia_sync_nuvola()` esce subito fuori dalle 14 e dalle 19. Richieste aperte per Italiano (pag. 12–47) e Spagnolo (pag. 86–101) del 20/11. I quiz c'erano già.
+- **Da fare:** la verifica di Spagnolo da recuperare non è in Nuvola. Va inserita a mano o si aspetta che compaia. Controllare in Stato di ACE i pesi dei voti dopo il giro delle 19:30.
+
 ## Tabellina dei passi (18/11, ramo `tabellina-prova`, worktree `C:\progetti\ace\app-tabellina`, non in produzione)
 
 - Oggi di Lani e Oggi dei genitori: "Oggi hai preso Y passi su X disponibili", sotto "Guarda cosa manca" (da prendere, con il tocco che porta dove si fa; presi degli ultimi 7 giorni; ai genitori anche chi li ha dati). Edge Function nuova `tabellina` (sola lettura), regole in `src/lib/regole/tabellina.ts`. Fonti scelte dal signore: ogni giorno, studio in più, gesti di casa uno per uno, partita.

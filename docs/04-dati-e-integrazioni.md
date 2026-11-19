@@ -11,6 +11,7 @@
 - Lettura verificata il 4 novembre 2026: accesso con utente e password di un genitore, poi le API interne di Nuvola (compiti, eventi di classe/verifiche, voti, note) **in sola lettura**.
 - Gli endpoint esatti vanno rimappati con il signore presente, dal pannello di rete del browser in una sessione che apre lui. **Claude non inserisce mai le credenziali**: il signore le mette come segreti di Supabase (`supabase secrets set NUVOLA_UTENTE=... NUVOLA_PASSWORD=...`).
 - Edge Function `sync-nuvola`, programmata alle **14:30 e 19:30** (cron di Supabase): scarica, normalizza in `compiti`, `verifiche`, `voti`, `note`, scrive `sync_log`; se l'accesso fallisce avvisa i genitori.
+- Voti (19/11/2026): l'elenco `voti/materie` dà solo data e valutazione e nasconde la media. Peso (`"20%"`), `faMedia` e tipologia stanno nel dettaglio `…/frazione-temporale/{q}/voti/materia/{id materia}`, una chiamata per materia con voti; vanno in `voti.peso`, `voti.fa_media`, `voti.tipo` (migrazione 0044). Le medie dell'app (`src/lib/media.ts`) sono pesate, saltano i voti con `fa_media` falso, e la generale è la media delle medie per materia. I passi dei voti restano per voto, senza peso.
 - Dopo ogni sincronizzazione: genera il piano di ripasso per le verifiche nuove, le richieste di foto per pagine mai fotografate (pagine probabili dalla mappa dei libri se Nuvola dà solo l'argomento), le notifiche del pomeriggio, i movimenti di passi per voti e note.
 
 ## Google Classroom

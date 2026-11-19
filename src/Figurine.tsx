@@ -5,10 +5,11 @@ import { ArrowDown, ArrowLeft, ArrowUp } from '@phosphor-icons/react';
 import { Attesa, useSfondo } from './kit';
 import { nomeFigurina } from './lib/copione';
 import { CONFIG } from './lib/regole';
+import { mediaGenerale, mediaPesata } from './lib/media';
 
 // Figurina di Lani (design/Figurina.html) e Album da 64 (design/Album.html).
 
-type Voto = { materia_id: string; data: string; voto: number; materie: { nome: string } | null };
+type Voto = { materia_id: string; data: string; voto: number; peso: number | null; fa_media: boolean; materie: { nome: string } | null };
 
 /** Le 64 pose di famiglia (l'allenatore va nella pagina "La squadra", sprint 2). */
 const POSE = manifest.avatar.filter((a) => a.personaggio !== 'allenatore');
@@ -35,7 +36,7 @@ export function Figurina({ chiudi }: { chiudi: () => void }) {
   const [d, setD] = useState<{ voti: Voto[]; passi: number; chiavi: number; obiettivo: number }>();
   useEffect(() => {
     Promise.all([
-      supabase.from('voti').select('materia_id, data, voto, materie(nome)').order('data'),
+      supabase.from('voti').select('materia_id, data, voto, peso, fa_media, materie(nome)').order('data'),
       supabase.from('saldo_passi').select('passi').maybeSingle(),
       supabase.from('chiavi_totali').select('chiavi').maybeSingle(),
       supabase.from('impostazioni').select('valore').eq('chiave', 'obiettivo_media').maybeSingle(),
@@ -50,11 +51,11 @@ export function Figurina({ chiudi }: { chiudi: () => void }) {
   }, []);
   if (!d) return <Attesa />;
 
-  const media = (l: number[]) => (l.length ? l.reduce((a, b) => a + Number(b), 0) / l.length : null);
-  const generale = media(d.voti.map((v) => v.voto));
+  // medie pesate come Nuvola: peso del voto e voti che non fanno media (src/lib/media.ts)
+  const generale = mediaGenerale(d.voti);
   const perMateria = Object.values(
-    d.voti.reduce<Record<string, { nome: string; voti: number[] }>>((acc, v) => {
-      (acc[v.materia_id] ??= { nome: v.materie?.nome ?? v.materia_id, voti: [] }).voti.push(Number(v.voto));
+    d.voti.reduce<Record<string, { nome: string; voti: Voto[] }>>((acc, v) => {
+      (acc[v.materia_id] ??= { nome: v.materie?.nome ?? v.materia_id, voti: [] }).voti.push(v);
       return acc;
     }, {}),
   ).sort((a, b) => a.nome.localeCompare(b.nome));
@@ -101,13 +102,13 @@ export function Figurina({ chiudi }: { chiudi: () => void }) {
         {perMateria.length === 0 && <p>Ancora nessun voto su Nuvola.</p>}
         <ul className="medie">
           {perMateria.map((m) => {
-            const ultimo = m.voti.at(-1) ?? 0; // per materia c'è sempre almeno un voto
-            const prima = media(m.voti.slice(0, -1));
+            const ultimo = Number(m.voti.at(-1)?.voto ?? 0); // per materia c'è sempre almeno un voto
+            const prima = mediaPesata(m.voti.slice(0, -1));
             const tendenza = prima === null || Math.abs(ultimo - prima) < 0.25 ? '=' : ultimo > prima ? '↑' : '↓';
             return (
               <li key={m.nome}>
                 <span>{m.nome}</span>
-                <b>{fmt(media(m.voti))}</b>
+                <b>{fmt(mediaPesata(m.voti))}</b>
                 <span role="img" className={`tendenza t${tendenza === '↑' ? 'su' : tendenza === '↓' ? 'giu' : 'pari'}`} aria-label={tendenza === '↑' ? 'in salita' : tendenza === '↓' ? 'in discesa' : 'stabile'}>
                   {tendenza === '↑' ? <ArrowUp size={18} weight="bold" aria-hidden /> : tendenza === '↓' ? <ArrowDown size={18} weight="bold" aria-hidden /> : 'come prima'}
                 </span>
