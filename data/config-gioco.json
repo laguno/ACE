@@ -217,6 +217,29 @@
     "secondi": 600,
     "finestra": { "da": "06:00", "a": "13:00" }
   },
+  "metacognizione": {
+    "nota": "Blocco D del piano di studio (approvato dal signore il 19/11/2026): piano del giorno con stima dei minuti, voto previsto prima di una verifica, micro-lezione della settimana, riepilogo della domenica per i genitori. Sta in una sezione sua per non toccare le righe degli altri blocchi.",
+    "piano": {
+      "minuti_possibili": [5, 10, 15, 20, 30, 45, 60],
+      "minuti_max": 180,
+      "tendenza_giorni": 14,
+      "tendenza_voci_min": 5,
+      "nota_tendenza": "Rapporto tra minuti veri e stimati sulle voci finite negli ultimi tendenza_giorni: oltre 1 + soglia 'ci metti di più', sotto 1 - soglia 'ci metti di meno'.",
+      "tendenza_soglia": 0.2
+    },
+    "voto_previsto": {
+      "da_confermare": true,
+      "nota": "IMPORTO PROVVISORIO, DA CONFERMARE CON IL SIGNORE: passi se il voto vero cade entro scarto_max dal voto previsto. Il voto si lega alla verifica se è della stessa materia ed è dato tra il giorno della verifica e voto_entro_giorni dopo.",
+      "passi": 5,
+      "scarto_max": 0.5,
+      "chiedi_da_giorni_prima": 3,
+      "voto_min": 3,
+      "voto_max": 10,
+      "voto_entro_giorni": 14,
+      "tendenza_verifiche_min": 3,
+      "tendenza_soglia": 0.5
+    }
+  },
   "classifiche": {
     "nota": "Sprint 2: classifiche dal portale FIPAV Reggio Emilia, lette una volta al giorno dalla funzione classifiche. Stagione 2026/27. Se la squadra passa alla fase dopo cambia il girone (CId): per ora si cambia qui.",
     "portale": "https://reggioemilia.portalefipav.net/classifica.aspx?CId=",
