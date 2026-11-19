@@ -255,6 +255,12 @@ await fallisce('Lani non cambia il testo di un compito', LANI, `update compiti s
 await fallisce('Lani non si segna il foglio consegnato', LANI, `update fogli_firma set consegnato_il = now()`);
 await fallisce('Lani non cambia il testo di un popup', LANI, `update popup_coda set testo = 'x'`);
 await fallisce('Lani non cambia le domande di una flash card', LANI, `update flashcard set fronte = 'x'`);
+// 0070: la carta segnalata sbagliata da Lani resta fuori dal giro
+await come(LANI, `update flashcard set segnalata_sbagliata = true`);
+await come(LANI, `update flashcard set segnalata_sbagliata = false, prossima_revisione = oggi(), intervallo_giorni = 1`);
+verifica('Lani non rimette in giro una carta segnalata sbagliata', (await val(null, `select segnalata_sbagliata from flashcard where fronte = '2+2'`)) === true);
+await come(PAPA, `update flashcard set segnalata_sbagliata = false`);
+verifica('un genitore rimette in giro una carta segnalata', (await val(null, `select segnalata_sbagliata from flashcard where fronte = '2+2'`)) === false);
 await come(LANI, `insert into serate (data) values (oggi() + 5)`).catch(() => {});
 verifica('Lani non apre serate lontane da oggi', (await val(null, `select count(*)::int from serate where data = oggi() + 5`)) === 0);
 await come(LANI, `insert into umore (data, faccia) values (oggi() - 1, 'contenta')`).catch(() => {});
