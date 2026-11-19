@@ -221,7 +221,7 @@ const inserisce = async (uid, t, ruolo) => {
 };
 // foto_pagine e serate: Lani inserisce solo a condizioni (file vero, data vicina), provate sopra e sotto
 // partite: Lani solo da approvare, provato sopra
-const LANI_INSERISCE = ['errori_client', 'flashcard_giri', 'partite', 'push_iscrizioni', 'quiz_tentativi', 'umore', 'video_visti'];
+const LANI_INSERISCE = ['errori_client', 'flashcard_giri', 'partite', 'piano_voci', 'push_iscrizioni', 'quiz_tentativi', 'umore', 'video_visti'];
 const GENITORE_INSERISCE = [...LANI_INSERISCE, 'assenze', 'foto_pagine', 'serate', 'compiti', 'esercizi_dieci_minuti', 'fogli_firma', 'forzieri', 'frasi', 'gesti_casa', 'impostazioni', 'sgridate'];
 for (const t of tabelle) {
   verifica(`anon non inserisce in ${t}`, !(await inserisce(null, t, 'anon')));
@@ -310,6 +310,39 @@ verifica('spostata: via le sessioni non fatte', (await val(null, `select count(*
 await come(null, `update compiti set scadenza_spostata = '2026-11-27' where id = '${COMPITO}'`);
 await come(null, `update compiti set scadenza = '2026-11-24' where id = '${COMPITO}'`);
 verifica('la sincronizzazione non riporta indietro un compito spostato', (await val(null, `select scadenza::text from compiti where id = '${COMPITO}'`)) === '2026-11-27');
+
+// metacognizione (0050-0052): piano del giorno, voto previsto, micro-lezione
+await come(LANI, `insert into piano_voci (voce, titolo, minuti_stimati, iniziata_il) values ('carte', 'Flash card', 10, '2020-01-01')`);
+verifica('piano: inizio con l\'ora del server', (await val(null, `select iniziata_il > now() - interval '1 minute' from piano_voci`)) === true);
+await fallisce('piano: la stima non cambia dopo l\'inizio', LANI, `update piano_voci set minuti_stimati = 30 where voce = 'carte'`);
+await fallisce('piano: Lani non cambia il titolo', LANI, `update piano_voci set titolo = 'x' where voce = 'carte'`);
+await fallisce('piano: niente voce già finita', LANI, `insert into piano_voci (voce, titolo, minuti_stimati, iniziata_il, finita_il) values ('ripasso:x', 'Ripasso', 10, now(), now())`);
+await come(LANI, `insert into piano_voci (giorno, voce, titolo, minuti_stimati) values (oggi() - 1, 'compito:ieri', 'Ieri', 10)`).catch(() => {});
+verifica('piano: niente stime per un altro giorno', (await val(null, `select count(*)::int from piano_voci where voce = 'compito:ieri'`)) === 0);
+await fallisce('piano: stima fuori misura', LANI, `insert into piano_voci (voce, titolo, minuti_stimati) values ('compito:lungo', 'Lungo', 500)`);
+await come(LANI, `update piano_voci set finita_il = '2020-01-01' where voce = 'carte'`);
+verifica('piano: fine con l\'ora del server', (await val(null, `select finita_il >= iniziata_il and finita_il > now() - interval '1 minute' from piano_voci where voce = 'carte'`)) === true);
+await come(LANI, `delete from piano_voci`);
+verifica('piano: Lani non cancella', (await val(null, `select count(*)::int from piano_voci`)) === 1);
+await come(null, `insert into verifiche (nuvola_id, tipo, data) values ('v-prevista', 'verifica', oggi() + 3), ('v-oggi', 'verifica', oggi())`);
+const PREVISTA = await val(null, `select id from verifiche where nuvola_id = 'v-prevista'`);
+const DI_OGGI = await val(null, `select id from verifiche where nuvola_id = 'v-oggi'`);
+await come(LANI, `insert into voti_previsti (verifica_id, voto, creato_il) values ('${PREVISTA}', 7.5, '2020-01-01')`);
+verifica('voto previsto: Lani lo dice prima della verifica, ora del server', (await val(null, `select voto::text || (creato_il > now() - interval '1 minute') from voti_previsti`)) === '7.5true');
+await come(LANI, `update voti_previsti set voto = 8 where verifica_id = '${PREVISTA}'`);
+verifica('voto previsto: si cambia fino al giorno prima', (await val(null, `select voto::text from voti_previsti`)) === '8.0');
+await fallisce('voto previsto: non il giorno della verifica', LANI, `insert into voti_previsti (verifica_id, voto) values ('${DI_OGGI}', 7)`);
+await fallisce('voto previsto: solo mezzi voti', LANI, `update voti_previsti set voto = 7.3 where verifica_id = '${PREVISTA}'`);
+await fallisce('voto previsto: non sotto il minimo', LANI, `update voti_previsti set voto = 1 where verifica_id = '${PREVISTA}'`);
+await come(null, `update verifiche set data = oggi() where id = '${PREVISTA}'`);
+await come(LANI, `update voti_previsti set voto = 6 where verifica_id = '${PREVISTA}'`);
+verifica('voto previsto: fermo dal giorno della verifica', (await val(null, `select voto::text from voti_previsti`)) === '8.0');
+await fallisce('Lani non scrive un voto vero', LANI, `insert into voti (materia_id, data, voto) values (null, oggi(), 10)`);
+await come(LANI, `insert into micro_lezioni_lette (settimana, lezione, letta_il) values (date_trunc('week', oggi())::date, 'richiamo', '2020-01-01')`);
+verifica('micro-lezione: letta, ora del server', (await val(null, `select letta_il > now() - interval '1 minute' from micro_lezioni_lette`)) === true);
+await fallisce('micro-lezione: non per un\'altra settimana', LANI, `insert into micro_lezioni_lette (settimana, lezione) values (date_trunc('week', oggi())::date + 7, 'richiamo')`);
+for (const t of ['piano_voci', 'voti_previsti', 'micro_lezioni_lette']) await come(null, `delete from ${t} where true`);
+await come(null, `delete from verifiche where nuvola_id in ('v-prevista', 'v-oggi')`);
 
 console.log(`\n${ok} ok, ${ko} no`);
 process.exit(ko ? 1 : 0);
