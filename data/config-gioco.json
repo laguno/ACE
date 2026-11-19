@@ -256,5 +256,15 @@
       "peso_giorno_dopo_r_evolution": 1.4,
       "nota": "La bandierina avanza solo nei giorni di scuola; dopo l'arrivo di R-Evolution i giorni pesano di più perché i passi disponibili crescono (circa 230 contro 320 a settimana con impegno dell'80%)."
     }
+  },
+  "tutor": {
+    "_nota": "Blocco E del piano di studio (19/11/2026). Valori PROVVISORI scelti in assenza del signore: da confermare. Il tutor non dà passi. chiamate_al_giorno: chiamate a Claude per persona al giorno (lampadina e Spiegamelo tu insieme).",
+    "chiamate_al_giorno": 12,
+    "tentativo_min_caratteri": 3,
+    "tentativo_max_caratteri": 500,
+    "spiegamelo_min_caratteri": 40,
+    "spiegamelo_max_caratteri": 1500,
+    "argomento_max_caratteri": 120,
+    "storico_giorni_genitori": 14
   }
 }
