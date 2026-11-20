@@ -6,7 +6,9 @@ Storia delle sessioni, decisioni prese e scelte approvate: `docs/storico.md`.
 
 - Chiesto dal signore il 20/11: elenco lungo, materie ripetute. Prima parte in produzione alle 18:40 (`0de9417`, backup `ace-2026-11-20_18-37-40.sql`): sezione "Foto delle pagine" con una riga per materia (aperte o con prova in arrivo), chiuse e scadute in "Archivio foto" chiuso; la materia già in "Da sapere" non si ripete. Regola in `fotoPerMateria()` (`src/lib/foto`).
 - Limite: nella riga di materia le foto delle richieste vecchie non contano come viste (si tocca la chip "c'è già").
-- **Da fare:** il signore la prova sul telefono; poi il resto (ordine delle sezioni, "Da sapere" dentro "Da fare per voi").
+- 18:55 (`3be1c22`, backup `ace-2026-11-20_18-51-11.sql`): ordine nuovo, approvato dal signore: "Lani è a casa oggi?" in cima (prima delle 14), Da fare per voi (con la foto che tocca ai genitori, contata), Dai passi / Segna, Lani oggi ("Una cosa da dirle" prima della tabellina), Foto delle pagine in fondo. "Da sapere" tolto.
+- ACE Prova (`gioco-con-tabellina`, `app-tmp-merge`) era indietro di 16 commit: allineata il 20/11 alle 19:00 (unione locale, non pushata; `npm install` rifatto). Da ora l'hook `pre-push` blocca il push su `main` se il ramo di prova non contiene il commit (runbook, "Ambiente di prova").
+- **Da fare:** il signore prova Oggi dei genitori sul telefono.
 
 ## Foto delle verifiche e voti pesati (19/11, in produzione)
 
