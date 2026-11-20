@@ -729,6 +729,30 @@ describe("schiacciata", () => {
   });
 });
 
+describe("Stato.tocco", () => {
+  it("parte null; a ogni contatto dice tic, lato e se era una schiacciata", () => {
+    const s = nuova(6);
+    expect(s.tocco).toBeNull();
+    for (const lato of [0, 1] as const) {
+      const t = passo(sopraGiocatore(s, lato), FERMI);
+      expect(t.tocco).toEqual({ tic: t.tic, lato, schiacciata: false });
+    }
+    // un tic senza contatti lascia il tocco di prima
+    const t = passo(sopraGiocatore(s, 0), FERMI);
+    expect(passo(t, FERMI).tocco).toEqual(t.tocco);
+  });
+  it("una schiacciata la segna come tale", () => {
+    const s = libera(nuova(6));
+    const g = s.giocatori[0];
+    g.x = 420;
+    g.y = 100;
+    g.vy = 2;
+    s.palla = { x: 430, y: g.y + cerchio(s, g)[0] + 40, vx: 0, vy: 0 };
+    const t = passo(s, [{ ...FERMO, schiaccia: true }, FERMO]);
+    expect(t.tocco).toEqual({ tic: t.tic, lato: 0, schiacciata: true });
+  });
+});
+
 describe("comandi reattivi", () => {
   const SALTA: Comandi = { ...FERMO, salta: true };
   const DX: Comandi = { ...FERMO, dx: true };

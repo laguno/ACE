@@ -85,6 +85,8 @@ export type Stato = {
   ticTocco: number; // tic dell'ultimo contatto
   mira: number; // da -1 a 1, estratta a ogni tocco: l'imprecisione della CPU
   vincitore: Lato | null;
+  // ultimo contatto con la palla (anche quelli entro pausaTocco), per vibrazione e scintille di chi disegna
+  tocco: { tic: number; lato: Lato; schiacciata: boolean } | null;
 };
 
 /** mulberry32: [numero in 0..1, seme nuovo]. */
@@ -147,6 +149,7 @@ export function nuovaPartita(
     ticTocco: 0,
     mira: 0,
     vincitore: null,
+    tocco: null,
   };
   servi(s, estrai(s) < 0.5 ? 0 : 1);
   return s;
@@ -345,6 +348,7 @@ export function passo(
       p.vx = nx * M.tocco;
       p.vy = ny * M.tocco;
     }
+    s.tocco = { tic: s.tic, lato: l, schiacciata: g.schiaccia === M.durataSchiaccia };
     const nuovo = s.latoTocchi !== l || s.tic - s.ticTocco > M.pausaTocco;
     s.ticTocco = s.tic;
     if (!nuovo) continue;
