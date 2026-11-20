@@ -2,6 +2,8 @@
 // ripasso (sessioni_ripasso, senza IA) e, se mancano, flash card e quiz generati da Claude
 // dall'argomento della verifica, dai compiti che la citano, dalle lezioni recenti e dall'indice
 // del libro (data/mappa-libri.json: titoli e pagine, mai il testo dei libri).
+// Prima di salvare, ogni carta e ogni domanda passa il controllo di _shared/controllo-carte.ts
+// (seconda chiamata a Claude): quelle che non passano non entrano.
 // La chiamano sync-nuvola dopo ogni sincronizzazione (segreto del cron) o un genitore.
 import Anthropic from 'npm:@anthropic-ai/sdk';
 import { dbServizio, registraErroreServer } from '../_shared/ambiente.ts';
@@ -10,6 +12,7 @@ import * as C from '../../../src/lib/calendario/index.ts';
 import * as R from '../../../src/lib/regole/index.ts';
 import { accoda } from '../_shared/popup.ts';
 import { chiChiama, cronOGenitore } from '../_shared/accesso.ts';
+import { controllaCarte, segnalate } from '../_shared/controllo-carte.ts';
 
 const GIORNI = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'];
 
@@ -83,6 +86,8 @@ async function genera(v: { id: string; materia_id: string | null; data: string; 
     compiti: (compiti ?? []).map((c) => c.testo),
     lezioni: (lezioni ?? []).filter((l) => l.argomento).map((l) => `${l.data}: ${l.argomento}`),
     indice_libro: libriDi(v.materia_id),
+    // carte che Lani ha segnalato sbagliate: da non riproporre
+    carte_segnalate_sbagliate: await segnalate(db, v.materia_id),
   };
 
   const risposta = await claude.beta.messages.create({
@@ -97,11 +102,20 @@ async function genera(v: { id: string; materia_id: string | null; data: string; 
   if (risposta.stop_reason === 'refusal') throw new Error('richiesta rifiutata');
   const testo = risposta.content.find((b: { type: string }) => b.type === 'text') as { text: string } | undefined;
   if (!testo) throw new Error('risposta senza testo');
-  return JSON.parse(testo.text) as {
+  const g = JSON.parse(testo.text) as {
     pagine_probabili: string;
     flashcard: { tipo: string; fronte: string; retro: string }[];
     quiz: { testo: string; opzioni: string[]; giusta: number; spiegazione: string }[];
   };
+  const c = await controllaCarte(claude, {
+    materiale: [{ type: 'text', text: JSON.stringify(contesto) }],
+    fonte: 'argomento',
+    flashcard: g.flashcard,
+    quiz: g.quiz,
+    segnalate: contesto.carte_segnalate_sbagliate,
+  });
+  if (c.motivi.length) console.log('genera-studio, scartate', v.id, c.motivi);
+  return { ...g, flashcard: c.flashcard, quiz: c.quiz, scartate: c.scartate.flashcard + c.scartate.quiz };
 }
 
 async function prepara() {
@@ -122,6 +136,7 @@ async function prepara() {
 
   let sessioni = 0;
   let generate = 0;
+  let scartate = 0;
   const errori: string[] = [];
   for (const v of verifiche ?? []) {
     const piano = R.pianoRipasso(R.giorno(v.data), oggi, partite).map((s) => ({
@@ -145,6 +160,7 @@ async function prepara() {
     if ((v.quiz as unknown[]).length || generate >= PER_GIRO) continue;
     try {
       const g = await genera(v);
+      scartate += g.scartate;
       const carte = g.flashcard.map((f) => ({
         materia_id: v.materia_id,
         argomento: v.argomento ?? '',
@@ -154,9 +170,13 @@ async function prepara() {
         fonte: 'nuvola',
         verifica_id: v.id,
       }));
-      const { error: e1 } = await db.from('flashcard').upsert(carte, { onConflict: 'materia_id,fronte', ignoreDuplicates: true });
-      if (e1) throw new Error(`flashcard: ${e1.message}`);
-      const domande = g.quiz.filter((q) => q.opzioni.length >= 2 && q.giusta >= 0 && q.giusta < q.opzioni.length);
+      if (carte.length) {
+        const { error: e1 } = await db.from('flashcard').upsert(carte, { onConflict: 'materia_id,fronte', ignoreDuplicates: true });
+        if (e1) throw new Error(`flashcard: ${e1.message}`);
+      }
+      // nessuna domanda passata: niente quiz vuoto, si riprova al giro dopo (le carte non si duplicano)
+      const domande = g.quiz;
+      if (!domande.length) throw new Error('nessuna domanda ha passato il controllo');
       const { error: e2 } = await db
         .from('quiz')
         .insert({ materia_id: v.materia_id, argomento: v.argomento ?? '', verifica_id: v.id, domande });
@@ -168,7 +188,7 @@ async function prepara() {
       errori.push(`${v.data}: ${e instanceof Error ? e.message : 'errore'}`);
     }
   }
-  return { verifiche: verifiche?.length ?? 0, sessioni, generate, errori };
+  return { verifiche: verifiche?.length ?? 0, sessioni, generate, scartate, errori };
 }
 
 const autorizzato = async (req: Request) => cronOGenitore(await chiChiama(db, req, Deno.env.get('CRON_SEGRETO')));

@@ -159,7 +159,8 @@ describe('genera-studio', () => {
     await c(null, `insert into verifiche (nuvola_id, data, tipo, argomento, materia_id) values ('v1', '2026-11-30', 'verifica', 'Frazioni', 'matematica')`);
   });
   it('piano di ripasso, carte e quiz per una verifica nuova; il secondo giro non rifà', async () => {
-    ia.coda.push(CARTE);
+    // seconda risposta: il controllo delle carte (blocco H) le promuove tutte
+    ia.coda.push(CARTE, { flashcard: CARTE.flashcard.map((_, i) => ({ numero: i + 1, corretta: true, chiara: true, adatta: true, motivo: '' })), quiz: CARTE.quiz.map((_, i) => ({ numero: i + 1, giuste: [1], adatta: true, motivo: '' })) });
     const f = await carica('genera-studio');
     const r = await json(await f(richiesta({}, { cron: true })));
     expect(r.corpo).toMatchObject({ verifiche: 1, sessioni: 4, generate: 1, errori: [] });
@@ -168,7 +169,7 @@ describe('genera-studio', () => {
     expect(await valore(`select pagine_probabili from verifiche`)).toBe('pag. 50-55');
     const secondo = await json(await f(richiesta({}, { gettone: 'gettone-papa' })));
     expect(secondo.corpo.generate).toBe(0);
-    expect(ia.chiamate).toHaveLength(1);
+    expect(ia.chiamate).toHaveLength(2);
   });
   it('sere piene: niente ripasso con la partita FIPAV o l\'allenamento tardo; l\'allenamento presto non conta', async () => {
     ia.coda.push(CARTE);

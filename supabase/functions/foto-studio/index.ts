@@ -2,11 +2,14 @@
 // le pagine fotografate e le aggiunge a flash card e quiz della prossima verifica della stessa
 // materia; poi manda una notifica (a Lani se carica un genitore, ai genitori se carica Lani). Le foto sono dal libro di carta: l'IA ne ricava
 // domande con parole sue, non ricopia il testo (CLAUDE.md, regole).
+// Prima di salvare, ogni carta e ogni domanda passa il controllo di _shared/controllo-carte.ts
+// contro le stesse foto (seconda chiamata a Claude): quelle che non passano non entrano.
 // La chiamano l'app (con { richiesta_id }) o il cron ogni ora (foto ferme da più di un'ora); ripeterla non duplica niente.
 import Anthropic from 'npm:@anthropic-ai/sdk';
 import { dbServizio, registraErroreServer } from '../_shared/ambiente.ts';
 import { chiChiama, CorpoNonValido, cors, leggiCorpo, risposte } from '../_shared/accesso.ts';
 import { inviaPush } from '../_shared/push.ts';
+import { controllaCarte, segnalate } from '../_shared/controllo-carte.ts';
 import * as R from '../../../src/lib/regole/index.ts';
 
 const db = dbServizio();
@@ -94,7 +97,8 @@ async function aggiungiDaFoto(richiestaId: string, avvisa: 'lani' | 'genitore') 
   const esistenti = (quiz?.[0]?.domande ?? []) as unknown[];
 
   const materia = (r.materie as unknown as { nome: string } | null)?.nome ?? 'scuola';
-  const contesto = { prova: { tipo: verifica.tipo, materia, data: verifica.data, argomento: verifica.argomento }, pagine_richieste: r.pagine };
+  const giaSegnalate = await segnalate(db, verifica.materia_id);
+  const contesto = { prova: { tipo: verifica.tipo, materia, data: verifica.data, argomento: verifica.argomento }, pagine_richieste: r.pagine, carte_segnalate_sbagliate: giaSegnalate };
   const ris = await claude.beta.messages.create({
     model: 'claude-sonnet-5-5',
     max_tokens: 16000,
@@ -108,6 +112,15 @@ async function aggiungiDaFoto(richiestaId: string, avvisa: 'lani' | 'genitore') 
   const testo = ris.content.find((b: { type: string }) => b.type === 'text') as { text: string } | undefined;
   if (!testo) throw new Error('risposta senza testo');
   const g = JSON.parse(testo.text) as { foto: { numero: number; pagine: string }[]; flashcard: { tipo: string; fronte: string; retro: string }[]; quiz: { testo: string; opzioni: string[]; giusta: number; spiegazione: string }[] };
+  // controllo contro le stesse foto: se fallisce non entra niente e le foto restano da fare
+  const controllo = await controllaCarte(claude, {
+    materiale: [...immagini, { type: 'text', text: JSON.stringify(contesto) }],
+    fonte: 'foto',
+    flashcard: g.flashcard,
+    quiz: g.quiz,
+    segnalate: giaSegnalate,
+  });
+  if (controllo.motivi.length) console.log('foto-studio, scartate', richiestaId, controllo.motivi);
 
   // pagine viste: solo dove nessuno le ha scritte a mano
   for (const p of g.foto) {
@@ -115,12 +128,12 @@ async function aggiungiDaFoto(richiestaId: string, avvisa: 'lani' | 'genitore') 
     if (id && /\d/.test(p.pagine)) await db.from('foto_pagine').update({ pagine_viste: p.pagine }).eq('id', id).is('pagine_viste', null);
   }
 
-  const carte = g.flashcard.map((f) => ({ materia_id: verifica.materia_id, argomento: verifica.argomento ?? '', tipo: f.tipo, fronte: f.fronte, retro: f.retro, fonte: 'foto', verifica_id: verifica.id }));
+  const carte = controllo.flashcard.map((f) => ({ materia_id: verifica.materia_id, argomento: verifica.argomento ?? '', tipo: f.tipo, fronte: f.fronte, retro: f.retro, fonte: 'foto', verifica_id: verifica.id }));
   if (carte.length) {
     const { error: e1 } = await db.from('flashcard').upsert(carte, { onConflict: 'materia_id,fronte', ignoreDuplicates: true });
     if (e1) throw new Error(`flashcard: ${e1.message}`);
   }
-  const nuove = g.quiz.filter((q) => q.opzioni.length >= 2 && q.giusta >= 0 && q.giusta < q.opzioni.length).map((q) => ({ ...q, richiesta_foto: richiestaId }));
+  const nuove = controllo.quiz.map((q) => ({ ...q, richiesta_foto: richiestaId }));
   if (nuove.length) {
     if (quiz?.[0]) {
       const { error: e2 } = await db.from('quiz').update({ domande: [...esistenti, ...nuove] }).eq('id', quiz[0].id);
@@ -138,7 +151,8 @@ async function aggiungiDaFoto(richiestaId: string, avvisa: 'lani' | 'genitore') 
     await inviaPush(db, avvisa, { titolo: 'ACE', testo: testo.slice(0, 60), tipo: 'studio' }).catch((e) => console.error('push studio', e));
   }
   const { count } = await db.from('foto_pagine').select('id', { count: 'exact', head: true }).eq('richiesta_id', richiestaId).is('studio_il', null);
-  return { carte: carte.length, domande: nuove.length, verifica_id: verifica.id, restano: count ?? 0 };
+  const scartate = controllo.scartate.flashcard + controllo.scartate.quiz;
+  return { carte: carte.length, domande: nuove.length, scartate, verifica_id: verifica.id, restano: count ?? 0 };
 }
 
 Deno.serve(async (req) => {
