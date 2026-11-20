@@ -98,6 +98,22 @@ describe('sync-nuvola', () => {
     expect(await valore(`select coalesce(sum(passi), 0)::int from movimenti_passi`)).toBe(passi);
     expect(await valore(`select count(*)::int from compiti`)).toBe(1);
   });
+  it('voto previsto vicino al voto vero: passi una volta sola; lontano: niente', async () => {
+    nuvolaFinta();
+    const c = stato.banco!.come;
+    await c(null, `insert into materie (id, nome, abbreviazione) values ('matematica', 'Matematica', 'Mate') on conflict do nothing`);
+    await c(null, `insert into materie (id, nome, abbreviazione) values ('storia', 'Storia', 'Sto') on conflict do nothing`);
+    await c(null, `insert into verifiche (id, data, tipo, materia_id) values ('00000000-0000-0000-0000-0000000000a1', '2026-11-23', 'verifica', 'matematica'), ('00000000-0000-0000-0000-0000000000a2', '2026-11-23', 'verifica', 'storia')`);
+    await c(null, `insert into voti_previsti (verifica_id, voto) values ('00000000-0000-0000-0000-0000000000a1', 7.5), ('00000000-0000-0000-0000-0000000000a2', 9)`);
+    await c(null, `insert into voti (nuvola_id, materia_id, data, voto) values ('sto-1', 'storia', '2026-11-24', 6)`);
+    const f = await carica('sync-nuvola');
+    await f(richiesta({}, { cron: true }));
+    await f(richiesta({}, { cron: true }));
+    // voto 8 di matematica dal Nuvola finto: previsto 7½, dentro lo scarto della config
+    const P = (await import('../../../src/lib/regole/index.ts')).CONFIG.metacognizione.voto_previsto.passi;
+    expect(await valore(`select coalesce(sum(passi), 0)::int from movimenti_passi where motivo = 'voto_previsto'`)).toBe(P);
+    expect(await valore(`select riferimento from movimenti_passi where motivo = 'voto_previsto'`)).toBe('00000000-0000-0000-0000-0000000000a1');
+  });
   it('richieste di foto di compiti passati: scadute senza passi; giro spento a metà chiuso come interrotto', async () => {
     nuvolaFinta();
     const f = await carica('sync-nuvola');
