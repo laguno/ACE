@@ -226,6 +226,17 @@ test('correggere una spunta nel suo giorno della Settimana', async ({ page }) =>
   expect(t['rpc/storna_spunta']).toEqual([expect.objectContaining({ p_motivo: 'compito', p_riferimento: 'c1' })]);
 });
 
+test('cartella segnata ma non fatta: Togli nella Settimana storna i passi e toglie la spunta', async ({ page }) => {
+  const { t } = await finto(page, { ...dati(), serate: [{ data: '2026-11-23', cartella_il: '2026-11-23T19:05:00Z', borsa_il: null, chiusa_il: null }] });
+  await page.goto('/');
+  await scheda(page, 'Settimana');
+  await page.getByRole('button', { name: 'Togli la spunta: cartella' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Togli la spunta' }).click();
+  await expect(page.getByRole('status')).toContainText('Cartella: spunta tolta');
+  expect(t.serate[0].cartella_il).toBeNull();
+  expect(t['rpc/storna_spunta']).toEqual([expect.objectContaining({ p_motivo: 'cartella', p_riferimento: 'serata:2026-11-23' })]);
+});
+
 test('foto mancante: la fa Lani e la riga non compare; dopo le 20 o dalla scadenza la possono fare i genitori, senza passi', async ({ page }) => {
   const d = dati();
   d.compiti.push({ id: 'c2', testo: 'Leggere', materia_id: 'italiano', scadenza: '2026-11-25', fatto_il: null });
