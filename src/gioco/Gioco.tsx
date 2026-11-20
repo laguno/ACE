@@ -20,8 +20,8 @@ const cmDi = (v: number | null | undefined) => v ?? P.altezza_default_cm;
 const CM: [number, number] = [cmDi(P.altezze_cm.lani), cmDi(P.altezze_cm.leo)];
 // taratura del disegno e della CPU: da rivedere con Lani
 const ERRORE_CPU = 40;
-const ALTO = 562; // campo visibile: 1000 × 562 (16:9)
-const SUOLO = 70; // il pavimento sta a 70 dal bordo basso
+const SOPRA = 492; // campo visibile sopra il pavimento: 1000 × 492
+const FASCIA_TASTI = 112; // px CSS sotto il pavimento per i pulsanti (gioco.css: 88 + margine, anche col bordo sicuro dell'iPhone)
 const SOGLIA_ALFA = 20; // sopra questa opacità un pixel è figura
 
 const immagine = (src: string) => Object.assign(new Image(), { src });
@@ -32,7 +32,7 @@ const FIGURE = {
   giocatori: [immagine('/assets/avatar/lani/lani-battuta.webp'), immagine('/assets/avatar/leo/leo-tennis.webp')],
 };
 const pronta = (i: HTMLImageElement) => i.complete && i.naturalWidth > 0;
-const Y = (y: number) => ALTO - SUOLO - y; // il motore ha y verso l'alto, la tela verso il basso
+const Y = (y: number) => SOPRA - y; // il motore ha y verso l'alto, la tela verso il basso
 
 /** Parte non trasparente della figurina (dalla testa ai piedi) e x dei piedi, misurate una volta. */
 type Riquadro = { x: number; y: number; w: number; h: number; piede: number };
@@ -98,7 +98,7 @@ function disegnaGiocatore(
   if (g.schiaccia <= 0) m.durataSch = 0;
   else if (m.durataSch === 0) m.durataSch = g.schiaccia;
 
-  // tutto attorno ai piedi: a riposo l'altezza resta quella vera (il respiro muove l'1,2%)
+  // tutto attorno ai piedi: a riposo l'altezza resta quella vera (il respiro muove lo 0,6%)
   let sy: number; // allungamento verticale
   let giro = 0; // inclinazione
   let su = 0; // saltello della corsa
@@ -114,7 +114,7 @@ function disegnaGiocatore(
     su = Math.abs(Math.sin(m.fase)) * 5 * corsa;
     sy = 1 - 0.035 * Math.abs(Math.cos(m.fase)) * corsa;
     giro = Math.sign(g.vx) * 0.13 * corsa; // il busto va avanti nel verso di marcia
-  } else sy = 1 + 0.012 * Math.sin((ora / 1000) * 2 * Math.PI * 0.55 + l * 2); // respiro
+  } else sy = 1 + 0.006 * Math.sin((ora / 1000) * 2 * Math.PI * 0.55 + l * 2); // respiro
   const sx = 2 - sy; // il volume resta più o meno quello
 
   // ombra a terra: si stringe e sbiadisce quando sale
@@ -160,20 +160,22 @@ function disegna(c: HTMLCanvasElement, s: Stato, moto: Moto[], f: number, ora: n
     c.width = w;
     c.height = h;
   }
-  const k = Math.min(w / M.largo, h / ALTO);
+  // il pavimento sta sopra la fascia dei pulsanti: così i pulsanti non coprono mai chi gioca
+  const terra = h - FASCIA_TASTI * dpr;
+  const k = Math.min(w / M.largo, terra / Y(0));
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, w, h);
-  ctx.setTransform(k, 0, 0, k, (w - M.largo * k) / 2, (h - ALTO * k) / 2);
 
-  // sfondo a tutto campo (ritagliato al centro), pavimento, rete
+  // sfondo a tutta tela (ritagliato al centro) e pavimento fino in fondo, dove stanno i pulsanti
   const fs = FIGURE.sfondo;
   if (pronta(fs)) {
-    const lato = Math.min(fs.naturalWidth, (fs.naturalHeight * M.largo) / ALTO);
-    const alto = (lato * ALTO) / M.largo;
-    ctx.drawImage(fs, (fs.naturalWidth - lato) / 2, (fs.naturalHeight - alto) / 2, lato, alto, 0, 0, M.largo, ALTO);
+    const z = Math.max(w / fs.naturalWidth, h / fs.naturalHeight);
+    ctx.drawImage(fs, (w - fs.naturalWidth * z) / 2, (h - fs.naturalHeight * z) / 2, fs.naturalWidth * z, fs.naturalHeight * z);
   }
   ctx.fillStyle = 'rgba(255, 246, 250, 0.85)';
-  ctx.fillRect(0, Y(0), M.largo, SUOLO);
+  ctx.fillRect(0, terra, w, h - terra);
+
+  ctx.setTransform(k, 0, 0, k, (w - M.largo * k) / 2, terra - Y(0) * k);
   ctx.fillStyle = '#3d2350';
   ctx.fillRect(M.reteX - M.reteMezza, Y(M.reteAlta), M.reteMezza * 2, M.reteAlta);
 
