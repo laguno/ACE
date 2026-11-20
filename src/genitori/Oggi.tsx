@@ -169,7 +169,6 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
           </Elenco>
           </>
         )}
-        <FotoRichieste client={client} avvisa={fatto} />
       </section>
 
       <div className="ga-rapide">
@@ -190,6 +189,8 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
           <small>Un fatto da correggere</small>
         </button>
       </div>
+
+      <FotoRichieste client={client} avvisa={fatto} escludi={fotoTocca.map((r) => r.id)} />
 
       <section className="ga-sezione" aria-labelledby="lani-oggi">
         <h2 id="lani-oggi">Lani oggi</h2>
