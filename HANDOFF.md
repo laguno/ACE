@@ -2,6 +2,12 @@
 
 Storia delle sessioni, decisioni prese e scelte approvate: `docs/storico.md`.
 
+## Restyling dell'Oggi dei genitori (20/11, in corso)
+
+- Chiesto dal signore il 20/11: elenco lungo, materie ripetute. Prima parte in produzione alle 18:40 (`0de9417`, backup `ace-2026-11-20_18-37-40.sql`): sezione "Foto delle pagine" con una riga per materia (aperte o con prova in arrivo), chiuse e scadute in "Archivio foto" chiuso; la materia già in "Da sapere" non si ripete. Regola in `fotoPerMateria()` (`src/lib/foto`).
+- Limite: nella riga di materia le foto delle richieste vecchie non contano come viste (si tocca la chip "c'è già").
+- **Da fare:** il signore la prova sul telefono; poi il resto (ordine delle sezioni, "Da sapere" dentro "Da fare per voi").
+
 ## Foto delle verifiche e voti pesati (19/11, in produzione)
 
 - Le verifiche non avevano richieste di foto. `richiesteFoto()` in `sync-nuvola` cercava le pagine solo nell'argomento. Ora legge anche `pagine_probabili`. Quando una verifica è nuova, `genera-studio` scrive le pagine dopo `richiesteFoto()`, quindi la richiesta arriva al giro successivo.
