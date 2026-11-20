@@ -133,6 +133,47 @@ Nello studio il personaggio parla poco: commenta il risultato con un numero prec
 
 Nel voto 7-8 la frase sul ripasso compare solo se ACE sa che Lani ha fatto davvero le sessioni; altrimenti resta solo il voto e i passi.
 
+## Come studio (blocco D, 19/11/2026)
+
+Lani impara a guardare come studia. Niente voti di Lani su di sé: solo stime da confrontare con i fatti. Le tendenze compaiono da 3 verifiche o 5 voci del piano in su (config `metacognizione`) e dicono come va, mai come è lei. Testi in `src/lib/copione/metacognizione.ts`.
+
+**Piano del giorno** (Pomeriggio, sotto i compiti). Per ogni compito, ripasso e giro di carte Lani sceglie i minuti, poi tocca "Inizio" e "Finito" (ore del server). Nessun passo.
+
+| Situazione | Testo |
+|---|---|
+| Titolo e domanda | "Il piano di oggi" — "Quanti minuti ti servono?" |
+| Totale | "In tutto {min} minuti stimati." |
+| Voce finita | "Stima {stima} min, vero {vero} min." |
+| Tendenza giusta | "Le tue stime ci prendono: il pomeriggio si organizza bene." |
+| Tendenza: ci mette di più | "Di solito ci metti un po’ di più di quanto stimi. Aggiungi qualche minuto." |
+| Tendenza: ci mette di meno | "Di solito ci metti meno di quanto stimi. Ti resta tempo libero." |
+
+**Voto previsto** (Studio, carta della verifica, dai 3 giorni prima fino al giorno prima). Il voto vero arriva solo da Nuvola. Se lo scarto è entro mezzo voto: passi (importo provvisorio in config, **da confermare con il signore**).
+
+| Situazione | Testo |
+|---|---|
+| Domanda | "Che voto pensi di prendere?" — "Non è una promessa: serve a capire quanto ti conosci." |
+| Previsione data | "Hai previsto {voto}. Puoi cambiarlo fino a domani." |
+| Voto vero arrivato | "Previsto {previsto}, preso {vero}." (vicino: "Ci hai preso: ti conosci bene.") |
+| Tendenza giusta | "Le tue previsioni sono vicine ai voti veri." |
+| Tendenza alta | "Di solito prevedi un po’ più alto del voto vero: un ripasso in più aiuta." |
+| Tendenza bassa | "Di solito prendi più di quanto pensi: sai più di quello che credi." |
+
+**Micro-lezione della settimana** (Studio, in cima finché non la legge; una a settimana dal 16/11, poi si ricomincia).
+
+| Settimana | Posa | Titolo | Testo | Da provare |
+|---|---|---|---|---|
+| 1 | lani-pensierosa | "Prima prova a ricordare" | "Rileggere sembra studiare, ma il cervello impara quando cerca la risposta da solo. Chiudi il libro e prova a dirla." | "Prima di girare una carta, di’ la risposta ad alta voce." |
+| 2 | bart-pallone | "Poco ma spesso" | "Quindici minuti per tre giorni valgono più di un’ora la sera prima. Per questo il ripasso è già diviso nei pomeriggi." | "Fai la sessione di ripasso nel giorno previsto." |
+| 3 | lani-concentrata | "Mescola gli esercizi" | "Esercizi tutti uguali di fila sembrano facili. Mescolati ti obbligano a capire quale regola serve: è quello che chiede la verifica." | "Negli esercizi, salta tra tipi diversi invece di farli in fila." |
+| 4 | lady-compiti | "Spiegalo a Lady" | "Se sai spiegarlo con parole tue, lo hai capito. Dove ti blocchi, lì c’è da ripassare." | "Spiega un argomento a voce, anche al gatto, in due minuti." |
+| 5 | lani-pensierosa | "Sicura o quasi?" | "Sentirsi sicuri non vuol dire sapere. Prima di girare la carta chiediti quanto ne sei sicura: poi controlla." | "Quando dici "sapevo", controlla di aver detto proprio la risposta giusta." |
+| 6 | lani-determinata | "Quanto ci metti" | "Tutti sbagliano a stimare il tempo. Segnare stima e tempo vero ti aiuta a organizzare il pomeriggio senza corse." | "Nel piano del giorno, scrivi i minuti prima di cominciare." |
+| 7 | leo-cinque | "Gli errori servono" | "Una risposta sbagliata, corretta subito, si ricorda meglio di una giusta per caso. Gli errori del quiz diventano carte apposta." | "Rileggi la spiegazione di ogni domanda sbagliata del quiz." |
+| 8 | bart-sonnecchia | "Il sonno studia" | "Mentre dormi il cervello sistema quello che hai studiato. La sera prima della verifica: ripasso breve, poi a letto." | "La sera prima di una verifica, chiudi lo studio entro le 21." |
+
+**Riepilogo della domenica** (area genitori, Settimana; solo genitori): sessioni di ripasso fatte su previste, pillole nel giorno previsto (quando c’è il blocco C), giri di flash card, quota di carte "sicura ma sbagliata" (quando c’è il blocco B), scarto medio tra voto previsto e vero, minuti veri contro stimati, lezione letta. Numeri, nessun giudizio.
+
 ## Sera
 
 La sera Bart guida la chiusura: prima i dieci minuti, poi cartella, borsa e fogli. La domenica la chiusura è lunga e la guida papà.
