@@ -106,6 +106,11 @@ Nello studio il personaggio parla poco: commenta il risultato con un numero prec
 | Quiz da 6 a 8 | lani-determinata | "{giuste} su 10. Le {sbagliate} sbagliate sono diventate flash card." | — |
 | Quiz sotto il 6 | lani-pensierosa | "{giuste} su 10. Ora sai cosa ripassare: domani si riprova." | — |
 | "Non ho capito" premuto | lani-pensierosa | "Ok, vediamola con un altro esempio." | — |
+| Lampadina, prima del primo indizio (provvisorio, 19/11) | lani-pensierosa | Campo: "Prima dimmi come ci hai provato" (suggerimento: "Dove ti blocchi? Bastano due parole."). Pulsante: "Ci ho provato così". Dopo: "Il tuo tentativo: {testo}" e pulsante "Un indizio" | — |
+| Lampadina, tentativo vuoto (provvisorio) | — | "Scrivi almeno una parola su come hai provato." | — |
+| Lampadina o Spiegamelo tu, tetto del giorno pieno (provvisorio) | lani-pensierosa | "Per oggi la lampadina ha dato tutto. Domani si riaccende; intanto chiedi a mamma o papà." | — |
+| Studio, carta "Spiegamelo tu" (provvisorio) | — | "Spiegamelo tu" · "Spiega un argomento con parole tue". Pulsante: "Prova" | — |
+| Spiegamelo tu, schermata (provvisorio) | lani-pensierosa | "Spiega un argomento con parole tue. Ti dico cosa c'è e cosa manca, senza voto." Campi "Argomento", "La tua spiegazione"; pulsante "Controlla". Risposta: "Cosa c'è", "Cosa manca", "Da sistemare", una domanda; pulsante "Riprova a spiegarlo". Testo corto: "Scrivi almeno due frasi." | — |
 | Sera prima della verifica | bart-sonnecchia | "Ultimo quiz breve sugli errori, poi a letto: domani {materia}." | sbadiglio |
 | Voto 9 o 10 | nonno-pollice | "{voto} in {materia}. Il nonno ha alzato il pollice. Succede di rado." | borbottio |
 | Voto 7 o 8 | mamma-applaude | "{voto} in {materia}: +{passi}. Le {n} sessioni di ripasso si vedono." (con una: "La sessione di ripasso si vede") | applauso |

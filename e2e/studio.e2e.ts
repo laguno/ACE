@@ -134,3 +134,30 @@ test('assenze: la verifica del giorno a casa è da recuperare, quella spostata a
   await expect(carta('Spagnolo').locator('.valore')).not.toHaveClass(/quieto/);
   await expect(carta('Geografia').locator('.valore')).toHaveClass(/quieto/);
 });
+
+test('spiegamelo tu: Lani spiega, il tutor dice cosa c’è e cosa manca, senza voto', async ({ page }) => {
+  await page.clock.setFixedTime(MARTEDI);
+  const corpi: Record<string, unknown>[] = [];
+  await finto(page, dati(), {
+    spiega: (c: Record<string, unknown>) => {
+      corpi.push(c);
+      return { cosa_va: ['Le parti sono uguali.'], cosa_manca: ['Cosa dice il denominatore.'], da_sistemare: [], domanda: 'Cosa dice il numero sotto la linea?' };
+    },
+  });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Studio' }).click();
+  await page.getByRole('button', { name: 'Prova' }).click();
+  await expect(page.getByRole('heading', { name: 'Spiegamelo tu' })).toBeVisible();
+  await page.getByLabel('Argomento').fill('Le frazioni');
+  await page.getByLabel('La tua spiegazione').fill('Corta.');
+  await page.getByRole('button', { name: 'Controlla' }).click();
+  await expect(page.getByRole('alert')).toHaveText('Scrivi almeno due frasi.');
+  await page.getByLabel('La tua spiegazione').fill('Una frazione è quando divido un intero in parti uguali e ne prendo alcune.');
+  await page.getByRole('button', { name: 'Controlla' }).click();
+  await expect(page.getByRole('heading', { name: 'Cosa manca' })).toBeVisible();
+  await expect(page.getByText('Cosa dice il denominatore.')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Da sistemare' })).toHaveCount(0);
+  expect(corpi).toEqual([{ azione: 'spiegamelo', argomento: 'Le frazioni', testo: 'Una frazione è quando divido un intero in parti uguali e ne prendo alcune.' }]);
+  await page.getByRole('button', { name: 'Torna allo studio' }).click();
+  await expect(page.getByRole('heading', { name: 'Le tue verifiche' })).toBeVisible();
+});

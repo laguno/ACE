@@ -100,20 +100,36 @@ test('lunedì alle 19:00 resta sul pomeriggio: chiusura alle 20:30', async ({ pa
   await expect(page.getByRole('button', { name: 'Oggi' })).toHaveAttribute('aria-current', 'page');
 });
 
-test('lampadina: spiegazione con un altro esempio, poi un indizio alla volta', async ({ page }) => {
+test('lampadina: spiegazione con un altro esempio, poi il tentativo, poi un indizio alla volta', async ({ page }) => {
   await page.clock.setFixedTime(new Date('2026-11-09T17:45:00+01:00'));
+  const INDIZI = ['Guarda il denominatore.', 'Dividi per lui.', 'Ora moltiplica.'];
+  const s = { tentativo: null as string | null, visti: 0, corpi: [] as Record<string, unknown>[] };
+  const stato = () => ({ spiegazione: 'Per trovare i 2/3 di 12: 12 : 3 = 4, poi 4 × 2 = 8.', tentativo: s.tentativo, indizi: INDIZI.slice(0, s.visti), totale_indizi: 3 });
   await finto(page, dati(), {
-    spiega: { spiegazione: 'Per trovare i 2/3 di 12: 12 : 3 = 4, poi 4 × 2 = 8.', indizi: ['Guarda il denominatore.', 'Dividi per lui.', 'Ora moltiplica.'] },
+    spiega: (c: Record<string, unknown>) => {
+      s.corpi.push(c);
+      if (c.azione === 'tentativo') return { tentativo: (s.tentativo = String(c.testo)) };
+      if (c.azione === 'indizio') s.visti++;
+      return stato();
+    },
   });
   await page.goto('/');
   await page.getByRole('button', { name: 'Non ho capito: Matematica' }).click();
   await expect(page.getByRole('heading', { name: 'Non ho capito' })).toBeVisible();
   await expect(page.getByText('Per trovare i 2/3 di 12')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Un indizio' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Ci ho provato così' }).click();
+  await expect(page.getByRole('alert')).toHaveText('Scrivi almeno una parola su come hai provato.');
+  await page.getByLabel('Prima dimmi come ci hai provato').fill('Ho diviso 12 per 2');
+  await page.getByRole('button', { name: 'Ci ho provato così' }).click();
+  await expect(page.getByText('Il tuo tentativo: Ho diviso 12 per 2')).toBeVisible();
   await expect(page.getByText('Guarda il denominatore.')).toHaveCount(0);
   await page.getByRole('button', { name: 'Un indizio' }).click();
   await expect(page.getByText('Guarda il denominatore.')).toBeVisible();
   await page.getByRole('button', { name: 'Un altro indizio' }).click();
   await expect(page.getByText('Dividi per lui.')).toBeVisible();
+  // apertura anche due volte in sviluppo (StrictMode): conta l'ordine dei passi di Lani
+  expect(s.corpi.map((c) => c.azione).filter(Boolean)).toEqual(['tentativo', 'indizio', 'indizio']);
   await page.getByRole('button', { name: 'Torna ai compiti' }).click();
   await expect(page.getByRole('heading', { name: 'Compiti per martedì' })).toBeVisible();
 });
