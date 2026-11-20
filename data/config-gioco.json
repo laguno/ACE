@@ -238,7 +238,7 @@
       "nota": "Carica della mossa finale (docs/11 §3.2), stessa forma di OpzioniCarica del motore: max = carica piena; tocco, schiacciata, punto = carica guadagnata quando la palla passa oltre la rete, a ogni schiacciata, a ogni punto; subito = piccola carica a chi subisce il punto; armato = da quanta carica la mossa si può usare. Da tarare con Lani.",
       "max": 100, "tocco": 8, "schiacciata": 15, "punto": 20, "subito": 10, "armato": 90
     },
-    "cpu_errore": { "facile": 70, "normale": 40, "difficile": 20 },
+    "cpu_errore": { "facile": 90, "normale": 60, "difficile": 40 },
     "cpu_livello": "normale"
   },
   "classifiche": {
