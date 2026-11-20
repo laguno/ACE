@@ -113,7 +113,9 @@ async function turno() {
   const soloBorsa = !R.cartellaConta(oggi) && C.partitaTra(await impegniDi(piu(oggi, 1)));
   const chiusura = C.oraChiusura(imp.ora_chiusura?.[oggi.getDay()] ?? null, impegniOggi, soloBorsa ? (imp.ora_chiusura_breve ?? null) : null);
   if (chiusura && !assenza) {
-    if (alle(chiusura))
+    // in campo: dopo il rientro; se il rientro è già nel silenzio delle 21, prima di uscire (20/11)
+    const oraChiusura = C.orarioChiusura(chiusura, fasce, R.CONFIG.notifiche);
+    if (oraChiusura && finestra(ora, oraChiusura))
       inviate.chiusura = await manda('lani', 'chiusura', K.notifica(oggi.getDay() === 0 ? 'chiusura_domenica' : 'chiusura'), giorno);
     // sollecito: spostato dopo il campo; se cadrebbe dalle 21:00, anticipato all'ultimo giro prima
     const sollecito = C.orarioSollecito(chiusura, fasce, R.CONFIG.notifiche);

@@ -146,6 +146,23 @@ export function orarioNotifica(previsto: string, fasce: { da: string; a: string 
 }
 
 /**
+ * Ora della notifica di chiusura (scelta del signore del 20/11): come le altre si sposta dopo il campo;
+ * se così cadrebbe nel silenzio della sera (sport tardo, margini 30/60), si anticipa all'ultimo giro
+ * del cron prima che inizi il silenzio dello sport. Null se anche quello cade in campo.
+ */
+export function orarioChiusura(chiusura: string, fasce: { da: string; a: string }[], s: RegoleSilenzio): string | null {
+  const dopo = orarioNotifica(chiusura, fasce, s);
+  if (dopo) return dopo;
+  let t = chiusura;
+  for (let f = fasce.find((x) => t >= x.da && t < x.a); f; f = fasce.find((x) => t >= x.da && t < x.a)) {
+    const prima = inMinuti(f.da) - s.passo_cron_minuti;
+    if (prima < 0) return null;
+    t = inOra(prima);
+  }
+  return t < chiusura ? t : null;
+}
+
+/**
  * Ora del sollecito: i minuti del config dopo la chiusura, spostato se Lani è in campo. Se così
  * cadrebbe nel silenzio, si anticipa all'ultimo giro del cron prima delle 21:00, purché venga dopo
  * la chiusura e Lani non sia in campo; se no niente sollecito (voce provvisoria del 19/11).

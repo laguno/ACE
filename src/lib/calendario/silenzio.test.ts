@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CONFIG, pianoRipasso } from '../regole';
-import { fasceInCampo, orarioNotifica, orarioSollecito, seraPiena, type RegoleSilenzio } from './index';
+import { fasceInCampo, orarioChiusura, orarioNotifica, orarioSollecito, seraPiena, type RegoleSilenzio } from './index';
 
 // Numeri dal config vero: se il signore li cambia, cambiano anche qui
 const S: RegoleSilenzio = CONFIG.notifiche;
@@ -71,9 +71,10 @@ describe('orarioSollecito', () => {
   it('chiusura alle 20:30: oltre le 21 non va, si anticipa all\'ultimo giro prima del silenzio', () => {
     expect(orarioSollecito('20:30', [], S)).toBe(ora(S.silenzio_lani_dalle, -S.passo_cron_minuti));
   });
-  it('martedì con allenamento alle 18:30 (chiusura alle 18:00): il sollecito aspetta il rientro', () => {
+  it('martedì con allenamento alle 18:30 (chiusura alle 18:00): il rientro è già nel silenzio, niente sollecito', () => {
     const fasce = fasceInCampo([allenamento('18:30', '20:00')], S);
-    expect(orarioSollecito('18:00', fasce, S)).toBe(ora('20:00', DOPO));
+    expect(ora('20:00', DOPO) >= S.silenzio_lani_dalle).toBe(true);
+    expect(orarioSollecito('18:00', fasce, S)).toBeNull();
   });
   it('partita la sera: in campo fino a tardi, niente sollecito', () => {
     const fasce = fasceInCampo([{ titolo: 'Partita Lani U13: X vs Y', inizio: '2026-11-26T19:00:00+01:00' }], S);
@@ -97,5 +98,21 @@ describe('seraPiena e ripasso serale', () => {
     const occupati = impegni.filter((i) => seraPiena(i, S)).map((i) => i.inizio.slice(0, 10));
     const piano = pianoRipasso(new Date(2026, 10, 25), new Date(2026, 10, 23), occupati);
     expect(piano.map((p) => p.data)).toEqual(['2026-11-23']);
+  });
+});
+
+describe('orarioChiusura (scelta del signore del 20/11)', () => {
+  it("fuori dal campo: all'ora della chiusura", () => expect(orarioChiusura('20:30', [], S)).toBe('20:30'));
+  it('allenamento del pomeriggio: dopo il rientro, come le altre notifiche', () => {
+    const fasce = fasceInCampo([allenamento('17:00', '18:30')], S);
+    expect(orarioChiusura('17:30', fasce, S)).toBe(ora('18:30', DOPO));
+  });
+  it("allenamento tardo: il rientro è nel silenzio, si anticipa all'ultimo giro prima del campo", () => {
+    const fasce = fasceInCampo([allenamento('18:30', '20:00')], S);
+    expect(orarioChiusura('18:00', fasce, S)).toBe(ora('18:30', -PRIMA - S.passo_cron_minuti));
+  });
+  it('partita la sera, senza ora di fine', () => {
+    const fasce = fasceInCampo([partitaFipav('19:00')], S);
+    expect(orarioChiusura('18:30', fasce, S)).toBe(ora('19:00', -PRIMA - S.passo_cron_minuti));
   });
 });
