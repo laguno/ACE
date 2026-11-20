@@ -8,6 +8,7 @@ import { PartiteFipav } from '../Partita';
 import { FoglioAssenza, SpostaVerifiche, togliAssenza } from '../Assenze';
 import { GIORNI } from '../spunte';
 import { bello, piu, type Props } from './comune';
+import { StoricoTutor } from './Tutor';
 
 // Settimana: giorno per giorno compiti e spunte (con "Togli" sul posto) e "Lani a casa"; sotto
 // verifiche, partite, fogli da firmare e foto salvate. Assorbe Correzioni, Fogli e Lani a casa.
@@ -225,6 +226,8 @@ export default function Settimana({ client, passi, avvisa }: Props) {
       </details>
 
       <FotoSalvate client={client} avvisa={avvisa} conferma={(si) => setChiede({ foto: si })} />
+
+      <StoricoTutor client={client} />
 
       {chiede === 'casa' && <FoglioAssenza client={client} giorno={giorno} avvisa={fatto} chiudi={() => setChiede(undefined)} />}
       {chiede === 'togliCasa' && (

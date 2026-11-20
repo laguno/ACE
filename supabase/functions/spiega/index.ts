@@ -85,14 +85,15 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors(req) });
   const chi = await chiChiama(db, req, undefined);
   if (chi?.tipo !== 'utente') return risposta({ errore: 'accesso richiesto' }, 401);
+  const io = chi.id;
   const giorno = R.iso(R.giornoRoma(new Date()));
 
   const scrivi = async (r: Record<string, unknown>) => {
-    const { error } = await db.from('tutor_richieste').insert({ profilo_id: chi.id, giorno, ...r });
+    const { error } = await db.from('tutor_richieste').insert({ profilo_id: io, giorno, ...r });
     if (error) throw new Error(`storico: ${error.message}`);
   };
   async function chiamateDiOggi() {
-    const { count } = await db.from('tutor_richieste').select('id', { count: 'exact', head: true }).eq('profilo_id', chi!.id).eq('giorno', giorno).eq('ia', true);
+    const { count } = await db.from('tutor_richieste').select('id', { count: 'exact', head: true }).eq('profilo_id', io).eq('giorno', giorno).eq('ia', true);
     return count ?? 0;
   }
 
@@ -135,7 +136,7 @@ Deno.serve(async (req) => {
       .from('tutor_richieste')
       .select('tipo, testo, risposta, creato_il')
       .eq('compito_id', compito_id)
-      .eq('profilo_id', chi.id)
+      .eq('profilo_id', io)
       .in('tipo', ['tentativo', 'indizio'])
       .order('creato_il', { ascending: false });
     const tentativo = (fatte ?? []).find((f) => f.tipo === 'tentativo')?.testo ?? null;

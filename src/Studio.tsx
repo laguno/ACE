@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Cards, ClipboardText } from '@phosphor-icons/react';
+import { Cards, ChatCircleText, ClipboardText } from '@phosphor-icons/react';
 import { Riquadro, Testata } from './kit';
 import * as R from './lib/regole';
 import { Flashcard, Quiz, type Carta, type Domanda } from './Ripasso';
 import { GIORNI, MESI, maiuscola } from './spunte';
 import { supabase } from './supabase';
+import { Spiegamelo } from './Tutor';
 
 // Studio — design/Studio.html. Verifiche in arrivo con il piano di ripasso (sessioni da 15 minuti),
 // carte del giorno (ripetizione a intervalli) e quiz liberi. Video più avanti.
@@ -50,6 +51,7 @@ export default function Studio() {
   const [compitiAperti, setCompitiAperti] = useState(0);
   const [carteTotali, setCarteTotali] = useState(0);
   const [attivita, setAttivita] = useState<Attivita>();
+  const [spiegamelo, setSpiegamelo] = useState(false);
 
   async function carica() {
     const domani = R.iso(R.prossimoGiornoDiScuola(R.giornoRoma(new Date())));
@@ -106,6 +108,7 @@ export default function Studio() {
     carica();
   };
   const testata = <Testata sfondo="panna" posa="lani-pensierosa" misura={132} sopra="Studio" titolo="Le tue verifiche" riga={<p>Il ripasso è già organizzato nei pomeriggi liberi.</p>} />;
+  if (spiegamelo) return <Spiegamelo chiudi={() => setSpiegamelo(false)} />;
   if (attivita?.tipo === 'carte') return <Flashcard carte={attivita.carte} titolo={attivita.titolo} sessione={attivita.sessione} chiudi={chiudi} />;
   if (attivita?.tipo === 'quiz') return <Quiz quizId={attivita.quizId} titolo={attivita.titolo} domande={attivita.domande} sessione={attivita.sessione} chiudi={chiudi} />;
   // intestazione subito, i dati dopo: titolo e avatar sono il primo disegno (Lighthouse, 13/11)
@@ -212,6 +215,24 @@ export default function Studio() {
           </ul>
         </div>
       )}
+      {/* tutor (blocco E): spiegare con parole proprie, il tutor dice cosa manca; nessun voto, nessun passo */}
+      <div className="carta">
+        <ul className="cose">
+          <li>
+            <Riquadro colore="lilla">
+              <ChatCircleText size={24} weight="bold" aria-hidden />
+            </Riquadro>
+            <span className="allarga">
+              <b>Spiegamelo tu</b>
+              <small>Spiega un argomento con parole tue</small>
+            </span>
+            <button className="secondario compatto" onClick={() => setSpiegamelo(true)}>
+              Prova
+            </button>
+          </li>
+        </ul>
+      </div>
+
     </section>
   );
 }
