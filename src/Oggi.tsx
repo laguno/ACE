@@ -14,6 +14,7 @@ import { supabase } from './supabase';
 import { DieciMinuti } from './DieciMinuti';
 import { PillolaPartita } from './ProssimaPartita';
 import { useREvolutionDa } from './accensione';
+import { PianoDelGiorno } from './Metacognizione';
 import Tabellina from './Tabellina';
 import type { Dove } from './lib/regole/tabellina';
 
@@ -371,6 +372,14 @@ function Pomeriggio({ chiusura, apri, vai }: { chiusura: string | null; apri: Ap
           </span>
         </button>
       )}
+
+      <PianoDelGiorno
+        cose={[
+          ...daFare.map((c) => ({ voce: `compito:${c.id}`, titolo: c.materie?.nome ? `${c.materie.nome}: ${c.testo}` : c.testo })),
+          ...(ripasso ? [{ voce: `ripasso:${ripasso.id}`, titolo: `Ripasso di ${ver?.materie?.nome?.toLowerCase() ?? 'verifica'}` }] : []),
+          ...(carte > 0 ? [{ voce: 'carte', titolo: 'Carte del giorno' }] : []),
+        ]}
+      />
 
       {(foto.length > 0 || fotoFatta) && (
         <div className="carta" data-ancora="foto">

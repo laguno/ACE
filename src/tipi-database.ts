@@ -651,6 +651,12 @@ export type Database = {
         }
         Relationships: []
       }
+      micro_lezioni_lette: {
+        Row: { lezione: string; letta_il: string; settimana: string }
+        Insert: { lezione: string; letta_il?: string; settimana: string }
+        Update: { lezione?: string; letta_il?: string; settimana?: string }
+        Relationships: []
+      }
       movimenti_passi: {
         Row: {
           creato_il: string
@@ -817,6 +823,12 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      piano_voci: {
+        Row: { creata_il: string; finita_il: string | null; giorno: string; iniziata_il: string | null; minuti_stimati: number; titolo: string; voce: string }
+        Insert: { creata_il?: string; finita_il?: string | null; giorno?: string; iniziata_il?: string | null; minuti_stimati: number; titolo: string; voce: string }
+        Update: { creata_il?: string; finita_il?: string | null; giorno?: string; iniziata_il?: string | null; minuti_stimati?: number; titolo?: string; voce?: string }
+        Relationships: []
       }
       pin_genitori: {
         Row: {
@@ -1434,6 +1446,20 @@ export type Database = {
             columns: ["materia_id"]
             isOneToOne: false
             referencedRelation: "materie"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      voti_previsti: {
+        Row: { cambiato_il: string; creato_il: string; verifica_id: string; voto: number }
+        Insert: { cambiato_il?: string; creato_il?: string; verifica_id: string; voto: number }
+        Update: { cambiato_il?: string; creato_il?: string; verifica_id?: string; voto?: number }
+        Relationships: [
+          {
+            foreignKeyName: "voti_previsti_verifica_id_fkey"
+            columns: ["verifica_id"]
+            isOneToOne: true
+            referencedRelation: "verifiche"
             referencedColumns: ["id"]
           },
         ]

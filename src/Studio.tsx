@@ -5,6 +5,7 @@ import * as R from './lib/regole';
 import { Flashcard, Quiz, type Carta, type Domanda } from './Ripasso';
 import { GIORNI, MESI, maiuscola } from './spunte';
 import { supabase } from './supabase';
+import { ComeTiConosci, MicroLezione, VotoPrevisto, usePrevisioni } from './Metacognizione';
 
 // Studio — design/Studio.html. Verifiche in arrivo con il piano di ripasso (sessioni da 15 minuti),
 // carte del giorno (ripetizione a intervalli) e quiz liberi. Video più avanti.
@@ -50,6 +51,7 @@ export default function Studio() {
   const [compitiAperti, setCompitiAperti] = useState(0);
   const [carteTotali, setCarteTotali] = useState(0);
   const [attivita, setAttivita] = useState<Attivita>();
+  const previsioni = usePrevisioni();
 
   async function carica() {
     const domani = R.iso(R.prossimoGiornoDiScuola(R.giornoRoma(new Date())));
@@ -114,6 +116,7 @@ export default function Studio() {
   return (
     <section className="schermo schermo-studio">
       {testata}
+      <MicroLezione />
 
       {verifiche.length === 0 && (
         <div className="carta">
@@ -153,6 +156,7 @@ export default function Studio() {
             ) : prossima ? (
               <p className="nota">Prossima sessione: {GIORNI[R.giorno(prossima.data_prevista).getDay()]}.</p>
             ) : null}
+            {!v.daRecuperare && !v.recupero_vago && <VotoPrevisto verifica={v} previsto={previsioni.previste.get(v.id)} ricarica={previsioni.ricarica} />}
             {i === 0 && compitiAperti > 0 && <p className="avviso-compiti">{AVVISO_COMPITI}</p>}
             {(sessioni.length > 0 || daFare || v.quiz[0]) && (
               <div className="riga-pallini">
@@ -188,6 +192,8 @@ export default function Studio() {
           </div>
         );
       })}
+
+      <ComeTiConosci {...previsioni} />
 
       {carteTotali > 0 && (
         <div className="carta">
