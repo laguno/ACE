@@ -25,8 +25,15 @@ export const M = {
   salto: 13,
   memoriaSalto: 8, // salto premuto in aria: parte se si tocca terra entro memoriaSalto - 2 tic
   gravitaG: 0.6,
-  tocco: 13, // velocità della palla dopo un tocco da terra
-  schiacciata: 17, // dopo un tocco in salto
+  tocco: 13, // velocità della palla dopo un tocco (da terra o in salto)
+  // Schiacciata, solo col comando: in aria, palla dal proprio lato sopra la rete e entro
+  // margineSchiaccia dal cerchio di tocco. La palla parte a schiacciaVx verso l'altro campo e
+  // scende fino a schiacciaGiu, ma sempre abbastanza alta da passare la rete.
+  margineSchiaccia: 12,
+  schiacciaVx: 13,
+  schiacciaGiu: 10,
+  memoriaSchiaccia: 8, // tic in cui il comando premuto resta valido (premuto un filo prima)
+  durataSchiaccia: 14, // tic di animazione; intanto chi ha schiacciato non ritocca la palla
   casa: [250, 750],
   altoBattuta: 330,
   attesa: 60, // tic fermi prima che la palla della battuta scenda
@@ -48,8 +55,9 @@ export type Lato = 0 | 1;
 export type Palla = { x: number; y: number; vx: number; vy: number };
 /** Giocatore: x al centro, y ai piedi; cm = altezza del personaggio; schiaccia = tic di animazione rimasti. */
 export type Corpo = Palla & { cm: number; schiaccia: number };
-export type Comandi = { sx: boolean; dx: boolean; salta: boolean };
-export const FERMO: Comandi = { sx: false, dx: false, salta: false };
+
+export type Comandi = { sx: boolean; dx: boolean; salta: boolean; schiaccia: boolean };
+export const FERMO: Comandi = { sx: false, dx: false, salta: false, schiaccia: false };
 
 /** Tutto JSON: si salva, si confronta, si rigioca. */
 export type Stato = {
@@ -60,6 +68,7 @@ export type Stato = {
   uPerCm: number; // unità di campo per cm: M.reteAlta / altezza vera della rete
   prima: [Comandi, Comandi]; // comandi del tic precedente: il salto parte sul fronte di pressione
   memoriaSalto: [number, number]; // tic rimasti al salto premuto in aria (0 = nessuno)
+  memoriaSchiaccia: [number, number]; // tic rimasti al comando schiaccia premuto (0 = nessuno)
   punti: [number, number];
   durata: number; // tic di gioco: scaduti, la partita finisce al primo punto che non lascia la parità
   battuta: Lato;
@@ -97,6 +106,7 @@ function servi(s: Stato, lato: Lato): void {
   s.latoTocchi = null;
   s.mira = estrai(s) * 2 - 1;
   s.memoriaSalto = [0, 0];
+  s.memoriaSchiaccia = [0, 0];
 }
 
 /**
@@ -120,6 +130,7 @@ export function nuovaPartita(
     uPerCm: M.reteAlta / reteCm,
     prima: [FERMO, FERMO],
     memoriaSalto: [0, 0],
+    memoriaSchiaccia: [0, 0],
     punti: [0, 0],
     durata,
     battuta: 0,
@@ -198,6 +209,35 @@ function rete(p: Palla, xPrima: number): void {
   }
 }
 
+/**
+ * La palla si può schiacciare? Giocatore in aria e non già in schiacciata, palla dal suo lato e
+ * sopra la rete, centro della palla entro margine dal cerchio di tocco.
+ */
+function aTiro(s: Stato, l: Lato, margine: number): boolean {
+  const g = s.giocatori[l];
+  const p = s.palla;
+  if (g.y <= 0 || g.schiaccia > 0 || p.y <= M.reteAlta) return false;
+  if (l === 0 ? p.x >= M.reteX : p.x <= M.reteX) return false;
+  const [centro, raggio] = cerchio(s, g);
+  const r = M.raggio + raggio + margine;
+  const dx = p.x - g.x;
+  const dy = p.y - g.y - centro;
+  return r > 0 && dx * dx + dy * dy < r * r;
+}
+
+/**
+ * Schiacciata del lato l: schiacciaVx verso l'altro campo, in giù fino a schiacciaGiu ma non tanto
+ * da finire in rete. Dopo n tic la palla è a y + n·vy − gravita·n(n+1)/2: si sceglie vy perché
+ * sopra la rete passi con un filo di margine.
+ */
+function schiaccia(p: Palla, l: Lato): void {
+  const dir = l === 0 ? 1 : -1;
+  const n = Math.max(Math.abs(M.reteX - p.x) / M.schiacciaVx, 1);
+  const sopra = M.reteAlta + M.raggio + M.reteMezza + 4;
+  p.vx = dir * M.schiacciaVx;
+  p.vy = Math.max(-M.schiacciaGiu, (sopra - p.y) / n + (M.gravita * (n + 1)) / 2);
+}
+
 /** Un sessantesimo di secondo. Non tocca lo stato ricevuto. A partita finita lo restituisce com'è. */
 export function passo(
   prima: Stato,
@@ -212,6 +252,7 @@ export function passo(
     punti: [prima.punti[0], prima.punti[1]],
     prima: [{ ...comandi[0] }, { ...comandi[1] }],
     memoriaSalto: [prima.memoriaSalto[0], prima.memoriaSalto[1]],
+    memoriaSchiaccia: [prima.memoriaSchiaccia[0], prima.memoriaSchiaccia[1]],
   };
 
   // Comandi reattivi. Il salto parte solo su una pressione nuova (tenere il tasto non fa rimbalzare);
@@ -225,6 +266,9 @@ export function passo(
       g.vy = M.salto;
       s.memoriaSalto[l] = 0;
     } else if (s.memoriaSalto[l] > 0) s.memoriaSalto[l]--;
+    if (c.schiaccia && !prima.prima[l].schiaccia) s.memoriaSchiaccia[l] = M.memoriaSchiaccia;
+    else if (s.memoriaSchiaccia[l] > 0) s.memoriaSchiaccia[l]--;
+    if (g.schiaccia > 0) g.schiaccia--;
     // velocità verso quella voluta: si parte con accelG, si frena (o si inverte) con frenaG
     const voluta = ((c.dx ? 1 : 0) - (c.sx ? 1 : 0)) * M.passoG;
     const freno = voluta === 0 || g.vx * voluta < 0 ? M.frenaG : M.accelG;
@@ -255,9 +299,13 @@ export function passo(
   rete(p, xPrima);
   const xLato = p.x;
 
-  // tocchi: la palla riparte lungo la linea centro del giocatore → centro della palla
+  // tocchi: la palla riparte lungo la linea centro del giocatore → centro della palla, oppure,
+  // con il comando, è schiacciata. La schiacciata automatica di prima (ogni tocco in aria più
+  // forte) è tolta: col pulsante sarebbe stata un doppione, e una palla che parte forte senza
+  // averlo chiesto è difficile da controllare per chi gioca.
   for (const l of LATI) {
     const g = s.giocatori[l];
+    if (g.schiaccia > 0) continue; // ha appena schiacciato: la palla se ne va, non la ritocca
     const [centro, raggio] = cerchio(s, g);
     const R = M.raggio + raggio;
     const cx = g.x;
@@ -265,15 +313,20 @@ export function passo(
     const dx = p.x - cx;
     const dy = p.y - cy;
     const d2 = dx * dx + dy * dy;
-    if (d2 >= R * R) continue;
-    const d = Math.sqrt(d2);
-    const nx = d > 0 ? dx / d : 0;
-    const ny = d > 0 ? dy / d : 1;
-    const forza = g.y > 0 ? M.schiacciata : M.tocco;
-    p.x = cx + nx * R;
-    p.y = cy + ny * R;
-    p.vx = nx * forza;
-    p.vy = ny * forza;
+    if (s.memoriaSchiaccia[l] > 0 && aTiro(s, l, M.margineSchiaccia)) {
+      schiaccia(p, l);
+      g.schiaccia = M.durataSchiaccia;
+      s.memoriaSchiaccia[l] = 0;
+    } else {
+      if (d2 >= R * R) continue;
+      const d = Math.sqrt(d2);
+      const nx = d > 0 ? dx / d : 0;
+      const ny = d > 0 ? dy / d : 1;
+      p.x = cx + nx * R;
+      p.y = cy + ny * R;
+      p.vx = nx * M.tocco;
+      p.vy = ny * M.tocco;
+    }
     const nuovo = s.latoTocchi !== l || s.tic - s.ticTocco > M.pausaTocco;
     s.ticTocco = s.tic;
     if (!nuovo) continue;
@@ -296,7 +349,10 @@ export function passo(
 
 /**
  * CPU: funzione pura dello stato. Va dove scenderà la palla, un po' dietro per mandarla verso la
- * rete; dal secondo tocco salta. `errore` (in unità di campo) è quanto sbaglia la mira: 0 = precisa.
+ * rete; dal secondo tocco salta e, se la palla è a tiro, schiaccia. `errore` (in unità di campo) è
+ * quanto sbaglia la mira: 0 = precisa. Sbaglia anche il tempo della schiacciata: preme quando la
+ * palla è entro margineSchiaccia + mira × errore, cioè a volte troppo presto (il comando scade) o
+ * mai (tocco normale). mira cambia a ogni tocco: deterministico, senza estrazioni in più.
  * ponytail: la previsione ignora la rete; se la CPU sembra tonta sotto rete, aggiungerla qui.
  */
 export function ia(s: Stato, lato: Lato, errore: number): Comandi {
@@ -330,5 +386,6 @@ export function ia(s: Stato, lato: Lato, errore: number): Comandi {
     Math.abs(s.palla.x - g.x) < 70 &&
     alta > 110 &&
     alta < 220;
-  return { sx: dx < -M.passoG, dx: dx > M.passoG, salta };
+  const schiaccia = aTiro(s, lato, M.margineSchiaccia + s.mira * errore);
+  return { sx: dx < -M.passoG, dx: dx > M.passoG, salta, schiaccia };
 }

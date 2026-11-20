@@ -25,6 +25,7 @@ const comandiArb = fc.record({
   sx: fc.boolean(),
   dx: fc.boolean(),
   salta: fc.boolean(),
+  schiaccia: fc.boolean(),
 });
 // Comandi tenuti per qualche tic (altrimenti i giocatori tremano sul posto): fino a ~3000 tic.
 const sequenzaArb: fc.Arbitrary<Coppia[]> = fc
@@ -253,7 +254,7 @@ describe("passo: purezza", () => {
     s.vincitore = 1;
     expect(passo(s, FERMI)).toBe(s);
     const prima = structuredClone(s);
-    passo(s, [{ sx: true, dx: false, salta: true }, FERMO]);
+    passo(s, [{ sx: true, dx: false, salta: true, schiaccia: true }, FERMO]);
     expect(s).toEqual(prima);
   });
 });
@@ -301,7 +302,7 @@ describe("battuta", () => {
       const b = nuova(seme).battuta;
       const altro: Lato = b === 0 ? 1 : 0;
       // il battitore si scansiona verso il fondo: la palla cade sulla sua casa, non sulla sua testa
-      const via: Comandi = { sx: b === 0, dx: b === 1, salta: false };
+      const via: Comandi = { ...FERMO, sx: b === 0, dx: b === 1 };
       const scegli = (): Coppia => (b === 0 ? [via, FERMO] : [FERMO, via]);
       const s = finoA(nuova(seme), (st) => sommaPunti(st) > 0, 600, scegli);
       expect(s.punti[altro]).toBe(1);
@@ -579,6 +580,124 @@ describe("rete", () => {
   });
 });
 
+describe("schiacciata", () => {
+  const SCHIACCIA: Comandi = { ...FERMO, schiaccia: true };
+  /** Lato 0 in aria a x, palla ferma a quota y (sopra la sua testa di dy), al primo tocco. */
+  function aTiroDi(x: number, sopra = 5, y = 100): Stato {
+    const s = libera(nuova(6));
+    const g = s.giocatori[0];
+    g.x = x;
+    g.y = y;
+    g.vy = 2;
+    const [centro, raggio] = cerchio(s, g);
+    s.palla = { x: x + 10, y: y + centro + raggio + M.raggio + sopra, vx: 0, vy: 0 };
+    return s;
+  }
+  it("in aria, palla sopra la rete e a tiro: parte più veloce e più tesa del tocco normale", () => {
+    const s = passo(aTiroDi(400, -5), [SCHIACCIA, FERMO]);
+    const t = passo(aTiroDi(400, -5), FERMI);
+    expect(s.palla.y).toBeGreaterThan(M.reteAlta);
+    expect(s.palla.vx).toBe(M.schiacciaVx);
+    expect(s.palla.vx).toBeGreaterThan(Math.abs(t.palla.vx) + 5);
+    expect(s.palla.vy).toBeLessThan(t.palla.vy - 5);
+    expect(Math.sqrt(s.palla.vx ** 2 + s.palla.vy ** 2)).toBeGreaterThan(M.tocco);
+    expect(s.giocatori[0].schiaccia).toBe(M.durataSchiaccia);
+    expect(t.giocatori[0].schiaccia).toBe(0);
+    expect(s.tocchi).toBe(1);
+  });
+  it("palla molto sopra la rete: scende ripida, fino a M.schiacciaGiu", () => {
+    const alta = aTiroDi(300, 5, 400); // giocatore portato in alto a mano: palla ben sopra la rete
+    expect(passo(alta, [SCHIACCIA, FERMO]).palla.vy).toBe(-M.schiacciaGiu);
+  });
+  it("l'animazione dura M.durataSchiaccia tic e scende fino a 0", () => {
+    let s = passo(aTiroDi(400), [SCHIACCIA, FERMO]);
+    for (let i = 0; i < M.durataSchiaccia; i++) s = passo(s, FERMI);
+    expect(s.giocatori[0].schiaccia).toBe(0);
+  });
+  it("senza comando, a terra, con la palla sotto la rete o fuori tiro: niente schiacciata", () => {
+    const casi: Stato[] = [];
+    const senza = aTiroDi(400, -5); // senza comando: tocco normale (la palla è a contatto)
+    casi.push(senza);
+    const terra = aTiroDi(400, -5, 0); // a terra: palla sotto la rete, nessuna schiacciata
+    casi.push(terra);
+    const bassa = aTiroDi(150, -5, 30); // in aria ma palla sotto la rete
+    casi.push(bassa);
+    const lontana = aTiroDi(400, M.margineSchiaccia + 5); // fuori tiro
+    casi.push(lontana);
+    for (const [i, s] of casi.entries()) {
+      const dopo = passo(s, [i === 0 ? FERMO : SCHIACCIA, FERMO]);
+      expect(dopo.giocatori[0].schiaccia).toBe(0);
+      expect(dopo.palla.vx).not.toBe(M.schiacciaVx);
+    }
+    expect(aTiroDi(150, -5, 30).palla.y).toBeLessThan(M.reteAlta);
+  });
+  it("premuto un filo prima vale ancora; premuto troppo prima si perde; tenuto non conta di nuovo", () => {
+    for (const [anticipo, vale] of [
+      [M.memoriaSchiaccia - 1, true],
+      [M.memoriaSchiaccia, false],
+    ] as const) {
+      // si preme con la palla fuori tiro e la si porta a tiro dopo anticipo tic
+      let s = aTiroDi(400);
+      const palla = s.palla;
+      s.palla = { x: 900, y: 900, vx: 0, vy: 0 };
+      s.attesa = anticipo;
+      s.giocatori[0].vy = 0;
+      s.giocatori[0].y = 1e6; // in aria per tutta la prova
+      s = passo(s, [SCHIACCIA, FERMO]);
+      for (let i = 1; i < anticipo; i++) s = passo(s, [SCHIACCIA, FERMO]);
+      const g = s.giocatori[0];
+      const [centro, raggio] = cerchio(s, g);
+      s.palla = { ...palla, y: g.y + centro + raggio + M.raggio + 5 };
+      s.attesa = 0;
+      s = passo(s, [SCHIACCIA, FERMO]);
+      expect(s.giocatori[0].schiaccia > 0).toBe(vale);
+    }
+  });
+  it("da ogni punto del proprio campo la schiacciata passa la rete e fa punto", () => {
+    for (const lato of [0, 1] as const)
+      for (let x = 100; x <= 440; x += 20) {
+        let s = aTiroDi(x, 0, 95 + (x % 40));
+        if (lato === 1) {
+          // stesso caso a specchio
+          const g = s.giocatori;
+          [g[0], g[1]] = [g[1], g[0]];
+          g[1].x = M.largo - x;
+          g[0].x = M.casa[0];
+          g[0].y = 0;
+          s.palla.x = M.largo - s.palla.x;
+        }
+        const comandi: Coppia = lato === 0 ? [SCHIACCIA, FERMO] : [FERMO, SCHIACCIA];
+        s = passo(s, comandi);
+        expect(s.giocatori[lato].schiaccia).toBe(M.durataSchiaccia);
+        s = finoA(s, (st) => sommaPunti(st) > 0, 300);
+        expect(s.punti[lato]).toBe(1);
+      }
+  });
+  it("la CPU con errore 0 schiaccia quando la palla è a tiro", () => {
+    const s = aTiroDi(400);
+    s.mira = 0;
+    expect(ia(s, 0, 0).schiaccia).toBe(true);
+    s.giocatori[0].y = 0;
+    expect(ia(s, 0, 0).schiaccia).toBe(false);
+  });
+  it("in partita CPU contro CPU: con errore 0 schiaccia, con errore alto molto meno", () => {
+    const conta = (errore: number) => {
+      let n = 0;
+      for (let seme = 0; seme < 4; seme++) {
+        let s = nuova(seme);
+        for (let i = 0; i < 60 * HZ && s.vincitore === null; i++) {
+          s = passo(s, [ia(s, 0, errore), ia(s, 1, errore)]);
+          for (const g of s.giocatori) if (g.schiaccia === M.durataSchiaccia) n++;
+        }
+      }
+      return n;
+    };
+    const precisa = conta(0);
+    expect(precisa).toBeGreaterThan(0);
+    expect(conta(80)).toBeLessThan(precisa);
+  });
+});
+
 describe("comandi reattivi", () => {
   const SALTA: Comandi = { ...FERMO, salta: true };
   const DX: Comandi = { ...FERMO, dx: true };
@@ -756,6 +875,7 @@ describe("CPU (ia)", () => {
             expect(typeof c.sx).toBe("boolean");
             expect(typeof c.dx).toBe("boolean");
             expect(typeof c.salta).toBe("boolean");
+            expect(typeof c.schiaccia).toBe("boolean");
             expect(c.sx && c.dx).toBe(false);
           }
           expect(s).toEqual(prima);
