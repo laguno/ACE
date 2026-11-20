@@ -3,8 +3,9 @@
 // Per ora si apre solo in sviluppo da #gioco (main.tsx): niente voce nell'app, niente tetto, niente server.
 // ponytail: personaggi e testi sono segnaposto (pose che esistono già), in attesa delle figurine
 // intere del signore e del copione.
+import { Capacitor } from '@capacitor/core';
 import { ScreenOrientation } from '@capacitor/screen-orientation';
-import { ArrowFatUp, CaretLeft, CaretRight, HandFist } from '@phosphor-icons/react';
+import { ArrowFatUp, CaretLeft, CaretRight, HandFist, Pause } from '@phosphor-icons/react';
 import { useEffect, useRef, useState, type PointerEvent } from 'react';
 import config from '../../data/config-gioco.json' with { type: 'json' };
 import './gioco.css';
@@ -31,7 +32,7 @@ const DPR_MAX = 2; // oltre non si vede la differenza e il telefono scalda
 const SOGLIA_ALFA = 20; // sopra questa opacità un pixel è figura
 const FERMO_COLPO = 4; // frame di pausa alla schiacciata (hit-stop)
 const PUNTO_MS = 1200; // quanto resta la scritta del punto
-const RAGGIO_PALLA = M.raggio * 1.25; // la palla si disegna più grande del 25%: il motore non cambia
+const RAGGIO_PALLA = M.raggio * 1.25 * 0.85; // la palla si disegna un po' più grande: il motore non cambia
 const COLORE_FONDO = '#ffe3ef'; // finché lo sfondo non è caricato
 const INCHIOSTRO = '#2f2a6e'; // ombre, bordi, pillola del punteggio
 // Tremolio (skill game-feel): trauma che cala nel tempo vero, scossa = trauma², seni lisci.
@@ -336,43 +337,126 @@ function disegnaPalla(ctx: CanvasRenderingContext2D, p: Palla, e: Effetti, f: nu
   ctx.globalAlpha = 1;
 }
 
-/** Sfondo e pavimento in primo piano, disegnati una volta per misura di schermo (con un bordo per la scossa). */
-type Fondale = { tela: HTMLCanvasElement; w: number; h: number; margine: number; conSfondo: boolean };
-function fondale(f: Fondale | null, w: number, h: number, terra: number, dpr: number): Fondale {
+/**
+ * Sfondo e campo, disegnati una volta per misura di schermo su due tele fuori schermo, con un bordo
+ * per la scossa (e per il parallasse, lo sfondo). Il campo è in prospettiva solo nel disegno: la
+ * fisica resta 2D e giocatori e palla stanno sulla linea di mezzo del trapezio (la linea dei piedi).
+ */
+type Fondale = { sfondo: HTMLCanvasElement; campo: HTMLCanvasElement; w: number; h: number; terra: number; margine: number; conSfondo: boolean };
+const PROFONDO = 40; // px CSS dalla linea di mezzo al bordo lontano e a quello vicino
+const SCALA_PROFONDO = 0.15; // il bordo lontano è più stretto del 15%, quello vicino più largo
+const SBIECO = 26; // px CSS: il lontano va a destra e il vicino a sinistra, così la rete si vede in diagonale
+const PARALLASSE = 6; // px CSS che lo sfondo si sposta seguendo la palla
+function fondale(f: Fondale | null, w: number, h: number, terra: number, k: number, ox: number, dpr: number): Fondale {
   const conSfondo = pronta(FIGURE.sfondo);
-  if (f && f.w === w && f.h === h && f.conSfondo === conSfondo) return f;
-  const margine = Math.ceil(SCOSSA_PX[0] * dpr) + 2;
-  const tela = f?.tela ?? document.createElement('canvas');
-  tela.width = w + margine * 2;
-  tela.height = h + margine * 2;
-  const ctx = tela.getContext('2d');
-  if (ctx) {
-    ctx.translate(margine, margine);
-    ctx.fillStyle = COLORE_FONDO;
-    ctx.fillRect(-margine, -margine, tela.width, tela.height);
+  if (f && f.w === w && f.h === h && f.terra === terra && f.conSfondo === conSfondo) return f;
+  const margine = Math.ceil((SCOSSA_PX[0] + PARALLASSE) * dpr) + 2;
+  const sfondo = f?.sfondo ?? document.createElement('canvas');
+  const campo = f?.campo ?? document.createElement('canvas');
+  sfondo.width = campo.width = w + margine * 2;
+  sfondo.height = campo.height = h + margine * 2;
+  const sc = sfondo.getContext('2d');
+  if (sc) {
+    sc.fillStyle = COLORE_FONDO;
+    sc.fillRect(0, 0, sfondo.width, sfondo.height);
     const fs = FIGURE.sfondo;
     if (conSfondo) {
-      const z = Math.max(tela.width / fs.naturalWidth, tela.height / fs.naturalHeight);
-      ctx.drawImage(fs, (w - fs.naturalWidth * z) / 2, (h - fs.naturalHeight * z) / 2, fs.naturalWidth * z, fs.naturalHeight * z);
+      const z = Math.max(sfondo.width / fs.naturalWidth, sfondo.height / fs.naturalHeight);
+      sc.drawImage(fs, (sfondo.width - fs.naturalWidth * z) / 2, (sfondo.height - fs.naturalHeight * z) / 2, fs.naturalWidth * z, fs.naturalHeight * z);
     }
-    // pavimento in primo piano: parte della scena, con le linee che vengono verso chi guarda
-    const pav = ctx.createLinearGradient(0, terra, 0, h);
-    pav.addColorStop(0, '#ffe3ef');
+  }
+  const ctx = campo.getContext('2d');
+  if (ctx) {
+    ctx.clearRect(0, 0, campo.width, campo.height);
+    ctx.translate(margine, margine);
+    const cx = w / 2;
+    // punto del campo: xu in unità del motore, d da -1 (bordo lontano) a 1 (bordo vicino)
+    const X = (xu: number, d: number) => cx + (ox + xu * k - cx) * (1 + d * SCALA_PROFONDO) - d * SBIECO * dpr;
+    const Yp = (d: number) => terra + d * PROFONDO * dpr;
+    const alto = (d: number) => M.reteAlta * k * (1 + d * SCALA_PROFONDO); // altezza della rete a quella profondità
+    const linea = (x1: number, d1: number, x2: number, d2: number) => {
+      ctx.moveTo(X(x1, d1), Yp(d1));
+      ctx.lineTo(X(x2, d2), Yp(d2));
+    };
+
+    // pavimento dal bordo lontano fino in fondo allo schermo
+    const pav = ctx.createLinearGradient(0, Yp(-1), 0, h);
+    pav.addColorStop(0, '#ffd9e8');
     pav.addColorStop(1, '#ffc8e1');
     ctx.fillStyle = pav;
-    ctx.fillRect(-margine, terra, tela.width, h - terra + margine);
-    ctx.strokeStyle = 'rgba(149, 128, 207, 0.35)';
-    ctx.lineWidth = 2 * dpr;
+    ctx.fillRect(-margine, Yp(-1), campo.width, h - Yp(-1) + margine);
+    // il campo: un trapezio un po' più caldo, con le linee bianche
+    ctx.fillStyle = '#ffe6cf';
     ctx.beginPath();
-    for (let i = -7; i <= 7; i++) {
-      ctx.moveTo(w / 2 + i * w * 0.07, terra);
-      ctx.lineTo(w / 2 + i * w * 0.16, h + margine);
+    ctx.moveTo(X(0, -1), Yp(-1));
+    ctx.lineTo(X(M.largo, -1), Yp(-1));
+    ctx.lineTo(X(M.largo, 1), Yp(1));
+    ctx.lineTo(X(0, 1), Yp(1));
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 3 * dpr;
+    ctx.lineJoin = 'round';
+    ctx.stroke(); // fondo e laterali
+    ctx.beginPath();
+    const tre = M.largo / 6; // linea dei 3 metri: un terzo di metà campo (9 m)
+    for (const xu of [M.reteX, M.reteX - tre, M.reteX + tre]) linea(xu, -1, xu, 1);
+    ctx.stroke();
+
+    // ombra della rete sul pavimento
+    ctx.globalAlpha = 0.16;
+    ctx.fillStyle = INCHIOSTRO;
+    ctx.beginPath();
+    ctx.moveTo(X(M.reteX, -1), Yp(-1));
+    ctx.lineTo(X(M.reteX, 1), Yp(1));
+    ctx.lineTo(X(M.reteX + 70, 1), Yp(1));
+    ctx.lineTo(X(M.reteX + 70, -1), Yp(-1));
+    ctx.closePath();
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // rete: palo lontano (più basso e sottile), fascia in diagonale con la maglia, palo vicino
+    const palo = (d: number, largo: number) => {
+      ctx.fillStyle = '#3d2350';
+      const x = X(M.reteX, d);
+      ctx.fillRect(x - (largo * dpr) / 2, Yp(d) - alto(d) - 8 * k, largo * dpr, alto(d) + 8 * k);
+    };
+    palo(-1, 4);
+    const fascia = 0.42; // la fascia è alta il 42% della rete, dalla cima in giù
+    const cima = (d: number) => Yp(d) - alto(d);
+    const sotto = (d: number) => cima(d) + alto(d) * fascia;
+    ctx.fillStyle = 'rgba(61, 35, 80, 0.18)';
+    ctx.beginPath();
+    ctx.moveTo(X(M.reteX, -1), cima(-1));
+    ctx.lineTo(X(M.reteX, 1), cima(1));
+    ctx.lineTo(X(M.reteX, 1), sotto(1));
+    ctx.lineTo(X(M.reteX, -1), sotto(-1));
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(61, 35, 80, 0.55)';
+    ctx.lineWidth = 1 * dpr;
+    ctx.beginPath();
+    for (let i = 1; i < 12; i++) {
+      const d = -1 + (2 * i) / 12;
+      ctx.moveTo(X(M.reteX, d), cima(d));
+      ctx.lineTo(X(M.reteX, d), sotto(d));
+    }
+    for (let j = 1; j < 5; j++) {
+      const q = j / 5;
+      ctx.moveTo(X(M.reteX, -1), cima(-1) + alto(-1) * fascia * q);
+      ctx.lineTo(X(M.reteX, 1), cima(1) + alto(1) * fascia * q);
     }
     ctx.stroke();
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(-margine, terra - 2 * dpr, tela.width, 4 * dpr); // linea di fondo del campo
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 4 * dpr;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(X(M.reteX, -1), cima(-1));
+    ctx.lineTo(X(M.reteX, 1), cima(1));
+    ctx.stroke();
+    palo(1, 8);
   }
-  return { tela, w, h, margine, conSfondo };
+  return { sfondo, campo, w, h, terra, margine, conSfondo };
 }
 
 /** Pillola del punteggio: si ridisegna solo quando cambia qualcosa. */
@@ -446,13 +530,14 @@ function disegna(c: HTMLCanvasElement, t: Tela, s: Stato, a: Vista, e: Effetti, 
   const dx = SCOSSA_PX[0] * dpr * sh * Math.sin(e.tempoScossa * 1.7);
   const dy = SCOSSA_PX[1] * dpr * sh * Math.sin(e.tempoScossa * 2.3);
 
-  t.fondale = fondale(t.fondale, w, h, terra, dpr);
+  t.fondale = fondale(t.fondale, w, h, terra, k, ox, dpr);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.drawImage(t.fondale.tela, -t.fondale.margine + dx, -t.fondale.margine + dy);
+  const m = t.fondale.margine;
+  const parallasse = ((M.reteX - a.palla.x) / M.reteX) * PARALLASSE * dpr; // lo sfondo è lontano: si muove poco
+  ctx.drawImage(t.fondale.sfondo, -m + dx + parallasse, -m + dy);
+  ctx.drawImage(t.fondale.campo, -m + dx, -m + dy);
 
   ctx.setTransform(k, 0, 0, k, ox + dx, terra + dy);
-  ctx.fillStyle = '#3d2350';
-  ctx.fillRect(M.reteX - M.reteMezza, Y(M.reteAlta), M.reteMezza * 2, M.reteAlta);
   // personaggi all'altezza vera: cm × unità per cm (docs/09 §3.3)
   a.giocatori.forEach((g, l) => disegnaGiocatore(ctx, g, l, g.cm * s.uPerCm, e.moto[l], f, ora));
   disegnaPalla(ctx, a.palla, e, f, dpr / k);
@@ -546,6 +631,26 @@ function leggi(i: Ingressi): Comandi {
   i.visti.clear();
   return d;
 }
+/**
+ * Schermo intero e orizzontale nel browser (nell'APK ci pensa il plugin di orientamento). Si prova
+ * da sola una volta sola, al primo dito alzato su un comando (il pointerdown di un dito non basta al
+ * browser per dare il permesso); se poi si esce, si rientra solo dal menu Pausa.
+ */
+let schermoProvato = false;
+const schermoPossibile = () => !Capacitor.isNativePlatform() && document.fullscreenEnabled && !document.fullscreenElement;
+function schermoIntero(dalMenu: boolean) {
+  if ((schermoProvato && !dalMenu) || !schermoPossibile()) return;
+  schermoProvato = true;
+  try {
+    document.documentElement
+      .requestFullscreen({ navigationUI: 'hide' })
+      .then(() => (screen.orientation as unknown as { lock?: (o: string) => Promise<void> }).lock?.('landscape'))
+      .catch(() => {});
+  } catch {
+    /* browser senza schermo intero: si gioca lo stesso */
+  }
+}
+
 function cattura(ev: PointerEvent<HTMLElement>) {
   try {
     ev.currentTarget.setPointerCapture(ev.pointerId);
@@ -561,6 +666,7 @@ export default function Gioco() {
   const [fine, setFine] = useState<[number, number] | null>(null);
   const [inPausa, setInPausa] = useState(false);
   const riprendi = useRef(() => {});
+  const ferma = useRef(() => {});
 
   // Nell'APK (dalla 1.3) il gioco gira lo schermo da solo e uscendo lo rimette dritto: il resto di ACE
   // è verticale. Nel browser e negli APK vecchi il blocco non c'è: resta "Gira il telefono".
@@ -651,32 +757,45 @@ export default function Gioco() {
     };
     giro = requestAnimationFrame(ciclo);
 
-    const tasto = (giu: boolean) => (ev: KeyboardEvent) => {
-      const tt = TASTIERA[ev.code];
-      if (!tt) return;
-      ev.preventDefault();
-      if (!giu) lascia(ing, tt, ev.code);
-      else if (!ev.repeat) premi(ing, tt, ev.code);
-    };
-    const su = tasto(false);
-    const giu = tasto(true);
-    // finestra lasciata con un tasto giù: il keyup non arriva più
+    // finestra lasciata con un tasto giù: il keyup non arriva più. Anche i tocchi brevi in memoria si
+    // dimenticano: dopo una pausa non parte un salto vecchio.
     const via = () => {
       TASTI.forEach((tt) => [...ing.premuti[tt]].forEach((chi) => lascia(ing, tt, chi)));
       ing.dita.clear();
+      ing.visti.clear();
     };
-    // in secondo piano si ferma; al ritorno si aspetta un tocco, e il tempo riparte da lì
-    const visibile = () => {
-      if (document.visibilityState !== 'hidden' || s.vincitore !== null) return;
+    // Pausa (pulsante, P o Esc, pagina in secondo piano): i tic si fermano e i tasti si lasciano;
+    // alla ripresa il tempo riparte da lì, così la palla non salta.
+    ferma.current = () => {
+      if (pausa || s.vincitore !== null) return;
       pausa = true;
       via();
       setInPausa(true);
     };
     riprendi.current = () => {
       pausa = false;
+      via();
       prima = performance.now();
       resto = MEZZO_PASSO;
       setInPausa(false);
+    };
+    const tasto = (giu: boolean) => (ev: KeyboardEvent) => {
+      if (giu && (ev.code === 'KeyP' || ev.code === 'Escape')) {
+        if (ev.repeat) return;
+        ev.preventDefault();
+        (pausa ? riprendi : ferma).current();
+        return;
+      }
+      const tt = TASTIERA[ev.code];
+      if (!tt) return;
+      ev.preventDefault();
+      if (!giu) lascia(ing, tt, ev.code);
+      else if (!ev.repeat && !pausa) premi(ing, tt, ev.code);
+    };
+    const su = tasto(false);
+    const giu = tasto(true);
+    const visibile = () => {
+      if (document.visibilityState === 'hidden') ferma.current();
     };
     addEventListener('keydown', giu);
     addEventListener('keyup', su);
@@ -702,13 +821,16 @@ export default function Gioco() {
   const comando = (t: Tasto) => {
     const molla = (ev: PointerEvent) => lascia(ing, t, ev.pointerId);
     return {
+      onPointerUp: (ev: PointerEvent) => {
+        molla(ev);
+        schermoIntero(false);
+      },
       ref: rif(t),
       onPointerDown: (ev: PointerEvent<HTMLButtonElement>) => {
         ev.preventDefault();
         premi(ing, t, ev.pointerId);
         cattura(ev);
       },
-      onPointerUp: molla,
       onPointerCancel: molla,
       onLostPointerCapture: molla,
     };
@@ -743,7 +865,10 @@ export default function Gioco() {
       ing.dita.set(ev.pointerId, t);
       premi(ing, t, ev.pointerId);
     },
-    onPointerUp: molla,
+    onPointerUp: (ev: PointerEvent) => {
+      molla(ev);
+      schermoIntero(false);
+    },
     onPointerCancel: molla,
     onLostPointerCapture: molla,
   };
@@ -769,11 +894,34 @@ export default function Gioco() {
           Salta
         </button>
       </div>
+      <button type="button" className="gioco-ferma" aria-label="Pausa" title="Pausa (P o Esc)" onClick={() => ferma.current()}>
+        <Pause size={28} weight="fill" aria-hidden />
+      </button>
       <p className="gioco-gira">Gira il telefono</p>
       {inPausa && !fine && (
-        <button type="button" className="gioco-pausa" onClick={() => riprendi.current()}>
-          Tocca per continuare
-        </button>
+        <div className="gioco-velo" role="dialog" aria-label="Pausa">
+          <h1>Pausa</h1>
+          <button type="button" className="principale" onClick={() => riprendi.current()}>
+            Continua
+          </button>
+          {schermoPossibile() && (
+            <button type="button" onClick={() => schermoIntero(true)}>
+              Schermo intero
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => {
+              // il gioco si sceglie all'avvio da #gioco (main.tsx): senza, ricaricando si torna ad ACE
+              if (location.hash === '#gioco') {
+                location.hash = '';
+                location.reload();
+              } else history.back();
+            }}
+          >
+            Esci
+          </button>
+        </div>
       )}
       {fine && (
         <div className="gioco-fine" role="dialog" aria-label="Partita finita">

@@ -30,8 +30,13 @@ main.gioco { position: fixed; inset: 0; width: 100%; margin: 0; padding: 0; back
 }
 @media (prefers-reduced-motion: reduce) { .gioco-schiaccia.pronto::after { animation: none; opacity: 1; } }
 
-/* tornando nel gioco dopo essere usciti: si riparte solo col tocco */
-.gioco-pausa { position: absolute; inset: 0; display: grid; place-content: center; margin: 0; border: 0; background: rgba(47, 42, 110, 0.72); color: #fff; font: 800 30px 'Baloo 2', sans-serif; }
+/* Pausa: in alto a destra, lontano dalla pillola del punteggio (al centro) */
+.gioco-ferma { position: absolute; top: calc(10px + env(safe-area-inset-top)); right: calc(16px + env(safe-area-inset-right)); display: grid; place-items: center; width: 52px; height: 52px; padding: 0; border: 3px solid var(--notte); border-radius: 16px; background: rgba(255, 255, 255, 0.85); color: var(--notte); }
+/* velo della pausa (anche tornando nel gioco dopo essere usciti): si riparte solo col tocco */
+.gioco-velo { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 12px; background: rgba(47, 42, 110, 0.8); color: #fff; }
+.gioco-velo h1 { margin: 0 0 4px; font: 800 32px 'Baloo 2', sans-serif; }
+.gioco-velo button { min-width: 220px; min-height: 52px; padding: 0 28px; border: 3px solid var(--notte); border-radius: 999px; background: #fff; color: var(--notte); font: 800 18px Nunito, sans-serif; }
+.gioco-velo .principale { background: var(--burro); }
 
 .gioco-fine { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 12px; background: rgba(47, 42, 110, 0.8); color: var(--bianco); text-align: center; }
 .gioco-fine h1 { margin: 0; font: 800 32px 'Baloo 2', sans-serif; }
@@ -41,6 +46,6 @@ main.gioco { position: fixed; inset: 0; width: 100%; margin: 0; padding: 0; back
 /* in verticale il gioco si ferma (Gioco.tsx) e chiede di girare lo schermo */
 .gioco-gira { display: none; }
 @media (orientation: portrait) {
-  .gioco canvas, .gioco-tasti, .gioco-croce { visibility: hidden; }
+  .gioco canvas, .gioco-tasti, .gioco-croce, .gioco-ferma { visibility: hidden; }
   .gioco-gira { position: absolute; inset: 0; display: grid; place-content: center; margin: 0; color: var(--bianco); font: 800 24px 'Baloo 2', sans-serif; }
 }
