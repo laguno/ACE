@@ -79,6 +79,7 @@ Il tetto lo conta il **server** (una riga per partita e giorno, nuova migrazione
 4. **Nessun premio per la vittoria**: niente passi, niente figurine, niente contatori. Il gioco vale solo il divertimento.
 5. **Partita a tempo: 1:30 (90 secondi)** (16/11 sera: 2 minuti, poi ridotta a 1:30; sostituisce il set ai 15 della Fase 1). Vince chi ha più punti allo scadere; lo scambio in corso si finisce; in parità si gioca un punto in più e chi lo fa vince. Il numero sta in `data/config-gioco.json` (`pallavolo.secondi`). Con il tetto di 3 partite fanno 4,5 minuti al giorno.
    **Altezze**: ogni personaggio ha la sua altezza in cm in `data/config-gioco.json` (`pallavolo.altezze_cm`, `altezza_default_cm` per chi manca, `rete_cm` = 224 cm); la scala unità per cm è legata alla rete e il disegno è proporzionale ai cm. Chi è più alto tocca più in alto, ma l'effetto sul gioco è attenuato, così bart (cane) e lady (gattina) restano giocabili.
+5b. **Selezione e mossa finale** (docs/11 §3.1-3.2): prima di ogni partita si scelgono i due personaggi (8, a mano o "A caso", per Tu e per CPU); ognuno ha una mossa finale con barra di carica (`pallavolo.personaggi`, `pallavolo.finisher`).
 6. **Dove si implementa.** Sessione di Claude Code sul repository di ACE (ramo `gioco`), con test e le regole di CLAUDE.md. Nessuna pubblicazione nelle finestre vietate (14:20-14:45 e 19:45-21:00) e backup prima di ogni pubblicazione, come da HANDOFF.
 
 ## 6. Rischi

@@ -222,8 +222,8 @@ Se i numeri della carica arrivano dalla config, `nuovaPartita` li riceve in `opz
 ## 5. Decisioni del signore (da chiedere una alla volta)
 
 Bloccanti per la Fase 1:
-1. Nomi ed effetti delle 8 mosse finali (tabella §3.2): vanno bene così?
-2. La CPU: la sceglie il giocatore, oppure è sempre "a caso"? Proposta: tutte e due.
+1. ~~Nomi ed effetti delle 8 mosse finali~~ DECISO: approvate come in tabella §3.2 (nomi in `pallavolo.personaggi`).
+2. ~~La CPU~~ DECISO: si sceglie a mano o "A caso", per il giocatore e per la CPU, anche tutti e due; "A caso" si risolve a "Gioca".
 
 Non bloccanti (si chiedono quando servono):
 3. Quanto deve vincere Lani contro la CPU (livello di `cpu_errore`).

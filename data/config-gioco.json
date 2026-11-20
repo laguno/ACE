@@ -223,7 +223,23 @@
     "rete_cm": 224,
     "altezza_default_cm": 170,
     "altezze_cm": { "lani": 174, "leo": 135, "papa": 187, "mamma": 182, "allenatore": 170, "nonno": 173, "bart": 60, "lady": 25 },
-    "partite_al_giorno": 3
+        "partite_al_giorno": 3,
+    "personaggi": {
+      "lani": { "nome": "Lani", "figura": "/assets/avatar/lani/lani-battuta.webp", "guarda": "sx", "finisher": "fulmine", "mossa": "Schiacciata fulminante" },
+      "leo": { "nome": "Leo", "figura": "/assets/avatar/leo/leo-tennis.webp", "guarda": "sx", "finisher": "dritto", "mossa": "Dritto di tennis" },
+      "papa": { "nome": "Papà", "figura": "/assets/avatar/papa/papa-passaggio.webp", "guarda": "sx", "finisher": "bomba", "mossa": "Bomba dall'alto" },
+      "mamma": { "nome": "Mamma", "figura": "/assets/avatar/mamma/mamma-passaggio.webp", "guarda": "sx", "finisher": "furba", "mossa": "Palla furba" },
+      "nonno": { "nome": "Nonno", "figura": "/assets/avatar/nonno/nonno-passaggio.webp", "guarda": "sx", "finisher": "esperienza", "mossa": "Colpo dell'esperienza" },
+      "allenatore": { "nome": "Allenatore", "figura": "/assets/avatar/allenatore/allenatore-pollice.webp", "guarda": "sx", "finisher": "fischio", "mossa": "Fischio!" },
+      "bart": { "nome": "Bart", "figura": "/assets/avatar/bart/bart-pallone.webp", "guarda": "sx", "finisher": "scatto", "mossa": "Scatto del cane" },
+      "lady": { "nome": "Lady", "figura": "/assets/avatar/lady/lady-dispettosa.webp", "guarda": "sx", "finisher": "dispetto", "mossa": "Dispetto" }
+    },
+    "finisher": {
+      "nota": "Carica della mossa finale (docs/11 §3.2), stessa forma di OpzioniCarica del motore: max = carica piena; tocco, schiacciata, punto = carica guadagnata quando la palla passa oltre la rete, a ogni schiacciata, a ogni punto; subito = piccola carica a chi subisce il punto; armato = da quanta carica la mossa si può usare. Da tarare con Lani.",
+      "max": 100, "tocco": 8, "schiacciata": 15, "punto": 20, "subito": 10, "armato": 90
+    },
+    "cpu_errore": { "facile": 70, "normale": 40, "difficile": 20 },
+    "cpu_livello": "normale"
   },
   "classifiche": {
     "nota": "Sprint 2: classifiche dal portale FIPAV Reggio Emilia, lette una volta al giorno dalla funzione classifiche. Stagione 2026/27. Se la squadra passa alla fase dopo cambia il girone (CId): per ora si cambia qui.",

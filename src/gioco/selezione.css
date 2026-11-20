@@ -1,0 +1,29 @@
+/* Selezione dei personaggi: pensata per il telefono in orizzontale (844x390), vale anche in verticale. */
+.selezione { position: fixed; inset: 0; display: flex; flex-direction: column; gap: 6px; padding: calc(6px + env(safe-area-inset-top)) calc(10px + env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) calc(10px + env(safe-area-inset-left)); background: var(--notte); color: #fff; font-family: Nunito, sans-serif; overflow: auto; }
+.selezione-colonne { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.selezione-col { display: flex; flex-direction: column; min-height: 0; padding: 6px; border: 3px solid var(--viola); border-radius: 16px; }
+.selezione-col.cpu { border-color: var(--fucsia); }
+.selezione h2 { margin: 0 0 4px; font: 800 18px/1 'Baloo 2', sans-serif; }
+.selezione-col.tu h2 { color: #d9d2ff; }
+.selezione-col.cpu h2 { color: #ffc2de; }
+.selezione-griglia { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(5, 1fr); grid-auto-rows: minmax(52px, 1fr); gap: 5px; }
+.scheda { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-width: 0; min-height: 52px; padding: 3px; border: 3px solid transparent; border-radius: 12px; background: #fff; color: var(--notte); text-align: center; font: 700 12px/1.15 Nunito, sans-serif; cursor: pointer; }
+.scheda img { flex: none; width: 100%; height: 72px; object-fit: contain; }
+.scheda .testo { display: block; min-width: 0; max-width: 100%; }
+.scheda .testo > * { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.scheda b { font-weight: 800; font-size: 12px; letter-spacing: -0.3px; }
+.scheda small { font-size: 12px; font-weight: 700; color: var(--testo-2); }
+.scheda .mossa { color: var(--testo-2); font-size: 12px; }
+.scheda.caso { background: var(--burro-chiaro); }
+.scheda.caso::before { content: '?'; font: 800 40px/72px 'Baloo 2', sans-serif; }
+.selezione-col.tu .scheda.attiva { border-color: var(--viola); background: var(--lilla); box-shadow: 0 0 0 3px #fff; }
+.selezione-col.cpu .scheda.attiva { border-color: var(--accento); background: var(--rosa); box-shadow: 0 0 0 3px #fff; }
+.scheda:focus-visible, .selezione-gioca:focus-visible { outline: 4px solid var(--burro); outline-offset: 2px; }
+.selezione-gioca { flex: none; align-self: center; min-width: 240px; min-height: 52px; padding: 0 32px; border: 3px solid #fff; border-radius: 999px; background: var(--burro); color: var(--notte); font: 800 22px 'Baloo 2', sans-serif; cursor: pointer; }
+/* in verticale le colonne si impilano, 3 schede per riga */
+@media (orientation: portrait) {
+  .selezione-colonne { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+  .selezione-griglia { grid-template-columns: repeat(3, 1fr); }
+  .scheda img { height: 44px; }
+  .scheda.caso::before { line-height: 44px; }
+}
