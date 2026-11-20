@@ -311,5 +311,16 @@ await come(null, `update compiti set scadenza_spostata = '2026-11-27' where id =
 await come(null, `update compiti set scadenza = '2026-11-24' where id = '${COMPITO}'`);
 verifica('la sincronizzazione non riporta indietro un compito spostato', (await val(null, `select scadenza::text from compiti where id = '${COMPITO}'`)) === '2026-11-27');
 
+// tutor (0055): Lani non legge né scrive risposte salvate e storico; i genitori leggono, non scrivono
+await come(null, `insert into tutor_aiuti (compito_id, testo_compito, spiegazione, indizi, risultati) values ('${COMPITO}', 'Es. 3 pag. 40', 'Esempio', '["a"]', '["3/4"]')`);
+await come(null, `insert into tutor_richieste (profilo_id, tipo, compito_id, testo) values ('${LANI}', 'tentativo', '${COMPITO}', 'ho provato')`);
+verifica('tutor: Lani non legge indizi e risultati salvati', (await come(LANI, 'select * from tutor_aiuti')).rows.length === 0);
+verifica('tutor: Lani non legge lo storico', (await come(LANI, 'select * from tutor_richieste')).rows.length === 0);
+await fallisce('tutor: Lani non scrive un tentativo da sola', LANI, `insert into tutor_richieste (profilo_id, tipo, testo) values ('${LANI}', 'tentativo', 'x')`);
+await fallisce('tutor: Lani non scrive indizi', LANI, `insert into tutor_aiuti (compito_id, testo_compito, spiegazione) values ('${COMPITO}', 'x', 'y') on conflict do nothing`);
+verifica('tutor: un genitore legge lo storico', (await come(PAPA, 'select * from tutor_richieste')).rows.length === 1);
+await fallisce('tutor: un genitore non scrive nello storico', PAPA, `insert into tutor_richieste (profilo_id, tipo) values ('${PAPA}', 'spiegamelo')`);
+await fallisce('tutor: niente tipi inventati', null, `insert into tutor_richieste (profilo_id, tipo) values ('${LANI}', 'voto')`);
+
 console.log(`\n${ok} ok, ${ko} no`);
 process.exit(ko ? 1 : 0);
