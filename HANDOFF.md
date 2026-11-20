@@ -20,11 +20,11 @@ Storia delle sessioni, decisioni prese e scelte approvate: `docs/storico.md`.
 - 19:27 (`2354ee6`, backup `ace-2026-11-20_19-26-08.sql`): `passi()` dei genitori restituisce null se la funzione non risponde (Dai passi: "passi non arrivati" + Riprova, non più "tetto pieno"; Riprova anche su firma, Segna, partita); Stato di ACE rosso solo per giri non riusciti; Settimana "Nessuna serata da chiudere finora" il lunedì; prova `astra › figurina e album` sistemata (7,25, media delle medie). Restano di genitori-ux solo gergo e conferma modifiche fuori da Sera.
 - **Da fare:** il signore prova Oggi dei genitori sul telefono.
 
-## Piano studio: pronto da provare (20/11 sera, ramo `studio`)
+## Piano studio: IN PRODUZIONE (20/11 21:10, `18bbcd2`)
 
 - Notifiche: nelle sere di sport tardo la chiusura si anticipa all'ultimo giro prima del silenzio (scelta del signore, 20/11); prove riscritte con i margini 30/60. `studio` ha ricevuto `main` e `rifinitura`: giro completo verde (487 unità, 362 schema, 221 e2e; l'unica rossa era la figurina, ora corretta).
 - Ramo di prova `gioco-con-tabellina` = gioco + tabellina + main + studio (`8f63041`, 521 unità verdi); DB locale con 0045–0070, cron `genera-mate` e `foto-studio` spenti in locale. Serve una build nuova (`npm run prova:telefono` in `app-tmp-merge`): la 5187 ora la usa la sessione del gioco (`ramo gioco`, scelta del signore), poi la rimette.
-- **Da fare:** il signore prova il piano studio su ACE Prova; poi pubblicazione (backup, migrazioni 0045–0070 `db push --remote --yes --include-all`, funzioni `spiega`, `notifiche`, `genera-studio`, `foto-studio`, `genera-mate`, `passi`, `sync-nuvola`, push di `studio` su `main`), fuori dalle finestre vietate.
+- **Pubblicato 20/11 ~21:10:** backup `ace-2026-11-20_21-07-31.sql`; migrazioni 0045–0070 in produzione (cron `genera-mate` e `foto-studio` attivi); tutte le 13 funzioni ripubblicate; `studio` su `main` (Vercel success). Al deploy il bundle falliva per import senza `.ts` in `src/lib` (metacognizione, come-passi, foto): corretto. Da controllare domani: `sync_log`, Stato di ACE, telefono di Lani (prima pillola, notifiche nella sera di allenamento).
 - Worktree tolti il 20/11: `app-studio-*` (4), `app-metacognizione`, `app-rilascio`, `app-sprint-2` (rami tenuti). Cartella `app-studio-notifiche` rimasta bloccata da un processo: si cancella a mano. `app-tabellina` è unito in main, si può togliere.
 
 ## Foto delle verifiche e voti pesati (19/11, in produzione)
