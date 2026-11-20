@@ -1093,3 +1093,17 @@ button.chip-pagina { cursor: pointer; }
 
 /* Area genitori: la tabellina ha già la sua freccia, quella di ".ga summary" sarebbe la seconda */
 .ga .tabellina-dettagli > summary::after { content: none; }
+
+/* Metacognizione (blocco D): piano del giorno, voto previsto, micro-lezione */
+.piano-voci { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 10px; }
+.piano-voci li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.piano-titolo { flex: 1 1 160px; min-width: 0; overflow-wrap: anywhere; }
+.piano-azioni { display: inline-flex; align-items: center; gap: 8px; }
+.piano-azioni .secondario.compatto { margin-top: 0; }
+.piano-esito { color: var(--testo-2); font-weight: 700; }
+.piano-giorno select, .voto-previsto select { min-height: 44px; padding: 0 12px; border: 2px solid var(--lilla-bordo); border-radius: 14px; background: var(--bianco); font: inherit; color: var(--testo); }
+.voto-previsto { margin-top: 8px; }
+.voto-previsto label { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.micro-lezione { display: flex; gap: 12px; align-items: flex-start; }
+.micro-lezione h2 { margin: 0 0 6px; }
+.micro-lezione p { margin: 0 0 8px; }

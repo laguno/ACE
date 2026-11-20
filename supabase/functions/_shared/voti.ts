@@ -4,6 +4,7 @@ import * as K from '../../../src/lib/copione/index.ts';
 import * as R from '../../../src/lib/regole/index.ts';
 import { aggiornaForzieri } from './forzieri.ts';
 import { accoda } from './popup.ts';
+import { passiPrevisioni } from './previsioni.ts';
 
 /** Errore con un messaggio che si può mostrare ai genitori (sync_log). */
 export class Passo extends Error {}
@@ -25,7 +26,8 @@ async function registra(db: SupabaseClient, motivo: string, riferimento: string,
 
 /** Passi di voti e note, poi i forzieri. */
 export async function passiEForzieri(db: SupabaseClient) {
-  const passi = await passiVotiENote(db);
+  // voto previsto (blocco D): dopo i voti, prima dei forzieri
+  const passi = (await passiVotiENote(db)) + (await passiPrevisioni(db));
   return { passi, forzieri: await aggiornaForzieri(db, passi) };
 }
 
