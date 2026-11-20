@@ -215,6 +215,15 @@ export function creaGestori(db: SupabaseClient) {
       return registraStudio('quiz', g, R.passiQuiz(t.numero, t.giuste, t.totale));
     },
 
+    // Serie di esercizi di matematica (blocco F): passi per averla finita, mai per le giuste.
+    async matematica(id) {
+      const t = await riga('mate_tentativi', 'id', id);
+      const g = R.giornoRoma(t.fatto_il);
+      if (!R.serieMateValida(new Date(t.iniziato_il), new Date(t.fatto_il), t.problemi, t.tentati))
+        return niente('serie non finita o troppo veloce');
+      return registraStudio('matematica', g, P.studio_facoltativo.matematica_serie);
+    },
+
     async video(id) {
       const v = await riga('video_visti', 'id', id, '*, video(durata_secondi)');
       const g = R.giornoRoma(v.visto_il);

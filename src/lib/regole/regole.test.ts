@@ -425,3 +425,21 @@ describe('assenze da scuola', () => {
     expect(bandierina(giorno('2027-06-04'), undefined, undefined, ['2026-11-24'])).toBe(7200);
   });
 });
+
+describe('serie di matematica (blocco F, provvisorio)', () => {
+  const S = CONFIG.passi.studio_facoltativo;
+  const inizio = new Date('2026-11-24T15:00:00Z');
+  const dopo = (s: number) => new Date(inizio.getTime() + s * 1000);
+  it('vale con tutti i problemi tentati e abbastanza tempo, giuste o no', async () => {
+    const { serieMateValida } = await import('./index');
+    expect(serieMateValida(inizio, dopo(8 * S.matematica_secondi_per_problema), 8, 8)).toBe(true);
+    expect(serieMateValida(inizio, dopo(8 * S.matematica_secondi_per_problema - 1), 8, 8)).toBe(false);
+    expect(serieMateValida(inizio, dopo(9999), 8, 7)).toBe(false);
+    expect(serieMateValida(inizio, dopo(9999), 0, 0)).toBe(false);
+  });
+  it('conta nel tetto giornaliero come gli altri tipi di studio', async () => {
+    const { caselleStudio } = await import('./index');
+    expect(caselleStudio('matematica', '2026-11-24')).toHaveLength(S.max_al_giorno_per_tipo);
+    expect(caselleStudio('matematica', '2026-11-24')[0]).toBe('matematica:2026-11-24:1');
+  });
+});
