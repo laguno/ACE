@@ -87,6 +87,7 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
     const { error } = await client.from('fogli_firma').update({ consegnato_il: new Date().toISOString() }).eq('id', f.id);
     if (error) return avvisa(`${f.titolo}: firma non salvata.`, () => firmato(f));
     const p = await passi('foglio', f.id);
+    if (p === null) return avvisa(`${f.titolo}: firmato, ma i passi non sono arrivati.`, () => firmato(f));
     fatto(p ? `${f.titolo}: firmato, +${p} a Lani.` : `${f.titolo}: firmato.`);
   }
 
@@ -254,7 +255,7 @@ function FoglioPassi({ client, passi, date, gestiOggi, aggiorna, chiudi }: Props
   const tetto = R.CONFIG.passi.gesti_casa.tetto_giornaliero;
   const [lavoro, setLavoro] = useState<string>();
   // l'ultimo gesto dato, con "Annulla", dentro il foglio (fuori dal foglio modale non si tocca)
-  const [ultimo, setUltimo] = useState<{ testo: string; annulla?: () => void }>();
+  const [ultimo, setUltimo] = useState<{ testo: string; azione?: () => void; etichetta?: string }>();
   const pieno = gestiOggi >= tetto;
 
   async function annulla(id: string, nome: string) {
@@ -272,9 +273,18 @@ function FoglioPassi({ client, passi, date, gestiOggi, aggiorna, chiudi }: Props
       setLavoro(undefined);
       return setUltimo({ testo: 'Non salvato. Riprova.' });
     }
-    const p = await passi('gesto', data.id);
+    await dai(data.id, nome);
     setLavoro(undefined);
-    setUltimo(p ? { testo: `${nome}: +${p} a Lani.`, annulla: () => annulla(data.id, nome) } : { testo: `${nome}: oggi il tetto dei gesti è già pieno.` });
+  }
+  async function dai(id: string, nome: string) {
+    const p = await passi('gesto', id);
+    setUltimo(
+      p === null
+        ? { testo: `${nome}: passi non arrivati.`, azione: () => dai(id, nome), etichetta: 'Riprova' }
+        : p
+          ? { testo: `${nome}: +${p} a Lani.`, azione: () => annulla(id, nome), etichetta: 'Annulla' }
+          : { testo: `${nome}: oggi il tetto dei gesti è già pieno.` },
+    );
     aggiorna();
   }
 
@@ -297,9 +307,9 @@ function FoglioPassi({ client, passi, date, gestiOggi, aggiorna, chiudi }: Props
       {ultimo && (
         <p className="ga-ultimo" role="status">
           {ultimo.testo}
-          {ultimo.annulla && (
-            <button type="button" onClick={ultimo.annulla}>
-              Annulla
+          {ultimo.azione && (
+            <button type="button" onClick={ultimo.azione}>
+              {ultimo.etichetta}
             </button>
           )}
         </p>
@@ -325,7 +335,11 @@ function FoglioSegna({ client, passi, avvisa, chiudi }: Props & { chiudi: () => 
     const nota = tipo === 'balla' && 'nota' in balla ? balla.nota : null;
     const { data, error } = await client.from('sgridate').insert({ tipo, nota }).select('id').single();
     if (error || !data) return avvisa(`${nome}: non segnata.`, segna);
-    const p = await passi('sgridata', data.id);
+    await conta(data.id);
+  }
+  async function conta(id: string) {
+    const p = await passi('sgridata', id);
+    if (p === null) return avvisa(`${nome}: segnata, ma i passi non sono stati tolti.`, () => conta(id));
     avvisa(p ? `${nome}: ${meno(p)} passi.` : `${nome}: segnata.`);
   }
 
