@@ -633,6 +633,89 @@ export type Database = {
           },
         ]
       }
+      mate_serie: {
+        Row: {
+          argomento: string
+          creato_il: string
+          id: string
+          materia_id: string | null
+          problemi: Json
+          verifica_id: string | null
+        }
+        Insert: {
+          argomento: string
+          creato_il?: string
+          id?: string
+          materia_id?: string | null
+          problemi: Json
+          verifica_id?: string | null
+        }
+        Update: {
+          argomento?: string
+          creato_il?: string
+          id?: string
+          materia_id?: string | null
+          problemi?: Json
+          verifica_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mate_serie_materia_id_fkey"
+            columns: ["materia_id"]
+            isOneToOne: false
+            referencedRelation: "materie"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mate_serie_verifica_id_fkey"
+            columns: ["verifica_id"]
+            isOneToOne: false
+            referencedRelation: "verifiche"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mate_tentativi: {
+        Row: {
+          dettaglio: Json
+          fatto_il: string
+          id: string
+          iniziato_il: string
+          numero: number
+          problemi: number
+          serie_id: string
+          tentati: number
+        }
+        Insert: {
+          dettaglio?: Json
+          fatto_il?: string
+          id?: string
+          iniziato_il: string
+          numero?: number
+          problemi: number
+          serie_id: string
+          tentati: number
+        }
+        Update: {
+          dettaglio?: Json
+          fatto_il?: string
+          id?: string
+          iniziato_il?: string
+          numero?: number
+          problemi?: number
+          serie_id?: string
+          tentati?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mate_tentativi_serie_id_fkey"
+            columns: ["serie_id"]
+            isOneToOne: false
+            referencedRelation: "mate_serie"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       materie: {
         Row: {
           abbreviazione: string
