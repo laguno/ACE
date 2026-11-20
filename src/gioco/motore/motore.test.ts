@@ -579,6 +579,82 @@ describe("rete", () => {
   });
 });
 
+describe("comandi reattivi", () => {
+  const SALTA: Comandi = { ...FERMO, salta: true };
+  const DX: Comandi = { ...FERMO, dx: true };
+  /** Partita con la palla bloccata in battuta: si provano solo i movimenti. */
+  const campo = () => {
+    const s = nuova(5);
+    s.attesa = 10 ** 6;
+    return s;
+  };
+  /** Tic in cui il giocatore 0 è in aria, eseguendo i comandi dati (uno per tic). */
+  function ticInAria(comandi: Comandi[]): number[] {
+    let s = campo();
+    const su: number[] = [];
+    comandi.forEach((c, i) => {
+      s = passo(s, [c, FERMO]);
+      if (s.giocatori[0].y > 0) su.push(i);
+    });
+    return su;
+  }
+  const LUNGO = 100;
+  // salto premuto al tic 0: in aria dal tic 0 al tic atterra - 1, a terra al tic atterra
+  const atterra = ticInAria([SALTA, ...Array<Comandi>(LUNGO).fill(FERMO)]).length;
+  /** Salta al tic 0 e di nuovo al tic t. */
+  const dueSalti = (t: number) =>
+    Array.from({ length: LUNGO }, (_, i) => (i === 0 || i === t ? SALTA : FERMO));
+
+  it("tenere salta fa un salto solo: niente rimbalzi all'atterraggio", () => {
+    const su = ticInAria(Array<Comandi>(LUNGO).fill(SALTA));
+    expect(su.length).toBe(atterra);
+    expect(su[0]).toBe(0);
+  });
+  it("salto premuto poco prima di atterrare: riparte il tic dopo l'atterraggio", () => {
+    for (let anticipo = 1; anticipo <= M.memoriaSalto - 2; anticipo++) {
+      const su = ticInAria(dueSalti(atterra - anticipo));
+      expect(su.length).toBe(2 * atterra);
+      expect(su).toContain(atterra + 1);
+    }
+  });
+  it("salto premuto troppo presto in aria si perde", () => {
+    expect(ticInAria(dueSalti(atterra - (M.memoriaSalto - 1))).length).toBe(atterra);
+  });
+  // Niente prova del "coyote" (salto concesso pochi tic dopo aver lasciato terra): nel gioco si
+  // lascia terra solo saltando, quindi non c'è un caso in cui servirebbe.
+  it("partenza in 3-5 tic, frenata in 2-4, inversione senza scatti", () => {
+    let s = campo();
+    const vx: number[] = [];
+    const via = (c: Comandi, n: number) => {
+      for (let i = 0; i < n; i++) {
+        s = passo(s, [c, FERMO]);
+        vx.push(s.giocatori[0].vx);
+      }
+    };
+    via(DX, 6);
+    const piena = vx.indexOf(M.passoG) + 1;
+    expect(piena).toBeGreaterThanOrEqual(3);
+    expect(piena).toBeLessThanOrEqual(5);
+    vx.length = 0;
+    via(FERMO, 6);
+    const ferma = vx.indexOf(0) + 1;
+    expect(ferma).toBeGreaterThanOrEqual(2);
+    expect(ferma).toBeLessThanOrEqual(4);
+    vx.length = 0;
+    via(DX, 6);
+    via({ ...FERMO, sx: true }, 10);
+    for (let i = 1; i < vx.length; i++)
+      expect(Math.abs(vx[i] - vx[i - 1])).toBeLessThanOrEqual(M.frenaG);
+    expect(vx.at(-1)).toBe(-M.passoG);
+  });
+  it("contro la rete il giocatore si ferma (vx a 0)", () => {
+    let s = campo();
+    for (let i = 0; i < 120; i++) s = passo(s, [DX, FERMO]);
+    expect(s.giocatori[0].x).toBe(M.reteX - M.reteMezza - M.raggioG);
+    expect(s.giocatori[0].vx).toBe(0);
+  });
+});
+
 describe("altezze", () => {
   const ALTEZZE = { papa: 187, lani: 174, default: 170, leo: 135, bart: 60, lady: 25 };
   /** Quota più alta raggiunta dal centro della palla toccata da chi salta (cima del cerchio + raggio palla). */

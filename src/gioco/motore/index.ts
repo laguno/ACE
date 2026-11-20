@@ -19,8 +19,11 @@ export const M = {
   vMax: 20, // caduta massima: sotto raggio + reteMezza, così la palla non attraversa la rete
   raggioG: 50, // giocatore: un cerchio (testa e mani) col centro a centroG dai piedi
   centroG: 60,
-  passoG: 6,
+  passoG: 6, // velocità piena del giocatore
+  accelG: 1.5, // partenza: velocità piena in 4 tic
+  frenaG: 2, // frenata (e inversione) più decisa: da piena a ferma in 3 tic
   salto: 13,
+  memoriaSalto: 8, // salto premuto in aria: parte se si tocca terra entro memoriaSalto - 2 tic
   gravitaG: 0.6,
   tocco: 13, // velocità della palla dopo un tocco da terra
   schiacciata: 17, // dopo un tocco in salto
@@ -55,6 +58,8 @@ export type Stato = {
   palla: Palla;
   giocatori: [Corpo, Corpo];
   uPerCm: number; // unità di campo per cm: M.reteAlta / altezza vera della rete
+  prima: [Comandi, Comandi]; // comandi del tic precedente: il salto parte sul fronte di pressione
+  memoriaSalto: [number, number]; // tic rimasti al salto premuto in aria (0 = nessuno)
   punti: [number, number];
   durata: number; // tic di gioco: scaduti, la partita finisce al primo punto che non lascia la parità
   battuta: Lato;
@@ -91,6 +96,7 @@ function servi(s: Stato, lato: Lato): void {
   s.tocchi = 0;
   s.latoTocchi = null;
   s.mira = estrai(s) * 2 - 1;
+  s.memoriaSalto = [0, 0];
 }
 
 /**
@@ -112,6 +118,8 @@ export function nuovaPartita(
       { x: 0, y: 0, vx: 0, vy: 0, cm: cm[1], schiaccia: 0 },
     ],
     uPerCm: M.reteAlta / reteCm,
+    prima: [FERMO, FERMO],
+    memoriaSalto: [0, 0],
     punti: [0, 0],
     durata,
     battuta: 0,
@@ -202,14 +210,28 @@ export function passo(
     palla: { ...prima.palla },
     giocatori: [{ ...prima.giocatori[0] }, { ...prima.giocatori[1] }],
     punti: [prima.punti[0], prima.punti[1]],
+    prima: [{ ...comandi[0] }, { ...comandi[1] }],
+    memoriaSalto: [prima.memoriaSalto[0], prima.memoriaSalto[1]],
   };
 
+  // Comandi reattivi. Il salto parte solo su una pressione nuova (tenere il tasto non fa rimbalzare);
+  // premuto in aria resta in memoria M.memoriaSalto tic e parte all'atterraggio. Niente "coyote"
+  // (salto concesso appena lasciata terra): qui si lascia terra solo saltando.
   for (const l of LATI) {
     const g = s.giocatori[l];
     const c = comandi[l];
-    g.vx = ((c.dx ? 1 : 0) - (c.sx ? 1 : 0)) * M.passoG;
-    if (c.salta && g.y === 0) g.vy = M.salto;
-    g.x = Math.min(Math.max(g.x + g.vx, MIN_X[l]), MAX_X[l]);
+    if (c.salta && !prima.prima[l].salta) s.memoriaSalto[l] = M.memoriaSalto;
+    if (s.memoriaSalto[l] > 0 && g.y === 0) {
+      g.vy = M.salto;
+      s.memoriaSalto[l] = 0;
+    } else if (s.memoriaSalto[l] > 0) s.memoriaSalto[l]--;
+    // velocità verso quella voluta: si parte con accelG, si frena (o si inverte) con frenaG
+    const voluta = ((c.dx ? 1 : 0) - (c.sx ? 1 : 0)) * M.passoG;
+    const freno = voluta === 0 || g.vx * voluta < 0 ? M.frenaG : M.accelG;
+    g.vx = g.vx < voluta ? Math.min(g.vx + freno, voluta) : Math.max(g.vx - freno, voluta);
+    const x = Math.min(Math.max(g.x + g.vx, MIN_X[l]), MAX_X[l]);
+    if (x !== g.x + g.vx) g.vx = 0; // contro la rete o il fondo ci si ferma
+    g.x = x;
     g.vy -= M.gravitaG;
     g.y += g.vy;
     if (g.y <= 0) {
