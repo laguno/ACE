@@ -43,7 +43,7 @@ export function PianoDelGiorno({ cose }: { cose: CosaDelPiano[] }) {
   const stima = (c: CosaDelPiano, minuti: number) => {
     const c_ = voci?.find((v) => v.voce === c.voce);
     if (c_) return scrivi(supabase.from('piano_voci').update({ minuti_stimati: minuti }).eq('giorno', oggi).eq('voce', c.voce));
-    return scrivi(supabase.from('piano_voci').insert({ voce: c.voce, titolo: c.titolo, minuti_stimati: minuti }));
+    return scrivi(supabase.from('piano_voci').insert({ giorno: oggi, voce: c.voce, titolo: c.titolo, minuti_stimati: minuti }));
   };
   // l'ora la mette il server (timbra_ora): qui basta un valore qualsiasi
   const segna = (voce: string, colonna: 'iniziata_il' | 'finita_il') =>
