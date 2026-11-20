@@ -33,11 +33,12 @@ export const M = {
   // margineSchiaccia dal cerchio di tocco. La palla va verso l'altro campo più in giù che può
   // (fino a schiacciaGiu) passando sopra la rete; in orizzontale da schiacciaVx a schiacciaVxMax,
   // più veloce quando serve per scendere anche da lontano.
-  margineSchiaccia: 12,
+  margineSchiaccia: 30,
   schiacciaVx: 16,
   schiacciaVxMax: 24,
   schiacciaGiu: 16,
-  memoriaSchiaccia: 8, // tic in cui il comando premuto resta valido (premuto un filo prima)
+  memoriaSchiaccia: 14, // tic in cui il comando premuto resta valido (premuto un filo prima)
+  perdonoSchiaccia: 8, // premuto fino a tanti tic dopo il proprio tocco in aria: la palla è schiacciata lo stesso
   durataSchiaccia: 14, // tic di animazione; intanto chi ha schiacciato non ritocca la palla
   casa: [250, 750],
   altoBattuta: 330,
@@ -228,6 +229,9 @@ function aTiro(s: Stato, l: Lato, margine: number): boolean {
   const p = s.palla;
   if (g.y <= 0 || g.schiaccia > 0 || p.y <= M.reteAlta) return false;
   if (l === 0 ? p.x >= M.reteX : p.x <= M.reteX) return false;
+  // appena toccata in aria da lui con un tocco normale: vale ancora (comando premuto un filo tardi)
+  const t = s.tocco;
+  if (t && t.lato === l && !t.schiacciata && s.tic - t.tic <= M.perdonoSchiaccia) return true;
   const [centro, raggio] = cerchio(s, g);
   const r = M.raggio + raggio + margine;
   const dx = p.x - g.x;
@@ -257,6 +261,28 @@ function schiaccia(p: Palla, l: Lato): void {
   const n = Math.max(dist / vx, 1);
   p.vx = dir * vx;
   p.vy = Math.max(-M.schiacciaGiu, (sopra - p.y) / n + (M.gravita * (n + 1)) / 2);
+}
+
+/**
+ * Premendo schiaccia adesso, la schiacciata del lato partirebbe entro la finestra del comando?
+ * Per accendere il pulsante. Si prova davvero: memoriaSchiaccia passi del motore con il comando
+ * premuto e gli altri fermi (chi gioca intanto si muove, quindi è una previsione, non una promessa).
+ */
+export function puoSchiacciare(s: Stato, lato: Lato): boolean {
+  const g = s.giocatori[lato];
+  if (s.vincitore !== null || g.y <= 0 || g.schiaccia > 0) return false;
+  const c: [Comandi, Comandi] = [FERMO, FERMO];
+  c[lato] = { ...FERMO, schiaccia: true };
+  const prima: [Comandi, Comandi] = [s.prima[0], s.prima[1]];
+  prima[lato] = FERMO; // così il comando è una pressione nuova
+  let t: Stato = { ...s, prima };
+  const punti = s.punti[0] + s.punti[1];
+  for (let i = 0; i < M.memoriaSchiaccia; i++) {
+    t = passo(t, c);
+    if (t.punti[0] + t.punti[1] !== punti) return false;
+    if (t.tocco && t.tocco.tic === t.tic && t.tocco.lato === lato && t.tocco.schiacciata) return true;
+  }
+  return false;
 }
 
 /** Un sessantesimo di secondo. Non tocca lo stato ricevuto. A partita finita lo restituisce com'è. */

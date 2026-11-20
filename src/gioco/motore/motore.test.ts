@@ -11,6 +11,7 @@ import {
   ia,
   nuovaPartita,
   passo,
+  puoSchiacciare,
   type Comandi,
   type Lato,
   type Stato,
@@ -726,6 +727,120 @@ describe("schiacciata", () => {
     const precisa = conta(0);
     expect(precisa).toBeGreaterThan(0);
     expect(conta(80)).toBeLessThan(precisa);
+  });
+});
+
+describe("schiacciata alla portata di chi gioca", () => {
+  const SCHIACCIA: Comandi = { ...FERMO, schiaccia: true };
+  type Esito = { inAria: boolean; sopraRete: boolean; schiacciata: boolean };
+  /**
+   * Un giocatore umano medio. La palla arriva alzata dal compagno (secondo tocco) vicino alla rete:
+   * x 340-420, apice 400-500, vx -1.5/0/1.5. Lui è sotto la palla con uno scarto di ±30, salta
+   * quando la palla è a 100-250 sopra le sue mani (chi presto, chi tardi) e preme schiaccia una
+   * volta sola, k tic dopo il salto, con k qualsiasi da 0 a 21 (la salita intera).
+   * Plausibili sono i casi in cui, senza schiacciare, la tocca in aria con la palla sopra la rete:
+   * lì una schiacciata ha senso. Esito: se entro un tic dalla pressione (o prima) parte una schiacciata.
+   */
+  function giro(px: number, alto: number, vx: number, scarto: number, quando: number, k: number | null): Esito | null {
+    let s = nuova(6, 10 ** 6);
+    s.attesa = 0;
+    s.tocchi = 1;
+    s.latoTocchi = 0;
+    s.palla = { x: px, y: alto, vx, vy: 0 };
+    s.giocatori[0].x = Math.min(px + scarto + vx * 20, M.reteX - M.reteMezza - M.raggioG);
+    let salto = -1;
+    let primo: Esito | null = null;
+    for (let t = 0; t < 200; t++) {
+      const g = s.giocatori[0];
+      if (salto < 0 && s.palla.y - (g.y + cerchio(s, g)[0]) < quando) salto = t;
+      const preme = k !== null && salto >= 0 && t === salto + k;
+      const prima = s;
+      s = passo(s, [{ ...FERMO, salta: salto === t, schiaccia: preme }, FERMO]);
+      if (s.tocco && s.tocco !== prima.tocco) {
+        if (s.tocco.schiacciata) return { inAria: true, sopraRete: true, ...primo, schiacciata: true };
+        primo ??= { inAria: prima.giocatori[0].y > 0, sopraRete: prima.palla.y > M.reteAlta, schiacciata: false };
+      }
+      if (sommaPunti(s) > 0 || (k !== null && salto >= 0 && t > salto + k + 1)) return primo;
+    }
+    return primo;
+  }
+  it("un giocatore medio che preme in un momento qualsiasi della salita schiaccia almeno 1 volta su 2", () => {
+    let riuscite = 0;
+    let prove = 0;
+    for (const px of [340, 380, 420])
+      for (const alto of [400, 450, 500])
+        for (const vx of [-1.5, 0, 1.5])
+          for (const scarto of [-30, 0, 30])
+            for (const quando of [100, 150, 200, 250]) {
+              const senza = giro(px, alto, vx, scarto, quando, null);
+              if (!senza?.inAria || !senza.sopraRete) continue;
+              for (let k = 0; k <= 21; k++) {
+                prove++;
+                if (giro(px, alto, vx, scarto, quando, k)?.schiacciata) riuscite++;
+              }
+            }
+    expect(prove).toBeGreaterThan(1000);
+    expect(riuscite / prove).toBeGreaterThanOrEqual(0.5);
+  });
+  it("premuto subito dopo il proprio tocco in aria, entro M.perdonoSchiaccia tic: schiacciata lo stesso", () => {
+    for (const [ritardo, vale] of [
+      [M.perdonoSchiaccia, true],
+      [M.perdonoSchiaccia + 1, false],
+    ] as const) {
+      let s = libera(nuova(6));
+      const g = s.giocatori[0];
+      g.x = 400;
+      g.y = 1e4; // in aria per tutta la prova
+      s.palla = { x: 400, y: g.y + cerchio(s, g)[0] + M.raggio + M.raggioG - 5, vx: 0, vy: 0 };
+      s = passo(s, FERMI); // tocco normale: la palla sale
+      expect(s.tocco?.schiacciata).toBe(false);
+      for (let i = 1; i < ritardo; i++) s = passo(s, FERMI);
+      s = passo(s, [SCHIACCIA, FERMO]);
+      expect(s.giocatori[0].schiaccia === M.durataSchiaccia).toBe(vale);
+    }
+  });
+  it("puoSchiacciare: vero solo se premendo adesso la schiacciata parte, e allora parte davvero", () => {
+    const s = libera(nuova(6));
+    const g = s.giocatori[0];
+    g.x = 400;
+    g.y = 100;
+    g.vy = 2;
+    const centro = cerchio(s, g)[0];
+    s.palla = { x: 420, y: g.y + centro + 60, vx: 0, vy: 0 };
+    expect(puoSchiacciare(s, 0)).toBe(true);
+    expect(puoSchiacciare(s, 1)).toBe(false); // l'altro è a terra
+    const s2 = structuredClone(s);
+    expect(puoSchiacciare(s, 0)).toBe(true);
+    expect(s).toEqual(s2); // non cambia lo stato
+    const aTerra = structuredClone(s);
+    aTerra.giocatori[0].y = 0;
+    aTerra.giocatori[0].vy = 0;
+    expect(puoSchiacciare(aTerra, 0)).toBe(false);
+    const lontana = structuredClone(s);
+    lontana.palla = { x: 100, y: 700, vx: 0, vy: 0 };
+    expect(puoSchiacciare(lontana, 0)).toBe(false);
+    const sottoRete = structuredClone(s);
+    sottoRete.palla = { x: 420, y: M.reteAlta - 40, vx: 0, vy: 0 };
+    sottoRete.giocatori[0].y = 1; // sta atterrando: tocca la palla sotto la rete e poi è a terra
+    sottoRete.giocatori[0].vy = -5;
+    expect(puoSchiacciare(sottoRete, 0)).toBe(false);
+    // coerenza in partita: ogni volta che dice sì, premendo (e con l'altro fermo) si schiaccia
+    let t = nuova(3);
+    let si = 0;
+    for (let i = 0; i < 3000 && t.vincitore === null; i++) {
+      if (puoSchiacciare(t, 0)) {
+        si++;
+        let u = t;
+        let fatta = false;
+        for (let j = 0; j < M.memoriaSchiaccia && !fatta; j++) {
+          u = passo(u, [{ ...FERMO, schiaccia: true }, FERMO]);
+          fatta = u.giocatori[0].schiaccia === M.durataSchiaccia;
+        }
+        expect(fatta).toBe(true);
+      }
+      t = passo(t, [ia(t, 0, 40), ia(t, 1, 40)]);
+    }
+    expect(si).toBeGreaterThan(0);
   });
 });
 
