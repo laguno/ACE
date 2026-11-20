@@ -131,6 +131,20 @@ Nello studio il personaggio parla poco: commenta il risultato con un numero prec
 | Compito fatto in anticipo | lani-festeggia | "Fatto con due giorni d'anticipo: +13 invece di 10." | "sì!" |
 | Serie di anticipo (dal secondo giorno) | leo-cinque | "{n} giorni avanti con i compiti. Leo vuole il cinque." | risatina |
 
+**Esercizi di matematica (blocco F, 19/11, testi provvisori da approvare).** Pulsante "Esercizi" sulla carta di una verifica di matematica. Serie mescolata: metodi diversi nella stessa serie. Ogni metodo parte dall'esempio svolto e si svuota man mano. Nessun popup: i testi stanno nella schermata.
+
+| Situazione | Posa | Testo | Verso |
+|---|---|---|---|
+| Etichetta sopra il problema | (nessun popup) | "Esempio svolto" / "Completa 1 passaggio" / "Completa {n} passaggi" / "Problema intero" | — |
+| Esempio svolto | (nessun popup) | Pulsanti "Passaggio dopo", poi "Ho capito" | — |
+| Scelta del metodo | (nessun popup) | "Che strada prendi?" Dopo la scelta: "Strada giusta." oppure "Qui serve: {metodo}." più il perché in una frase | — |
+| Modello a barre | (nessun popup) | Pulsante "Disegna le barre" / "Nascondi le barre" | — |
+| Risposta sbagliata, primo tentativo | (nessun popup) | "Non ancora: rifai il conto e riprova." | — |
+| Risposta sbagliata, secondo tentativo | (nessun popup) | "Era {risposta}. Guarda come si fa, la prossima la provi tu." | — |
+| Problema intero | (nessun popup) | "Risolvilo sul quaderno e scrivi la risposta." | — |
+| Regola sotto la serie | (nessun popup) | "Serie finita: {passi} passi, giuste o no." | — |
+| Serie finita | (nessun popup) | Titolo "Serie finita". "{giusti} su {provati} risolti da sola. +{passi} passi." (senza passi: "Domani si riparte da qui.") | — |
+
 Nel voto 7-8 la frase sul ripasso compare solo se ACE sa che Lani ha fatto davvero le sessioni; altrimenti resta solo il voto e i passi.
 
 ## Sera
