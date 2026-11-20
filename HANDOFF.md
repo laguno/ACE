@@ -2,6 +2,15 @@
 
 Storia delle sessioni, decisioni prese e scelte approvate: `docs/storico.md`.
 
+## Piano studio basato sulle evidenze (19-20/11, ramo `studio`, worktree `C:\progetti\ace\app-studio`, non in produzione)
+
+- Approvato dal signore il 19/11 (piano di Jarvis rivisto), fatto tutto insieme in otto blocchi e unito nel ramo `studio` il 20/11. Niente push, niente produzione.
+- A+B+C: FSRS-5 (`src/lib/regole/fsrs.ts`, scritto in casa: la rete dell'ufficio blocca il download di `ts-fsrs`), sicurezza prima di girare la carta, pillole mescolate (`pillola.ts`), coda dei ripassi senza rete (`src/coda-studio.ts`), passi misti (restano gli attuali, in più carte del giorno e ripasso della vigilia). Migrazione 0045.
+- D metacognizione (0050-0052), E tutor su `spiega` (0055-0056), F matematica (0060-0063), G silenzio delle notifiche in campo e dalle 21:00, H controllo automatico delle carte dell'IA (0070). Rami d'origine: `metacognizione`, `studio-tutor`, `studio-mate`, `studio-notifiche`, `studio-carte`.
+- Decisioni del signore: niente coda di approvazione dei genitori; passi misti; notifiche restano 3 al giorno + 1 sollecito; nessun controllo privacy sulle foto (ci pensa lui).
+- **Da confermare col signore, una domanda per volta:** tutti i numeri segnati provvisori in `config-gioco.json` (sezioni `ripasso`, `metacognizione`, `tutor`, silenzio notifiche, passi `pillola_del_giorno`, `ripasso_cumulativo`, `matematica_serie`, voto previsto).
+- **Prima di pubblicare:** backup, `npm run prova:schema`, migrazioni 0045-0070 con `db push --remote --yes --include-all`, Edge Functions toccate (`spiega`, `notifiche`, `genera-studio`, `foto-studio`, `genera-mate` nuova) più tutte quelle che importano da `_shared` cambiato (almeno `passi` e `sync-nuvola`). La prova `astra.e2e.ts › figurina e album` è rotta già su `origin/main`.
+
 ## Foto delle verifiche e voti pesati (19/11, in produzione)
 
 - Le verifiche non avevano richieste di foto. `richiesteFoto()` in `sync-nuvola` cercava le pagine solo nell'argomento. Ora legge anche `pagine_probabili`. Quando una verifica è nuova, `genera-studio` scrive le pagine dopo `richiesteFoto()`, quindi la richiesta arriva al giro successivo.
