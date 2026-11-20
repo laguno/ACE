@@ -1,4 +1,4 @@
-import type { Config } from './index';
+import type { Config } from './index.ts';
 
 // "Come si fanno i passi": la pagina di Astra (per Lani) e le regole complete dei genitori.
 // Ogni numero arriva dal config passato: nessun valore scritto qui (prova in come-passi.test.ts).

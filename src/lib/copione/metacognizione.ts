@@ -1,7 +1,7 @@
 // Testi del blocco D (metacognizione, 19/11/2026): stessa fonte di docs/05-copione.md, sezione
 // "Come studio". Regole del copione: titoli <= 4 parole, testi <= 25 parole, niente emoji, "tu",
 // lodare il gesto, mai rimproveri. Le frasi sulla tendenza dicono come va, non come è Lani.
-import type { VersoPrevisioni, VersoTempo } from '../regole/metacognizione';
+import type { VersoPrevisioni, VersoTempo } from '../regole/metacognizione.ts';
 
 export interface MicroLezione {
   id: string;

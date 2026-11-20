@@ -1,6 +1,6 @@
 // Foto delle pagine: le scelte che non dipendono dal browser (misure, tipi, errori), con le prove.
 // Il disegno sulla tela sta in src/Foto.tsx; le prove con immagini vere in e2e/foto-file.e2e.ts.
-import { pagine as estraiPagine } from '../nuvola';
+import { pagine as estraiPagine } from '../nuvola/index.ts';
 
 /** Lato lungo della foto caricata: basta per leggere una pagina, pesa poco. */
 const LATO_MAX = 1600;

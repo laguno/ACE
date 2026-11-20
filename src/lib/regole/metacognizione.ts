@@ -2,7 +2,7 @@
 // Piano del giorno con i minuti stimati e quelli veri, voto previsto prima della verifica
 // confrontato col voto vero di Nuvola, micro-lezione della settimana, riepilogo della domenica.
 // Funzioni pure: i numeri vengono da data/config-gioco.json (sezione metacognizione).
-import { CONFIG, giorno, iso, lunedi } from './index';
+import { CONFIG, giorno, iso, lunedi } from './index.ts';
 
 const M = CONFIG.metacognizione;
 const GIORNO_MS = 864e5;
