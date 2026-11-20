@@ -170,6 +170,16 @@ describe('genera-studio', () => {
     expect(secondo.corpo.generate).toBe(0);
     expect(ia.chiamate).toHaveLength(1);
   });
+  it('sere piene: niente ripasso con la partita FIPAV o l\'allenamento tardo; l\'allenamento presto non conta', async () => {
+    ia.coda.push(CARTE);
+    await stato.banco!.come(null, `insert into impegni_famiglia (id, inizio, titolo) values
+      ('a-tardo', '2026-11-26T18:30:00+01:00', 'Allenamento Pallavolo Leilani U-13'),
+      ('a-presto', '2026-11-27T15:00:00+01:00', 'Allenamento Pallavolo Leilani U-13'),
+      ('fipav:93399:1', '2026-11-28T16:00:00+01:00', 'Partita Lani U14: U14R-EVOLUTION vs GAZZE')`);
+    const f = await carica('genera-studio');
+    await f(richiesta({}, { cron: true }));
+    expect(await valore(`select string_agg(data_prevista::text, ',' order by numero) from sessioni_ripasso`)).toBe('2026-11-24,2026-11-25,2026-11-27,2026-11-29');
+  });
   it('l\'IA sbaglia: l\'errore resta nel risultato, il piano c\'è lo stesso; Lani non può chiamarla', async () => {
     ia.coda.push(new Error('sovraccarico'));
     const f = await carica('genera-studio');

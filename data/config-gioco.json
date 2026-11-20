@@ -195,7 +195,17 @@
     "solleciti": 1,
     "sollecito_dopo_minuti": 45,
     "caratteri_max": 60,
-    "silenzio_rimproveri_dopo": "21:00"
+    "silenzio_rimproveri_dopo": "21:00",
+    "silenzio_lani_dalle": "21:00",
+    "passo_cron_minuti": 15,
+    "sport": {
+      "margine_prima_minuti": 15,
+      "margine_dopo_minuti": 30,
+      "durata_allenamento_minuti": 120,
+      "durata_partita_minuti": 150
+    },
+    "allenamento_tardo_dalle": "17:00",
+    "_nota_silenzio": "Blocco G, 19/11/2026 (provvisorio, da confermare col signore): a Lani nessuna notifica dalle 21:00 né durante allenamenti e partite (dal margine prima alla fine più il margine dopo; senza ora di fine si usa la durata). Una notifica che cade lì si sposta a dopo; se dopo sono già le 21:00 non parte. Il sollecito che cadrebbe dopo le 21:00 si anticipa all'ultimo giro del cron prima, purché dopo la chiusura. Sera piena (niente ripasso): partita, o allenamento che inizia dalle 17:00 (stessa soglia della chiusura anticipata)."
   },
   "popup": {
     "max_per_apertura": 1,
