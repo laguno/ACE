@@ -62,6 +62,10 @@ export const M = {
   // Mossa finale (docs/11 §3.2): parametri per tipo. "dist" = distanza dalla rete, nel campo avversario,
   // dove la palla tocca terra (calcolata col volo vero, pareti escluse).
   fulmine: 1.4, // schiacciata: velocità e giù massimo × fulmine (più veloce e più ripida)
+  // fulmine e dritto con la palla sotto la cima della rete (dritti non passerebbero): tiro teso che sale
+  // appena quanto basta (vy da sottoSu in su) e scende ripido a sottoDist dalla rete
+  sottoSu: 8,
+  sottoDist: 200,
   drittoVx: 17, // palla tesa
   drittoSopra: 12, // passa la rete a tanto sopra la cima
   bombaVy: 17, // altissima
@@ -358,8 +362,10 @@ function mossa(s: Stato, l: Lato): void {
   s.armato[l] = 0;
   s.carica[l] = 0;
   s.finisher = { lato: l, tipo, tic: s.tic };
-  if (tipo === 'fulmine') {
-    schiaccia(p, l, p.y > M.reteAlta + M.raggio + M.reteMezza ? M.fulmine : 1); // da sotto la cima: veloce come una normale
+  const bassa = p.y <= M.reteAlta + M.raggio + M.reteMezza;
+  if (bassa && (tipo === 'fulmine' || tipo === 'dritto')) lancia(p, l, M.sottoSu, M.sottoDist);
+  else if (tipo === 'fulmine') {
+    schiaccia(p, l, M.fulmine);
     s.giocatori[l].schiaccia = M.durataSchiaccia;
   } else if (tipo === 'dritto')
     sopraRete(p, l, M.drittoVx, M.reteAlta + M.raggio + M.reteMezza + M.drittoSopra, M.schiacciaGiu);

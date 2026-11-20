@@ -1251,10 +1251,8 @@ describe("mossa finale (docs/11 §3.2)", () => {
 
   it("ogni mossa che lancia la palla la manda nel campo avversario, anche da lontano o da terra", () => {
     for (const tipo of ["fulmine", "dritto", "bomba", "furba", "esperienza", "dispetto"] as const)
-      for (const x of [100, 250, 400])
-        for (const piedi of [0, 60]) {
-          // fulmine da terra accanto alla rete, palla sotto la cima: la rete la ferma, come una schiacciata vera
-          if (tipo === "fulmine" && x === 400 && piedi === 0) continue;
+      for (const x of [100, 250, 400, 454])
+        for (const piedi of [0, 30, 60]) {
           const stati = volo(passo(armata(tipo, x, piedi), FERMI));
           expect(stati[stati.length - 1].punti, `${tipo} ${x} ${piedi}`).toEqual([1, 0]);
           expect(primaViolazione(stati[0], stati.length - 1, () => FERMI, reteIntatta)).toBeNull();
