@@ -101,7 +101,11 @@ export async function finto(page: Pick<Page, 'addInitScript' | 'route'>, t: Tabe
       (t.caricate ??= []).push({ percorso, tipo: file?.type ?? '', byte: file ? Buffer.from(await file.arrayBuffer()) : null });
       return json({ Key: percorso, Id: percorso });
     }
-    if (url.pathname.startsWith('/functions/v1/')) return json(funzioni[url.pathname.split('/')[3]] ?? {});
+    if (url.pathname.startsWith('/functions/v1/')) {
+      // una funzione (corpo) => risposta, per le Edge Functions con più passi (spiega)
+      const f = funzioni[url.pathname.split('/')[3]];
+      return json(typeof f === 'function' ? f(req.postDataJSON() ?? {}) : (f ?? {}));
+    }
     if (url.pathname.startsWith('/auth/v1/')) return json({ id: utente.id });
 
     const nome = url.pathname.replace('/rest/v1/', '');

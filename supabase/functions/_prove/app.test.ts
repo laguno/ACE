@@ -2,6 +2,7 @@
 process.env.TZ = 'Europe/Rome';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ia } from './anthropic-finto';
+import config from '../../../data/config-gioco.json';
 import { carica, creaBanco, LANI, PAPA, richiesta, stato, valore } from './banco';
 
 vi.mock('../_shared/ambiente.ts', async (originale) => {
@@ -109,33 +110,103 @@ describe('premi', () => {
 });
 
 describe('spiega', () => {
-  const SPIEGA = { spiegazione: 'Un esempio diverso.', indizi: ['uno', 'due', 'tre'] };
+  const SPIEGA = { spiegazione: 'Un esempio diverso.', indizi: ['uno', 'due', 'tre'], risultati: ['3/4'] };
+  const lani = (corpo: unknown) => richiesta(corpo, { gettone: 'gettone-lani' });
   beforeEach(() => stato.banco!.come(null, `insert into compiti (id, testo, scadenza) values ('${COMPITO}', 'Frazioni pag. 40', '2026-11-27')`));
-  it('una chiamata all\'IA per compito: la seconda volta la risposta salvata', async () => {
+  it("una chiamata all'IA per compito: la seconda volta la risposta salvata; indizi nascosti all'apertura", async () => {
     const f = await carica('spiega');
     ia.coda.push(SPIEGA);
-    expect((await json(await f(richiesta({ compito_id: COMPITO }, { gettone: 'gettone-lani' })))).corpo).toEqual(SPIEGA);
-    expect((await json(await f(richiesta({ compito_id: COMPITO }, { gettone: 'gettone-lani' })))).corpo).toEqual(SPIEGA);
+    const primo = (await json(await f(lani({ compito_id: COMPITO })))).corpo;
+    expect(primo).toEqual({ spiegazione: 'Un esempio diverso.', tentativo: null, indizi: [], totale_indizi: 3 });
+    expect(JSON.stringify(primo)).not.toContain('3/4');
+    expect((await json(await f(lani({ compito_id: COMPITO })))).corpo).toEqual(primo);
     expect(ia.chiamate).toHaveLength(1);
+    // Lani non legge le risposte salvate né lo storico; il vecchio posto in compiti resta vuoto
+    expect((await stato.banco!.come(LANI, 'select * from tutor_aiuti')).rows).toHaveLength(0);
+    expect((await stato.banco!.come(LANI, 'select * from tutor_richieste')).rows).toHaveLength(0);
+    expect(await valore(`select spiegazione from compiti`)).toBeNull();
   });
-  it('testo del compito cambiato: si rifà', async () => {
+  it('testo del compito cambiato: si rifà, e gli indizi ripartono da zero', async () => {
     const f = await carica('spiega');
     ia.coda.push(SPIEGA, { ...SPIEGA, spiegazione: 'Nuova.' });
-    await f(richiesta({ compito_id: COMPITO }, { gettone: 'gettone-lani' }));
+    await f(lani({ compito_id: COMPITO }));
+    await f(lani({ compito_id: COMPITO, azione: 'tentativo', testo: 'ho diviso per 2' }));
+    await f(lani({ compito_id: COMPITO, azione: 'indizio' }));
     await stato.banco!.come(null, `update compiti set testo = 'Frazioni pag. 41'`);
-    expect((await json(await f(richiesta({ compito_id: COMPITO }, { gettone: 'gettone-lani' })))).corpo.spiegazione).toBe('Nuova.');
+    const r = (await json(await f(lani({ compito_id: COMPITO })))).corpo;
+    expect(r.spiegazione).toBe('Nuova.');
+    expect(r.indizi).toEqual([]);
+    expect(r.tentativo).toBe('ho diviso per 2');
     expect(ia.chiamate).toHaveLength(2);
   });
-  it('compito che non c\'è 404, rifiuto dell\'IA 502, errore dell\'IA 500 registrato', async () => {
+  it('prima il tentativo, poi un indizio alla volta; tutto nello storico, nessun passo', async () => {
     const f = await carica('spiega');
-    expect((await f(richiesta({ compito_id: '00000000-0000-0000-0000-000000000000' }, { gettone: 'gettone-lani' }))).status).toBe(404);
-    expect((await f(richiesta({ compito_id: 3 }, { gettone: 'gettone-lani' }))).status).toBe(404);
+    ia.coda.push(SPIEGA);
+    await f(lani({ compito_id: COMPITO }));
+    expect(await json(await f(lani({ compito_id: COMPITO, azione: 'indizio' })))).toEqual({ stato: 409, corpo: { errore: 'prima il tentativo' } });
+    expect((await f(lani({ compito_id: COMPITO, azione: 'tentativo', testo: ' no ' }))).status).toBe(400);
+    expect((await json(await f(lani({ compito_id: COMPITO, azione: 'tentativo', testo: '  ho  sommato i denominatori ' })))).corpo).toEqual({ tentativo: 'ho sommato i denominatori' });
+    expect((await json(await f(lani({ compito_id: COMPITO, azione: 'indizio' })))).corpo.indizi).toEqual(['uno']);
+    expect((await json(await f(lani({ compito_id: COMPITO, azione: 'indizio' })))).corpo.indizi).toEqual(['uno', 'due']);
+    expect((await json(await f(lani({ compito_id: COMPITO, azione: 'indizio' })))).corpo.indizi).toEqual(['uno', 'due', 'tre']);
+    expect((await json(await f(lani({ compito_id: COMPITO, azione: 'indizio' })))).corpo.indizi).toEqual(['uno', 'due', 'tre']);
+    // riaperta: tentativo e indizi già visti restano
+    expect((await json(await f(lani({ compito_id: COMPITO })))).corpo).toMatchObject({ tentativo: 'ho sommato i denominatori', indizi: ['uno', 'due', 'tre'] });
+    expect(ia.chiamate).toHaveLength(1);
+    expect(await valore(`select string_agg(tipo, ',' order by tipo) from tutor_richieste`)).toBe('indizio,indizio,indizio,spiegazione,spiegazione,tentativo');
+    expect((await stato.banco!.come(PAPA, 'select * from tutor_richieste')).rows).toHaveLength(6);
+    expect(await valore(`select count(*)::int from movimenti_passi`)).toBe(0);
+  });
+  it('secondo controllo: indizio col risultato scartato; spiegazione col risultato rifatta, poi 502', async () => {
+    const f = await carica('spiega');
+    ia.coda.push({ spiegazione: 'Viene 0,75.', indizi: ['a'], risultati: ['0.75'] }, { ...SPIEGA, indizi: ['uno', 'quindi fa 3 / 4', 'tre'] });
+    const r = (await json(await f(lani({ compito_id: COMPITO })))).corpo;
+    expect(r).toMatchObject({ spiegazione: 'Un esempio diverso.', totale_indizi: 2 });
+    expect(ia.chiamate).toHaveLength(2);
+    expect((ia.chiamate[1].messages as { content: string }[])[0].content).toContain('conteneva il risultato');
+    expect(await valore(`select string_agg(esito, ',' order by esito) from tutor_richieste`)).toBe('bloccata,ok');
+    expect(await valore(`select indizi::text from tutor_aiuti`)).toBe('["uno", "tre"]');
+    await stato.banco!.come(null, `update compiti set testo = 'Frazioni pag. 41'`);
+    ia.coda.push({ spiegazione: '3/4', indizi: ['a'], risultati: ['3/4'] }, { spiegazione: 'ok', indizi: ['3/4'], risultati: ['3/4'] });
+    expect((await f(lani({ compito_id: COMPITO }))).status).toBe(502);
+  });
+  it('tetto giornaliero da config-gioco.json: poi 429, segnato nello storico', async () => {
+    const tetto = config.tutor.chiamate_al_giorno;
+    await stato.banco!.come(null, `insert into tutor_richieste (profilo_id, tipo, ia, giorno) select '${LANI}', 'spiegamelo', true, '2026-11-24' from generate_series(1, ${tetto})`);
+    await stato.banco!.come(null, `insert into tutor_richieste (profilo_id, tipo, ia, giorno) values ('${LANI}', 'spiegamelo', true, '2026-11-23')`);
+    const f = await carica('spiega');
+    expect(await json(await f(lani({ compito_id: COMPITO })))).toEqual({ stato: 429, corpo: { errore: 'tetto' } });
+    expect((await f(lani({ azione: 'spiegamelo', argomento: 'Frazioni', testo: 'Una frazione è un numero che dice quante parti prendo di un intero diviso.' }))).status).toBe(429);
+    expect(ia.chiamate).toHaveLength(0);
+    expect(await valore(`select count(*)::int from tutor_richieste where esito = 'tetto'`)).toBe(2);
+    // il tetto è di ognuno: papà può ancora
+    ia.coda.push(SPIEGA);
+    expect((await f(richiesta({ compito_id: COMPITO }, { gettone: 'gettone-papa' }))).status).toBe(200);
+  });
+  it('spiegamelo tu: cosa va, cosa manca, nessun voto; testo corto 400', async () => {
+    const f = await carica('spiega');
+    const RITORNO = { cosa_va: ['Le parti uguali.'], cosa_manca: ['Il denominatore.'], da_sistemare: [], domanda: 'Cosa dice il numero sotto?' };
+    ia.coda.push(RITORNO);
+    expect((await f(lani({ azione: 'spiegamelo', argomento: 'Frazioni', testo: 'corto' }))).status).toBe(400);
+    const testo = 'Una frazione è quando divido una torta in parti uguali e ne prendo alcune.';
+    expect((await json(await f(lani({ azione: 'spiegamelo', argomento: 'Frazioni', testo })))).corpo).toEqual(RITORNO);
+    expect(JSON.parse((ia.chiamate[0].messages as { content: string }[])[0].content)).toEqual({ argomento: 'Frazioni', spiegazione_di_lei: testo });
+    expect(await valore(`select testo from tutor_richieste where tipo = 'spiegamelo' and ia`)).toBe(testo);
+    expect(await valore(`select count(*)::int from movimenti_passi`)).toBe(0);
+  });
+  it("compito che non c'è 404, rifiuto dell'IA 502, errore dell'IA 500 registrato", async () => {
+    const f = await carica('spiega');
+    expect((await f(lani({ compito_id: '00000000-0000-0000-0000-000000000000' }))).status).toBe(404);
+    expect((await f(lani({ compito_id: 3 }))).status).toBe(404);
+    expect((await f(lani({ compito_id: COMPITO, azione: 'boh' }))).status).toBe(400);
+    expect(await json(await f(lani({ compito_id: COMPITO, azione: 'indizio' })))).toEqual({ stato: 409, corpo: { errore: 'prima la spiegazione' } });
     ia.rifiuta = true;
-    expect((await f(richiesta({ compito_id: COMPITO }, { gettone: 'gettone-lani' }))).status).toBe(502);
+    expect((await f(lani({ compito_id: COMPITO }))).status).toBe(502);
     ia.rifiuta = false;
     ia.coda.push(new Error('rete'));
-    expect((await f(richiesta({ compito_id: COMPITO }, { gettone: 'gettone-lani' }))).status).toBe(500);
+    expect((await f(lani({ compito_id: COMPITO }))).status).toBe(500);
     expect(await valore(`select count(*)::int from errori_client where dove = 'spiega'`)).toBe(1);
+    expect(await valore(`select count(*)::int from tutor_richieste where esito = 'errore' and ia`)).toBe(2);
     expect((await f(richiesta({ compito_id: COMPITO }))).status).toBe(401);
   });
 });

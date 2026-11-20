@@ -296,5 +296,15 @@
       "carte_da_pescare": 40,
       "argomenti_minimi": 2
     }
+  },
+  "tutor": {
+    "_nota": "Blocco E del piano di studio (19/11/2026). Valori PROVVISORI scelti in assenza del signore: da confermare. Il tutor non dà passi. chiamate_al_giorno: chiamate a Claude per persona al giorno (lampadina e Spiegamelo tu insieme).",
+    "chiamate_al_giorno": 12,
+    "tentativo_min_caratteri": 3,
+    "tentativo_max_caratteri": 500,
+    "spiegamelo_min_caratteri": 40,
+    "spiegamelo_max_caratteri": 1500,
+    "argomento_max_caratteri": 120,
+    "storico_giorni_genitori": 14
   }
 }

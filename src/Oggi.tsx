@@ -16,6 +16,7 @@ import { PillolaPartita } from './ProssimaPartita';
 import { useREvolutionDa } from './accensione';
 import { PianoDelGiorno } from './Metacognizione';
 import Tabellina from './Tabellina';
+import { Aiuto } from './Tutor';
 import type { Dove } from './lib/regole/tabellina';
 
 // Oggi — design/Oggi.html (mattina) e design/Pomeriggio.html (pomeriggio).
@@ -407,46 +408,6 @@ function Pomeriggio({ chiusura, apri, vai }: { chiusura: string | null; apri: Ap
           {fotoFatta && <p className="nota accento" role="status">{fotoFatta}</p>}
         </div>
       )}
-    </section>
-  );
-}
-
-/** Lampadina "Non ho capito": l'argomento con un altro esempio, poi un indizio alla volta. */
-function Aiuto({ compito, chiudi }: { compito: Compito; chiudi: () => void }) {
-  const [r, setR] = useState<{ spiegazione: string; indizi: string[] } | null>();
-  const [visti, setVisti] = useState(0);
-  useEffect(() => {
-    supabase.functions.invoke('spiega', { body: { compito_id: compito.id } }).then(({ data, error }) => {
-      setR(error || !data?.spiegazione ? null : data);
-    });
-  }, [compito.id]);
-
-  return (
-    <section className="schermo">
-      <Testata sfondo="pomeriggio" posa="lani-pensierosa" sopra={compito.materie?.nome ?? 'Compito'} titolo="Non ho capito" riga={<p>{compito.testo}</p>} />
-      <div className="carta" aria-live="polite">
-        {r === undefined && <p>Ok, vediamola con un altro esempio…</p>}
-        {r === null && <p>Adesso la lampadina non si accende. Riprova tra poco, oppure chiedi a mamma o papà.</p>}
-        {r && (
-          <>
-            <p>Ok, vediamola con un altro esempio.</p>
-            <p>{r.spiegazione}</p>
-            {r.indizi.slice(0, visti).map((x, n) => (
-              <p key={n} className="indizio">
-                <b>Indizio {n + 1}.</b> {x}
-              </p>
-            ))}
-            {visti < r.indizi.length && (
-              <button className="secondario" onClick={() => setVisti(visti + 1)}>
-                {visti ? 'Un altro indizio' : 'Un indizio'}
-              </button>
-            )}
-          </>
-        )}
-      </div>
-      <button className="principale largo" onClick={chiudi}>
-        Torna ai compiti
-      </button>
     </section>
   );
 }
