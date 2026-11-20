@@ -4,26 +4,34 @@ main.gioco { position: fixed; inset: 0; width: 100%; margin: 0; padding: 0; back
 .gioco * { touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
 .gioco canvas { display: block; width: 100%; height: 100%; }
 
-/* Pulsanti sul pavimento in primo piano (PRIMO_PIANO in Gioco.tsx, 112 px): 92 alti + 7 di ombra +
-   8 dal bordo, sotto la linea di fondo, così non coprono mai giocatori e palla. Pieni, contorno
-   scuro spesso e sempre allo stesso posto: il pollice li trova senza guardare. Colori fissi (non
-   cambiano col tema scuro): la scena resta la stessa. */
-.gioco-tasti { position: absolute; bottom: max(8px, env(safe-area-inset-bottom)); display: flex; gap: 12px; }
-.gioco-sx { left: max(12px, env(safe-area-inset-left)); }
-.gioco-dx { right: max(12px, env(safe-area-inset-right)); }
-.gioco-tasti button { display: grid; place-items: center; width: 124px; height: 92px; padding: 0; border: 5px solid var(--notte); border-radius: 30px; background: var(--viola); color: #fff; box-shadow: 0 7px 0 var(--notte); transition: transform 50ms, box-shadow 50ms; touch-action: none; }
+/* Comandi agli angoli bassi, sopra il pavimento in primo piano: a 32 px dai lati e 24 dal fondo
+   (più il bordo sicuro), pieni, contorno scuro spesso, sempre allo stesso posto: il pollice li
+   trova senza guardare. Colori fissi (non cambiano col tema scuro): la scena resta la stessa.
+   Nessun filter e animazioni solo con transform e opacity: costano poco anche sui telefoni lenti. */
+/* croce: una zona di tocco sola, più grande delle frecce (il margine fa parte della zona) */
+.gioco-croce { position: absolute; left: calc(16px + env(safe-area-inset-left)); bottom: calc(12px + env(safe-area-inset-bottom)); display: flex; gap: 4px; padding: 28px 16px 12px; }
+.gioco-freccia, .gioco-tasti button { display: flex; flex-direction: column; align-items: center; justify-content: center; border: 4px solid var(--notte); border-radius: 24px; color: #fff; box-shadow: 0 6px 0 var(--notte); transition: transform 50ms, box-shadow 50ms; }
+.gioco-freccia { width: 68px; height: 80px; background: var(--viola); }
+.gioco-tasti { position: absolute; right: calc(32px + env(safe-area-inset-right)); bottom: calc(24px + env(safe-area-inset-bottom)); display: flex; gap: 4px; }
+.gioco-tasti button { position: relative; gap: 2px; width: 70px; height: 80px; padding: 0; font: 800 13px/1 Nunito, sans-serif; letter-spacing: -0.2px; }
 /* giù per tutta la durata del tocco (classe messa da Gioco.tsx: :active col pointer capture non regge) */
-.gioco-tasti button.giu { transform: translateY(6px) scale(0.95); box-shadow: 0 1px 0 var(--notte); filter: brightness(0.88); }
-.gioco-tasti .gioco-salta { width: 112px; background: var(--fucsia); }
-/* Schiaccia: spento ma visibile; acceso (classe "pronto") quando la schiacciata è possibile */
-.gioco-tasti .gioco-schiaccia { width: 112px; border-color: var(--lilla-bordo); background: var(--lilla-medio); color: var(--lilla); box-shadow: 0 7px 0 var(--lilla-bordo); }
-.gioco-tasti .gioco-schiaccia.pronto { border-color: var(--granata-scuro); background: var(--burro); color: var(--granata-scuro); box-shadow: 0 7px 0 var(--granata-scuro); animation: gioco-pulsa 0.6s ease-in-out infinite alternate; }
-.gioco-tasti .gioco-schiaccia.pronto.giu { animation: none; box-shadow: 0 1px 0 var(--granata-scuro); }
+.gioco-croce .giu, .gioco-tasti .giu { transform: translateY(5px) scale(0.96); box-shadow: 0 1px 0 var(--notte); }
+.gioco-tasti .gioco-salta { background: var(--fucsia); }
+/* Schiaccia spento: chiaro col segno e la scritta scuri (contrasto 7:1), si vede che c'è.
+   Acceso (classe "pronto") quando la schiacciata è possibile: giallo, con un anello che pulsa. */
+.gioco-tasti .gioco-schiaccia { border-color: var(--lilla-bordo); background: var(--lilla); color: var(--testo-2); box-shadow: 0 6px 0 var(--lilla-bordo); }
+.gioco-tasti .gioco-schiaccia.pronto { border-color: var(--granata-scuro); background: var(--burro); color: var(--granata-scuro); box-shadow: 0 6px 0 var(--granata-scuro); }
+.gioco-tasti .gioco-schiaccia.pronto.giu { box-shadow: 0 1px 0 var(--granata-scuro); }
+.gioco-schiaccia::after { content: ''; position: absolute; inset: -10px; border: 6px solid var(--burro); border-radius: 30px; opacity: 0; pointer-events: none; }
+.gioco-schiaccia.pronto::after { animation: gioco-pulsa 0.7s ease-out infinite; }
 @keyframes gioco-pulsa {
-  from { scale: 1; outline: 0 solid rgba(255, 226, 122, 0.9); }
-  to { scale: 1.07; outline: 10px solid rgba(255, 226, 122, 0.55); }
+  from { transform: scale(0.9); opacity: 1; }
+  to { transform: scale(1.2); opacity: 0; }
 }
-@media (prefers-reduced-motion: reduce) { .gioco-tasti .gioco-schiaccia.pronto { animation: none; outline: 6px solid var(--burro); } }
+@media (prefers-reduced-motion: reduce) { .gioco-schiaccia.pronto::after { animation: none; opacity: 1; } }
+
+/* tornando nel gioco dopo essere usciti: si riparte solo col tocco */
+.gioco-pausa { position: absolute; inset: 0; display: grid; place-content: center; margin: 0; border: 0; background: rgba(47, 42, 110, 0.72); color: #fff; font: 800 30px 'Baloo 2', sans-serif; }
 
 .gioco-fine { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 12px; background: rgba(47, 42, 110, 0.8); color: var(--bianco); text-align: center; }
 .gioco-fine h1 { margin: 0; font: 800 32px 'Baloo 2', sans-serif; }
@@ -33,6 +41,6 @@ main.gioco { position: fixed; inset: 0; width: 100%; margin: 0; padding: 0; back
 /* in verticale il gioco si ferma (Gioco.tsx) e chiede di girare lo schermo */
 .gioco-gira { display: none; }
 @media (orientation: portrait) {
-  .gioco canvas, .gioco-tasti { visibility: hidden; }
+  .gioco canvas, .gioco-tasti, .gioco-croce { visibility: hidden; }
   .gioco-gira { position: absolute; inset: 0; display: grid; place-content: center; margin: 0; color: var(--bianco); font: 800 24px 'Baloo 2', sans-serif; }
 }
