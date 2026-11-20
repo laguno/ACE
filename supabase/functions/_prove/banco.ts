@@ -30,6 +30,11 @@ export async function creaBanco(env: Record<string, string> = {}) {
     },
     storage: {
       from: (bucket: string) => ({
+        // il file scaricato è sempre una foto finta di pochi byte: basta che l'oggetto esista
+        async download(nome: string) {
+          const r = await db.query('select 1 from storage.objects where bucket_id = $1 and name = $2', [bucket, nome]);
+          return r.rows.length ? { data: new Blob([new Uint8Array([255, 216, 255])], { type: 'image/jpeg' }), error: null } : { data: null, error: { message: 'Object not found' } };
+        },
         async createSignedUrl(nome: string, durata: number) {
           const r = await db.query('select 1 from storage.objects where bucket_id = $1 and name = $2', [bucket, nome]);
           return r.rows.length ? { data: { signedUrl: `https://firmato.test/${bucket}/${nome}?per=${durata}` }, error: null } : { data: null, error: { message: 'Object not found' } };

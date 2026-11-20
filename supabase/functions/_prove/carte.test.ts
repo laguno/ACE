@@ -127,6 +127,40 @@ describe('genera-studio: controllo delle carte', () => {
   });
 });
 
+describe('foto-studio: controllo delle carte', () => {
+  const RICHIESTA = '00000000-0000-0000-0000-0000000000e1';
+  const FOTO = { foto: [{ numero: 1, pagine: '40' }], ...GENERATE };
+  beforeEach(async () => {
+    await stato.banco!.db.exec(`
+      insert into richieste_foto (id, motivo, materia_id, pagine, verifica_id) values ('${RICHIESTA}', 'verifica', 'scienze', 'pag. 40', '${VERIFICA}');
+      insert into storage.objects (bucket_id, name) values ('foto-pagine', 'scienze/1.jpg');
+      insert into foto_pagine (richiesta_id, materia_id, percorso_storage, caricata_da) values ('${RICHIESTA}', 'scienze', 'scienze/1.jpg', '${LANI}');`);
+  });
+  const lanciaFoto = async () => json(await (await carica('foto-studio'))(richiesta({ richiesta_id: RICHIESTA }, { gettone: 'gettone-lani' })));
+
+  it('il controllore vede le stesse foto; entrano solo carte e domande che passano', async () => {
+    ia.coda.push(FOTO, CONTROLLO);
+    const { stato: s, corpo } = await lanciaFoto();
+    expect(s).toBe(200);
+    expect(corpo).toMatchObject({ carte: 2, domande: 1, scartate: 5, restano: 0 });
+    const c = ia.chiamate[1] as { model: string; messages: { content: { type: string }[] }[] };
+    expect(c.model).toBe('claude-sonnet-5-5');
+    expect(c.messages[0].content.filter((b) => b.type === 'image')).toHaveLength(1);
+    expect(testoControllo()).toContain('solo quello che si vede');
+    expect(await valore(`select count(*)::int from flashcard where fonte = 'foto'`)).toBe(2);
+    expect(((await valore(`select domande from quiz`)) as unknown[]).length).toBe(1);
+  });
+
+  it('controllo fallito: niente salvato, le foto restano da fare e si riprovano', async () => {
+    ia.coda.push(FOTO, new Error('rete'));
+    expect((await lanciaFoto()).stato).toBe(500);
+    expect(await valore(`select count(*)::int from flashcard`)).toBe(0);
+    expect(await valore(`select count(*)::int from foto_pagine where studio_il is null`)).toBe(1);
+    ia.coda.push(FOTO, CONTROLLO);
+    expect((await lanciaFoto()).corpo).toMatchObject({ carte: 2, domande: 1 });
+  });
+});
+
 describe('controllaCarte', () => {
   it('forma: completa con ___, vero/falso che inizia con Vero o Falso, opzioni diverse e indice valido', () => {
     expect(benFormata({ tipo: 'completa', fronte: 'Il ___ batte.', retro: 'cuore' })).toBe(true);
