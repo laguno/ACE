@@ -145,7 +145,10 @@ export function ripassa(
   };
 }
 
-/** Carta da riprendere insieme ai genitori: troppe cadute, esce dal giro automatico. */
-export function daRiprendere(stato: StatoCarta | null): boolean {
-  return (stato?.cadute ?? 0) >= C.cadute_da_riprendere;
+/**
+ * Carta da riprendere insieme ai genitori: troppe cadute, esce dal giro automatico.
+ * cadute_da_riprendere 0 = mai (decisione del signore, 20/11/2026): la carta resta sempre nel giro.
+ */
+export function daRiprendere(stato: StatoCarta | null, soglia: number = C.cadute_da_riprendere): boolean {
+  return soglia > 0 && (stato?.cadute ?? 0) >= soglia;
 }

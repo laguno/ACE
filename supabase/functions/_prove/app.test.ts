@@ -68,7 +68,7 @@ describe('passi', () => {
       ('00000000-0000-0000-0000-0000000000d2', '00000000-0000-0000-0000-0000000000e2', 1, '2026-11-24', 'quiz', '2026-11-24T16:40:00+01:00')`);
     const vigilia = await json(await f(richiesta({ tipo: 'ripasso', id: '00000000-0000-0000-0000-0000000000d1' }, { gettone: 'gettone-lani' })));
     const prima = await json(await f(richiesta({ tipo: 'ripasso', id: '00000000-0000-0000-0000-0000000000d2' }, { gettone: 'gettone-lani' })));
-    expect(vigilia.corpo).toMatchObject({ passi: 15 }); // 10 + 5
+    expect(vigilia.corpo).toMatchObject({ passi: 13 }); // 10 + 3
     expect(prima.corpo).toMatchObject({ passi: 10, motivo: 'ripasso' });
     const di = await json(await f(richiesta({ tipo: 'ripasso', id: '00000000-0000-0000-0000-0000000000d1' }, { gettone: 'gettone-lani' })));
     expect(di.corpo.passi).toBe(0);

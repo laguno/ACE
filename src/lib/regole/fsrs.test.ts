@@ -22,7 +22,7 @@ describe('FSRS', () => {
     expect(ricordo(10, 10)).toBeCloseTo(0.9, 5);
     expect(intervallo(10)).toBe(10);
     expect(intervallo(0.2)).toBe(1);
-    expect(intervallo(10_000)).toBe(120);
+    expect(intervallo(10_000)).toBe(30);
   });
 
   it('carta nuova: Bene torna dopo 3 giorni, Di nuovo domani', () => {
@@ -42,7 +42,7 @@ describe('FSRS', () => {
       visti.push(giorni);
     }
     for (let i = 1; i < visti.length; i++) expect(visti[i]).toBeGreaterThanOrEqual(visti[i - 1]);
-    expect(Math.max(...visti)).toBeLessThanOrEqual(120);
+    expect(Math.max(...visti)).toBeLessThanOrEqual(30);
     expect(stato.ripetizioni).toBe(7);
     expect(stato.cadute).toBe(0);
   });
@@ -72,10 +72,11 @@ describe('FSRS', () => {
     expect(s.difficolta).toBeGreaterThanOrEqual(1);
   });
 
-  it('tre cadute: da riprendere insieme', () => {
+  it('con la soglia a 0 (decisione del 20/11) nessuna carta esce dal giro; con una soglia sì', () => {
     let s = ripassa(null, 3, '2026-11-01').stato;
-    expect(daRiprendere(s)).toBe(false);
+    expect(daRiprendere(s, 3)).toBe(false);
     for (const g of ['2026-11-04', '2026-11-05', '2026-11-06']) s = ripassa(s, 1, g).stato;
-    expect(daRiprendere(s)).toBe(true);
+    expect(daRiprendere(s, 3)).toBe(true);
+    expect(daRiprendere(s)).toBe(false);
   });
 });

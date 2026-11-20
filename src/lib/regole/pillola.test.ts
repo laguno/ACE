@@ -58,8 +58,8 @@ describe('intervallo con verifica in calendario', () => {
     expect(massimoPerVerifica('2026-11-20', '2026-11-21')).toBe(1);
   });
   it('senza verifica o verifica passata: massimo normale', () => {
-    expect(massimoPerVerifica('2026-11-20', null)).toBe(120);
-    expect(massimoPerVerifica('2026-11-20', '2026-11-10')).toBe(120);
+    expect(massimoPerVerifica('2026-11-20', null)).toBe(30);
+    expect(massimoPerVerifica('2026-11-20', '2026-11-10')).toBe(30);
   });
 });
 
