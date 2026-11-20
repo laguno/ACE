@@ -243,7 +243,7 @@ test('foto mancante: la fa Lani e la riga non compare; dopo le 20 o dalla scaden
   d.richieste_foto = [{ id: 'r1', motivo: 'compito', materia_id: 'italiano', pagine: '34–38', compito_id: 'c2', stato: 'aperta', creato_il: '2026-11-23T13:00:00Z' }];
   await finto(page, d);
   await page.goto('/');
-  const riga = page.getByRole('list', { name: 'Da sapere' }).getByRole('listitem').filter({ hasText: 'Foto: Italiano' });
+  const riga = page.getByRole('list', { name: 'Da fare per voi' }).getByRole('listitem').filter({ hasText: 'Foto: Italiano' });
   // prima delle 20 e prima della scadenza la riga non c'è: la foto la fa Lani, ai genitori non resta nulla da fare
   await expect(riga).toHaveCount(0);
 
