@@ -49,3 +49,21 @@ main.gioco { position: fixed; inset: 0; width: 100%; margin: 0; padding: 0; back
   .gioco canvas, .gioco-tasti, .gioco-croce, .gioco-ferma { visibility: hidden; }
   .gioco-gira { position: absolute; inset: 0; display: grid; place-content: center; margin: 0; color: var(--bianco); font: 800 24px 'Baloo 2', sans-serif; }
 }
+
+/* Fine partita: Ancora e Cambia personaggi, uno accanto all'altro */
+.gioco-fine-scelte { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+.gioco-fine .secondario { width: auto; margin: 0; padding: 0 28px; font: 800 18px Nunito, sans-serif; }
+
+/* Mossa finale: a sinistra di Schiaccia, alla stessa altezza (così la linea dei piedi non sale e il
+   pulsante non copre mai giocatori o palla). Nascosto ma al suo posto finché la barra non è piena
+   (classe "pronto" messa da Gioco.tsx): viola scuro con le fiamme, come la barra piena. */
+.gioco-tasti .gioco-speciale { position: absolute; right: calc(100% + 8px); bottom: 0; width: auto; min-width: 96px; max-width: 150px; padding: 0 10px; border-color: var(--notte); background: linear-gradient(#7b1fa2, #4a148c); color: #fff; font: 800 13px/1.1 Nunito, sans-serif; text-align: center; box-shadow: 0 6px 0 var(--notte), 0 0 18px 4px rgba(255, 138, 0, 0.55); visibility: hidden; pointer-events: none; }
+.gioco-tasti .gioco-speciale.pronto { visibility: visible; pointer-events: auto; }
+.gioco-tasti .gioco-speciale.giu { box-shadow: 0 1px 0 var(--notte), 0 0 18px 4px rgba(255, 138, 0, 0.55); }
+.gioco-speciale::before { content: ''; position: absolute; left: 8px; right: 8px; bottom: calc(100% + 2px); height: 20px; background: radial-gradient(ellipse 50% 100% at 50% 100%, #ffd54a 0 30%, #ff6a00 58%, transparent 62%) 0 100% / 18px 100% repeat-x; transform-origin: bottom; pointer-events: none; animation: gioco-fiamma 0.3s ease-in-out infinite alternate; }
+@keyframes gioco-fiamma {
+  from { transform: scaleY(0.7); opacity: 0.75; }
+  to { transform: scaleY(1.1); opacity: 1; }
+}
+/* meno movimento: niente fiamme che ballano, resta il bagliore fermo */
+@media (prefers-reduced-motion: reduce) { .gioco-speciale::before { display: none; } }
