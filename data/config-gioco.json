@@ -218,8 +218,11 @@
     "finestra": { "da": "06:00", "a": "13:00" }
   },
   "pallavolo": {
-    "nota": "Gioco di pallavolo (docs/09, decisi dal signore il 16/11): partita a tempo, vince chi ha più punti allo scadere; lo scambio in corso si finisce, in parità decide il punto dopo. Nessun premio per la vittoria. Il tetto al giorno lo conterà il server dalla Fase 2.",
-    "secondi": 120,
+    "nota": "Gioco di pallavolo (docs/09, decisi dal signore il 16/11): partita a tempo, vince chi ha più punti allo scadere; lo scambio in corso si finisce, in parità decide il punto dopo. Nessun premio per la vittoria. Altezze in cm (bart è un cane da 25 kg e lady una gattina: altezze da animale, il motore attenua l effetto così restano giocabili); il motore usa rete_cm per la scala unità per cm e il disegno è proporzionale ai cm. Il tetto al giorno lo conterà il server dalla Fase 2.",
+    "secondi": 90,
+    "rete_cm": 224,
+    "altezza_default_cm": 170,
+    "altezze_cm": { "lani": 174, "leo": 135, "papa": 187, "mamma": 182, "allenatore": 170, "nonno": 173, "bart": 60, "lady": 25 },
     "partite_al_giorno": 3
   },
   "classifiche": {
