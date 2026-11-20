@@ -21,14 +21,12 @@ const cmDi = (v: number | null | undefined) => v ?? P.altezza_default_cm;
 const CM: [number, number] = [cmDi(P.altezze_cm.lani), cmDi(P.altezze_cm.leo)];
 // taratura del disegno e della CPU: da rivedere con Lani
 const ERRORE_CPU = 40;
-// Il campo scende fino a FONDO px CSS dal basso (≈ 330 su 390): sotto
-// c'è il pavimento in primo piano. I pulsanti stanno agli angoli bassi (gioco.css), fuori dalle
-// zone dove di solito stanno giocatori e palla.
-const FONDO = 60;
-// Il campo (1000) sta in LARGO_VISTA unità di larghezza: quel poco di margine tiene Lani e Leo, a casa,
-// fuori dalle frecce e dai pulsanti (verificato a 844x390 con lo script di prova).
-const LARGO_VISTA = 1070;
-const VISTA_MIN = 360; // unità che si vedono almeno sopra il pavimento: la palla della battuta (330) entra tutta
+// Il pavimento (linea dei piedi) sta subito sopra i pulsanti, misurati sulla pagina (bordo sicuro
+// compreso): giocatori e palla, che non scendono mai sotto i piedi, non finiscono mai sotto un
+// pulsante, in nessun punto del campo. Sotto c'è il pavimento in primo piano.
+const SOPRA_TASTI = 26; // px CSS tra la cima dei pulsanti e i piedi (ci sta l'anello di Schiaccia acceso)
+const FONDO_RISERVA = 126; // px CSS se i pulsanti non si possono misurare
+const VISTA_MIN = 340; // unità che si vedono almeno sopra il pavimento: la palla della battuta (330) quasi tutta
 const DPR_MAX = 2; // oltre non si vede la differenza e il telefono scalda
 const SOGLIA_ALFA = 20; // sopra questa opacità un pixel è figura
 const FERMO_COLPO = 4; // frame di pausa alla schiacciata (hit-stop)
@@ -244,6 +242,7 @@ function scoppio(e: Effetti, x: number, y: number, scossa: boolean) {
 /** px = unità del campo per 1 px CSS. */
 function disegnaPalla(ctx: CanvasRenderingContext2D, p: Palla, e: Effetti, f: number, px: number) {
   const r = RAGGIO_PALLA;
+  const py = Math.max(p.y, r); // disegnata più grande: a terra poggia sul pavimento, non ci affonda
   // ombra a terra, sempre e ben visibile: si stringe con la quota e dice dove scendere
   const via = 1 + p.y / 220;
   ctx.globalAlpha = Math.max(0.3, 0.55 / via);
@@ -285,7 +284,7 @@ function disegnaPalla(ctx: CanvasRenderingContext2D, p: Palla, e: Effetti, f: nu
     ctx.beginPath();
     for (let i = -2; i <= 2; i++) {
       const sx = p.x - dx * (r + 8) - dy * i * r * 0.45;
-      const sy = Y(p.y) - dy * (r + 8) + dx * i * r * 0.45;
+      const sy = Y(py) - dy * (r + 8) + dx * i * r * 0.45;
       const lungo = (i % 2 === 0 ? 70 : 45) * (0.5 + (0.5 * e.linee) / LINEE);
       ctx.moveTo(sx, sy);
       ctx.lineTo(sx - dx * lungo, sy - dy * lungo);
@@ -296,7 +295,7 @@ function disegnaPalla(ctx: CanvasRenderingContext2D, p: Palla, e: Effetti, f: nu
   ctx.globalAlpha = 1;
 
   ctx.save();
-  ctx.translate(p.x, Y(p.y));
+  ctx.translate(p.x, Y(py));
   ctx.rotate(p.x * 0.02);
   if (pronta(FIGURE.palla)) ctx.drawImage(FIGURE.palla, -r, -r, r * 2, r * 2);
   else {
@@ -310,11 +309,11 @@ function disegnaPalla(ctx: CanvasRenderingContext2D, p: Palla, e: Effetti, f: nu
   ctx.lineWidth = 3 * px;
   ctx.strokeStyle = INCHIOSTRO;
   ctx.beginPath();
-  ctx.arc(p.x, Y(p.y), r, 0, 7);
+  ctx.arc(p.x, Y(py), r, 0, 7);
   ctx.stroke();
   ctx.strokeStyle = '#ffffff';
   ctx.beginPath();
-  ctx.arc(p.x, Y(p.y), r + 3 * px, 0, 7);
+  ctx.arc(p.x, Y(py), r + 3 * px, 0, 7);
   ctx.stroke();
 
   // scintille: si muovono solo fuori dalla pausa; la lista si compatta sul posto
@@ -422,7 +421,7 @@ function hud(o: Hud | null, punti: [number, number], secondi: number, dpr: numbe
   return { tela, chiave };
 }
 
-type Tela = { ctx: CanvasRenderingContext2D; fondale: Fondale | null; hud: Hud | null };
+type Tela = { ctx: CanvasRenderingContext2D; fondale: Fondale | null; hud: Hud | null; fondo: number; misura: number };
 
 /** a = vista interpolata; f = frame a 60 Hz di animazione (0 in pausa); scossa in px CSS. */
 function disegna(c: HTMLCanvasElement, t: Tela, s: Stato, a: Vista, e: Effetti, f: number, ora: number) {
@@ -434,8 +433,14 @@ function disegna(c: HTMLCanvasElement, t: Tela, s: Stato, a: Vista, e: Effetti, 
     c.width = w;
     c.height = h;
   }
-  const terra = h - FONDO * dpr; // linea dei piedi
-  const k = Math.min(w / LARGO_VISTA, terra / VISTA_MIN);
+  if (t.misura !== w * 100000 + h) {
+    // a ogni nuova misura di schermo: cima dei pulsanti → linea dei piedi
+    t.misura = w * 100000 + h;
+    const cime = [...document.querySelectorAll('.gioco-freccia, .gioco-tasti button')].map((b) => b.getBoundingClientRect().top);
+    t.fondo = cime.length ? c.clientHeight - Math.min(...cime) + SOPRA_TASTI : FONDO_RISERVA;
+  }
+  const terra = h - t.fondo * dpr; // linea dei piedi
+  const k = Math.min(w / M.largo, terra / VISTA_MIN);
   const ox = (w - M.largo * k) / 2;
   const sh = e.trauma * e.trauma;
   const dx = SCOSSA_PX[0] * dpr * sh * Math.sin(e.tempoScossa * 1.7);
@@ -568,7 +573,7 @@ export default function Gioco() {
     const c = tela;
     const ctx = c?.getContext('2d', { alpha: false });
     if (!c || !ctx) return;
-    const t: Tela = { ctx, fondale: null, hud: null };
+    const t: Tela = { ctx, fondale: null, hud: null, fondo: FONDO_RISERVA, misura: 0 };
     const verticale = matchMedia('(orientation: portrait)');
     const calmo = matchMedia('(prefers-reduced-motion: reduce)');
     let s = nuovaPartita(Date.now(), DURATA, CM, P.rete_cm);
@@ -748,19 +753,19 @@ export default function Gioco() {
       <canvas ref={setTela} aria-label="Campo di pallavolo" />
       <div className="gioco-croce" role="group" aria-label="Corri: tocca a sinistra o a destra" title="Corri (frecce o A e D)" {...croce}>
         <span className="gioco-freccia" ref={rif('sx')}>
-          <CaretLeft size={46} weight="bold" aria-hidden />
+          <CaretLeft size={54} weight="bold" aria-hidden />
         </span>
         <span className="gioco-freccia" ref={rif('dx')}>
-          <CaretRight size={46} weight="bold" aria-hidden />
+          <CaretRight size={54} weight="bold" aria-hidden />
         </span>
       </div>
       <div className="gioco-tasti">
         <button type="button" className="gioco-schiaccia" title="Schiaccia (K)" {...comando('schiaccia')}>
-          <HandFist size={34} weight="fill" aria-hidden />
+          <HandFist size={40} weight="fill" aria-hidden />
           Schiaccia
         </button>
         <button type="button" className="gioco-salta" title="Salta (spazio o freccia su)" {...comando('salta')}>
-          <ArrowFatUp size={34} weight="fill" aria-hidden />
+          <ArrowFatUp size={40} weight="fill" aria-hidden />
           Salta
         </button>
       </div>
