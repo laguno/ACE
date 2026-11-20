@@ -28,9 +28,9 @@ registerSW({
   },
 });
 
-// Gioco di pallavolo in prova (docs/09): in sviluppo e nelle preview di Vercel, da /#gioco, senza accesso.
+// Gioco di pallavolo in prova (docs/09): in sviluppo, in mode locale (npm run prova:telefono) e nelle preview di Vercel, da /#gioco, senza accesso.
 // Nella build di produzione questa riga sparisce e il gioco non è raggiungibile finché non ha la sua voce nell'app.
-const Gioco = (import.meta.env.DEV || import.meta.env.VITE_GIOCO === '1') && location.hash === '#gioco' ? lazy(() => import('./gioco/Gioco')) : null;
+const Gioco = (import.meta.env.DEV || import.meta.env.MODE === 'locale' || import.meta.env.VITE_GIOCO === '1') && location.hash === '#gioco' ? lazy(() => import('./gioco/Gioco')) : null;
 
 const radice = document.getElementById('root');
 if (!radice) throw new Error('manca #root in index.html');
