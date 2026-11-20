@@ -48,7 +48,7 @@ L'orizzontale libera anche il 2 contro 2: sul lato lungo i quattro sprite ci sta
 
 ### 3.5 Controlli (due pollici)
 
-In orizzontale: frecce a sinistra, bottone grande a destra (salta; con la palla a portata, schiaccia). Bersagli ≥ 44 px. Tuffo e bagher automatico dopo, se il gioco funziona.
+In orizzontale: frecce a sinistra, a destra il bottone grande per saltare e il pulsante **Schiaccia** (comando `schiaccia` del motore: vale solo in aria, con la palla vicina sopra la rete; anche la CPU schiaccia, con il suo errore; da computer c'è un tasto da tastiera). Comandi più reattivi: il salto premuto poco prima di atterrare resta in memoria qualche tic, e il salto è concesso ancora pochi tic dopo aver lasciato terra. Bersagli ≥ 44 px. Tuffo e bagher automatico dopo, se il gioco funziona.
 
 ### 3.6 Il tetto di 3 partite al giorno
 
@@ -77,7 +77,8 @@ Il tetto lo conta il **server** (una riga per partita e giorno, nuova migrazione
 2. **Compagne**: solo descrizioni, come per le figurine; niente foto. Soprannomi e numeri li fornisce il signore quando sarà il momento (servono dalla Fase 2).
 3. **Tetto massimo: 3 partite al giorno.** Nessuna condizione per sbloccarle (ribadito alle 17:11).
 4. **Nessun premio per la vittoria**: niente passi, niente figurine, niente contatori. Il gioco vale solo il divertimento.
-5. **Partita a tempo: 2 minuti** (16/11 sera; sostituisce il set ai 15 della Fase 1). Vince chi ha più punti allo scadere; lo scambio in corso si finisce; in parità si gioca un punto in più e chi lo fa vince. Il numero sta in `data/config-gioco.json` (`pallavolo.secondi`). Con il tetto di 3 partite fanno 6 minuti al giorno.
+5. **Partita a tempo: 1:30 (90 secondi)** (16/11 sera: 2 minuti, poi ridotta a 1:30; sostituisce il set ai 15 della Fase 1). Vince chi ha più punti allo scadere; lo scambio in corso si finisce; in parità si gioca un punto in più e chi lo fa vince. Il numero sta in `data/config-gioco.json` (`pallavolo.secondi`). Con il tetto di 3 partite fanno 4,5 minuti al giorno.
+   **Altezze**: ogni personaggio ha la sua altezza in cm in `data/config-gioco.json` (`pallavolo.altezze_cm`, `altezza_default_cm` per chi manca, `rete_cm` = 224 cm); la scala unità per cm è legata alla rete e il disegno è proporzionale ai cm. Chi è più alto tocca più in alto, ma l'effetto sul gioco è attenuato, così bart (cane) e lady (gattina) restano giocabili.
 6. **Dove si implementa.** Sessione di Claude Code sul repository di ACE (ramo `gioco`), con test e le regole di CLAUDE.md. Nessuna pubblicazione nelle finestre vietate (14:20-14:45 e 19:45-21:00) e backup prima di ogni pubblicazione, come da HANDOFF.
 
 ## 6. Rischi
