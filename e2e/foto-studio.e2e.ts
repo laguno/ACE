@@ -177,3 +177,26 @@ test('genitori: foto non ancora elaborate, lo dice la card', async ({ page }) =>
   await expect(riga).toContainText('Foto non ancora elaborate: tocca Ho finito.');
   await expect(riga.getByRole('button', { name: 'Ho finito' })).toBeVisible();
 });
+
+// restyling dell'Oggi dei genitori (20/11): una riga per materia, le richieste vecchie in "Archivio foto"
+test('genitori: una riga per materia, chiuse senza prova in archivio', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-11-18T21:20:00+01:00'));
+  const d = dati();
+  d.materie.push({ id: 'tecnologia', nome: 'Tecnologia' });
+  d.richieste_foto.push(
+    { id: 'r2', motivo: 'compito', materia_id: 'scienze', pagine: '20', stato: 'scaduta', creato_il: '2026-11-10T13:00:00Z' },
+    { id: 'r3', motivo: 'compito', materia_id: 'tecnologia', pagine: '40', stato: 'fatta', creato_il: '2026-11-12T13:00:00Z' },
+    { id: 'r4', motivo: 'compito', materia_id: 'tecnologia', pagine: '44', stato: 'fatta', creato_il: '2026-11-14T13:00:00Z' },
+  );
+  await finto(page, d);
+  await page.goto('/');
+  const vive = page.getByRole('list', { name: 'Aggiungi foto' }).getByRole('listitem');
+  await expect(vive).toHaveCount(1);
+  await expect(vive.first()).toContainText('Scienze: pagine 20, 100–107, 110–117');
+  const archivio = page.getByText('Archivio foto (2)');
+  await expect(archivio).toBeVisible();
+  await expect(page.getByRole('list', { name: 'Archivio foto' })).toBeHidden();
+  await page.screenshot({ path: 'e2e/risultati/genitori-oggi-foto.png', fullPage: true });
+  await archivio.click();
+  await expect(page.getByRole('list', { name: 'Archivio foto' }).getByRole('listitem')).toHaveCount(2);
+});

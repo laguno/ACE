@@ -63,7 +63,7 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
       ieriChiusa: ie.data?.cartella_il ?? null,
     };
     setD(nuovi);
-    conta(daFare(nuovi).length);
+    conta(daFare(nuovi, oggi).length);
   }
   useEffect(() => {
     carica();
@@ -90,22 +90,23 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
     fatto(p ? `${f.titolo}: firmato, +${p} a Lani.` : `${f.titolo}: firmato.`);
   }
 
-  const righe = daFare(d);
-  // correzione del signore del 16/11: la foto la fa Lani (+2); ai genitori la riga compare solo quando
-  // tocca a loro (dalla scadenza o dopo le 20), cioè quando c'è il pulsante: prima sembrava una cosa da fare non spuntabile
-  const fotoTocca = d.foto.filter((r) => {
-    const scade = r.compiti?.scadenza ?? r.verifiche?.data;
-    return ora >= '20:00' || (!!scade && scade <= oggi);
-  });
+  const righe = daFare(d, oggi);
+  const fotoTocca = fotoAVoi(d, oggi);
+  // ordine approvato dal signore il 20/11: domanda delle 14, da fare, gesti di ogni giorno, Lani oggi, foto
   return (
     <>
+      {chiediCasa && (
+        <button type="button" className="ga-domanda" onClick={() => setFoglio('casa')}>
+          Lani è a casa oggi?
+        </button>
+      )}
       <section className="ga-sezione" aria-labelledby="da-fare">
         <h2 id="da-fare">
           Da fare per voi {righe.length > 0 && <span className="ga-conta">{righe.length}</span>}
         </h2>
-        {righe.length === 0 && fotoTocca.length === 0 ? (
+        {righe.length === 0 ? (
           <Vuoto titolo="Niente da fare per voi" testo="Fogli, foto e forzieri sono a posto." />
-        ) : righe.length > 0 && (
+        ) : (
           <Elenco etichetta="Da fare per voi">
             {d.fogli.map((f) => (
               <Riga
@@ -148,28 +149,18 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
                 }
               />
             ))}
+            {fotoTocca.map((r) => (
+              <Riga
+                key={r.id}
+                colore="burro"
+                icona={<Camera size={20} weight="bold" aria-hidden />}
+                titolo={`Foto: ${descrizione(r)}`}
+                sotto="Se la fate voi, Lani non prende i passi"
+                azione={<Fotografa client={client} richiesta={r} studio genitore fatto={() => fatto(`Foto salvata: ${descrizione(r)}.`)} />}
+              />
+            ))}
           </Elenco>
         )}
-        {fotoTocca.length > 0 && (
-          <>
-          <p className="ga-nota">Da sapere</p>
-          <Elenco etichetta="Da sapere">
-            {fotoTocca.map((r) => {
-              return (
-                <Riga
-                  key={r.id}
-                  colore="burro"
-                  icona={<Camera size={20} weight="bold" aria-hidden />}
-                  titolo={`Foto: ${descrizione(r)}`}
-                  sotto="Se la fate voi, Lani non prende i passi"
-                  azione={<Fotografa client={client} richiesta={r} studio genitore fatto={() => fatto(`Foto salvata: ${descrizione(r)}.`)} />}
-                />
-              );
-            })}
-          </Elenco>
-          </>
-        )}
-        <FotoRichieste client={client} avvisa={fatto} />
       </section>
 
       <div className="ga-rapide">
@@ -207,8 +198,6 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
             <dd>{prossima ? `${prossima.materie?.nome ?? 'Verifica'}, ${bello(prossima.data)}` : 'nessuna'}</dd>
           </div>
         </dl>
-        {/* la stessa tabellina di Lani, con chi ha dato i passi; si rilegge quando cambiano i passi di oggi */}
-        <Tabellina key={d.passiOggi} genitori client={client} />
         {/* una riga da un fatto vero di ieri, che loda il gesto e non la persona; senza il fatto non compare
             (revisione del 16/11, testo approvato dal signore) */}
         {d.ieriChiusa && (
@@ -217,12 +206,11 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
             Ieri sera ha chiuso tutto alle {oraRoma(new Date(d.ieriChiusa))}. Per esempio: «Ho visto che ieri sera hai chiuso tutto.»
           </p>
         )}
-        {chiediCasa && (
-          <button type="button" className="ga-domanda" onClick={() => setFoglio('casa')}>
-            Lani è a casa oggi?
-          </button>
-        )}
+        {/* la stessa tabellina di Lani, con chi ha dato i passi; si rilegge quando cambiano i passi di oggi */}
+        <Tabellina key={d.passiOggi} genitori client={client} />
       </section>
+
+      <FotoRichieste client={client} avvisa={fatto} escludi={fotoTocca.map((r) => r.id)} />
 
       {foglio === 'passi' && <FoglioPassi {...{ client, passi, avvisa }} date={d.date} gestiOggi={d.gestiOggi} aggiorna={carica} chiudi={() => setFoglio(undefined)} />}
       {foglio === 'segna' && <FoglioSegna {...{ client, passi, avvisa }} chiudi={() => setFoglio(undefined)} />}
@@ -242,9 +230,19 @@ export default function Oggi({ client, passi, avvisa, conta }: Props & { conta: 
   );
 }
 
-/** Le righe di "Da fare per voi": quello che aspetta i genitori (le foto le fa Lani: stanno sotto, in "Da sapere"). */
-function daFare(d: Dati) {
-  return [...d.fogli, ...d.forzieri, ...d.verifiche.filter((v) => daRecuperare(v, d.assenze))];
+/** Le righe di "Da fare per voi": quello che aspetta i genitori, foto comprese quando tocca a loro. */
+function daFare(d: Dati, oggi: string) {
+  return [...d.fogli, ...d.forzieri, ...d.verifiche.filter((v) => daRecuperare(v, d.assenze)), ...fotoAVoi(d, oggi)];
+}
+
+// correzione del signore del 16/11: la foto la fa Lani (+2); ai genitori la riga compare solo quando
+// tocca a loro (dalla scadenza o dopo le 20), cioè quando c'è il pulsante: prima sembrava una cosa da fare non spuntabile
+function fotoAVoi(d: Dati, oggi: string) {
+  const ora = oraRoma();
+  return d.foto.filter((r) => {
+    const scade = r.compiti?.scadenza ?? r.verifiche?.data;
+    return ora >= '20:00' || (!!scade && scade <= oggi);
+  });
 }
 
 /**

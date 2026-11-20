@@ -11,12 +11,21 @@ Storia delle sessioni, decisioni prese e scelte approvate: `docs/storico.md`.
 - **Da confermare col signore, una domanda per volta:** tutti i numeri segnati provvisori in `config-gioco.json` (sezioni `ripasso`, `metacognizione`, `tutor`, silenzio notifiche, passi `pillola_del_giorno`, `ripasso_cumulativo`, `matematica_serie`, voto previsto).
 - **Prima di pubblicare:** backup, `npm run prova:schema`, migrazioni 0045-0070 con `db push --remote --yes --include-all`, Edge Functions toccate (`spiega`, `notifiche`, `genera-studio`, `foto-studio`, `genera-mate` nuova) più tutte quelle che importano da `_shared` cambiato (almeno `passi` e `sync-nuvola`). La prova `astra.e2e.ts › figurina e album` è rotta già su `origin/main`.
 
+## Restyling dell'Oggi dei genitori (20/11, in corso)
+
+- Chiesto dal signore il 20/11: elenco lungo, materie ripetute. Prima parte in produzione alle 18:40 (`0de9417`, backup `ace-2026-11-20_18-37-40.sql`): sezione "Foto delle pagine" con una riga per materia (aperte o con prova in arrivo), chiuse e scadute in "Archivio foto" chiuso; la materia già in "Da sapere" non si ripete. Regola in `fotoPerMateria()` (`src/lib/foto`).
+- Limite: nella riga di materia le foto delle richieste vecchie non contano come viste (si tocca la chip "c'è già").
+- 18:55 (`3be1c22`, backup `ace-2026-11-20_18-51-11.sql`): ordine nuovo, approvato dal signore: "Lani è a casa oggi?" in cima (prima delle 14), Da fare per voi (con la foto che tocca ai genitori, contata), Dai passi / Segna, Lani oggi ("Una cosa da dirle" prima della tabellina), Foto delle pagine in fondo. "Da sapere" tolto.
+- ACE Prova (`gioco-con-tabellina`, `app-tmp-merge`) era indietro di 16 commit: allineata il 20/11 alle 19:00 (unione locale, non pushata; `npm install` rifatto). Da ora l'hook `pre-push` blocca il push su `main` se il ramo di prova non contiene il commit (runbook, "Ambiente di prova").
+- **Da fare:** il signore prova Oggi dei genitori sul telefono.
+
 ## Foto delle verifiche e voti pesati (19/11, in produzione)
 
 - Le verifiche non avevano richieste di foto. `richiesteFoto()` in `sync-nuvola` cercava le pagine solo nell'argomento. Ora legge anche `pagine_probabili`. Quando una verifica è nuova, `genera-studio` scrive le pagine dopo `richiesteFoto()`, quindi la richiesta arriva al giro successivo.
 - Medie pesate come Nuvola: peso, `fa_media` e tipo dal dettaglio `voti/materia/{id}` (migrazione 0044, già applicata). La formula è in `src/lib/media.ts`, usata in Figurina e Settimana.
 - `sync-nuvola` è stata pubblicata il 19/11 alle 18:05 e poi lanciata a mano con `net.http_post` e il segreto del Vault. `lancia_sync_nuvola()` esce subito fuori dalle 14 e dalle 19. Richieste aperte per Italiano (pag. 12–47) e Spagnolo (pag. 86–101) del 20/11. I quiz c'erano già.
-- **Da fare:** la verifica di Spagnolo da recuperare non è in Nuvola. Va inserita a mano o si aspetta che compaia. Controllare in Stato di ACE i pesi dei voti dopo il giro delle 19:30.
+- 20/11: il recupero di Spagnolo (verifica del 20/11, la prof era assente per sciopero) è stato spostato a venerdì 27/11 con `data_spostata`. `genera-studio` ha rifatto il ripasso (4 sessioni, dal 22 al 26/11). La richiesta di foto e il quiz restano. Cartella del 19/11 segnata ma non fatta: -5 con storno. Ora i genitori la tolgono da soli in Settimana, giorno, "La sera", Togli (anche la borsa).
+- **Da fare:** controllare in Stato di ACE i pesi dei voti.
 
 ## Tabellina dei passi (18/11, ramo `tabellina-prova`, worktree `C:\progetti\ace\app-tabellina`, non in produzione)
 

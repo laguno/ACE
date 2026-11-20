@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { erroreDi, misure, numeriPagine, pagineMancanti, PESO_MAX, scegli, tipoOriginale } from '.';
+import { erroreDi, fotoPerMateria, misure, numeriPagine, pagineMancanti, PESO_MAX, scegli, tipoOriginale } from '.';
 
 const file = (name: string, type: string, byte = 10) => Object.assign(new Blob([new Uint8Array(byte)], { type }), { name });
 
@@ -84,4 +84,28 @@ describe('intervalli di pagine', () => {
     expect(intervalli([6])).toBe('6');
     expect(intervalli([])).toBe('');
   });
+});
+
+describe('fotoPerMateria', () => {
+  const r = (id: string, materia_id: string | null, pagine: string, stato: string) => ({ id, materia_id, pagine, stato });
+  test('una riga per materia, chiuse senza prova in archivio', () => {
+    const lista = [r('a', 'sci', '20', 'fatta'), r('b', 'sci', '12-14', 'aperta'), r('c', 'tec', '5', 'scaduta'), r('d', 'tec', '6', 'fatta'), r('e', 'ita', '30', 'fatta')];
+    const { righe, archivio } = fotoPerMateria(lista, new Map([['ita', 'pag. 30-32']]));
+    expect(righe.map((x) => [x.richiesta.id, x.ids, x.attese])).toEqual([
+      ['b', ['b'], '12–14'],
+      ['e', ['e'], '30–32'],
+    ]);
+    expect(archivio.map((x) => x.id)).toEqual(['a', 'c', 'd']);
+  });
+  test('senza materia: ogni richiesta aperta ha la sua riga', () => {
+    const { righe } = fotoPerMateria([r('a', null, '1', 'aperta'), r('b', null, '2', 'aperta')], new Map());
+    expect(righe).toHaveLength(2);
+  });
+});
+
+test('fotoPerMateria: con la prova in arrivo le richieste della materia si uniscono in una riga', () => {
+  const r = (id: string, pagine: string, stato: string) => ({ id, materia_id: 'sci', pagine, stato });
+  const { righe, archivio } = fotoPerMateria([r('a', '20', 'fatta'), r('b', '12-14', 'aperta')], new Map([['sci', 'pag. 12-16']]));
+  expect(righe.map((x) => [x.richiesta.id, x.ids, x.attese])).toEqual([['b', ['a', 'b'], '12–16, 20']]);
+  expect(archivio).toEqual([]);
 });

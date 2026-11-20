@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Camera, Images } from '@phosphor-icons/react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { Elenco, Riga } from './kit';
-import { caricaConAvanzamento, erroreDi, intervalli, MESSAGGI, misure, numeriPagine, pagineAttese, pagineMancanti, percentuale, scegli, type ErroreFoto, type Pronta } from './lib/foto';
+import { caricaConAvanzamento, erroreDi, fotoPerMateria, intervalli, MESSAGGI, misure, numeriPagine, pagineAttese, pagineMancanti, percentuale, scegli, type ErroreFoto, type Pronta } from './lib/foto';
 
 // Da fotografare: pagine chieste da ACE (sincronizzazione di Nuvola). Le foto vanno nel bucket
 // privato foto-pagine; con "Ho finito" la funzione "passi" chiude la richiesta e dà i passi a Lani se la foto è sua.
@@ -539,7 +539,7 @@ type RichiestaRecente = RichiestaFoto & { stato: string };
  * Genitori: aggiungere foto a una richiesta di qualsiasi stato (anche chiusa da Lani o scaduta):
  * appunti, pagine mancanti. Le nuove foto entrano nelle carte e nel quiz della prossima prova.
  */
-export function FotoRichieste({ client, avvisa }: { client: SupabaseClient; avvisa: (s: string) => void }) {
+export function FotoRichieste({ client, avvisa, escludi = [] }: { client: SupabaseClient; avvisa: (s: string) => void; escludi?: string[] }) {
   const [lista, setLista] = useState<RichiestaRecente[]>();
   const [prove, setProve] = useState<Map<string, string>>(new Map());
   useEffect(() => {
@@ -559,22 +559,35 @@ export function FotoRichieste({ client, avvisa }: { client: SupabaseClient; avvi
       .then(({ data }) => setProve(new Map((data ?? []).filter((v) => v.materia_id && v.pagine_probabili).map((v) => [v.materia_id as string, v.pagine_probabili as string]))));
   }, [client]);
   if (!lista?.length) return null;
+  // una riga per materia (aperte o con la prova in arrivo); la materia già in "Da sapere" non si ripete
+  const { righe, archivio } = fotoPerMateria(lista, prove);
+  const vive = righe.filter((g) => !g.ids.some((id) => escludi.includes(id)));
+  const riga = (r: RichiestaRecente, attese: string) => {
+    const titolo = r.materie?.nome ? `${r.materie.nome}: pagine ${intervalli(numeriPagine(attese))}` : descrizione(r);
+    return (
+      <Riga
+        key={r.id}
+        icona={<Camera size={20} weight="bold" aria-hidden />}
+        titolo={titolo}
+        sotto={r.stato === 'aperta' ? 'Aperta: la fa Lani' : r.stato === 'fatta' ? 'Chiusa da Lani: potete aggiungere pagine' : 'Scaduta: potete aggiungere pagine'}
+        azione={<Fotografa client={client} richiesta={r} studio genitore chiusa={r.stato !== 'aperta'} attese={attese} etichetta="Aggiungi" fatto={() => avvisa(`Foto aggiunte: ${titolo}.`)} />}
+      />
+    );
+  };
   return (
-    <Elenco etichetta="Aggiungi foto">
-      {lista.map((r) => {
-        const attese = pagineAttese(r.pagine, r.materia_id ? (prove.get(r.materia_id) ?? null) : null);
-        // titolo: le pagine della prova (4–16), non solo quelle del compito (6)
-        const titolo = r.materie?.nome && prove.has(r.materia_id ?? '') ? `${r.materie.nome}: pagine ${intervalli(numeriPagine(attese))}` : descrizione(r);
-        return (
-          <Riga
-            key={r.id}
-            icona={<Camera size={20} weight="bold" aria-hidden />}
-            titolo={titolo}
-            sotto={r.stato === 'aperta' ? 'Aperta' : r.stato === 'fatta' ? 'Chiusa da Lani: potete aggiungere pagine' : 'Scaduta: potete aggiungere pagine'}
-            azione={<Fotografa client={client} richiesta={r} studio genitore chiusa={r.stato !== 'aperta'} attese={attese} etichetta="Aggiungi" fatto={() => avvisa(`Foto aggiunte: ${titolo}.`)} />}
-          />
-        );
-      })}
-    </Elenco>
+    <section className="ga-sezione" aria-labelledby="foto-pagine">
+      <h2 id="foto-pagine">Foto delle pagine</h2>
+      {vive.length > 0 ? (
+        <Elenco etichetta="Aggiungi foto">{vive.map((g) => riga(g.richiesta, g.attese))}</Elenco>
+      ) : (
+        <p className="ga-nota">Nessuna foto in sospeso.</p>
+      )}
+      {archivio.length > 0 && (
+        <details>
+          <summary>Archivio foto ({archivio.length})</summary>
+          <Elenco etichetta="Archivio foto">{archivio.map((r) => riga(r, r.pagine))}</Elenco>
+        </details>
+      )}
+    </section>
   );
 }

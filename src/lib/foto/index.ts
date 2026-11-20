@@ -120,3 +120,26 @@ export function intervalli(numeri: number[]): string {
   }
   return fuori.join(', ');
 }
+
+type RichiestaGruppo = { id: string; materia_id: string | null; pagine: string; stato: string };
+
+/**
+ * Foto nell'Oggi dei genitori (restyling del 20/11, scelta del signore): una riga per materia con le richieste
+ * ancora utili (aperte, o della materia di una prova in arrivo); le altre vanno in archivio, una per richiesta.
+ * La riga usa la richiesta aperta più recente (se non c'è, la più recente) e chiede le pagine di tutte più quelle della prova.
+ * `lista` dalla più recente; `prove`: materia → pagine probabili della prossima prova.
+ */
+export function fotoPerMateria<R extends RichiestaGruppo>(lista: R[], prove: Map<string, string>) {
+  const gruppi = new Map<string, R[]>();
+  const archivio: R[] = [];
+  for (const r of lista) {
+    if (r.stato !== 'aperta' && !(r.materia_id && prove.has(r.materia_id))) archivio.push(r);
+    else gruppi.set(r.materia_id ?? r.id, [...(gruppi.get(r.materia_id ?? r.id) ?? []), r]);
+  }
+  const righe = [...gruppi.values()].map((g) => ({
+    richiesta: g.find((r) => r.stato === 'aperta') ?? g[0],
+    ids: g.map((r) => r.id),
+    attese: intervalli(numeriPagine(pagineAttese(g.map((r) => r.pagine).join(', '), g[0].materia_id ? (prove.get(g[0].materia_id) ?? null) : null))),
+  }));
+  return { righe, archivio };
+}

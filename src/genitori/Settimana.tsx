@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { CalendarBlank, Check, FileText, House } from '@phosphor-icons/react';
+import { Backpack, Bag, CalendarBlank, Check, FileText, House } from '@phosphor-icons/react';
 import * as R from '../lib/regole';
 import { mediaGenerale } from '../lib/media';
 import { Attesa, CampoData, CampoTesto, Elenco, Foglio, Riga, Vuoto } from '../kit';
@@ -16,7 +16,8 @@ import { StoricoTutor } from './Tutor';
 
 type Compito = { id: string; testo: string; scadenza: string; scadenza_spostata: string | null; fatto_il: string | null; materie: { nome: string } | null };
 type Foglio_ = { id: string; titolo: string; scadenza: string | null; dato_il: string | null };
-type Dati = { media: number | null; obiettivo: number; note: number; serate: string[]; chiusura: Record<string, string>; compiti: Compito[]; assenze: string[]; fogli: Foglio_[]; rEvolutionDa: string | null };
+type Sera = { data: string; cartella_il: string | null; borsa_il: string | null };
+type Dati = { media: number | null; obiettivo: number; note: number; serate: string[]; sere: Sera[]; chiusura: Record<string, string>; compiti: Compito[]; assenze: string[]; fogli: Foglio_[]; rEvolutionDa: string | null };
 const quando = (c: Compito) => c.scadenza_spostata ?? c.scadenza;
 
 export default function Settimana({ client, passi, avvisa }: Props) {
@@ -26,14 +27,14 @@ export default function Settimana({ client, passi, avvisa }: Props) {
   const [giorno, setGiorno] = useState(R.iso(oggi));
   const [d, setD] = useState<Dati>();
   const [vista, setVista] = useState<'foglio'>();
-  const [chiede, setChiede] = useState<'casa' | 'togliCasa' | { togli: Compito } | { firma: Foglio_ } | { foto: () => void }>();
+  const [chiede, setChiede] = useState<'casa' | 'togliCasa' | { togli: Compito } | { sera: 'cartella' | 'borsa' } | { firma: Foglio_ } | { foto: () => void }>();
 
   async function carica() {
     const [v, o, n, s, c, a, f, re, ch] = await Promise.all([
       client.from('voti').select('materia_id, voto, peso, fa_media'),
       client.from('impostazioni').select('valore').eq('chiave', 'obiettivo_media').maybeSingle(),
       client.from('note').select('id', { count: 'exact', head: true }).gte('data', R.iso(lun)).lte('data', R.iso(dom)),
-      client.from('serate').select('data').gte('data', R.iso(lun)).lte('data', R.iso(dom)).not('cartella_il', 'is', null),
+      client.from('serate').select('data, cartella_il, borsa_il').gte('data', R.iso(lun)).lte('data', R.iso(dom)),
       // ponytail: per scadenza; una spunta della domenica per un compito del lunedì dopo non compare (la settimana chiude la domenica sera)
       client.from('compiti').select('id, testo, scadenza, scadenza_spostata, fatto_il, materie(nome)').gte('scadenza', R.iso(piu(lun, -7))).lte('scadenza', R.iso(dom)),
       client.from('assenze').select('giorno').gte('giorno', R.iso(lun)).lte('giorno', R.iso(dom)),
@@ -45,7 +46,8 @@ export default function Settimana({ client, passi, avvisa }: Props) {
       media: mediaGenerale(v.data ?? []),
       obiettivo: Number(o.data?.valore ?? 7.35),
       note: n.count ?? 0,
-      serate: (s.data ?? []).map((x) => x.data as string),
+      serate: (s.data ?? []).filter((x) => x.cartella_il).map((x) => x.data as string),
+      sere: (s.data ?? []) as Sera[],
       chiusura: (ch.data?.valore as Record<string, string> | undefined) ?? {},
       compiti: (c.data ?? []) as unknown as Compito[],
       assenze: (a.data ?? []).map((x) => x.giorno as string),
@@ -67,6 +69,16 @@ export default function Settimana({ client, passi, avvisa }: Props) {
     // lo storno è già fatto e si può ripetere: basta ritoccare Togli
     if (e2) return avvisa('Passi annullati, ma la spunta è rimasta.', () => togli(c));
     fatto(stornato ? 'Spunta tolta e passi annullati.' : 'Spunta tolta (i passi erano già chiusi con le chiavi della settimana).');
+  }
+  /** Cartella o borsa segnate ma non fatte: via i passi (storno) e via la spunta, così la sera non conta per le chiavi. */
+  async function togliSera(cosa: 'cartella' | 'borsa') {
+    setChiede(undefined);
+    const nome = cosa === 'cartella' ? 'Cartella' : 'Borsa';
+    const { data: stornato, error } = await client.rpc('storna_spunta', { p_motivo: cosa, p_riferimento: `serata:${giorno}` });
+    if (error) return avvisa(`${nome}: spunta non tolta.`, () => togliSera(cosa));
+    const { error: e2 } = await client.from('serate').update({ [`${cosa}_il`]: null }).eq('data', giorno);
+    if (e2) return avvisa('Passi annullati, ma la spunta è rimasta.', () => togliSera(cosa));
+    fatto(stornato ? `${nome}: spunta tolta e passi annullati.` : `${nome}: spunta tolta.`);
   }
   async function firma(f: Foglio_) {
     setChiede(undefined);
@@ -110,6 +122,7 @@ export default function Settimana({ client, passi, avvisa }: Props) {
   const giorni = Array.from({ length: 7 }, (_, i) => R.iso(piu(lun, i)));
   const delGiorno = d.compiti.filter((c) => quando(c) === giorno);
   const aCasa = d.assenze.includes(giorno);
+  const sera = d.sere.find((s) => s.data === giorno);
   const scuola = R.giornoDiScuola(R.giorno(giorno));
   // serate da chiudere finora: i giorni passati con una chiusura, più oggi se è già chiusa
   const oggiIso = R.iso(oggi);
@@ -189,6 +202,25 @@ export default function Settimana({ client, passi, avvisa }: Props) {
             )}
           </Elenco>
         )}
+        {sera && (sera.cartella_il || sera.borsa_il) && (
+          <Elenco etichetta="La sera">
+            {(['cartella', 'borsa'] as const)
+              .filter((cosa) => sera[`${cosa}_il`])
+              .map((cosa) => (
+                <Riga
+                  key={cosa}
+                  icona={cosa === 'cartella' ? <Backpack size={20} weight="bold" aria-hidden /> : <Bag size={20} weight="bold" aria-hidden />}
+                  titolo={cosa === 'cartella' ? 'Cartella pronta' : 'Borsa pronta'}
+                  sotto={`Spuntata alle ${new Date(sera[`${cosa}_il`]!).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Rome' })}`}
+                  azione={
+                    <button type="button" className="ga-btn tenue" aria-label={`Togli la spunta: ${cosa}`} onClick={() => setChiede({ sera: cosa })}>
+                      Togli
+                    </button>
+                  }
+                />
+              ))}
+          </Elenco>
+        )}
       </section>
 
       <section className="ga-sezione" aria-labelledby="verifiche">
@@ -242,6 +274,14 @@ export default function Settimana({ client, passi, avvisa }: Props) {
         <Foglio titolo="Togliere la spunta?" azione="Togli la spunta" conferma={() => togli(chiede.togli)} chiudi={() => setChiede(undefined)}>
           <p className="ga-nota">
             {chiede.togli.materie?.nome ?? 'Compito'}: {chiede.togli.testo}. Lani perde i passi di questo compito e vede chi l’ha corretta. Se l’ha fatto apposta, in Oggi c’è Segna, Balla.
+          </p>
+        </Foglio>
+      )}
+      {typeof chiede === 'object' && 'sera' in chiede && (
+        <Foglio titolo={`Togliere la ${chiede.sera}?`} azione="Togli la spunta" conferma={() => togliSera(chiede.sera)} chiudi={() => setChiede(undefined)}>
+          <p className="ga-nota">
+            {chiede.sera === 'cartella' ? 'Cartella' : 'Borsa'} di {bello(giorno)} segnata ma non fatta: Lani perde i passi
+            {chiede.sera === 'cartella' ? ' e la sera non conta per le chiavi della domenica' : ''}.
           </p>
         </Foglio>
       )}

@@ -1,0 +1,21 @@
+#!/bin/sh
+# Regola del signore (18/11, ribadita il 20/11): ACE Prova mai indietro rispetto a main.
+# Blocca il push su main se il ramo di prova (ace-prova-ramo.json, scritto da prova:allinea)
+# non contiene già il commit da pubblicare. Prima si unisce nel ramo di prova, poi si pubblica.
+comune="$(git rev-parse --git-common-dir)"
+file="$comune/ace-prova-ramo.json"
+while read -r locale sha remoto _; do
+  [ "$remoto" = "refs/heads/main" ] || continue
+  case "$sha" in 0000000*) continue ;; esac
+  if [ ! -f "$file" ]; then
+    echo "pre-push: nessun ramo di prova registrato ($file). Lancia npm run prova:allinea sul ramo di prova." >&2
+    exit 1
+  fi
+  ramo=$(sed -n 's/.*"ramo": *"\([^"]*\)".*/\1/p' "$file")
+  if ! git merge-base --is-ancestor "$sha" "$ramo" 2>/dev/null; then
+    echo "pre-push: il ramo di prova $ramo NON contiene $(echo "$sha" | cut -c1-7): ACE Prova resterebbe indietro rispetto a main." >&2
+    echo "Prima unisci in $ramo (git merge <ramo da pubblicare>, oppure npm run prova:allinea dopo), poi rifai il push." >&2
+    exit 1
+  fi
+done
+exit 0
