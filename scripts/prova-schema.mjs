@@ -221,7 +221,7 @@ const inserisce = async (uid, t, ruolo) => {
 };
 // foto_pagine e serate: Lani inserisce solo a condizioni (file vero, data vicina), provate sopra e sotto
 // partite: Lani solo da approvare, provato sopra
-const LANI_INSERISCE = ['errori_client', 'flashcard_giri', 'partite', 'piano_voci', 'push_iscrizioni', 'quiz_tentativi', 'ripassi_carte', 'umore', 'video_visti'];
+const LANI_INSERISCE = ['errori_client', 'flashcard_giri', 'mate_tentativi', 'partite', 'piano_voci', 'push_iscrizioni', 'quiz_tentativi', 'ripassi_carte', 'umore', 'video_visti'];
 const GENITORE_INSERISCE = [...LANI_INSERISCE, 'assenze', 'foto_pagine', 'serate', 'compiti', 'esercizi_dieci_minuti', 'fogli_firma', 'forzieri', 'frasi', 'gesti_casa', 'impostazioni', 'sgridate'];
 for (const t of tabelle) {
   verifica(`anon non inserisce in ${t}`, !(await inserisce(null, t, 'anon')));
@@ -353,6 +353,23 @@ await fallisce('tutor: Lani non scrive indizi', LANI, `insert into tutor_aiuti (
 verifica('tutor: un genitore legge lo storico', (await come(PAPA, 'select * from tutor_richieste')).rows.length === 1);
 await fallisce('tutor: un genitore non scrive nello storico', PAPA, `insert into tutor_richieste (profilo_id, tipo) values ('${PAPA}', 'spiegamelo')`);
 await fallisce('tutor: niente tipi inventati', null, `insert into tutor_richieste (profilo_id, tipo) values ('${LANI}', 'voto')`);
+// matematica (blocco F, 0060-0062): serie scritte dal server, Lani salva solo i suoi tentativi
+const SERIE = '33333333-3333-3333-3333-333333333333';
+await come(null, `insert into mate_serie (id, argomento, problemi) values ('${SERIE}', 'Frazioni', '[{"metodo":"a"}]')`);
+verifica('Lani legge le serie di matematica', (await come(LANI, 'select * from mate_serie')).rows.length === 1);
+await fallisce('Lani non scrive serie di matematica', LANI, `insert into mate_serie (argomento, problemi) values ('x', '[]')`);
+await come(LANI, `update mate_serie set problemi = '[]' where id = '${SERIE}'`).catch(() => {});
+verifica('Lani non cambia i problemi di una serie', (await val(null, `select jsonb_array_length(problemi) from mate_serie where id = '${SERIE}'`)) === 1);
+await come(LANI, `insert into mate_tentativi (serie_id, numero, iniziato_il, fatto_il, problemi, tentati) values ('${SERIE}', 9, now() - interval '10 minutes', '2020-01-01', 8, 8)`);
+await come(LANI, `insert into mate_tentativi (serie_id, iniziato_il, problemi, tentati) values ('${SERIE}', now() - interval '10 minutes', 8, 8)`);
+verifica('serie di matematica: numero e ora di fine li decide il server', (await val(null, `select string_agg(numero::text, ',' order by numero) || ':' || bool_and(fatto_il > now() - interval '1 minute') from mate_tentativi`)) === '1,2:true');
+await fallisce('serie di matematica: non più tentati che problemi', LANI, `insert into mate_tentativi (serie_id, iniziato_il, problemi, tentati) values ('${SERIE}', now() - interval '1 minute', 8, 9)`);
+await fallisce('serie di matematica: inizio nel futuro rifiutato', LANI, `insert into mate_tentativi (serie_id, iniziato_il, problemi, tentati) values ('${SERIE}', now() + interval '1 hour', 8, 8)`);
+await come(LANI, `update mate_tentativi set tentati = 0`).catch(() => {});
+verifica('Lani non cambia una serie già fatta', (await val(null, `select min(tentati) from mate_tentativi`)) === 8);
+await come(null, `select registra_passi('compito', 'cm1', 4, 1, '2026-11-18'), registra_passi('matematica', 'matematica:2026-11-18:1', 5, 1, '2026-11-18'), registra_passi('matematica', 'matematica:2026-11-17:1', 5, 1, '2026-11-17')`);
+await come(PAPA, `select storna_spunta('compito', 'cm1')`);
+verifica('storno di un compito: via i passi di matematica di quel giorno, non degli altri', (await val(null, `select string_agg(riferimento || '=' || passi, ',' order by riferimento) from movimenti_passi where motivo = 'storno' and (riferimento like '%cm1' or riferimento like 'matematica:%')`)) === 'compito:cm1=-4,matematica:matematica:2026-11-18:1=-5');
 
 console.log(`\n${ok} ok, ${ko} no`);
 process.exit(ko ? 1 : 0);

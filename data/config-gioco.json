@@ -115,6 +115,9 @@
       "flashcard_secondi_prima_di_girare": 7,
       "video_completo": 3,
       "video_frazione_minima_vista": 0.95,
+      "matematica_serie": 5,
+      "matematica_secondi_per_problema": 30,
+      "_matematica": "PROVVISORIO (blocco F, 19/11, da approvare dal signore): passi per una serie di esercizi di matematica finita, tutti i problemi tentati, qualunque sia il numero di risposte giuste; serie valida solo se è durata almeno matematica_secondi_per_problema a problema. Conta nel tetto di max_al_giorno_per_tipo come gli altri tipi.",
       "quiz": {
         "soglia_giuste": 0.9,
         "tentativi": {

@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Cards, ChatCircleText, ClipboardText } from '@phosphor-icons/react';
+import { Calculator, Cards, ChatCircleText, ClipboardText } from '@phosphor-icons/react';
 import { Riquadro, Testata } from './kit';
 import * as R from './lib/regole';
 import { Flashcard, Quiz, SELECT_CARTA, type Carta, type Domanda } from './Ripasso';
 import { componiPillola } from './lib/regole/pillola';
+import { Matematica, type Serie } from './Matematica';
 import { GIORNI, MESI, maiuscola } from './spunte';
 import { supabase } from './supabase';
 import { ComeTiConosci, MicroLezione, VotoPrevisto, usePrevisioni } from './Metacognizione';
@@ -31,8 +32,10 @@ type Verifica = {
   materie: { nome: string } | null;
   sessioni_ripasso: Sessione[];
   quiz: { id: string; domande: Domanda[] }[];
+  /** esercizi di matematica (blocco F): una serie per verifica */
+  mate_serie?: Serie[];
 };
-type Attivita = ({ tipo: 'carte'; carte: Carta[] } | { tipo: 'quiz'; quizId: string; domande: Domanda[] }) & { titolo: string; sessione?: string };
+type Attivita = ({ tipo: 'carte'; carte: Carta[] } | { tipo: 'quiz'; quizId: string; domande: Domanda[] } | { tipo: 'mate'; serie: Serie }) & { titolo: string; sessione?: string };
 const titoloQuiz = (v: Verifica) => `Quiz di ${(v.materie?.nome ?? 'ripasso').toLowerCase()}`;
 
 const COSA: Record<R.TipoSessione, string> = {
@@ -58,7 +61,7 @@ export default function Studio() {
 
   async function carica() {
     const domani = R.iso(R.prossimoGiornoDiScuola(R.giornoRoma(new Date())));
-    const sel = 'id, data, tipo, argomento, pagine_probabili, recupero_vago, materie(nome), sessioni_ripasso(id, numero, data_prevista, tipo, fatta_il), quiz(id, domande)';
+    const sel = 'id, data, tipo, argomento, pagine_probabili, recupero_vago, materie(nome), sessioni_ripasso(id, numero, data_prevista, tipo, fatta_il), quiz(id, domande), mate_serie(id, problemi)';
     const { data: casa } = await supabase.from('assenze').select('giorno').lt('giorno', oggi);
     const [v, r, c, k, n] = await Promise.all([
       supabase.from('verifiche').select(sel).gte('data', oggi).order('data').limit(6),
@@ -113,6 +116,7 @@ export default function Studio() {
   const testata = <Testata sfondo="panna" posa="lani-pensierosa" misura={132} sopra="Studio" titolo="Le tue verifiche" riga={<p>Il ripasso è già organizzato nei pomeriggi liberi.</p>} />;
   if (spiegamelo) return <Spiegamelo chiudi={() => setSpiegamelo(false)} />;
   if (attivita?.tipo === 'carte') return <Flashcard carte={attivita.carte} titolo={attivita.titolo} sessione={attivita.sessione} chiudi={chiudi} />;
+  if (attivita?.tipo === 'mate') return <Matematica serie={attivita.serie} titolo={attivita.titolo} chiudi={chiudi} />;
   if (attivita?.tipo === 'quiz') return <Quiz quizId={attivita.quizId} titolo={attivita.titolo} domande={attivita.domande} sessione={attivita.sessione} chiudi={chiudi} />;
   // intestazione subito, i dati dopo: titolo e avatar sono il primo disegno (Lighthouse, 13/11)
   if (!verifiche) return <section className="schermo schermo-studio">{testata}</section>;
@@ -193,6 +197,11 @@ export default function Studio() {
                 ) : null}
               </div>
             )}
+            {v.mate_serie?.map((serie) => (
+              <button key={serie.id} className="secondario compatto" onClick={() => setAttivita({ tipo: 'mate', serie, titolo: 'Esercizi di matematica' })}>
+                <Calculator size={20} weight="bold" aria-hidden /> Esercizi
+              </button>
+            ))}
           </div>
         );
       })}

@@ -96,7 +96,16 @@ export function passiQuiz(tentativo: number, giuste: number, totale: number): nu
   return bravo ? riga[0] : riga[1];
 }
 
-export type TipoStudio = 'flashcard' | 'video' | 'quiz';
+export type TipoStudio = 'flashcard' | 'video' | 'quiz' | 'matematica';
+
+/**
+ * Serie di esercizi di matematica valida per i passi: tutti i problemi tentati e almeno
+ * matematica_secondi_per_problema a problema. Le risposte giuste non contano (blocco F, 19/11).
+ */
+export function serieMateValida(iniziatoIl: Date, fattoIl: Date, problemi: number, tentati: number): boolean {
+  const minimo = problemi * P.studio_facoltativo.matematica_secondi_per_problema * 1000;
+  return problemi > 0 && tentati === problemi && fattoIl.getTime() - iniziatoIl.getTime() >= minimo;
+}
 
 /**
  * Lo studio facoltativo dà passi solo con i compiti del giorno spuntati
