@@ -104,11 +104,12 @@ export interface VotoNuvola {
   tipo?: string | null;
 }
 
-// verifica scritta ↔ voto scritto, interrogazione ↔ orale; se Nuvola non dice il tipo, va bene tutto
+// si escludono solo i casi chiari: orale per una verifica scritta, scritto per un'interrogazione.
+// Il tipo arriva da Nuvola in minuscolo ("orale", "scritto", ...); se manca va bene tutto.
 function tipiCompatibili(verifica: VerificaDaAbbinare['tipo'], voto: VotoNuvola['tipo']): boolean {
   if (!verifica || !voto) return true;
-  if (verifica === 'verifica') return voto === 'scritto' || voto === 'pratico';
-  if (verifica === 'interrogazione') return voto === 'orale';
+  if (verifica === 'verifica') return !/orale/i.test(voto);
+  if (verifica === 'interrogazione') return !/scritt/i.test(voto);
   return true;
 }
 

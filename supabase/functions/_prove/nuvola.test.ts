@@ -103,13 +103,13 @@ describe('sync-nuvola', () => {
     const c = stato.banco!.come;
     await c(null, `insert into materie (id, nome, abbreviazione) values ('matematica', 'Matematica', 'Mate') on conflict do nothing`);
     await c(null, `insert into materie (id, nome, abbreviazione) values ('storia', 'Storia', 'Sto') on conflict do nothing`);
-    await c(null, `insert into verifiche (id, data, tipo, materia_id) values ('00000000-0000-0000-0000-0000000000a1', '2026-11-23', 'verifica', 'matematica'), ('00000000-0000-0000-0000-0000000000a2', '2026-11-23', 'verifica', 'storia')`);
+    await c(null, `insert into verifiche (id, data, tipo, materia_id) values ('00000000-0000-0000-0000-0000000000a1', '2026-11-23', 'interrogazione', 'matematica'), ('00000000-0000-0000-0000-0000000000a2', '2026-11-23', 'verifica', 'storia')`);
     await c(null, `insert into voti_previsti (verifica_id, voto) values ('00000000-0000-0000-0000-0000000000a1', 7.5), ('00000000-0000-0000-0000-0000000000a2', 9)`);
     await c(null, `insert into voti (nuvola_id, materia_id, data, voto) values ('sto-1', 'storia', '2026-11-24', 6)`);
     const f = await carica('sync-nuvola');
     await f(richiesta({}, { cron: true }));
     await f(richiesta({}, { cron: true }));
-    // voto 8 di matematica dal Nuvola finto: previsto 7½, dentro lo scarto della config
+    // voto 8 orale di matematica dal Nuvola finto: previsto 7½, dentro lo scarto della config; storia 6 contro 9 no
     const P = (await import('../../../src/lib/regole/index.ts')).CONFIG.metacognizione.voto_previsto.passi;
     expect(await valore(`select coalesce(sum(passi), 0)::int from movimenti_passi where motivo = 'voto_previsto'`)).toBe(P);
     expect(await valore(`select riferimento from movimenti_passi where motivo = 'voto_previsto'`)).toBe('00000000-0000-0000-0000-0000000000a1');

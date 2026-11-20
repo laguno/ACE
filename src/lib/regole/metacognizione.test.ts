@@ -88,6 +88,10 @@ describe('voto previsto', () => {
     expect(D.abbinaVoti(verifiche, [{ id: 't', materia_id: 'mate', data: iso, voto: 8 }]).size).toBe(0);
     expect(D.abbinaVoti(verifiche, [{ id: 'o', materia_id: 'mate', data: '2026-11-30', voto: 8, tipo: 'orale' }]).size).toBe(0);
     expect(D.abbinaVoti(verifiche, [{ id: 's', materia_id: 'mate', data: '2026-11-30', voto: 8, tipo: 'scritto' }]).get('v1')?.id).toBe('s');
+    expect(D.abbinaVoti(verifiche, [{ id: 'g', materia_id: 'mate', data: '2026-11-30', voto: 8, tipo: 'scritto/grafico' }]).get('v1')?.id).toBe('g');
+    const interrogazione = [{ id: 'i1', materia_id: 'mate', data: '2026-11-30', tipo: 'interrogazione' }];
+    expect(D.abbinaVoti(interrogazione, [{ id: 's', materia_id: 'mate', data: '2026-11-30', voto: 8, tipo: 'scritto' }]).size).toBe(0);
+    expect(D.abbinaVoti(interrogazione, [{ id: 'o', materia_id: 'mate', data: '2026-11-30', voto: 8, tipo: 'orale' }]).get('i1')?.id).toBe('o');
   });
 
   it('abbina: due verifiche vicine, un voto ciascuna, alla più recente prima del voto', () => {
