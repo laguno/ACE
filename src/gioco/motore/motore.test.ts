@@ -12,9 +12,11 @@ import {
   nuovaPartita,
   passo,
   puoSchiacciare,
+  puoSpeciale,
   type Comandi,
   type Lato,
   type Stato,
+  type TipoFinisher,
 } from "./index";
 
 type Coppia = readonly [Comandi, Comandi];
@@ -27,6 +29,7 @@ const comandiArb = fc.record({
   dx: fc.boolean(),
   salta: fc.boolean(),
   schiaccia: fc.boolean(),
+  speciale: fc.boolean(),
 });
 // Comandi tenuti per qualche tic (altrimenti i giocatori tremano sul posto): fino a ~3000 tic.
 const sequenzaArb: fc.Arbitrary<Coppia[]> = fc
@@ -255,7 +258,7 @@ describe("passo: purezza", () => {
     s.vincitore = 1;
     expect(passo(s, FERMI)).toBe(s);
     const prima = structuredClone(s);
-    passo(s, [{ sx: true, dx: false, salta: true, schiaccia: true }, FERMO]);
+    passo(s, [{ sx: true, dx: false, salta: true, schiaccia: true, speciale: true }, FERMO]);
     expect(s).toEqual(prima);
   });
 });
@@ -962,8 +965,8 @@ describe("altezze", () => {
     return cima;
   }
   it("il tocco è alle mani alzate: centro del cerchio vicino alla cima della testa disegnata", () => {
-    // con l'attenuazione vale per chi è vicino all'altezza di default; i piccoli toccano più in alto della testa
-    for (const cm of [M.CM_DEFAULT, ALTEZZE.lani, 182]) {
+    // dal 20/11 (docs/11 §2.1) le mani sono alla cima vera della testa per tutti sopra M.manoMin
+    for (const cm of [M.CM_DEFAULT, ALTEZZE.lani, 182, ALTEZZE.leo]) {
       const s = nuovaPartita(1, DURATA, [cm, cm]);
       const rapporto = cerchio(s, s.giocatori[0])[0] / (cm * s.uPerCm);
       expect(rapporto).toBeGreaterThanOrEqual(0.95);
@@ -975,17 +978,19 @@ describe("altezze", () => {
     s = finoA(s, (st) => sommaPunti(st) >= 2, 2000);
     expect(s.giocatori.map((g) => g.cm)).toEqual([ALTEZZE.lani, ALTEZZE.papa]);
   });
-  it("chi è più alto tocca più in alto; sotto e sopra la portata è chiusa tra i limiti", () => {
+  // Aggiornata il 20/11: prima l'altezza contava poco (portata attenuata, papà − gattina < mezza
+  // palla); docs/11 §2.1 vuole le mani alla testa vera, quindi ora la differenza è l'altezza vera.
+  it("chi è più alto tocca più in alto, di quanto è più alto; sotto M.manoMin le mani restano lì", () => {
     const c = Object.fromEntries(
       Object.entries(ALTEZZE).map(([n, cm]) => [n, cimaInSalto(cm)]),
     );
     expect(c.papa).toBeGreaterThan(c.lani);
     expect(c.lani).toBeGreaterThan(c.default);
     expect(c.default).toBeGreaterThan(c.leo);
-    expect(c.leo).toBeGreaterThanOrEqual(c.bart);
-    expect(c.bart).toBe(c.lady); // entrambi al limite portataMin
-    // l'altezza aiuta un pochino: tra papà e la gattina meno di mezza palla
-    expect(c.papa - c.lady).toBeLessThan(M.raggio);
+    expect(c.leo).toBeGreaterThan(c.bart);
+    expect(c.bart).toBe(c.lady); // entrambi a M.manoMin
+    const u = nuova(1).uPerCm;
+    expect(c.papa - c.leo).toBeCloseTo((ALTEZZE.papa - ALTEZZE.leo) * u, 6);
   });
   it("anche a 25 cm, saltando, si arriva a una palla appena sopra la rete", () => {
     // palla "normale sopra la rete": il suo fondo alla quota della rete
@@ -1007,13 +1012,15 @@ describe("altezze", () => {
 describe("CPU (ia)", () => {
   // dopo la scadenza servono al più uno scambio e i punti di parità: un margine largo
   const MARGINE = 3 * 60 * HZ; // gli scambi CPU contro CPU durano anche 90 secondi
-  it("CPU contro CPU (errore 20 e 20) finisce entro durata + margine, per 10 semi", () => {
+  // Aggiornata il 20/11: col corpo che ribatte la palla e il tocco che non la manda più a terra, a
+  // errore 20 o 40 la CPU non sbaglia quasi mai e uno scambio può durare 5 minuti; 60 ora gioca come 40 prima.
+  it("CPU contro CPU (errore 60 e 60) finisce entro durata + margine, per 10 semi", () => {
     for (let seme = 0; seme < 10; seme++) {
       const s = finoA(
         nuova(seme),
         (st) => st.vincitore !== null,
         DURATA + MARGINE,
-        (st) => [ia(st, 0, 20), ia(st, 1, 20)],
+        (st) => [ia(st, 0, 60), ia(st, 1, 60)],
       );
       expect(s.tic).toBeGreaterThanOrEqual(DURATA);
       const v = s.vincitore as Lato;
@@ -1085,5 +1092,300 @@ describe("CPU (ia)", () => {
     expect(ia(s, 0, 0).salta).toBe(false);
     s.attesa = 0;
     expect(ia(s, 0, 0).salta).toBe(true);
+  });
+});
+
+describe("corpo e tocco (docs/11 §2.1)", () => {
+  /** Il giocatore 0 è una capsula dai piedi alla testa: la palla è dentro? */
+  const dentro = (s: Stato) => {
+    const g = s.giocatori[0];
+    const y = Math.min(Math.max(s.palla.y, g.y), g.y + g.cm * s.uPerCm);
+    const dx = s.palla.x - g.x;
+    const dy = s.palla.y - y;
+    return dx * dx + dy * dy < (M.raggio + M.corpo - 1) ** 2;
+  };
+  it("la palla non attraversa il corpo: da ogni lato e a ogni altezza la ribatte in alto verso la rete", () => {
+    for (const da of [-1, 1])
+      for (let y = M.raggio + 40; y < 100; y += 8) { // sotto il cerchio delle mani: tocca il corpo
+        let s = libera(nuova(4));
+        const g = s.giocatori[0];
+        s.palla = { x: g.x + da * 120, y, vx: -da * 8, vy: 0 };
+        let toccata = false;
+        for (let i = 0; i < 30 && sommaPunti(s) === 0; i++) {
+          s = passo(s, FERMI);
+          expect(dentro(s)).toBe(false);
+          if (s.tocco && !toccata) {
+            toccata = true;
+            expect(s.palla.vy).toBeGreaterThanOrEqual(M.alzata);
+            expect(s.palla.vx).toBeGreaterThan(0); // verso la rete (lato 0: a destra)
+          }
+        }
+        expect(toccata).toBe(true);
+      }
+  });
+  it("una palla che cade sui piedi non è punto: bagher", () => {
+    const s = libera(nuova(4));
+    const g = s.giocatori[0];
+    s.palla = { x: g.x + M.corpo + 10, y: M.raggio + 2, vx: 0, vy: -1 };
+    const dopo = passo(s, FERMI);
+    expect(sommaPunti(dopo)).toBe(0);
+    expect(dopo.tocchi).toBe(1);
+    expect(dopo.palla.vy).toBe(M.alzata);
+  });
+  it("il proprio tocco normale non manda mai la palla verso terra (anche presa di lato o da sotto)", () => {
+    const s0 = libera(nuova(4));
+    const g = s0.giocatori[0];
+    const [centro, raggio] = cerchio(s0, g);
+    const R = M.raggio + raggio;
+    let prove = 0;
+    for (let dx = -R; dx <= R; dx += 8)
+      for (let dy = -R; dy <= R; dy += 8) {
+        if (dx * dx + dy * dy >= (R - 2) ** 2) continue;
+        const s = structuredClone(s0);
+        s.palla = { x: g.x + dx, y: g.y + centro + dy + M.gravita, vx: 0, vy: 0 };
+        const dopo = passo(s, FERMI);
+        expect(dopo.tocchi).toBe(1);
+        expect(dopo.palla.vy).toBeGreaterThan(0);
+        prove++;
+      }
+    expect(prove).toBeGreaterThan(50);
+  });
+  it("il perdono della schiacciata non prende una palla già lontana di lato", () => {
+    let s = libera(nuova(6));
+    const g = s.giocatori[0];
+    g.x = 300;
+    g.y = 1e4;
+    const [centro, raggio] = cerchio(s, g);
+    // palla presa di lato: riparte veloce in orizzontale
+    s.palla = { x: g.x + M.raggio + raggio - 5, y: g.y + centro, vx: 0, vy: 0 };
+    s = passo(s, FERMI);
+    expect(s.tocco?.schiacciata).toBe(false);
+    for (let i = 1; i < M.perdonoSchiaccia; i++) s = passo(s, FERMI);
+    expect(Math.abs(s.palla.x - s.giocatori[0].x)).toBeGreaterThan(M.raggio + raggio + M.perdonoVicino);
+    s = passo(s, [{ ...FERMO, schiaccia: true }, FERMO]);
+    expect(s.giocatori[0].schiaccia).toBe(0);
+  });
+});
+
+describe("mossa finale (docs/11 §3.2)", () => {
+  const TIPI: TipoFinisher[] = ["fulmine", "dritto", "bomba", "furba", "esperienza", "fischio", "scatto", "dispetto"];
+  const SPECIALE: Comandi = { ...FERMO, speciale: true };
+  const CARICA = { max: 50, tocco: 5, schiacciata: 11, punto: 13, subito: 7, armato: 40 };
+  const conTipi = (tipo: TipoFinisher, seme = 6) =>
+    libera(nuovaPartita(seme, DURATA, undefined, undefined, [tipo, "fulmine"], { carica: CARICA }));
+  /** Lato 0 col tocco armato, in aria a x; palla appena sopra le mani (un filo verso la rete). */
+  function armata(tipo: TipoFinisher, x = 250, piedi = 60): Stato {
+    const s = conTipi(tipo);
+    const g = s.giocatori[0];
+    g.x = x;
+    g.y = piedi;
+    s.carica[0] = s.caricaMax;
+    s.armato[0] = 10;
+    s.palla = { x: x + 10, y: piedi + cerchio(s, g)[0] + 60, vx: 0, vy: 0 };
+    return s;
+  }
+  /** Gioca col lato 1 tolto di mezzo finché c'è un punto: stati del volo (l'ultimo è dopo il punto). */
+  function volo(s: Stato): Stato[] {
+    s = structuredClone(s);
+    s.giocatori[1].y = 1e5;
+    const stati = [s];
+    while (sommaPunti(s) === 0 && stati.length < 600) stati.push((s = passo(s, FERMI)));
+    return stati;
+  }
+  const cade = (stati: Stato[]) => stati[stati.length - 2].palla.x;
+
+  it("la carica sale con tocco, schiacciata e punto (anche a chi lo subisce), fino al massimo", () => {
+    const t = passo(sopraGiocatore(conTipi("fulmine"), 0), FERMI);
+    expect(t.carica).toEqual([CARICA.tocco, 0]);
+    const sp = conTipi("fulmine");
+    const g = sp.giocatori[0];
+    g.x = 400;
+    g.y = 100;
+    g.vy = 2;
+    sp.palla = { x: 420, y: g.y + cerchio(sp, g)[0] + 60, vx: 0, vy: 0 };
+    const dopo = passo(sp, [{ ...FERMO, schiaccia: true }, FERMO]);
+    expect(dopo.giocatori[0].schiaccia).toBe(M.durataSchiaccia);
+    expect(dopo.carica).toEqual([CARICA.schiacciata, 0]);
+    const p = passo(aTerra(conTipi("fulmine"), 1), FERMI);
+    expect(p.carica).toEqual([CARICA.punto, CARICA.subito]);
+    const pieno = aTerra(conTipi("fulmine"), 1);
+    pieno.carica = [CARICA.max - 1, 0];
+    expect(passo(pieno, FERMI).carica[0]).toBe(CARICA.max);
+    // default se nuovaPartita non riceve le opzioni
+    expect(nuova(1).caricaMax).toBe(100);
+  });
+  it("speciale a barra non piena non fa niente", () => {
+    const s = conTipi("bomba");
+    s.carica[0] = s.caricaMax - 1;
+    expect(puoSpeciale(s, 0)).toBe(false);
+    expect(passo(s, [SPECIALE, FERMO]).armato).toEqual([0, 0]);
+  });
+  it("a barra piena il fronte di speciale arma il tocco per armato tic; tenuto non riarma; scaduto la carica resta", () => {
+    let s = conTipi("bomba");
+    s.palla = { x: 900, y: 900, vx: 0, vy: 0 };
+    s.attesa = 10 ** 6;
+    s.carica[0] = s.caricaMax;
+    expect(puoSpeciale(s, 0)).toBe(true);
+    s = passo(s, [SPECIALE, FERMO]);
+    expect(s.armato[0]).toBe(CARICA.armato);
+    expect(puoSpeciale(s, 0)).toBe(false);
+    for (let i = 0; i < CARICA.armato; i++) s = passo(s, [SPECIALE, FERMO]);
+    expect(s.armato[0]).toBe(0);
+    expect(s.carica[0]).toBe(CARICA.max);
+    expect(s.finisher).toBeNull();
+  });
+  it("il tocco armato fa la mossa del personaggio, azzera carica e arma, segna finisher", () => {
+    for (const tipo of TIPI) {
+      const dopo = passo(armata(tipo), FERMI);
+      expect(dopo.finisher).toEqual({ lato: 0, tipo, tic: dopo.tic });
+      expect(dopo.carica[0]).toBe(0);
+      expect(dopo.armato[0]).toBe(0);
+    }
+  });
+  it("speciale e poi il tocco: dal pulsante alla mossa", () => {
+    let s = sopraGiocatore(conTipi("dritto"), 0);
+    s.carica[0] = s.caricaMax;
+    s = passo(s, [SPECIALE, FERMO]);
+    expect(s.finisher?.tipo).toBe("dritto");
+  });
+
+  it("ogni mossa che lancia la palla la manda nel campo avversario, anche da lontano o da terra", () => {
+    for (const tipo of ["fulmine", "dritto", "bomba", "furba", "esperienza", "dispetto"] as const)
+      for (const x of [100, 250, 400])
+        for (const piedi of [0, 60]) {
+          // fulmine da terra accanto alla rete, palla sotto la cima: la rete la ferma, come una schiacciata vera
+          if (tipo === "fulmine" && x === 400 && piedi === 0) continue;
+          const stati = volo(passo(armata(tipo, x, piedi), FERMI));
+          expect(stati[stati.length - 1].punti, `${tipo} ${x} ${piedi}`).toEqual([1, 0]);
+          expect(primaViolazione(stati[0], stati.length - 1, () => FERMI, reteIntatta)).toBeNull();
+        }
+  });
+  it("fulmine: più veloce del 40% e più ripida della schiacciata normale", () => {
+    const base = armata("fulmine", 400, 100);
+    const f = passo(base, FERMI).palla;
+    const normale = structuredClone(base);
+    normale.armato[0] = 0;
+    const n = passo(normale, [{ ...FERMO, schiaccia: true }, FERMO]).palla;
+    expect(Math.sqrt(f.vx ** 2 + f.vy ** 2)).toBeGreaterThan(1.3 * Math.sqrt(n.vx ** 2 + n.vy ** 2));
+    expect(f.vy / f.vx).toBeLessThan(n.vy / n.vx);
+  });
+  it("dritto: tesa, veloce e bassa sopra la rete", () => {
+    const stati = volo(passo(armata("dritto", 250, 60), FERMI));
+    expect(stati[0].palla.vx).toBe(M.drittoVx);
+    const sopra = stati.find((s) => Math.abs(s.palla.x - M.reteX) < M.drittoVx);
+    expect(sopra!.palla.y).toBeLessThan(M.reteAlta + M.raggio + M.reteMezza + M.drittoSopra + 20);
+    const normale = volo(passo(sopraGiocatore(conTipi("dritto"), 0), FERMI));
+    expect(Math.max(...stati.map((s) => s.palla.y))).toBeLessThan(Math.max(...normale.map((s) => s.palla.y)));
+  });
+  it("bomba: altissima, cade quasi verticale vicino alla linea di fondo", () => {
+    const stati = volo(passo(armata("bomba"), FERMI));
+    expect(Math.max(...stati.map((s) => s.palla.y))).toBeGreaterThan(600);
+    expect(Math.abs(cade(stati) - (M.reteX + M.bombaDist))).toBeLessThan(30);
+    const ultima = stati[stati.length - 2].palla;
+    expect(Math.abs(ultima.vy)).toBeGreaterThan(2.5 * Math.abs(ultima.vx));
+  });
+  it("furba: pallonetto che cade subito dietro la rete", () => {
+    for (const x of [100, 250, 440]) {
+      const c = cade(volo(passo(armata("furba", x), FERMI)));
+      expect(c).toBeGreaterThan(M.reteX);
+      expect(c).toBeLessThan(M.reteX + M.furbaDist + 40);
+    }
+  });
+  it("esperienza: in volo rallenta e poi accelera", () => {
+    const vx = volo(passo(armata("esperienza"), FERMI)).slice(0, -1).map((s) => s.palla.vx);
+    const lenta = vx.findIndex((v) => v < vx[0] * 0.5);
+    expect(lenta).toBeGreaterThan(0);
+    expect(vx.slice(lenta).some((v) => v > vx[0] * 1.5)).toBe(true);
+  });
+  it("dispetto: nel campo avversario la palla inverte vx una volta", () => {
+    const stati = volo(passo(armata("dispetto"), FERMI)).slice(0, -1);
+    const giri = stati.filter((s, i) => i > 0 && s.palla.vx * stati[i - 1].palla.vx < 0);
+    expect(giri.length).toBe(1);
+    expect(giri[0].palla.x).toBeGreaterThan(M.reteX + M.dispettoGiro - 20);
+  });
+  it("fischio: i comandi dell'altra parte (anche la CPU) sono spenti per 1 s", () => {
+    let s = passo(armata("fischio"), FERMI);
+    expect(s.attivo[0]).toBe(M.fischioTic);
+    s.palla = { x: 900, y: 900, vx: 0, vy: 0 };
+    s.attesa = 10 ** 6;
+    const x1 = s.giocatori[1].x;
+    for (let i = 0; i < M.fischioTic; i++) {
+      const cpu = { ...ia(s, 1, 0), sx: true, salta: true };
+      s = passo(s, [FERMO, cpu]);
+      expect(s.giocatori[1].x).toBe(x1);
+      expect(s.giocatori[1].y).toBe(0);
+    }
+    s = passo(s, [FERMO, { ...FERMO, sx: true }]);
+    expect(s.giocatori[1].x).toBeLessThan(x1);
+  });
+  it("scatto: per 3 s corsa e salto × 1.3 per chi lo usa, poi tutto normale", () => {
+    const corsa = (s: Stato) => {
+      s.palla = { x: 900, y: 900, vx: 0, vy: 0 };
+      s.attesa = 10 ** 6;
+      s.giocatori[0].y = 0;
+      s.giocatori[0].vy = 0;
+      s.giocatori[0].x = 100;
+      for (let i = 0; i < 20; i++) s = passo(s, [{ ...FERMO, dx: true, salta: i === 0 }, FERMO]);
+      return s.giocatori[0];
+    };
+    const s = passo(armata("scatto"), FERMI);
+    expect(s.attivo[0]).toBe(M.scattoTic);
+    const veloce = corsa(structuredClone(s));
+    const lento = corsa(conTipi("scatto"));
+    expect(veloce.vx).toBeCloseTo(M.passoG * M.scatto, 6);
+    expect(lento.vx).toBe(M.passoG);
+    expect(veloce.y).toBeGreaterThan(lento.y);
+    const finito = structuredClone(s);
+    finito.attivo[0] = 0;
+    expect(corsa(finito).vx).toBe(M.passoG);
+  });
+  it("difendibili: la CPU precisa ne riprende almeno una per mossa", () => {
+    for (const tipo of ["fulmine", "dritto", "bomba", "furba", "esperienza", "dispetto"] as const) {
+      let riprese = 0;
+      for (const x of [150, 250, 350, 440]) {
+        let s = passo(armata(tipo, x), FERMI);
+        for (let i = 0; i < 300 && sommaPunti(s) === 0 && s.latoTocchi !== 1; i++)
+          s = passo(s, [FERMO, { ...ia(s, 1, 0), speciale: false }]);
+        if (s.latoTocchi === 1) riprese++;
+      }
+      expect(riprese, tipo).toBeGreaterThan(0);
+    }
+  });
+  it("la CPU usa la mossa, ma non sempre appena può", () => {
+    let si = 0;
+    for (let seme = 0; seme < 40; seme++) {
+      const s = sopraGiocatore(nuovaPartita(seme, DURATA), 1);
+      s.palla.vy = -1;
+      s.carica[1] = s.caricaMax;
+      if (ia(s, 1, 20).speciale) si++;
+      s.carica[1] = s.caricaMax - 1;
+      expect(ia(s, 1, 20).speciale).toBe(false);
+    }
+    expect(si).toBeGreaterThan(0);
+    expect(si).toBeLessThan(40);
+    // in partita CPU contro CPU le mosse partono davvero, da tutte e due le parti
+    let s = nuovaPartita(2, DURATA, undefined, undefined, ["bomba", "fischio"]);
+    const lati = new Set<Lato>();
+    for (let i = 0; i < DURATA && s.vincitore === null; i++) {
+      s = passo(s, [ia(s, 0, 60), ia(s, 1, 60)]);
+      if (s.finisher) lati.add(s.finisher.lato);
+    }
+    expect([...lati].sort()).toEqual([0, 1]);
+  });
+  it("determinismo: stesso seme, stesse mosse, stessa partita", () => {
+    const partita = () => {
+      let s = nuovaPartita(9, 3000, [174, 135], 224, ["dispetto", "esperienza"], { carica: CARICA });
+      let mosse = 0;
+      for (let i = 0; i < 3000 && s.vincitore === null; i++) {
+        const prima = s.finisher;
+        s = passo(s, [ia(s, 0, 50), ia(s, 1, 50)]);
+        if (s.finisher !== prima) mosse++;
+      }
+      return { s, mosse };
+    };
+    const a = partita();
+    expect(a.mosse).toBeGreaterThan(0);
+    expect(partita()).toEqual(a);
+    expect(JSON.parse(JSON.stringify(a.s))).toEqual(a.s);
   });
 });

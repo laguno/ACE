@@ -48,14 +48,38 @@ export const M = {
   scartoIA: 30, // la CPU si mette dietro la palla di tanto, per mandarla verso la rete
   saltoIA: [70, 110, 220], // la CPU salta con la palla in discesa entro [0] in x e tra [1] e [2] sopra il centro
   schiacciaIA: 200, // la CPU schiaccia solo con la palla entro tanto dalla rete: da lontano la palla resta tesa e bassa
-  // Altezze (docs/09 §5.5): chi è più alto tocca più in alto, ma poco. Scarto di portata =
-  // kAltezza × (cm − CM_DEFAULT) × uPerCm, chiuso tra portataMin e portataMax; il salto è uguale
-  // per tutti. Con portataMin = -12 la gattina (25 cm) arriva ancora saltando a una palla appena
-  // sopra la rete (prova nei test); papà (187 cm) guadagna circa 5 unità.
+  // Altezze (docs/11 §2.1): le mani stanno alla cima vera della testa (cm × uPerCm), il salto è
+  // uguale per tutti. Sotto manoMin le mani restano a manoMin: altrimenti la gattina (25 cm) non
+  // arriverebbe mai a una palla sopra la rete (prova nei test).
   CM_DEFAULT: 170, // come altezza_default_cm di data/config-gioco.json
-  kAltezza: 0.3,
-  portataMin: -12,
-  portataMax: 12,
+  manoMin: 80,
+  // Corpo: capsula verticale dai piedi alla testa, di raggio corpo. La palla non lo attraversa:
+  // la ribatte in alto verso la rete (bagher) a vy = alzata e vx = bagherVx.
+  corpo: 18,
+  bagherVx: 3,
+  alzata: 10, // vy minima di un tocco normale e del bagher: il proprio tocco non manda la palla giù
+  perdonoVicino: 20, // il perdono della schiacciata vale solo con la palla ancora sopra le mani: entro tanto in x dal cerchio
+  // Mossa finale (docs/11 §3.2): parametri per tipo. "dist" = distanza dalla rete, nel campo avversario,
+  // dove la palla tocca terra (calcolata col volo vero, pareti escluse).
+  fulmine: 1.4, // schiacciata: velocità e giù massimo × fulmine (più veloce e più ripida)
+  drittoVx: 17, // palla tesa
+  drittoSopra: 12, // passa la rete a tanto sopra la cima
+  bombaVy: 17, // altissima
+  bombaDist: 430, // a 70 dalla linea di fondo
+  furbaVy: 12,
+  furbaDist: 70, // subito dietro la rete
+  espVy: 12,
+  espDist: 250,
+  espLento: 0.35, // in cima al volo vx × espLento...
+  espRiparte: 6, // ...finché la palla scende a più di espRiparte, poi vx × espVeloce (della vx di partenza)
+  espVeloce: 1.8,
+  dispettoVy: 13,
+  dispettoDist: 440,
+  dispettoGiro: 330, // scendendo, a tanto dalla rete nel campo avversario vx si inverte
+  fischioTic: 60, // comandi dell'altra parte spenti per 1 s
+  scattoTic: 180, // 3 s di corsa e salto × scatto
+  scatto: 1.3,
+  specialeIA: 0.35, // la CPU a barra piena usa la mossa con questa probabilità a ogni tocco (estratta dal seme)
 } as const;
 
 export type Lato = 0 | 1;
@@ -64,8 +88,13 @@ export type Palla = { x: number; y: number; vx: number; vy: number };
 /** Giocatore: x al centro, y ai piedi; cm = altezza del personaggio; schiaccia = tic di animazione rimasti. */
 export type Corpo = Palla & { cm: number; schiaccia: number };
 
-export type Comandi = { sx: boolean; dx: boolean; salta: boolean; schiaccia: boolean };
-export const FERMO: Comandi = { sx: false, dx: false, salta: false, schiaccia: false };
+export type Comandi = { sx: boolean; dx: boolean; salta: boolean; schiaccia: boolean; speciale: boolean };
+export const FERMO: Comandi = { sx: false, dx: false, salta: false, schiaccia: false, speciale: false };
+
+export type TipoFinisher = 'fulmine' | 'dritto' | 'bomba' | 'furba' | 'esperienza' | 'fischio' | 'scatto' | 'dispetto';
+/** subito = carica a chi subisce un punto; armato = tic per cui resta armato il tocco. Numeri dalla config. */
+export type OpzioniCarica = { max: number; tocco: number; schiacciata: number; punto: number; subito: number; armato: number };
+const CARICA: OpzioniCarica = { max: 100, tocco: 8, schiacciata: 15, punto: 20, subito: 10, armato: 90 };
 
 /** Tutto JSON: si salva, si confronta, si rigioca. */
 export type Stato = {
@@ -88,6 +117,14 @@ export type Stato = {
   vincitore: Lato | null;
   // ultimo contatto con la palla (anche quelli entro pausaTocco), per vibrazione e scintille di chi disegna
   tocco: { tic: number; lato: Lato; schiacciata: boolean } | null;
+  // mossa finale (docs/11 §3.2)
+  carica: [number, number]; // 0..caricaMax
+  caricaMax: number;
+  opzioniCarica: OpzioniCarica;
+  armato: [number, number]; // tic rimasti al tocco armato, 0 = no
+  finisher: { lato: Lato; tipo: TipoFinisher; tic: number } | null; // ultima mossa partita (tic = s.tic)
+  tipi: [TipoFinisher, TipoFinisher];
+  attivo: [number, number]; // tic rimasti a fischio o scatto di quel lato
 };
 
 /** mulberry32: [numero in 0..1, seme nuovo]. */
@@ -128,7 +165,10 @@ export function nuovaPartita(
   durata: number,
   cm: [number, number] = [M.CM_DEFAULT, M.CM_DEFAULT],
   reteCm = 224,
+  finisher: [TipoFinisher, TipoFinisher] = ['fulmine', 'fulmine'],
+  opzioni?: { carica?: OpzioniCarica },
 ): Stato {
+  const opz = opzioni?.carica ?? CARICA;
   const s: Stato = {
     tic: 0,
     seme: seme | 0,
@@ -151,6 +191,13 @@ export function nuovaPartita(
     mira: 0,
     vincitore: null,
     tocco: null,
+    carica: [0, 0],
+    caricaMax: opz.max,
+    opzioniCarica: { ...opz },
+    armato: [0, 0],
+    finisher: null,
+    tipi: [finisher[0], finisher[1]],
+    attivo: [0, 0],
   };
   servi(s, estrai(s) < 0.5 ? 0 : 1);
   return s;
@@ -160,9 +207,20 @@ export function nuovaPartita(
 // finisce sempre (si controlla solo a punto fatto) e in parità si va avanti: decide il punto dopo.
 function punto(s: Stato, lato: Lato): void {
   s.punti[lato]++;
+  carica(s, lato, s.opzioniCarica.punto);
+  carica(s, lato === 0 ? 1 : 0, s.opzioniCarica.subito);
   if (s.tic >= s.durata && s.punti[0] !== s.punti[1])
     s.vincitore = s.punti[0] > s.punti[1] ? 0 : 1;
   else servi(s, lato);
+}
+
+function carica(s: Stato, lato: Lato, n: number): void {
+  s.carica[lato] = Math.min(s.carica[lato] + n, s.caricaMax);
+}
+
+/** Barra piena e tocco non già armato: il pulsante speciale si accende. */
+export function puoSpeciale(s: Stato, lato: Lato): boolean {
+  return s.vincitore === null && s.armato[lato] === 0 && s.carica[lato] >= s.caricaMax;
 }
 
 const LATI = [0, 1] as const;
@@ -181,15 +239,10 @@ function pareti(p: Palla): void {
 
 /**
  * Cerchio di tocco del giocatore (le mani alzate): [quota del centro sopra i piedi, raggio]. Il
- * centro è alla cima della testa della figura di default (mano × CM_DEFAULT × uPerCm) più lo
- * scarto di portata attenuato; il raggio è uguale per tutti.
+ * centro è alla cima della testa (mano × cm × uPerCm, non sotto manoMin); il raggio è uguale per tutti.
  */
 export function cerchio(s: Stato, g: Corpo): [number, number] {
-  const d = Math.min(
-    Math.max(M.kAltezza * (g.cm - M.CM_DEFAULT) * s.uPerCm, M.portataMin),
-    M.portataMax,
-  );
-  return [M.mano * M.CM_DEFAULT * s.uPerCm + d, M.raggioG];
+  return [M.mano * Math.max(g.cm * s.uPerCm, M.manoMin), M.raggioG];
 }
 
 // rete: un'asta con la cima tonda. xPrima dice da che lato stava la palla: da sotto non passa.
@@ -229,14 +282,18 @@ function aTiro(s: Stato, l: Lato, margine: number): boolean {
   const p = s.palla;
   if (g.y <= 0 || g.schiaccia > 0 || p.y <= M.reteAlta) return false;
   if (l === 0 ? p.x >= M.reteX : p.x <= M.reteX) return false;
-  // appena toccata in aria da lui con un tocco normale: vale ancora (comando premuto un filo tardi)
-  const t = s.tocco;
-  if (t && t.lato === l && !t.schiacciata && s.tic - t.tic <= M.perdonoSchiaccia) return true;
   const [centro, raggio] = cerchio(s, g);
-  const r = M.raggio + raggio + margine;
   const dx = p.x - g.x;
   const dy = p.y - g.y - centro;
-  return r > 0 && dx * dx + dy * dy < r * r;
+  const d2 = dx * dx + dy * dy;
+  // appena toccata in aria da lui con un tocco normale: vale ancora (comando premuto un filo tardi),
+  // ma solo con la palla ancora vicina, altrimenti cambierebbe direzione lontano in aria
+  const t = s.tocco;
+  const vicino = Math.abs(dx) < M.raggio + raggio + M.perdonoVicino;
+  if (t && t.lato === l && !t.schiacciata && s.tic - t.tic <= M.perdonoSchiaccia && vicino)
+    return true;
+  const r = M.raggio + raggio + margine;
+  return r > 0 && d2 < r * r;
 }
 
 /**
@@ -246,21 +303,71 @@ function aTiro(s: Stato, l: Lato, margine: number): boolean {
  * schiacciaGiu). Da lontano serve più velocità orizzontale per scendere: con vy = −1 il tempo
  * massimo è nGiu (radice di g/2·n² + (1+g/2)·n = h), da cui vx = distanza / nGiu, nei limiti.
  */
-function schiaccia(p: Palla, l: Lato): void {
-  const dir = l === 0 ? 1 : -1;
+function schiaccia(p: Palla, l: Lato, f = 1): void {
   const lim = M.raggio + M.reteMezza;
   const sopra = M.reteAlta + lim + 4;
-  const dist = Math.abs(M.reteX + dir * lim - p.x);
+  const dist = Math.abs(M.reteX + (l === 0 ? 1 : -1) * lim - p.x);
   const h = p.y - sopra;
   const a = 1 + M.gravita / 2;
   const nGiu = h > 0 ? (Math.sqrt(a * a + 2 * M.gravita * h) - a) / M.gravita : 0;
   const vx = Math.min(
-    nGiu > 0 ? Math.max(M.schiacciaVx, dist / nGiu) : M.schiacciaVxMax,
-    M.schiacciaVxMax,
+    nGiu > 0 ? Math.max(M.schiacciaVx * f, dist / nGiu) : M.schiacciaVxMax * f,
+    M.schiacciaVxMax * f,
   );
-  const n = Math.max(dist / vx, 1);
+  sopraRete(p, l, vx, sopra, M.schiacciaGiu * f);
+}
+
+/** vx data; vy perché la palla passi la cima della rete a quota `sopra` (non più in giù di −giu). */
+function sopraRete(p: Palla, l: Lato, vx: number, sopra: number, giu: number): void {
+  const dir = l === 0 ? 1 : -1;
+  const lim = M.raggio + M.reteMezza;
+  const d = Math.abs(M.reteX - p.x);
+  // a quota `sopra` sia sul bordo vicino della cima tonda (palla in salita) sia su quello lontano (in discesa)
+  const vy = (n: number) => (sopra - p.y) / n + (M.gravita * (n + 1)) / 2;
   p.vx = dir * vx;
-  p.vy = Math.max(-M.schiacciaGiu, (sopra - p.y) / n + (M.gravita * (n + 1)) / 2);
+  // (da sotto la cima e vicino alla rete non si passa: lì al massimo M.tocco, e la rete la ribatte)
+  p.vy = Math.max(-giu, Math.min(vy(Math.max((d - lim) / vx, 1)), M.tocco), vy(Math.max((d + lim) / vx, 1)));
+}
+
+/**
+ * Palla lanciata a vy (o più, finché passa sopra la rete) che tocca terra a `dist` dalla rete nel
+ * campo avversario: il volo si conta tic per tic, come in passo.
+ */
+function lancia(p: Palla, l: Lato, vy: number, dist: number): void {
+  const lim = M.raggio + M.reteMezza;
+  for (let su = vy; ; su++) {
+    const ys: number[] = [];
+    for (let y = p.y, v = su; ys.length < 1000 && (v > 0 || y > M.raggio); ) {
+      v = Math.max(v - M.gravita, -M.vMax);
+      y += v;
+      ys.push(y);
+    }
+    p.vy = su;
+    p.vx = (M.reteX + (l === 0 ? 1 : -1) * dist - p.x) / Math.max(ys.length, 1);
+    const sbatte = ys.some(
+      (y, i) => y < M.reteAlta + lim && Math.abs(p.x + p.vx * (i + 1) - M.reteX) < lim + Math.abs(p.vx),
+    );
+    if (!sbatte || su >= M.vMax) return;
+  }
+}
+
+/** Tocco armato: parte la mossa finale del lato l. La palla è già stata toccata normalmente. */
+function mossa(s: Stato, l: Lato): void {
+  const p = s.palla;
+  const tipo = s.tipi[l];
+  s.armato[l] = 0;
+  s.carica[l] = 0;
+  s.finisher = { lato: l, tipo, tic: s.tic };
+  if (tipo === 'fulmine') {
+    schiaccia(p, l, p.y > M.reteAlta + M.raggio + M.reteMezza ? M.fulmine : 1); // da sotto la cima: veloce come una normale
+    s.giocatori[l].schiaccia = M.durataSchiaccia;
+  } else if (tipo === 'dritto')
+    sopraRete(p, l, M.drittoVx, M.reteAlta + M.raggio + M.reteMezza + M.drittoSopra, M.schiacciaGiu);
+  else if (tipo === 'bomba') lancia(p, l, M.bombaVy, M.bombaDist);
+  else if (tipo === 'furba') lancia(p, l, M.furbaVy, M.furbaDist);
+  else if (tipo === 'esperienza') lancia(p, l, M.espVy, M.espDist);
+  else if (tipo === 'dispetto') lancia(p, l, M.dispettoVy, M.dispettoDist);
+  else s.attivo[l] = tipo === 'fischio' ? M.fischioTic : M.scattoTic;
 }
 
 /**
@@ -291,6 +398,12 @@ export function passo(
   comandi: readonly [Comandi, Comandi],
 ): Stato {
   if (prima.vincitore !== null) return prima;
+  // fischio: per M.fischioTic i comandi dell'altra parte sono spenti
+  const spento = (l: Lato) => {
+    const a = l === 0 ? 1 : 0;
+    return prima.tipi[a] === 'fischio' && prima.attivo[a] > 0;
+  };
+  comandi = [spento(0) ? FERMO : comandi[0], spento(1) ? FERMO : comandi[1]];
   const s: Stato = {
     ...prima,
     tic: prima.tic + 1,
@@ -300,6 +413,9 @@ export function passo(
     prima: [{ ...comandi[0] }, { ...comandi[1] }],
     memoriaSalto: [prima.memoriaSalto[0], prima.memoriaSalto[1]],
     memoriaSchiaccia: [prima.memoriaSchiaccia[0], prima.memoriaSchiaccia[1]],
+    carica: [prima.carica[0], prima.carica[1]],
+    armato: [prima.armato[0], prima.armato[1]],
+    attivo: [prima.attivo[0], prima.attivo[1]],
   };
 
   // Comandi reattivi. Il salto parte solo su una pressione nuova (tenere il tasto non fa rimbalzare);
@@ -308,17 +424,22 @@ export function passo(
   for (const l of LATI) {
     const g = s.giocatori[l];
     const c = comandi[l];
+    // speciale: sul fronte, a barra piena, arma il prossimo tocco per opzioniCarica.armato tic
+    if (c.speciale && !prima.prima[l].speciale && puoSpeciale(prima, l)) s.armato[l] = s.opzioniCarica.armato;
+    else if (s.armato[l] > 0) s.armato[l]--;
+    const k = s.tipi[l] === 'scatto' && s.attivo[l] > 0 ? M.scatto : 1; // scatto: corsa e salto × M.scatto
+    if (s.attivo[l] > 0) s.attivo[l]--;
     if (c.salta && !prima.prima[l].salta) s.memoriaSalto[l] = M.memoriaSalto;
     if (s.memoriaSalto[l] > 0 && g.y === 0) {
-      g.vy = M.salto;
+      g.vy = M.salto * k;
       s.memoriaSalto[l] = 0;
     } else if (s.memoriaSalto[l] > 0) s.memoriaSalto[l]--;
     if (c.schiaccia && !prima.prima[l].schiaccia) s.memoriaSchiaccia[l] = M.memoriaSchiaccia;
     else if (s.memoriaSchiaccia[l] > 0) s.memoriaSchiaccia[l]--;
     if (g.schiaccia > 0) g.schiaccia--;
     // velocità verso quella voluta: si parte con accelG, si frena (o si inverte) con frenaG
-    const voluta = ((c.dx ? 1 : 0) - (c.sx ? 1 : 0)) * M.passoG;
-    const freno = voluta === 0 || g.vx * voluta < 0 ? M.frenaG : M.accelG;
+    const voluta = ((c.dx ? 1 : 0) - (c.sx ? 1 : 0)) * M.passoG * k;
+    const freno = (voluta === 0 || g.vx * voluta < 0 ? M.frenaG : M.accelG) * k;
     g.vx = g.vx < voluta ? Math.min(g.vx + freno, voluta) : Math.max(g.vx - freno, voluta);
     const x = Math.min(Math.max(g.x + g.vx, MIN_X[l]), MAX_X[l]);
     if (x !== g.x + g.vx) g.vx = 0; // contro la rete o il fondo ci si ferma
@@ -338,10 +459,27 @@ export function passo(
 
   const p = s.palla;
   const xPrima = p.x;
+  const vyPrima = p.vy;
   p.vy = Math.max(p.vy - M.gravita, -M.vMax);
   p.x += p.vx;
   p.y += p.vy;
   pareti(p);
+
+  // mosse che cambiano la palla in volo, finché nessuno la ritocca dopo la mossa
+  const f = s.finisher;
+  if (f && s.latoTocchi === f.lato && s.ticTocco === f.tic) {
+    const dir = f.lato === 0 ? 1 : -1;
+    if (f.tipo === 'esperienza') {
+      if (vyPrima > 0 && p.vy <= 0) p.vx *= M.espLento; // in cima rallenta...
+      else if (vyPrima >= -M.espRiparte && p.vy < -M.espRiparte) p.vx *= M.espVeloce / M.espLento; // ...poi accelera
+    } else if (
+      f.tipo === 'dispetto' &&
+      p.vy < 0 &&
+      (xPrima - M.reteX) * dir < M.dispettoGiro &&
+      (p.x - M.reteX) * dir >= M.dispettoGiro
+    )
+      p.vx = -p.vx;
+  }
 
   rete(p, xPrima);
   const xLato = p.x;
@@ -353,6 +491,8 @@ export function passo(
   for (const l of LATI) {
     const g = s.giocatori[l];
     if (g.schiaccia > 0) continue; // ha appena schiacciato: la palla se ne va, non la ritocca
+    const fl = s.finisher; // idem subito dopo la propria mossa finale
+    if (fl && fl.lato === l && s.tic - fl.tic < M.durataSchiaccia) continue;
     const [centro, raggio] = cerchio(s, g);
     const R = M.raggio + raggio;
     const cx = g.x;
@@ -360,22 +500,37 @@ export function passo(
     const dx = p.x - cx;
     const dy = p.y - cy;
     const d2 = dx * dx + dy * dy;
+    // corpo: capsula dai piedi alla testa. La palla non passa: bagher in alto verso la rete
+    const by = Math.min(Math.max(p.y, g.y), g.y + g.cm * s.uPerCm);
+    const bx = p.x - g.x;
+    const b2 = bx * bx + (p.y - by) * (p.y - by);
+    const Rb = M.raggio + M.corpo;
+    const corpo = b2 < Rb * Rb;
     if (s.memoriaSchiaccia[l] > 0 && aTiro(s, l, M.margineSchiaccia)) {
       schiaccia(p, l);
       g.schiaccia = M.durataSchiaccia;
       s.memoriaSchiaccia[l] = 0;
-    } else {
-      if (d2 >= R * R) continue;
+    } else if (d2 < R * R && !(corpo && dy < 0)) {
+      // mani: sopra il centro del cerchio, o di lato senza toccare il corpo
       const d = Math.sqrt(d2);
       const nx = d > 0 ? dx / d : 0;
       const ny = d > 0 ? dy / d : 1;
       p.x = cx + nx * R;
       p.y = cy + ny * R;
       p.vx = nx * M.tocco;
-      p.vy = ny * M.tocco;
-    }
-    s.tocco = { tic: s.tic, lato: l, schiacciata: g.schiaccia === M.durataSchiaccia };
+      p.vy = Math.max(ny * M.tocco, M.alzata); // mai verso terra: la palla presa di lato o da sotto sale
+    } else if (corpo) {
+      const b = Math.sqrt(b2);
+      const dir = l === 0 ? 1 : -1;
+      p.x = g.x + (b > 0 ? bx / b : dir) * Rb;
+      p.y = by + (b > 0 ? (p.y - by) / b : 0) * Rb;
+      p.vx = dir * M.bagherVx;
+      p.vy = M.alzata;
+    } else continue;
     const nuovo = s.latoTocchi !== l || s.tic - s.ticTocco > M.pausaTocco;
+    if (nuovo) carica(s, l, g.schiaccia === M.durataSchiaccia ? s.opzioniCarica.schiacciata : s.opzioniCarica.tocco);
+    if (s.armato[l] > 0) mossa(s, l);
+    s.tocco = { tic: s.tic, lato: l, schiacciata: g.schiaccia === M.durataSchiaccia };
     s.ticTocco = s.tic;
     if (!nuovo) continue;
     s.tocchi = s.latoTocchi === l ? s.tocchi + 1 : 1;
@@ -437,5 +592,9 @@ export function ia(s: Stato, lato: Lato, errore: number): Comandi {
   const schiaccia =
     Math.abs(s.palla.x - M.reteX) < M.schiacciaIA &&
     aTiro(s, lato, M.margineSchiaccia + s.mira * errore);
-  return { sx: dx < -M.passoG, dx: dx > M.passoG, salta, schiaccia };
+  // mossa finale: a barra piena, con la palla in arrivo, una volta ogni tanto. Il numero viene dal
+  // seme, che cambia a ogni tocco: deterministico, e ia resta pura (non estrae).
+  const speciale =
+    mia && s.attesa === 0 && puoSpeciale(s, lato) && caso(s.seme + lato)[0] < M.specialeIA;
+  return { sx: dx < -M.passoG, dx: dx > M.passoG, salta, schiaccia, speciale };
 }
