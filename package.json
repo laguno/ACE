@@ -16,7 +16,7 @@
     "simula": "set TARATURA=1&& vitest run scripts/simulatore/taratura",
     "prova:schema": "node scripts/prova-schema.mjs",
     "prova:dati": "node scripts/dati-finti-locale.mjs",
-    "prova:gioco": "node scripts/prova-gioco/selezione.mjs",
+    "prova:gioco": "node scripts/prova-gioco/selezione.mjs && node scripts/prova-gioco/gioco.mjs",
     "prova:schermate": "playwright test",
     "confronto": "set CONFRONTO=1&& playwright test confronto",
     "lint": "eslint .",
