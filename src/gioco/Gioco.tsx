@@ -5,10 +5,10 @@
 // intere del signore e del copione.
 import { ScreenOrientation } from '@capacitor/screen-orientation';
 import { ArrowFatUp, CaretLeft, CaretRight, HandFist } from '@phosphor-icons/react';
-import { useEffect, useRef, useState, type PointerEvent } from 'react';
+import { useEffect, useState, type PointerEvent } from 'react';
 import config from '../../data/config-gioco.json' with { type: 'json' };
 import './gioco.css';
-import { HZ, M, ia, nuovaPartita, passo, type Comandi, type Corpo } from './motore';
+import { HZ, M, ia, nuovaPartita, passo, puoSchiacciare, type Comandi, type Corpo } from './motore';
 
 type Stato = ReturnType<typeof nuovaPartita>;
 type Tasto = keyof Comandi;
@@ -20,9 +20,13 @@ const cmDi = (v: number | null | undefined) => v ?? P.altezza_default_cm;
 const CM: [number, number] = [cmDi(P.altezze_cm.lani), cmDi(P.altezze_cm.leo)];
 // taratura del disegno e della CPU: da rivedere con Lani
 const ERRORE_CPU = 40;
-const SOPRA = 492; // campo visibile sopra il pavimento: 1000 × 492
-const FASCIA_TASTI = 112; // px CSS sotto il pavimento per i pulsanti (gioco.css: 88 + margine, anche col bordo sicuro dell'iPhone)
+// Il campo prende tutta la larghezza; sotto la linea di fondo c'è il pavimento in primo piano, alto
+// PRIMO_PIANO px CSS, dove poggiano i pulsanti (gioco.css): così non coprono mai giocatori e palla.
+const PRIMO_PIANO = 112;
+const VISTA_MIN = 360; // unità che si vedono almeno sopra il pavimento: la palla della battuta (330) entra tutta
 const SOGLIA_ALFA = 20; // sopra questa opacità un pixel è figura
+const FERMO_COLPO = 4; // frame di pausa alla schiacciata (hit-stop)
+const PUNTO_MS = 800; // quanto resta la scritta "Punto!"
 
 const immagine = (src: string) => Object.assign(new Image(), { src });
 // Le figurine guardano tutte a sinistra: quella del lato 0 (a sinistra della rete) si ribalta.
@@ -32,7 +36,16 @@ const FIGURE = {
   giocatori: [immagine('/assets/avatar/lani/lani-battuta.webp'), immagine('/assets/avatar/leo/leo-tennis.webp')],
 };
 const pronta = (i: HTMLImageElement) => i.complete && i.naturalWidth > 0;
-const Y = (y: number) => SOPRA - y; // il motore ha y verso l'alto, la tela verso il basso
+const Y = (y: number) => -y; // il motore ha y verso l'alto, la tela verso il basso; 0 = pavimento
+
+/** Vibrazione dove c'è (Chrome Android sì, Safari no): mai un errore per questo. */
+function vibra(schema: number | number[]) {
+  try {
+    navigator.vibrate?.(schema);
+  } catch {
+    /* niente vibrazione */
+  }
+}
 
 /** Parte non trasparente della figurina (dalla testa ai piedi) e x dei piedi, misurate una volta. */
 type Riquadro = { x: number; y: number; w: number; h: number; piede: number };
@@ -150,39 +163,56 @@ function disegnaGiocatore(
   ctx.restore();
 }
 
-function disegna(c: HTMLCanvasElement, s: Stato, moto: Moto[], f: number, ora: number) {
-  const ctx = c.getContext('2d');
-  if (!ctx) return;
-  const dpr = window.devicePixelRatio || 1;
-  const w = Math.round(c.clientWidth * dpr);
-  const h = Math.round(c.clientHeight * dpr);
-  if (c.width !== w || c.height !== h) {
-    c.width = w;
-    c.height = h;
+/** Effetti che vivono solo nel disegno (tempi in frame a 60 Hz, "punto" in ms). */
+type Scintilla = { x: number; y: number; vx: number; vy: number; vita: number };
+type Effetti = {
+  moto: Moto[];
+  scia: { x: number; y: number }[];
+  scintille: Scintilla[];
+  sbuffo: { x: number; y: number; t: number } | null;
+  tremolio: number;
+  punto: number;
+};
+const nuoviEffetti = (): Effetti => ({ moto: [nuovoMoto(), nuovoMoto()], scia: [], scintille: [], sbuffo: null, tremolio: 0, punto: 0 });
+const VITA_SCINTILLA = 20;
+const VITA_SBUFFO = 14;
+
+function scoppio(e: Effetti, x: number, y: number) {
+  e.tremolio = 12;
+  e.sbuffo = { x, y, t: VITA_SBUFFO };
+  for (let i = 0; i < 18; i++) {
+    const a = (i / 18) * 2 * Math.PI + Math.random() * 0.4;
+    const v = 4 + Math.random() * 6;
+    e.scintille.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, vita: VITA_SCINTILLA });
   }
-  // il pavimento sta sopra la fascia dei pulsanti: così i pulsanti non coprono mai chi gioca
-  const terra = h - FASCIA_TASTI * dpr;
-  const k = Math.min(w / M.largo, terra / Y(0));
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.clearRect(0, 0, w, h);
+}
 
-  // sfondo a tutta tela (ritagliato al centro) e pavimento fino in fondo, dove stanno i pulsanti
-  const fs = FIGURE.sfondo;
-  if (pronta(fs)) {
-    const z = Math.max(w / fs.naturalWidth, h / fs.naturalHeight);
-    ctx.drawImage(fs, (w - fs.naturalWidth * z) / 2, (h - fs.naturalHeight * z) / 2, fs.naturalWidth * z, fs.naturalHeight * z);
-  }
-  ctx.fillStyle = 'rgba(255, 246, 250, 0.85)';
-  ctx.fillRect(0, terra, w, h - terra);
-
-  ctx.setTransform(k, 0, 0, k, (w - M.largo * k) / 2, terra - Y(0) * k);
-  ctx.fillStyle = '#3d2350';
-  ctx.fillRect(M.reteX - M.reteMezza, Y(M.reteAlta), M.reteMezza * 2, M.reteAlta);
-
-  // personaggi all'altezza vera: cm × unità per cm (docs/09 §3.3)
-  s.giocatori.forEach((g, l) => disegnaGiocatore(ctx, g, l, g.cm * s.uPerCm, moto[l], f, ora));
-
+function disegnaPalla(ctx: CanvasRenderingContext2D, s: Stato, e: Effetti, f: number, cima: number) {
   const p = s.palla;
+  // ombra a terra, sempre: si stringe con la quota e dice dove scendere
+  const via = 1 + p.y / 220;
+  ctx.fillStyle = `rgba(47, 42, 110, ${Math.max(0.22, 0.45 / via)})`;
+  ctx.beginPath();
+  ctx.ellipse(p.x, Y(0), (M.raggio * 1.1) / via, (M.raggio * 0.3) / via, 0, 0, 7);
+  ctx.fill();
+
+  // scia quando va forte
+  const veloce = Math.hypot(p.vx, p.vy) > 9;
+  if (!veloce) e.scia.length = 0;
+  else {
+    e.scia.forEach((q, i) => {
+      const t = (i + 1) / (e.scia.length + 1);
+      ctx.fillStyle = `rgba(255, 226, 122, ${0.45 * t})`;
+      ctx.beginPath();
+      ctx.arc(q.x, Y(q.y), M.raggio * (0.45 + 0.5 * t), 0, 7);
+      ctx.fill();
+    });
+    if (f > 0) {
+      e.scia.push({ x: p.x, y: p.y });
+      if (e.scia.length > 7) e.scia.shift();
+    }
+  }
+
   ctx.save();
   ctx.translate(p.x, Y(p.y));
   ctx.rotate(p.x * 0.02);
@@ -195,14 +225,130 @@ function disegna(c: HTMLCanvasElement, s: Stato, moto: Moto[], f: number, ora: n
   }
   ctx.restore();
 
-  // punteggio e tempo
-  const secondi = Math.ceil(Math.max(0, s.durata - s.tic) / HZ);
+  // palla sopra lo schermo: un segno in alto dice dov'è
+  if (p.y - M.raggio > cima) {
+    ctx.fillStyle = '#ffe27a';
+    ctx.strokeStyle = '#3d2350';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(p.x, Y(cima) + 6);
+    ctx.lineTo(p.x - 16, Y(cima) + 30);
+    ctx.lineTo(p.x + 16, Y(cima) + 30);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  }
+
+  // schiacciata: sbuffo che si allarga e scintille che cadono
+  if (e.sbuffo) {
+    const t = 1 - e.sbuffo.t / VITA_SBUFFO;
+    ctx.fillStyle = `rgba(255, 255, 255, ${0.55 * (1 - t)})`; // lampo
+    ctx.strokeStyle = `rgba(255, 226, 122, ${1 - t})`;
+    ctx.lineWidth = 8 * (1 - t) + 3;
+    ctx.beginPath();
+    ctx.arc(e.sbuffo.x, Y(e.sbuffo.y), M.raggio + 80 * t, 0, 7);
+    ctx.fill();
+    ctx.stroke();
+    e.sbuffo.t -= f;
+    if (e.sbuffo.t <= 0) e.sbuffo = null;
+  }
+  e.scintille = e.scintille.filter((z) => {
+    z.x += z.vx * f;
+    z.y += z.vy * f;
+    z.vy -= 0.25 * f;
+    z.vita -= f;
+    const t = z.vita / VITA_SCINTILLA;
+    ctx.fillStyle = z.vita % 6 < 3 ? `rgba(255, 226, 122, ${t})` : `rgba(255, 255, 255, ${t})`;
+    ctx.beginPath();
+    ctx.arc(z.x, Y(z.y), 4 + 7 * t, 0, 7);
+    ctx.fill();
+    return z.vita > 0;
+  });
+}
+
+function disegna(c: HTMLCanvasElement, s: Stato, e: Effetti, f: number, ora: number) {
+  const ctx = c.getContext('2d');
+  if (!ctx) return;
+  const dpr = window.devicePixelRatio || 1;
+  const w = Math.round(c.clientWidth * dpr);
+  const h = Math.round(c.clientHeight * dpr);
+  if (c.width !== w || c.height !== h) {
+    c.width = w;
+    c.height = h;
+  }
+  const terra = h - PRIMO_PIANO * dpr; // linea di fondo, dove poggiano i piedi
+  const k = Math.min(w / M.largo, terra / VISTA_MIN);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+
+  // tremolio della schiacciata: tutta la scena, pulsanti esclusi
+  const scossa = e.tremolio > 0 ? e.tremolio * 0.7 * dpr : 0;
+  e.tremolio = Math.max(0, e.tremolio - f);
+  const dx = (Math.random() - 0.5) * scossa;
+  const dy = (Math.random() - 0.5) * scossa;
+
+  // sfondo a tutta tela (ritagliato al centro)
+  const fs = FIGURE.sfondo;
+  if (pronta(fs)) {
+    const z = Math.max(w / fs.naturalWidth, h / fs.naturalHeight) * 1.03;
+    ctx.drawImage(fs, (w - fs.naturalWidth * z) / 2 + dx, (h - fs.naturalHeight * z) / 2 + dy, fs.naturalWidth * z, fs.naturalHeight * z);
+  }
+
+  // pavimento in primo piano: parte della scena, con le linee che vengono verso chi guarda
+  const pav = ctx.createLinearGradient(0, terra, 0, h);
+  pav.addColorStop(0, '#ffe3ef');
+  pav.addColorStop(1, '#ffc8e1');
+  ctx.fillStyle = pav;
+  ctx.fillRect(0, terra + dy, w, h - terra);
+  ctx.strokeStyle = 'rgba(149, 128, 207, 0.35)';
+  ctx.lineWidth = 2 * dpr;
+  for (let i = -6; i <= 6; i++) {
+    ctx.beginPath();
+    ctx.moveTo(w / 2 + i * w * 0.07 + dx, terra + dy);
+    ctx.lineTo(w / 2 + i * w * 0.16 + dx, h + dy);
+    ctx.stroke();
+  }
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, terra - 2 * dpr + dy, w, 4 * dpr); // linea di fondo del campo
+
+  ctx.setTransform(k, 0, 0, k, (w - M.largo * k) / 2 + dx, terra + dy);
   ctx.fillStyle = '#3d2350';
+  ctx.fillRect(M.reteX - M.reteMezza, Y(M.reteAlta), M.reteMezza * 2, M.reteAlta);
+
+  // personaggi all'altezza vera: cm × unità per cm (docs/09 §3.3)
+  s.giocatori.forEach((g, l) => disegnaGiocatore(ctx, g, l, g.cm * s.uPerCm, e.moto[l], f, ora));
+  disegnaPalla(ctx, s, e, f, terra / k);
+
+  // punteggio, tempo e "Punto!" in px dello schermo
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const secondi = Math.ceil(Math.max(0, s.durata - s.tic) / HZ);
   ctx.textAlign = 'center';
-  ctx.font = '800 54px "Baloo 2", sans-serif';
-  ctx.fillText(`${s.punti[0]}  ·  ${s.punti[1]}`, M.reteX, 62);
-  ctx.font = '800 26px Nunito, sans-serif';
-  ctx.fillText(`${Math.floor(secondi / 60)}:${String(secondi % 60).padStart(2, '0')}`, M.reteX, 96);
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = '#ffffff';
+  ctx.fillStyle = '#3d2350';
+  const scritta = (testo: string, x: number, y: number, font: string, bordo: number) => {
+    ctx.font = font;
+    ctx.lineWidth = bordo;
+    ctx.strokeText(testo, x, y);
+    ctx.fillText(testo, x, y);
+  };
+  const mezzo = w / dpr / 2;
+  scritta(`${s.punti[0]}  ·  ${s.punti[1]}`, mezzo, 42, '800 38px "Baloo 2", sans-serif', 6);
+  scritta(`${Math.floor(secondi / 60)}:${String(secondi % 60).padStart(2, '0')}`, mezzo, 64, '800 18px Nunito, sans-serif', 5);
+  if (e.punto > 0) {
+    const t = 1 - e.punto / PUNTO_MS;
+    const z = 1 + 0.35 * Math.max(0, 1 - t * 6); // entra grande e si assesta
+    ctx.globalAlpha = Math.min(1, e.punto / 200);
+    ctx.save();
+    ctx.translate(mezzo, (terra / dpr) * 0.45);
+    ctx.scale(z, z);
+    ctx.strokeStyle = '#7b2342';
+    ctx.fillStyle = '#ffe27a';
+    scritta('Punto!', 0, 0, '800 76px "Baloo 2", sans-serif', 14);
+    ctx.restore();
+    ctx.globalAlpha = 1;
+    e.punto -= f * PASSO_MS;
+  }
 }
 
 const TASTI: Tasto[] = ['sx', 'dx', 'salta', 'schiaccia'];
@@ -217,15 +363,40 @@ const TASTIERA: Record<string, Tasto> = {
   KeyK: 'schiaccia',
 };
 
+/**
+ * Chi tiene premuto ogni tasto (dita per pointerId, tasti per codice): due dita sullo stesso
+ * pulsante non si spengono a vicenda. "visti" tiene acceso per almeno un tic anche un tocco più
+ * breve di un sessantesimo, e anche uno fatto durante la pausa della schiacciata.
+ */
+type Ingressi = {
+  premuti: Record<Tasto, Set<number | string>>;
+  visti: Set<Tasto>;
+  bottoni: Partial<Record<Tasto, HTMLButtonElement | null>>;
+};
+const nuoviIngressi = (): Ingressi => ({
+  premuti: Object.fromEntries(TASTI.map((t) => [t, new Set()])) as Ingressi['premuti'],
+  visti: new Set(),
+  bottoni: {},
+});
+function premi(i: Ingressi, t: Tasto, chi: number | string) {
+  if (i.premuti[t].size === 0 && (t === 'salta' || t === 'schiaccia')) vibra(12);
+  i.premuti[t].add(chi);
+  i.visti.add(t);
+  i.bottoni[t]?.classList.add('giu'); // il pulsante resta giù finché c'è un dito
+}
+function lascia(i: Ingressi, t: Tasto, chi: number | string) {
+  i.premuti[t].delete(chi);
+  if (i.premuti[t].size === 0) i.bottoni[t]?.classList.remove('giu');
+}
+function leggi(i: Ingressi): Comandi {
+  const d = Object.fromEntries(TASTI.map((t) => [t, i.premuti[t].size > 0 || i.visti.has(t)])) as Comandi;
+  i.visti.clear();
+  return d;
+}
+
 export default function Gioco() {
-  const tela = useRef<HTMLCanvasElement>(null);
-  // Chi tiene premuto ogni tasto (dita per pointerId, tasti per codice): due dita sullo stesso
-  // pulsante non si spengono a vicenda. "visti" tiene acceso per almeno un tic anche un tocco
-  // più breve di un sessantesimo di secondo.
-  const premuti = useRef(
-    Object.fromEntries(TASTI.map((t) => [t, new Set<number | string>()])) as Record<Tasto, Set<number | string>>,
-  );
-  const visti = useRef(new Set<Tasto>());
+  const [tela, setTela] = useState<HTMLCanvasElement | null>(null);
+  const [ing] = useState(nuoviIngressi);
   const [partita, setPartita] = useState(0);
   const [fine, setFine] = useState<[number, number] | null>(null);
 
@@ -237,93 +408,127 @@ export default function Gioco() {
   }, []);
 
   useEffect(() => {
-    const c = tela.current;
+    const c = tela;
     if (!c) return;
-    const giu = premuti.current;
-    const leggi = (): Comandi => {
-      const d = Object.fromEntries(TASTI.map((t) => [t, giu[t].size > 0 || visti.current.has(t)])) as Comandi;
-      visti.current.clear();
-      return d;
-    };
-
     const verticale = matchMedia('(orientation: portrait)');
     let s = nuovaPartita(Date.now(), DURATA, CM, P.rete_cm);
-    const moto = [nuovoMoto(), nuovoMoto()];
+    const e = nuoviEffetti();
     let prima = performance.now();
     let resto = 0;
+    let fermo = 0;
     let giro = 0;
+    let toccoVisto = s.tocco?.tic ?? -1;
+    let puntiVisti = 0;
+    let acceso = false;
+    c.setAttribute('aria-label', 'Campo di pallavolo, 0 a 0');
+
+    // Eventi del tic appena fatto: vibrazioni ed effetti. true = schiacciata, si ferma tutto un attimo.
+    const eventi = (): boolean => {
+      let colpo = false;
+      const t = s.tocco;
+      if (t && t.tic !== toccoVisto) {
+        toccoVisto = t.tic;
+        if (t.lato === 0) vibra(t.schiacciata ? 70 : 20);
+        if (t.schiacciata) {
+          scoppio(e, s.palla.x, s.palla.y);
+          fermo = FERMO_COLPO;
+          colpo = true;
+        }
+      }
+      const punti = s.punti[0] + s.punti[1];
+      if (punti !== puntiVisti) {
+        puntiVisti = punti;
+        vibra([45, 70, 45]);
+        e.punto = PUNTO_MS;
+        c.setAttribute('aria-label', `Campo di pallavolo, ${s.punti[0]} a ${s.punti[1]}`);
+      }
+      return colpo;
+    };
+
     const ciclo = (ora: number) => {
       // passo fisso: il tempo vero si accumula e si consuma a sessantesimi; dopo una pausa lunga
-      // (scheda nascosta, telefono in verticale) non si recupera più di un quarto di secondo
+      // (scheda nascosta, telefono in verticale) non si recupera più di un quarto di secondo.
+      // Durante la pausa della schiacciata il tempo non si accumula: i tasti premuti restano in
+      // "premuti" e "visti" e li legge il primo tic dopo.
       const dt = Math.min(ora - prima, 250);
-      resto = verticale.matches ? 0 : resto + dt;
       prima = ora;
-      for (; resto >= PASSO_MS; resto -= PASSO_MS) s = passo(s, [leggi(), ia(s, 1, ERRORE_CPU)]);
-      disegna(c, s, moto, dt / PASSO_MS, ora);
+      if (verticale.matches) resto = 0;
+      else if (fermo > 0) fermo -= dt / PASSO_MS;
+      else resto += dt;
+      for (; resto >= PASSO_MS && fermo <= 0; resto -= PASSO_MS) {
+        s = passo(s, [leggi(ing), ia(s, 1, ERRORE_CPU)]);
+        if (eventi()) resto = PASSO_MS; // dopo questo tic il ciclo si ferma
+      }
+      const pronto = puoSchiacciare(s, 0);
+      if (pronto !== acceso) {
+        acceso = pronto;
+        ing.bottoni.schiaccia?.classList.toggle('pronto', pronto);
+      }
+      disegna(c, s, e, fermo > 0 ? 0 : dt / PASSO_MS, ora);
       if (s.vincitore === null) giro = requestAnimationFrame(ciclo);
       else setFine(s.punti);
     };
     giro = requestAnimationFrame(ciclo);
 
-    const tasto = (premi: boolean) => (e: KeyboardEvent) => {
-      const t = TASTIERA[e.code];
+    const tasto = (giu: boolean) => (ev: KeyboardEvent) => {
+      const t = TASTIERA[ev.code];
       if (!t) return;
-      e.preventDefault();
-      if (!premi) giu[t].delete(e.code);
-      else if (!e.repeat) {
-        giu[t].add(e.code);
-        visti.current.add(t);
-      }
+      ev.preventDefault();
+      if (!giu) lascia(ing, t, ev.code);
+      else if (!ev.repeat) premi(ing, t, ev.code);
     };
-    const premi = tasto(true);
-    const lascia = tasto(false);
+    const su = tasto(false);
+    const giu = tasto(true);
     // finestra lasciata con un tasto giù: il keyup non arriva più
-    const via = () => TASTI.forEach((t) => giu[t].clear());
-    addEventListener('keydown', premi);
-    addEventListener('keyup', lascia);
+    const via = () => TASTI.forEach((t) => [...ing.premuti[t]].forEach((chi) => lascia(ing, t, chi)));
+    addEventListener('keydown', giu);
+    addEventListener('keyup', su);
     addEventListener('blur', via);
     return () => {
       cancelAnimationFrame(giro);
-      removeEventListener('keydown', premi);
-      removeEventListener('keyup', lascia);
+      removeEventListener('keydown', giu);
+      removeEventListener('keyup', su);
       removeEventListener('blur', via);
       via();
+      ing.bottoni.schiaccia?.classList.remove('pronto');
     };
-  }, [partita]);
+  }, [tela, ing, partita]);
 
   // Il dito resta del pulsante finché non si alza, anche se scivola fuori (pointer capture).
   const comando = (t: Tasto) => {
-    const lascia = (e: PointerEvent) => void premuti.current[t].delete(e.pointerId);
+    const molla = (ev: PointerEvent) => lascia(ing, t, ev.pointerId);
     return {
-      onPointerDown: (e: PointerEvent<HTMLButtonElement>) => {
-        e.preventDefault();
-        e.currentTarget.setPointerCapture(e.pointerId);
-        premuti.current[t].add(e.pointerId);
-        visti.current.add(t);
+      ref: (b: HTMLButtonElement | null) => {
+        ing.bottoni[t] = b;
       },
-      onPointerUp: lascia,
-      onPointerCancel: lascia,
-      onLostPointerCapture: lascia,
+      onPointerDown: (ev: PointerEvent<HTMLButtonElement>) => {
+        ev.preventDefault();
+        ev.currentTarget.setPointerCapture(ev.pointerId);
+        premi(ing, t, ev.pointerId);
+      },
+      onPointerUp: molla,
+      onPointerCancel: molla,
+      onLostPointerCapture: molla,
     };
   };
 
   return (
-    <main className="gioco" onContextMenu={(e) => e.preventDefault()}>
-      <canvas ref={tela} aria-label="Campo di pallavolo" />
+    <main className="gioco" onContextMenu={(ev) => ev.preventDefault()}>
+      <canvas ref={setTela} aria-label="Campo di pallavolo" />
       <div className="gioco-tasti gioco-sx">
         <button type="button" aria-label="Sinistra" title="Sinistra (freccia sinistra o A)" {...comando('sx')}>
-          <CaretLeft size={40} weight="bold" aria-hidden />
+          <CaretLeft size={54} weight="bold" aria-hidden />
         </button>
         <button type="button" aria-label="Destra" title="Destra (freccia destra o D)" {...comando('dx')}>
-          <CaretRight size={40} weight="bold" aria-hidden />
+          <CaretRight size={54} weight="bold" aria-hidden />
         </button>
       </div>
       <div className="gioco-tasti gioco-dx">
         <button type="button" className="gioco-schiaccia" aria-label="Schiaccia" title="Schiaccia (K)" {...comando('schiaccia')}>
-          <HandFist size={40} weight="fill" aria-hidden />
+          <HandFist size={50} weight="fill" aria-hidden />
         </button>
         <button type="button" className="gioco-salta" aria-label="Salta" title="Salta (spazio o freccia su)" {...comando('salta')}>
-          <ArrowFatUp size={44} weight="fill" aria-hidden />
+          <ArrowFatUp size={50} weight="fill" aria-hidden />
         </button>
       </div>
       <p className="gioco-gira">Gira il telefono</p>
