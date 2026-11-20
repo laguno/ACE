@@ -47,6 +47,31 @@ describe('passi', () => {
     const grande = new Request('https://finto/x', { method: 'POST', headers: { Authorization: 'Bearer gettone-lani' }, body: 'x'.repeat(5000) });
     expect((await f(grande)).status).toBe(400);
   });
+  it('piano studio: pillola una volta al giorno; ripasso della vigilia vale in più', async () => {
+    const b = stato.banco!;
+    const f = await carica('passi');
+    const giro = (id: string) =>
+      b.come(null, `insert into flashcard_giri (id, iniziato_il, fatto_il, carte, sapevo, quasi, non_sapevo) values ('${id}', '2026-11-24T16:00:00+01:00', '2026-11-24T16:05:00+01:00', 8, 2, 3, 3)`);
+    await giro('00000000-0000-0000-0000-0000000000a1');
+    await giro('00000000-0000-0000-0000-0000000000a2');
+    const p1 = await json(await f(richiesta({ tipo: 'pillola', id: '00000000-0000-0000-0000-0000000000a1' }, { gettone: 'gettone-lani' })));
+    const p2 = await json(await f(richiesta({ tipo: 'pillola', id: '00000000-0000-0000-0000-0000000000a2' }, { gettone: 'gettone-lani' })));
+    expect(p1.corpo).toMatchObject({ passi: 3, motivo: 'pillola' }); // anche con poche giuste
+    expect(p2.corpo).toMatchObject({ passi: 0, perche: 'già registrato' });
+
+    await b.come(null, `insert into materie (id, nome, abbreviazione) values ('storia', 'Storia', 'STO') on conflict do nothing`);
+    await b.come(null, `insert into verifiche (id, materia_id, data, argomento) values ('00000000-0000-0000-0000-0000000000e1', 'storia', '2026-11-25', 'Romani')`);
+    await b.come(null, `insert into verifiche (id, materia_id, data, argomento) values ('00000000-0000-0000-0000-0000000000e2', 'storia', '2026-11-27', 'Greci')`);
+    await b.come(null, `insert into sessioni_ripasso (id, verifica_id, numero, data_prevista, tipo, fatta_il) values
+      ('00000000-0000-0000-0000-0000000000d1', '00000000-0000-0000-0000-0000000000e1', 2, '2026-11-24', 'quiz', '2026-11-24T16:30:00+01:00'),
+      ('00000000-0000-0000-0000-0000000000d2', '00000000-0000-0000-0000-0000000000e2', 1, '2026-11-24', 'quiz', '2026-11-24T16:40:00+01:00')`);
+    const vigilia = await json(await f(richiesta({ tipo: 'ripasso', id: '00000000-0000-0000-0000-0000000000d1' }, { gettone: 'gettone-lani' })));
+    const prima = await json(await f(richiesta({ tipo: 'ripasso', id: '00000000-0000-0000-0000-0000000000d2' }, { gettone: 'gettone-lani' })));
+    expect(vigilia.corpo).toMatchObject({ passi: 15 }); // 10 + 5
+    expect(prima.corpo).toMatchObject({ passi: 10, motivo: 'ripasso' });
+    const di = await json(await f(richiesta({ tipo: 'ripasso', id: '00000000-0000-0000-0000-0000000000d1' }, { gettone: 'gettone-lani' })));
+    expect(di.corpo.passi).toBe(0);
+  });
   it('un errore del database diventa 500 e finisce nel registro', async () => {
     const f = await carica('passi');
     await stato.banco!.come(null, `alter table compiti rename to compiti_rotti`);

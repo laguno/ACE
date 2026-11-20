@@ -109,6 +109,9 @@
       "max_al_giorno_per_tipo": 4,
       "richiede_compiti_spuntati": true,
       "flashcard_giro": 3,
+      "_nota_piano_studio": "Passi misti (decisione del signore, 19/11/2026): restano quelli sopra, si aggiungono pillola_del_giorno e ripasso_cumulativo. IMPORTI PROVVISORI da confermare dal signore.",
+      "pillola_del_giorno": 3,
+      "ripasso_cumulativo": 5,
       "flashcard_secondi_prima_di_girare": 7,
       "video_completo": 3,
       "video_frazione_minima_vista": 0.95,
@@ -262,6 +265,13 @@
     "ritenzione": 0.9,
     "intervallo_massimo_giorni": 120,
     "cadute_da_riprendere": 3,
-    "pesi_fsrs": [0.40255, 1.18385, 3.173, 15.69105, 7.1949, 0.5345, 1.4604, 0.0046, 1.54575, 0.1192, 1.01925, 1.9395, 0.11, 0.29605, 2.2698, 0.2315, 2.9898, 0.51655, 0.6621]
+    "pesi_fsrs": [0.40255, 1.18385, 3.173, 15.69105, 7.1949, 0.5345, 1.4604, 0.0046, 1.54575, 0.1192, 1.01925, 1.9395, 0.11, 0.29605, 2.2698, 0.2315, 2.9898, 0.51655, 0.6621],
+    "pillola": {
+      "_nota": "Blocco B: pillola da 3-5 minuti, carte mescolate da almeno due argomenti; le carte nuove la prima volta a blocco. Valori provvisori.",
+      "carte_min": 8,
+      "carte_max": 12,
+      "carte_da_pescare": 40,
+      "argomenti_minimi": 2
+    }
   }
 }

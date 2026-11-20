@@ -48,26 +48,30 @@ test('sessione di flash card: si gira dopo 7 secondi, intervalli e giro salvati'
 
   await page.locator('.carta', { hasText: 'Matematica' }).getByRole('button', { name: 'Inizia' }).click();
   await expect(page.getByText('Il numero sotto la linea si chiama ___.')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Gira' })).toBeDisabled();
-  await expect(page.getByText('Leggi bene: si gira tra 7 secondi.')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Sicura' })).toBeDisabled();
+  await expect(page.getByText('Pensa alla risposta: si gira tra 7 secondi.')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Sapevo', exact: true })).toBeDisabled();
   await expect(page.getByText('denominatore')).toHaveCount(0);
   await expect(page.getByRole('navigation', { name: 'Sezioni' })).toBeHidden();
   await expect(page.getByRole('button', { name: 'Genitori' })).toBeHidden();
   await page.clock.runFor(7500);
-  await page.getByRole('button', { name: 'Gira' }).click();
+  await page.getByRole('button', { name: 'Sicura' }).click();
   await expect(page.getByText('denominatore')).toBeVisible();
   await page.getByRole('button', { name: 'Sapevo', exact: true }).click();
 
-  await expect(page.getByRole('button', { name: 'Gira' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Sicura' })).toBeDisabled();
   await page.clock.runFor(7500);
-  await page.getByRole('button', { name: 'Gira' }).click();
+  await page.getByRole('button', { name: 'Forse' }).click();
   await page.getByRole('button', { name: 'Quasi' }).click();
 
   await expect(page.getByText('2 su 2 al primo colpo', { exact: false })).toHaveCount(0);
   await expect(page.getByText(/1 su 2 al primo colpo\. Le 1 incerte tornano domani\./)).toBeVisible();
-  expect(t.flashcard[0]).toMatchObject({ intervallo_giorni: 2, prossima_revisione: '2026-11-12' });
-  expect(t.flashcard[1]).toMatchObject({ intervallo_giorni: 2, prossima_revisione: '2026-11-11' });
+  // FSRS: sicura e sapevo = Bene (3 giorni), ma la verifica è il 12: torna entro l'11
+  expect(t.flashcard[0]).toMatchObject({ intervallo_giorni: 1, prossima_revisione: '2026-11-11', ripetizioni: 1, cadute: 0 });
+  expect(t.flashcard[1]).toMatchObject({ intervallo_giorni: 1, prossima_revisione: '2026-11-11' });
+  expect(t.ripassi_carte).toHaveLength(2);
+  expect(t.ripassi_carte[0]).toMatchObject({ giusta: true, sicurezza: 'sicura', voto: 3, sovrastima: false });
+  expect(t.ripassi_carte[1]).toMatchObject({ giusta: true, sicurezza: 'forse', voto: 2 });
   expect(t.flashcard_giri[0]).toMatchObject({ carte: 2, sapevo: 1, quasi: 1, non_sapevo: 0 });
   expect(t.sessioni_ripasso[1].fatta_il).toBeTruthy();
   expect(chiamate.map((c) => c.tipo)).toEqual(['flashcard', 'ripasso']);

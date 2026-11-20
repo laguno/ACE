@@ -2,13 +2,44 @@ import { useEffect, useState } from 'react';
 import { ArrowLeft, CheckCircle, XCircle } from '@phosphor-icons/react';
 import { useSfondo } from './kit';
 import * as R from './lib/regole';
+import * as F from './lib/regole/fsrs';
+import { accodaRipasso, nuovaChiave } from './coda-studio';
 import { adesso, passi } from './spunte';
 import { supabase } from './supabase';
 
 // Flash card e quiz (design/Flashcard.html, design/Quiz.html). Lani fa, il server decide i passi:
 // il giro si salva con l'ora d'inizio (controllo dei 7 secondi a carta), il quiz con le sbagliate.
+// Piano studio (19/11): prima di girare Lani dice quanto è sicura; il ripasso va in FSRS e nella
+// coda senza rete (coda-studio.ts).
 
-export type Carta = { id: string; materia_id: string | null; tipo: string; fronte: string; retro: string; intervallo_giorni: number };
+export type Carta = {
+  id: string;
+  materia_id: string | null;
+  argomento: string;
+  tipo: string;
+  fronte: string;
+  retro: string;
+  prossima_revisione: string;
+  stabilita: number | null;
+  difficolta: number | null;
+  ripetizioni: number;
+  cadute: number;
+  ultimo_ripasso: string | null;
+  /** Data della verifica da cui nasce, se c'è: la carta deve tornare prima. */
+  verifiche?: { data: string } | null;
+};
+export const SELECT_CARTA = 'id, materia_id, argomento, tipo, fronte, retro, prossima_revisione, stabilita, difficolta, ripetizioni, cadute, ultimo_ripasso, verifiche(data)';
+
+const SICUREZZE: { valore: F.Sicurezza; testo: string }[] = [
+  { valore: 'non_lo_so', testo: 'Non lo so' },
+  { valore: 'forse', testo: 'Forse' },
+  { valore: 'sicura', testo: 'Sicura' },
+];
+
+function statoDi(c: Carta): F.StatoCarta | null {
+  if (!c.ripetizioni || c.stabilita == null || c.difficolta == null || !c.ultimo_ripasso) return null;
+  return { stabilita: c.stabilita, difficolta: c.difficolta, ripetizioni: c.ripetizioni, cadute: c.cadute, ultima: c.ultimo_ripasso };
+}
 export type Domanda = { testo: string; opzioni: string[]; giusta: number; spiegazione: string };
 
 const STUDIO = R.CONFIG.passi.studio_facoltativo;
@@ -47,6 +78,8 @@ export function Flashcard({ carte, titolo, sessione, chiudi }: { carte: Carta[];
   const [inizio] = useState(adesso);
   const [i, setI] = useState(0);
   const [girata, setGirata] = useState(false);
+  const [sicurezza, setSicurezza] = useState<F.Sicurezza>();
+  const [pillola] = useState(nuovaChiave);
   const [restano, setRestano] = useState(SECONDI);
   const [conto, setConto] = useState({ sapevo: 0, quasi: 0, non_sapevo: 0 });
   const [fine, setFine] = useState<string>();
@@ -64,11 +97,33 @@ export function Flashcard({ carte, titolo, sessione, chiudi }: { carte: Carta[];
   const prossima = () => {
     setI(i + 1);
     setGirata(false);
+    setSicurezza(undefined);
   };
 
+  function gira(s: F.Sicurezza) {
+    setSicurezza(s);
+    setGirata(true);
+  }
+
   async function rispondi(esito: R.Esito) {
-    const p = R.prossimaRevisione(carta.intervallo_giorni, esito, R.giornoRoma(new Date()));
-    supabase.from('flashcard').update({ intervallo_giorni: p.intervallo, prossima_revisione: p.data }).eq('id', carta.id).then();
+    const oggi = R.iso(R.giornoRoma(new Date()));
+    const s = sicurezza ?? 'forse';
+    const v = F.votoDaCarta(esito, s);
+    const r = F.ripassa(statoDi(carta), v.voto, oggi, F.massimoPerVerifica(oggi, carta.verifiche?.data));
+    void accodaRipasso({
+      carta: carta.id,
+      aggiorna: {
+        stabilita: r.stato.stabilita,
+        difficolta: r.stato.difficolta,
+        ripetizioni: r.stato.ripetizioni,
+        cadute: r.stato.cadute,
+        ultimo_ripasso: oggi,
+        prossima_revisione: r.prossima,
+        intervallo_giorni: r.giorni,
+        da_riprendere: F.daRiprendere(r.stato),
+      },
+      ripasso: { chiave: nuovaChiave(), flashcard_id: carta.id, giorno: oggi, giusta: v.giusta, sicurezza: s, voto: v.voto, sovrastima: v.sovrastima, pillola_id: pillola },
+    });
     const nuovo = { ...conto, [esito]: conto[esito] + 1 };
     setConto(nuovo);
     if (i + 1 < carte.length) return prossima();
@@ -92,6 +147,8 @@ export function Flashcard({ carte, titolo, sessione, chiudi }: { carte: Carta[];
       .single();
     let presi = data ? await passi('flashcard', data.id) : 0;
     if (sessione) presi += await sessioneFatta(sessione);
+    // carte del giorno (non di una sessione): la pillola vale una volta al giorno
+    else if (data) presi += await passi('pillola', data.id);
     setFine(
       c.sapevo * 3 < totale
         ? 'Queste erano difficili. Domani le rivediamo, una alla volta.'
@@ -128,11 +185,15 @@ export function Flashcard({ carte, titolo, sessione, chiudi }: { carte: Carta[];
         ) : (
           <div className="da-girare">
             <p className="nota" aria-live="polite">
-              {restano > 0 ? `Leggi bene: si gira tra ${restano} secondi.` : 'Pronta? Gira la carta.'}
+              {restano > 0 ? `Pensa alla risposta: si gira tra ${restano} secondi.` : 'Quanto sei sicura? Poi si gira.'}
             </p>
-            <button className="principale largo" disabled={restano > 0} onClick={() => setGirata(true)}>
-              Gira
-            </button>
+            <div className="esiti sicurezza">
+              {SICUREZZE.map((x) => (
+                <button key={x.valore} className="principale" disabled={restano > 0} onClick={() => gira(x.valore)}>
+                  {x.testo}
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </div>

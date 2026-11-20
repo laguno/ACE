@@ -369,6 +369,16 @@ export function ripassoInTempo(dataVerifica: Date, fattaIl: Date): boolean {
   return startOfDay(fattaIl) < startOfDay(dataVerifica);
 }
 
+/**
+ * Ripasso cumulativo (piano studio del 19/11/2026): l'ultima sessione prima della verifica, fatta
+ * proprio il giorno previsto, che è il giorno prima della verifica.
+ */
+export function ripassoCumulativo(dataVerifica: Date, dataPrevista: Date, fattaIl: Date): boolean {
+  const vigilia = startOfDay(dataVerifica);
+  vigilia.setDate(vigilia.getDate() - 1);
+  return iso(dataPrevista) === iso(vigilia) && iso(fattaIl) === iso(dataPrevista);
+}
+
 /** Giro di flash card valido solo se è durato almeno 7 secondi a carta. */
 export function giroValido(iniziatoIl: Date, fattoIl: Date, carte: number): boolean {
   const minimo = carte * P.studio_facoltativo.flashcard_secondi_prima_di_girare * 1000;

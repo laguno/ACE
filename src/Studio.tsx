@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { Cards, ClipboardText } from '@phosphor-icons/react';
 import { Riquadro, Testata } from './kit';
 import * as R from './lib/regole';
-import { Flashcard, Quiz, type Carta, type Domanda } from './Ripasso';
+import { Flashcard, Quiz, SELECT_CARTA, type Carta, type Domanda } from './Ripasso';
+import { componiPillola } from './lib/regole/pillola';
 import { GIORNI, MESI, maiuscola } from './spunte';
 import { supabase } from './supabase';
 
@@ -38,10 +39,10 @@ const COSA: Record<R.TipoSessione, string> = {
   quiz: 'quiz',
   quiz_errori: 'quiz breve sugli errori',
 };
-const CARTE_PER_GIRO = 12;
+// pillola: si pescano le carte in scadenza e si mescolano tra argomenti (config ripasso.pillola)
+const DA_PESCARE = R.CONFIG.ripasso.pillola.carte_da_pescare;
 // finché i compiti di domani non sono spuntati, dentro la prima carta (decisione del signore, 9/11)
 const AVVISO_COMPITI = 'Finiti i compiti, flash card e quiz valgono passi';
-const SELECT_CARTA = 'id, materia_id, tipo, fronte, retro, intervallo_giorni';
 
 export default function Studio() {
   const oggi = R.iso(R.giornoRoma(new Date()));
@@ -64,14 +65,14 @@ export default function Studio() {
             .in('data', casa.map((x) => x.giorno))
             .is('data_spostata', null)
         : { data: [] },
-      supabase.from('flashcard').select(SELECT_CARTA).lte('prossima_revisione', oggi).eq('segnalata_sbagliata', false).order('prossima_revisione').limit(CARTE_PER_GIRO),
+      supabase.from('flashcard').select(SELECT_CARTA).lte('prossima_revisione', oggi).eq('segnalata_sbagliata', false).neq('da_riprendere', true).order('prossima_revisione').limit(DA_PESCARE),
       supabase.from('compiti').select('id', { count: 'exact', head: true }).eq('scadenza', domani).is('fatto_il', null),
       supabase.from('flashcard').select('id', { count: 'exact', head: true }).eq('segnalata_sbagliata', false),
     ]);
     // prima quelle da recuperare: la data la decidono mamma e papà con la prof
     const recuperare = ((r.data ?? []) as unknown as Verifica[]).map((x) => ({ ...x, daRecuperare: true }));
     setVerifiche([...recuperare, ...((v.data ?? []) as unknown as Verifica[])]);
-    setCarteDelGiorno((c.data ?? []) as Carta[]);
+    setCarteDelGiorno(componiPillola((c.data ?? []) as unknown as Carta[]));
     setCompitiAperti(k.count ?? 0);
     setCarteTotali(n.count ?? 0);
   }
@@ -97,8 +98,8 @@ export default function Studio() {
         sessione: s.id,
       });
     }
-    const { data } = await supabase.from('flashcard').select(SELECT_CARTA).eq('verifica_id', v.id).eq('segnalata_sbagliata', false).limit(15);
-    if (data?.length) setAttivita({ tipo: 'carte', carte: data as Carta[], titolo: v.materie?.nome ?? 'Ripasso', sessione: s.id });
+    const { data } = await supabase.from('flashcard').select(SELECT_CARTA).eq('verifica_id', v.id).eq('segnalata_sbagliata', false).neq('da_riprendere', true).limit(15);
+    if (data?.length) setAttivita({ tipo: 'carte', carte: data as unknown as Carta[], titolo: v.materie?.nome ?? 'Ripasso', sessione: s.id });
   }
 
   const chiudi = () => {

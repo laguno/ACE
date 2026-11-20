@@ -46,6 +46,8 @@ export function blocchiPassi(c: Config, opzioni: { rEvolution: boolean }): Blocc
         { testo: 'Borsa pronta per allenamento o partita', valore: piu(o.borsa), icona: 'Handbag', spiega: 'Divisa, scarpe e borraccia, la sera prima.' },
         { testo: 'Foglio da firmare consegnato', valore: piu(o.fogli), icona: 'Signature', spiega: 'Lo dai a mamma o papà, poi lo riporti a scuola firmato.' },
         { testo: 'Ripasso prima di una verifica', valore: piu(o.ripasso), icona: 'ArrowsClockwise', spiega: 'La sessione di Studio nel giorno previsto.' },
+        { testo: 'Ripasso del giorno prima', valore: piu(f.ripasso_cumulativo), icona: 'ArrowsClockwise', spiega: 'In più, se fai l\'ultima sessione proprio la vigilia della verifica.' },
+        { testo: 'Carte del giorno', valore: piu(f.pillola_del_giorno), icona: 'Cards', spiega: 'Un giro delle carte di oggi in Studio, una volta al giorno.' },
         { testo: 'Foto delle pagine che ACE ti chiede', valore: piu(p.foto_compito), icona: 'Camera', spiega: 'Fotografi le pagine richieste, tutte in una volta.' },
       ],
       dettagli: [

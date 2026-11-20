@@ -176,11 +176,25 @@ export function creaGestori(db: SupabaseClient) {
     },
 
     async ripasso(id) {
-      const s = await riga('sessioni_ripasso', 'id', id, 'fatta_il, verifiche(data)');
+      const s = await riga('sessioni_ripasso', 'id', id, 'fatta_il, data_prevista, verifiche(data)');
       if (!s.fatta_il) return niente('non fatta');
       const g = R.giornoRoma(s.fatta_il);
-      if (!R.ripassoInTempo(R.giorno(s.verifiche.data), g)) return niente('fatta dopo la verifica');
-      return registra('ripasso', id, P.obbligatori.ripasso, g);
+      const verifica = R.giorno(s.verifiche.data);
+      if (!R.ripassoInTempo(verifica, g)) return niente('fatta dopo la verifica');
+      const base = await registra('ripasso', id, P.obbligatori.ripasso, g);
+      // piano studio: in più il ripasso cumulativo della vigilia, fatto nel giorno previsto
+      if (!R.ripassoCumulativo(verifica, R.giorno(s.data_prevista), g)) return base;
+      const extra = await registra('ripasso_cumulativo', id, P.studio_facoltativo.ripasso_cumulativo, g);
+      return base.passi || extra.passi ? { passi: base.passi + extra.passi, motivo: 'ripasso' } : base;
+    },
+
+    // Pillola del giorno (piano studio): un giro di carte in scadenza oggi, una volta al giorno,
+    // senza guardare quante erano giuste. id = il giro in flashcard_giri.
+    async pillola(id) {
+      const giro = await riga('flashcard_giri', 'id', id);
+      const g = R.giornoRoma(giro.fatto_il);
+      if (!R.giroValido(new Date(giro.iniziato_il), new Date(giro.fatto_il), giro.carte)) return niente('carte girate troppo in fretta');
+      return registra('pillola', `pillola:${R.iso(g)}`, P.studio_facoltativo.pillola_del_giorno, g);
     },
 
     async flashcard(id) {

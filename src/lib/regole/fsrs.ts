@@ -41,6 +41,28 @@ export function votoDaEsito(esito: 'sapevo' | 'quasi' | 'non_sapevo'): Voto {
   return esito === 'sapevo' ? 3 : esito === 'quasi' ? 2 : 1;
 }
 
+/**
+ * Flash card: la sicurezza si dice prima di girare, l'esito dopo. "Non sapevo" è sbagliata;
+ * "quasi" è giusta a metà (Difficile anche se era sicura); "sapevo" segue la sicurezza.
+ */
+export function votoDaCarta(esito: 'sapevo' | 'quasi' | 'non_sapevo', sicurezza: Sicurezza): { voto: Voto; giusta: boolean; sovrastima: boolean } {
+  if (esito === 'non_sapevo') return { ...votoDa(false, sicurezza), giusta: false };
+  if (esito === 'quasi') return { voto: 2, giusta: true, sovrastima: false };
+  return { ...votoDa(true, sicurezza), giusta: true };
+}
+
+/**
+ * Con una verifica in calendario la carta deve tornare prima della data: intervallo massimo
+ * = giorni che mancano meno uno (il giorno prima c'è il ripasso cumulativo). Senza verifica, o
+ * già passata, vale il massimo normale.
+ */
+export function massimoPerVerifica(oggi: string, verifica: string | null | undefined): number {
+  if (!verifica) return C.intervallo_massimo_giorni;
+  const mancano = giorni(oggi, verifica);
+  if (mancano <= 0) return C.intervallo_massimo_giorni;
+  return limita(mancano - 1, 1, C.intervallo_massimo_giorni);
+}
+
 const limita = (x: number, min: number, max: number) => Math.min(max, Math.max(min, x));
 
 function giorni(da: string, a: string): number {
