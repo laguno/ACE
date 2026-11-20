@@ -17,8 +17,11 @@ export const M = {
   raggio: 28, // palla
   gravita: 0.35, // palla, per tic
   vMax: 20, // caduta massima: sotto raggio + reteMezza, così la palla non attraversa la rete
-  raggioG: 50, // giocatore: un cerchio (testa e mani) col centro a centroG dai piedi
-  centroG: 60,
+  raggioG: 40, // giocatore: cerchio di tocco (mani alzate; il centro lo dà cerchio()) e mezza larghezza.
+  // Era 50 col tocco al petto: con le mani alzate un cerchio largo copriva quasi tutto il campo e gli
+  // scambi CPU contro CPU non finivano più (taratura del 20/11 con partite simulate).
+  mano: 1, // centro del cerchio = mano × altezza disegnata (cm × uPerCm), cioè alla cima della testa
+  centroG: 175, // centro per l'altezza di default con la rete di 224 cm: solo per chi disegna senza stato
   passoG: 6, // velocità piena del giocatore
   accelG: 1.5, // partenza: velocità piena in 4 tic
   frenaG: 2, // frenata (e inversione) più decisa: da piena a ferma in 3 tic
@@ -27,11 +30,13 @@ export const M = {
   gravitaG: 0.6,
   tocco: 13, // velocità della palla dopo un tocco (da terra o in salto)
   // Schiacciata, solo col comando: in aria, palla dal proprio lato sopra la rete e entro
-  // margineSchiaccia dal cerchio di tocco. La palla parte a schiacciaVx verso l'altro campo e
-  // scende fino a schiacciaGiu, ma sempre abbastanza alta da passare la rete.
+  // margineSchiaccia dal cerchio di tocco. La palla va verso l'altro campo più in giù che può
+  // (fino a schiacciaGiu) passando sopra la rete; in orizzontale da schiacciaVx a schiacciaVxMax,
+  // più veloce quando serve per scendere anche da lontano.
   margineSchiaccia: 12,
-  schiacciaVx: 13,
-  schiacciaGiu: 10,
+  schiacciaVx: 16,
+  schiacciaVxMax: 24,
+  schiacciaGiu: 16,
   memoriaSchiaccia: 8, // tic in cui il comando premuto resta valido (premuto un filo prima)
   durataSchiaccia: 14, // tic di animazione; intanto chi ha schiacciato non ritocca la palla
   casa: [250, 750],
@@ -40,6 +45,8 @@ export const M = {
   pausaTocco: 12, // tic entro cui lo stesso contatto non conta come un tocco in più
   tocchiMax: 3,
   scartoIA: 30, // la CPU si mette dietro la palla di tanto, per mandarla verso la rete
+  saltoIA: [70, 110, 220], // la CPU salta con la palla in discesa entro [0] in x e tra [1] e [2] sopra il centro
+  schiacciaIA: 200, // la CPU schiaccia solo con la palla entro tanto dalla rete: da lontano la palla resta tesa e bassa
   // Altezze (docs/09 §5.5): chi è più alto tocca più in alto, ma poco. Scarto di portata =
   // kAltezza × (cm − CM_DEFAULT) × uPerCm, chiuso tra portataMin e portataMax; il salto è uguale
   // per tutti. Con portataMin = -12 la gattina (25 cm) arriva ancora saltando a una palla appena
@@ -169,16 +176,16 @@ function pareti(p: Palla): void {
 }
 
 /**
- * Cerchio di tocco del giocatore: [quota del centro sopra i piedi, raggio]. Lo scarto di portata
- * si divide a metà tra centro e raggio: la cima sale di tutto lo scarto, il fondo resta dov'è
- * (anche i piccoli prendono le palle basse).
+ * Cerchio di tocco del giocatore (le mani alzate): [quota del centro sopra i piedi, raggio]. Il
+ * centro è alla cima della testa della figura di default (mano × CM_DEFAULT × uPerCm) più lo
+ * scarto di portata attenuato; il raggio è uguale per tutti.
  */
 export function cerchio(s: Stato, g: Corpo): [number, number] {
   const d = Math.min(
     Math.max(M.kAltezza * (g.cm - M.CM_DEFAULT) * s.uPerCm, M.portataMin),
     M.portataMax,
   );
-  return [M.centroG + d / 2, M.raggioG + d / 2];
+  return [M.mano * M.CM_DEFAULT * s.uPerCm + d, M.raggioG];
 }
 
 // rete: un'asta con la cima tonda. xPrima dice da che lato stava la palla: da sotto non passa.
@@ -226,15 +233,26 @@ function aTiro(s: Stato, l: Lato, margine: number): boolean {
 }
 
 /**
- * Schiacciata del lato l: schiacciaVx verso l'altro campo, in giù fino a schiacciaGiu ma non tanto
- * da finire in rete. Dopo n tic la palla è a y + n·vy − gravita·n(n+1)/2: si sceglie vy perché
- * sopra la rete passi con un filo di margine.
+ * Schiacciata del lato l. Dopo n tic la palla è a y + n·vy − g·n(n+1)/2 e deve essere ancora a
+ * quota `sopra` quando ha superato la cima tonda della rete (x = reteX ± lim): la traiettoria
+ * scende, quindi sopra la rete passa tutta. Si sceglie la vy più in giù che lo permette (non oltre
+ * schiacciaGiu). Da lontano serve più velocità orizzontale per scendere: con vy = −1 il tempo
+ * massimo è nGiu (radice di g/2·n² + (1+g/2)·n = h), da cui vx = distanza / nGiu, nei limiti.
  */
 function schiaccia(p: Palla, l: Lato): void {
   const dir = l === 0 ? 1 : -1;
-  const n = Math.max(Math.abs(M.reteX - p.x) / M.schiacciaVx, 1);
-  const sopra = M.reteAlta + M.raggio + M.reteMezza + 4;
-  p.vx = dir * M.schiacciaVx;
+  const lim = M.raggio + M.reteMezza;
+  const sopra = M.reteAlta + lim + 4;
+  const dist = Math.abs(M.reteX + dir * lim - p.x);
+  const h = p.y - sopra;
+  const a = 1 + M.gravita / 2;
+  const nGiu = h > 0 ? (Math.sqrt(a * a + 2 * M.gravita * h) - a) / M.gravita : 0;
+  const vx = Math.min(
+    nGiu > 0 ? Math.max(M.schiacciaVx, dist / nGiu) : M.schiacciaVxMax,
+    M.schiacciaVxMax,
+  );
+  const n = Math.max(dist / vx, 1);
+  p.vx = dir * vx;
   p.vy = Math.max(-M.schiacciaGiu, (sopra - p.y) / n + (M.gravita * (n + 1)) / 2);
 }
 
@@ -383,9 +401,11 @@ export function ia(s: Stato, lato: Lato, errore: number): Comandi {
     s.attesa === 0 &&
     s.tocchi >= 1 &&
     s.palla.vy < 0 &&
-    Math.abs(s.palla.x - g.x) < 70 &&
-    alta > 110 &&
-    alta < 220;
-  const schiaccia = aTiro(s, lato, M.margineSchiaccia + s.mira * errore);
+    Math.abs(s.palla.x - g.x) < M.saltoIA[0] &&
+    alta > M.saltoIA[1] &&
+    alta < M.saltoIA[2];
+  const schiaccia =
+    Math.abs(s.palla.x - M.reteX) < M.schiacciaIA &&
+    aTiro(s, lato, M.margineSchiaccia + s.mira * errore);
   return { sx: dx < -M.passoG, dx: dx > M.passoG, salta, schiaccia };
 }

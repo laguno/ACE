@@ -81,7 +81,7 @@ function sopraGiocatore(s: Stato, lato: Lato): Stato {
   const g = c.giocatori[lato];
   c.palla = {
     x: g.x,
-    y: g.y + M.centroG + M.raggio + M.raggioG - 10,
+    y: g.y + cerchio(c, g)[0] + M.raggio + M.raggioG - 10,
     vx: 0,
     vy: 0,
   };
@@ -571,7 +571,7 @@ describe("rete", () => {
       g.x = M.reteX - dir * (M.reteMezza + M.raggioG);
       s.palla = {
         x: M.reteX - dir * (M.raggio + M.reteMezza),
-        y: g.y + M.centroG,
+        y: g.y + cerchio(s, g)[0],
         vx: 0,
         vy: 0,
       };
@@ -581,55 +581,109 @@ describe("rete", () => {
 });
 
 describe("schiacciata", () => {
+  // Riscritte il 20/11: il cerchio di tocco ora è alle mani alzate (sopra la testa), quindi le palle
+  // di prova si mettono a una quota assoluta e a una distanza data dal centro del cerchio.
   const SCHIACCIA: Comandi = { ...FERMO, schiaccia: true };
-  /** Lato 0 in aria a x, palla ferma a quota y (sopra la sua testa di dy), al primo tocco. */
-  function aTiroDi(x: number, sopra = 5, y = 100): Stato {
+  /**
+   * Lato 0 in aria (piedi a gy) a x; palla ferma a quota assoluta `quota`, verso la rete, a
+   * distanza `dist` dal centro del cerchio di tocco (default: dentro, a contatto).
+   */
+  function aTiro(x: number, quota: number, piedi?: number, dist?: number): Stato {
     const s = libera(nuova(6));
     const g = s.giocatori[0];
-    g.x = x;
-    g.y = y;
-    g.vy = 2;
     const [centro, raggio] = cerchio(s, g);
-    s.palla = { x: x + 10, y: y + centro + raggio + M.raggio + sopra, vx: 0, vy: 0 };
+    const r = dist ?? M.raggio + raggio - 5;
+    const gy = piedi ?? Math.max(1, quota - centro - 0.6 * r); // palla sopra le mani, in avanti
+    g.x = x;
+    g.y = gy;
+    g.vy = gy > 0 ? 2 : 0;
+    const dy = quota - (gy + centro);
+    const dx = r * r > dy * dy ? Math.sqrt(r * r - dy * dy) : 0;
+    s.palla = { x: x + dx, y: quota, vx: 0, vy: 0 };
     return s;
   }
-  it("in aria, palla sopra la rete e a tiro: parte più veloce e più tesa del tocco normale", () => {
-    const s = passo(aTiroDi(400, -5), [SCHIACCIA, FERMO]);
-    const t = passo(aTiroDi(400, -5), FERMI);
-    expect(s.palla.y).toBeGreaterThan(M.reteAlta);
-    expect(s.palla.vx).toBe(M.schiacciaVx);
-    expect(s.palla.vx).toBeGreaterThan(Math.abs(t.palla.vx) + 5);
-    expect(s.palla.vy).toBeLessThan(t.palla.vy - 5);
-    expect(Math.sqrt(s.palla.vx ** 2 + s.palla.vy ** 2)).toBeGreaterThan(M.tocco);
-    expect(s.giocatori[0].schiaccia).toBe(M.durataSchiaccia);
-    expect(t.giocatori[0].schiaccia).toBe(0);
-    expect(s.tocchi).toBe(1);
+  /** Gioca fino al punto con l'altro giocatore fuori gioco; dice dove la palla tocca terra. */
+  function doveCade(s: Stato, lato: Lato): number {
+    s.giocatori[lato === 0 ? 1 : 0].y = 1e5; // tolto di mezzo: in aria, lontano dalla palla
+    let x = s.palla.x;
+    s = finoA(
+      s,
+      (st) => {
+        if (sommaPunti(st) === 0) x = st.palla.x;
+        return sommaPunti(st) > 0;
+      },
+      400,
+    );
+    expect(s.punti[lato]).toBe(1);
+    return x;
+  }
+  /** Copia a specchio dello stato (lato 0 ↔ lato 1). */
+  function specchio(s: Stato): Stato {
+    const c = structuredClone(s);
+    const [a, b] = c.giocatori;
+    c.giocatori = [
+      { ...b, x: M.largo - b.x },
+      { ...a, x: M.largo - a.x },
+    ];
+    c.palla.x = M.largo - c.palla.x;
+    c.palla.vx = -c.palla.vx;
+    return c;
+  }
+
+  it("palla sopra la rete: la schiacciata parte in giù fin dal colpo, supera la rete e cade nell'altro campo", () => {
+    for (const lato of [0, 1] as const)
+      for (let x = 340; x <= 440; x += 20)
+        for (const quota of [300, 320, 340]) {
+          const base = aTiro(x, quota);
+          const s0 = lato === 0 ? base : specchio(base);
+          const comandi: Coppia = lato === 0 ? [SCHIACCIA, FERMO] : [FERMO, SCHIACCIA];
+          const s = passo(s0, comandi);
+          expect(s.giocatori[lato].schiaccia).toBe(M.durataSchiaccia);
+          expect(s.palla.vy).toBeLessThan(0);
+          expect(s.palla.vx * (lato === 0 ? 1 : -1)).toBeGreaterThanOrEqual(M.schiacciaVx);
+          const cade = doveCade(s, lato);
+          expect(lato === 0 ? cade > M.reteX : cade < M.reteX).toBe(true);
+          expect(primaViolazione(s, 200, () => FERMI, reteIntatta)).toBeNull();
+        }
   });
-  it("palla molto sopra la rete: scende ripida, fino a M.schiacciaGiu", () => {
-    const alta = aTiroDi(300, 5, 400); // giocatore portato in alto a mano: palla ben sopra la rete
-    expect(passo(alta, [SCHIACCIA, FERMO]).palla.vy).toBe(-M.schiacciaGiu);
+  it("da lontano la schiacciata passa comunque la rete e fa punto", () => {
+    for (let x = 100; x < 340; x += 20) {
+      const s = passo(aTiro(x, 300), [SCHIACCIA, FERMO]);
+      expect(s.giocatori[0].schiaccia).toBe(M.durataSchiaccia);
+      expect(doveCade(s, 0)).toBeGreaterThan(M.reteX);
+    }
+  });
+  it("è più veloce e più in giù del tocco normale dallo stesso punto", () => {
+    const s = passo(aTiro(400, 300), [SCHIACCIA, FERMO]);
+    const t = passo(aTiro(400, 300), FERMI);
+    expect(t.giocatori[0].schiaccia).toBe(0);
+    expect(t.tocchi).toBe(1);
+    expect(s.tocchi).toBe(1);
+    expect(Math.sqrt(s.palla.vx ** 2 + s.palla.vy ** 2)).toBeGreaterThan(M.tocco);
+    expect(s.palla.vy).toBeLessThan(t.palla.vy - 5);
+  });
+  it("palla molto sopra la rete e vicina: scende a M.schiacciaGiu", () => {
+    expect(passo(aTiro(430, 500, 300), [SCHIACCIA, FERMO]).palla.vy).toBe(-M.schiacciaGiu);
   });
   it("l'animazione dura M.durataSchiaccia tic e scende fino a 0", () => {
-    let s = passo(aTiroDi(400), [SCHIACCIA, FERMO]);
+    let s = passo(aTiro(400, 300), [SCHIACCIA, FERMO]);
     for (let i = 0; i < M.durataSchiaccia; i++) s = passo(s, FERMI);
     expect(s.giocatori[0].schiaccia).toBe(0);
   });
-  it("senza comando, a terra, con la palla sotto la rete o fuori tiro: niente schiacciata", () => {
-    const casi: Stato[] = [];
-    const senza = aTiroDi(400, -5); // senza comando: tocco normale (la palla è a contatto)
-    casi.push(senza);
-    const terra = aTiroDi(400, -5, 0); // a terra: palla sotto la rete, nessuna schiacciata
-    casi.push(terra);
-    const bassa = aTiroDi(150, -5, 30); // in aria ma palla sotto la rete
-    casi.push(bassa);
-    const lontana = aTiroDi(400, M.margineSchiaccia + 5); // fuori tiro
-    casi.push(lontana);
-    for (const [i, s] of casi.entries()) {
-      const dopo = passo(s, [i === 0 ? FERMO : SCHIACCIA, FERMO]);
+  it("senza comando, a terra, con la palla sotto la cima della rete o fuori tiro: niente schiacciata", () => {
+    const [, raggio] = cerchio(nuova(6), nuova(6).giocatori[0]);
+    const casi: [Stato, Comandi][] = [
+      [aTiro(400, 300), FERMO], // senza comando: tocco normale
+      [aTiro(400, M.reteAlta + 5, 0), SCHIACCIA], // a terra, palla appena sopra la rete
+      [aTiro(400, M.reteAlta - 10), SCHIACCIA], // in aria, palla sotto la cima della rete
+      [aTiro(400, 300, 60, M.raggio + raggio + M.margineSchiaccia + 5), SCHIACCIA], // fuori tiro
+    ];
+    for (const [s, c] of casi) {
+      const dopo = passo(s, [c, FERMO]);
       expect(dopo.giocatori[0].schiaccia).toBe(0);
-      expect(dopo.palla.vx).not.toBe(M.schiacciaVx);
     }
-    expect(aTiroDi(150, -5, 30).palla.y).toBeLessThan(M.reteAlta);
+    // i primi tre sono comunque tocchi normali
+    for (const [s, c] of casi.slice(0, 3)) expect(passo(s, [c, FERMO]).tocchi).toBe(1);
   });
   it("premuto un filo prima vale ancora; premuto troppo prima si perde; tenuto non conta di nuovo", () => {
     for (const [anticipo, vale] of [
@@ -637,44 +691,21 @@ describe("schiacciata", () => {
       [M.memoriaSchiaccia, false],
     ] as const) {
       // si preme con la palla fuori tiro e la si porta a tiro dopo anticipo tic
-      let s = aTiroDi(400);
-      const palla = s.palla;
+      let s = aTiro(400, 300, 1e5); // in aria per tutta la prova
       s.palla = { x: 900, y: 900, vx: 0, vy: 0 };
       s.attesa = anticipo;
       s.giocatori[0].vy = 0;
-      s.giocatori[0].y = 1e6; // in aria per tutta la prova
-      s = passo(s, [SCHIACCIA, FERMO]);
-      for (let i = 1; i < anticipo; i++) s = passo(s, [SCHIACCIA, FERMO]);
+      for (let i = 0; i < anticipo; i++) s = passo(s, [SCHIACCIA, FERMO]);
       const g = s.giocatori[0];
       const [centro, raggio] = cerchio(s, g);
-      s.palla = { ...palla, y: g.y + centro + raggio + M.raggio + 5 };
+      s.palla = { x: g.x, y: g.y + centro + raggio + M.raggio + 5, vx: 0, vy: 0 };
       s.attesa = 0;
       s = passo(s, [SCHIACCIA, FERMO]);
       expect(s.giocatori[0].schiaccia > 0).toBe(vale);
     }
   });
-  it("da ogni punto del proprio campo la schiacciata passa la rete e fa punto", () => {
-    for (const lato of [0, 1] as const)
-      for (let x = 100; x <= 440; x += 20) {
-        let s = aTiroDi(x, 0, 95 + (x % 40));
-        if (lato === 1) {
-          // stesso caso a specchio
-          const g = s.giocatori;
-          [g[0], g[1]] = [g[1], g[0]];
-          g[1].x = M.largo - x;
-          g[0].x = M.casa[0];
-          g[0].y = 0;
-          s.palla.x = M.largo - s.palla.x;
-        }
-        const comandi: Coppia = lato === 0 ? [SCHIACCIA, FERMO] : [FERMO, SCHIACCIA];
-        s = passo(s, comandi);
-        expect(s.giocatori[lato].schiaccia).toBe(M.durataSchiaccia);
-        s = finoA(s, (st) => sommaPunti(st) > 0, 300);
-        expect(s.punti[lato]).toBe(1);
-      }
-  });
   it("la CPU con errore 0 schiaccia quando la palla è a tiro", () => {
-    const s = aTiroDi(400);
+    const s = aTiro(400, 300);
     s.mira = 0;
     expect(ia(s, 0, 0).schiaccia).toBe(true);
     s.giocatori[0].y = 0;
@@ -791,6 +822,15 @@ describe("altezze", () => {
     }
     return cima;
   }
+  it("il tocco è alle mani alzate: centro del cerchio vicino alla cima della testa disegnata", () => {
+    // con l'attenuazione vale per chi è vicino all'altezza di default; i piccoli toccano più in alto della testa
+    for (const cm of [M.CM_DEFAULT, ALTEZZE.lani, 182]) {
+      const s = nuovaPartita(1, DURATA, [cm, cm]);
+      const rapporto = cerchio(s, s.giocatori[0])[0] / (cm * s.uPerCm);
+      expect(rapporto).toBeGreaterThanOrEqual(0.95);
+      expect(rapporto).toBeLessThanOrEqual(1.05);
+    }
+  });
   it("il cm passa da nuovaPartita ai giocatori e resta dopo ogni battuta", () => {
     let s = nuovaPartita(1, DURATA, [ALTEZZE.lani, ALTEZZE.papa]);
     s = finoA(s, (st) => sommaPunti(st) >= 2, 2000);
@@ -819,7 +859,7 @@ describe("altezze", () => {
     ] as const) {
       const s = libera(nuovaPartita(4, DURATA, [cm, M.CM_DEFAULT]));
       const g = s.giocatori[0];
-      s.palla = { x: g.x, y: M.centroG + M.raggioG + M.raggio + 2 + M.gravita, vx: 0, vy: 0 };
+      s.palla = { x: g.x, y: cerchio(s, s.giocatori[1])[0] + M.raggioG + M.raggio + 2 + M.gravita, vx: 0, vy: 0 };
       expect(passo(s, FERMI).tocchi).toBe(tocca ? 1 : 0);
     }
   });
@@ -898,7 +938,7 @@ describe("CPU (ia)", () => {
     s.tocchi = 1;
     s.palla = {
       x: s.giocatori[0].x,
-      y: s.giocatori[0].y + M.centroG + 150,
+      y: s.giocatori[0].y + cerchio(s, s.giocatori[0])[0] + 150,
       vx: 0,
       vy: -1,
     };
