@@ -221,7 +221,7 @@ const inserisce = async (uid, t, ruolo) => {
 };
 // foto_pagine e serate: Lani inserisce solo a condizioni (file vero, data vicina), provate sopra e sotto
 // partite: Lani solo da approvare, provato sopra
-const LANI_INSERISCE = ['errori_client', 'flashcard_giri', 'partite', 'push_iscrizioni', 'quiz_tentativi', 'umore', 'video_visti'];
+const LANI_INSERISCE = ['errori_client', 'flashcard_giri', 'partite', 'push_iscrizioni', 'quiz_tentativi', 'ripassi_carte', 'umore', 'video_visti'];
 const GENITORE_INSERISCE = [...LANI_INSERISCE, 'assenze', 'foto_pagine', 'serate', 'compiti', 'esercizi_dieci_minuti', 'fogli_firma', 'forzieri', 'frasi', 'gesti_casa', 'impostazioni', 'sgridate'];
 for (const t of tabelle) {
   verifica(`anon non inserisce in ${t}`, !(await inserisce(null, t, 'anon')));

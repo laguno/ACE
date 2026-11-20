@@ -221,7 +221,10 @@ export type Database = {
       flashcard: {
         Row: {
           argomento: string
+          cadute: number
           creato_il: string
+          da_riprendere: boolean
+          difficolta: number | null
           fonte: string | null
           fronte: string
           id: string
@@ -229,13 +232,19 @@ export type Database = {
           materia_id: string | null
           prossima_revisione: string
           retro: string
+          ripetizioni: number
           segnalata_sbagliata: boolean
+          stabilita: number | null
+          ultimo_ripasso: string | null
           tipo: string
           verifica_id: string | null
         }
         Insert: {
           argomento: string
+          cadute?: number
           creato_il?: string
+          da_riprendere?: boolean
+          difficolta?: number | null
           fonte?: string | null
           fronte: string
           id?: string
@@ -243,13 +252,19 @@ export type Database = {
           materia_id?: string | null
           prossima_revisione?: string
           retro: string
+          ripetizioni?: number
           segnalata_sbagliata?: boolean
+          stabilita?: number | null
+          ultimo_ripasso?: string | null
           tipo?: string
           verifica_id?: string | null
         }
         Update: {
           argomento?: string
+          cadute?: number
           creato_il?: string
+          da_riprendere?: boolean
+          difficolta?: number | null
           fonte?: string | null
           fronte?: string
           id?: string
@@ -257,7 +272,10 @@ export type Database = {
           materia_id?: string | null
           prossima_revisione?: string
           retro?: string
+          ripetizioni?: number
           segnalata_sbagliata?: boolean
+          stabilita?: number | null
+          ultimo_ripasso?: string | null
           tipo?: string
           verifica_id?: string | null
         }
@@ -1013,6 +1031,53 @@ export type Database = {
             columns: ["quiz_id"]
             isOneToOne: false
             referencedRelation: "quiz"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ripassi_carte: {
+        Row: {
+          chiave: string
+          fatto_il: string
+          flashcard_id: string
+          giorno: string
+          giusta: boolean
+          id: string
+          pillola_id: string | null
+          sicurezza: string | null
+          sovrastima: boolean
+          voto: number
+        }
+        Insert: {
+          chiave: string
+          fatto_il?: string
+          flashcard_id: string
+          giorno: string
+          giusta: boolean
+          id?: string
+          pillola_id?: string | null
+          sicurezza?: string | null
+          sovrastima?: boolean
+          voto: number
+        }
+        Update: {
+          chiave?: string
+          fatto_il?: string
+          flashcard_id?: string
+          giorno?: string
+          giusta?: boolean
+          id?: string
+          pillola_id?: string | null
+          sicurezza?: string | null
+          sovrastima?: boolean
+          voto?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ripassi_carte_flashcard_id_fkey"
+            columns: ["flashcard_id"]
+            isOneToOne: false
+            referencedRelation: "flashcard"
             referencedColumns: ["id"]
           },
         ]
