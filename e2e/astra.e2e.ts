@@ -115,7 +115,8 @@ test('figurina e album', async ({ page }) => {
   await page.getByRole('button', { name: 'Astra' }).click();
   await page.getByRole('button', { name: 'La tua figurina' }).click();
   await expect(page.getByRole('heading', { name: 'Lani, n. 9' })).toBeVisible();
-  await expect(page.locator('.numeri')).toContainText('7,17');
+  // media delle medie per materia, come la pagella (19/11): matematica (6, 8) 7, italiano 7,5
+  await expect(page.locator('.numeri')).toContainText('7,25');
   await expect(page.locator('.medie li', { hasText: 'Matematica' })).toContainText('7,0');
   await expect(page.getByLabel('in salita')).toBeVisible();
   await page.getByRole('button', { name: 'Torna ad Astra' }).click();
