@@ -7,6 +7,7 @@ import {
   HZ,
   M,
   caso,
+  cerchio,
   ia,
   nuovaPartita,
   passo,
@@ -208,9 +209,10 @@ describe("nuovaPartita", () => {
           vy: 0,
         });
         expect(s.giocatori).toEqual([
-          { x: M.casa[0], y: 0, vx: 0, vy: 0 },
-          { x: M.casa[1], y: 0, vx: 0, vy: 0 },
+          { x: M.casa[0], y: 0, vx: 0, vy: 0, cm: M.CM_DEFAULT, schiaccia: 0 },
+          { x: M.casa[1], y: 0, vx: 0, vy: 0, cm: M.CM_DEFAULT, schiaccia: 0 },
         ]);
+        expect(s.uPerCm).toBe(M.reteAlta / 224);
       }),
     );
   });
@@ -573,6 +575,57 @@ describe("rete", () => {
         vy: 0,
       };
       expect(primaViolazione(s, 5, () => FERMI, reteIntatta)).toBeNull();
+    }
+  });
+});
+
+describe("altezze", () => {
+  const ALTEZZE = { papa: 187, lani: 174, default: 170, leo: 135, bart: 60, lady: 25 };
+  /** Quota più alta raggiunta dal centro della palla toccata da chi salta (cima del cerchio + raggio palla). */
+  function cimaInSalto(cm: number): number {
+    let s = libera(nuova(3, DURATA));
+    s.giocatori[0].cm = cm;
+    s.palla = { x: 900, y: 900, vx: 0, vy: 0 }; // lontana: non disturba
+    s.attesa = 10 ** 6;
+    let cima = 0;
+    for (let i = 0; i < 60; i++) {
+      s = passo(s, [{ ...FERMO, salta: i === 0 }, FERMO]);
+      const g = s.giocatori[0];
+      const [centro, raggio] = cerchio(s, g);
+      cima = Math.max(cima, g.y + centro + raggio + M.raggio);
+    }
+    return cima;
+  }
+  it("il cm passa da nuovaPartita ai giocatori e resta dopo ogni battuta", () => {
+    let s = nuovaPartita(1, DURATA, [ALTEZZE.lani, ALTEZZE.papa]);
+    s = finoA(s, (st) => sommaPunti(st) >= 2, 2000);
+    expect(s.giocatori.map((g) => g.cm)).toEqual([ALTEZZE.lani, ALTEZZE.papa]);
+  });
+  it("chi è più alto tocca più in alto; sotto e sopra la portata è chiusa tra i limiti", () => {
+    const c = Object.fromEntries(
+      Object.entries(ALTEZZE).map(([n, cm]) => [n, cimaInSalto(cm)]),
+    );
+    expect(c.papa).toBeGreaterThan(c.lani);
+    expect(c.lani).toBeGreaterThan(c.default);
+    expect(c.default).toBeGreaterThan(c.leo);
+    expect(c.leo).toBeGreaterThanOrEqual(c.bart);
+    expect(c.bart).toBe(c.lady); // entrambi al limite portataMin
+    // l'altezza aiuta un pochino: tra papà e la gattina meno di mezza palla
+    expect(c.papa - c.lady).toBeLessThan(M.raggio);
+  });
+  it("anche a 25 cm, saltando, si arriva a una palla appena sopra la rete", () => {
+    // palla "normale sopra la rete": il suo fondo alla quota della rete
+    expect(cimaInSalto(ALTEZZE.lady)).toBeGreaterThan(M.reteAlta + M.raggio);
+  });
+  it("da fermo, una palla appena sopra la cima del cerchio di default la prende solo il più alto", () => {
+    for (const [cm, tocca] of [
+      [M.CM_DEFAULT, false],
+      [ALTEZZE.papa, true],
+    ] as const) {
+      const s = libera(nuovaPartita(4, DURATA, [cm, M.CM_DEFAULT]));
+      const g = s.giocatori[0];
+      s.palla = { x: g.x, y: M.centroG + M.raggioG + M.raggio + 2 + M.gravita, vx: 0, vy: 0 };
+      expect(passo(s, FERMI).tocchi).toBe(tocca ? 1 : 0);
     }
   });
 });

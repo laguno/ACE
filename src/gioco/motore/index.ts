@@ -30,11 +30,21 @@ export const M = {
   pausaTocco: 12, // tic entro cui lo stesso contatto non conta come un tocco in più
   tocchiMax: 3,
   scartoIA: 30, // la CPU si mette dietro la palla di tanto, per mandarla verso la rete
+  // Altezze (docs/09 §5.5): chi è più alto tocca più in alto, ma poco. Scarto di portata =
+  // kAltezza × (cm − CM_DEFAULT) × uPerCm, chiuso tra portataMin e portataMax; il salto è uguale
+  // per tutti. Con portataMin = -12 la gattina (25 cm) arriva ancora saltando a una palla appena
+  // sopra la rete (prova nei test); papà (187 cm) guadagna circa 5 unità.
+  CM_DEFAULT: 170, // come altezza_default_cm di data/config-gioco.json
+  kAltezza: 0.3,
+  portataMin: -12,
+  portataMax: 12,
 } as const;
 
 export type Lato = 0 | 1;
-/** Palla: x, y del centro. Giocatore: x al centro, y ai piedi. */
-export type Corpo = { x: number; y: number; vx: number; vy: number };
+/** Palla: x, y del centro. */
+export type Palla = { x: number; y: number; vx: number; vy: number };
+/** Giocatore: x al centro, y ai piedi; cm = altezza del personaggio; schiaccia = tic di animazione rimasti. */
+export type Corpo = Palla & { cm: number; schiaccia: number };
 export type Comandi = { sx: boolean; dx: boolean; salta: boolean };
 export const FERMO: Comandi = { sx: false, dx: false, salta: false };
 
@@ -42,8 +52,9 @@ export const FERMO: Comandi = { sx: false, dx: false, salta: false };
 export type Stato = {
   tic: number;
   seme: number; // stato del generatore casuale
-  palla: Corpo;
+  palla: Palla;
   giocatori: [Corpo, Corpo];
+  uPerCm: number; // unità di campo per cm: M.reteAlta / altezza vera della rete
   punti: [number, number];
   durata: number; // tic di gioco: scaduti, la partita finisce al primo punto che non lascia la parità
   battuta: Lato;
@@ -71,8 +82,8 @@ function estrai(s: Stato): number {
 
 function servi(s: Stato, lato: Lato): void {
   s.giocatori = [
-    { x: M.casa[0], y: 0, vx: 0, vy: 0 },
-    { x: M.casa[1], y: 0, vx: 0, vy: 0 },
+    { x: M.casa[0], y: 0, vx: 0, vy: 0, cm: s.giocatori[0].cm, schiaccia: 0 },
+    { x: M.casa[1], y: 0, vx: 0, vy: 0, cm: s.giocatori[1].cm, schiaccia: 0 },
   ];
   s.palla = { x: M.casa[lato], y: M.altoBattuta, vx: 0, vy: 0 };
   s.battuta = lato;
@@ -84,17 +95,23 @@ function servi(s: Stato, lato: Lato): void {
 
 /**
  * Partita nuova, a tempo: il seme decide chi batte per primo. durata in tic (secondi × HZ), dai
- * secondi di data/config-gioco.json.
+ * secondi di data/config-gioco.json; cm dei due lati e reteCm da pallavolo.altezze_cm e rete_cm.
  */
-export function nuovaPartita(seme: number, durata: number): Stato {
+export function nuovaPartita(
+  seme: number,
+  durata: number,
+  cm: [number, number] = [M.CM_DEFAULT, M.CM_DEFAULT],
+  reteCm = 224,
+): Stato {
   const s: Stato = {
     tic: 0,
     seme: seme | 0,
     palla: { x: 0, y: 0, vx: 0, vy: 0 },
     giocatori: [
-      { x: 0, y: 0, vx: 0, vy: 0 },
-      { x: 0, y: 0, vx: 0, vy: 0 },
+      { x: 0, y: 0, vx: 0, vy: 0, cm: cm[0], schiaccia: 0 },
+      { x: 0, y: 0, vx: 0, vy: 0, cm: cm[1], schiaccia: 0 },
     ],
+    uPerCm: M.reteAlta / reteCm,
     punti: [0, 0],
     durata,
     battuta: 0,
@@ -122,7 +139,7 @@ const LATI = [0, 1] as const;
 const MIN_X = [M.raggioG, M.reteX + M.reteMezza + M.raggioG];
 const MAX_X = [M.reteX - M.reteMezza - M.raggioG, M.largo - M.raggioG];
 
-function pareti(p: Corpo): void {
+function pareti(p: Palla): void {
   if (p.x < M.raggio) {
     p.x = M.raggio;
     p.vx = -p.vx;
@@ -132,8 +149,21 @@ function pareti(p: Corpo): void {
   }
 }
 
+/**
+ * Cerchio di tocco del giocatore: [quota del centro sopra i piedi, raggio]. Lo scarto di portata
+ * si divide a metà tra centro e raggio: la cima sale di tutto lo scarto, il fondo resta dov'è
+ * (anche i piccoli prendono le palle basse).
+ */
+export function cerchio(s: Stato, g: Corpo): [number, number] {
+  const d = Math.min(
+    Math.max(M.kAltezza * (g.cm - M.CM_DEFAULT) * s.uPerCm, M.portataMin),
+    M.portataMax,
+  );
+  return [M.centroG + d / 2, M.raggioG + d / 2];
+}
+
 // rete: un'asta con la cima tonda. xPrima dice da che lato stava la palla: da sotto non passa.
-function rete(p: Corpo, xPrima: number): void {
+function rete(p: Palla, xPrima: number): void {
   const dxR = p.x - M.reteX;
   const lim = M.raggio + M.reteMezza;
   if (p.y < M.reteAlta) {
@@ -204,11 +234,12 @@ export function passo(
   const xLato = p.x;
 
   // tocchi: la palla riparte lungo la linea centro del giocatore → centro della palla
-  const R = M.raggio + M.raggioG;
   for (const l of LATI) {
     const g = s.giocatori[l];
+    const [centro, raggio] = cerchio(s, g);
+    const R = M.raggio + raggio;
     const cx = g.x;
-    const cy = g.y + M.centroG;
+    const cy = g.y + centro;
     const dx = p.x - cx;
     const dy = p.y - cy;
     const d2 = dx * dx + dy * dy;
@@ -249,7 +280,8 @@ export function passo(
 export function ia(s: Stato, lato: Lato, errore: number): Comandi {
   const g = s.giocatori[lato];
   let { x, y, vx, vy } = s.palla;
-  const quota = M.centroG + M.raggioG + M.raggio;
+  const [centro, raggio] = cerchio(s, g);
+  const quota = centro + raggio + M.raggio;
   for (let i = 0; i < 300 && (vy > 0 || y > quota); i++) {
     vy = Math.max(vy - M.gravita, -M.vMax);
     x += vx;
@@ -267,7 +299,7 @@ export function ia(s: Stato, lato: Lato, errore: number): Comandi {
     ? x + (lato === 0 ? -1 : 1) * M.scartoIA + s.mira * errore
     : M.casa[lato];
   const dx = meta - g.x;
-  const alta = s.palla.y - (g.y + M.centroG);
+  const alta = s.palla.y - (g.y + centro);
   const salta =
     mia &&
     s.attesa === 0 &&
