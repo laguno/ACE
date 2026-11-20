@@ -17,7 +17,15 @@ Storia delle sessioni, decisioni prese e scelte approvate: `docs/storico.md`.
 - Limite: nella riga di materia le foto delle richieste vecchie non contano come viste (si tocca la chip "c'è già").
 - 18:55 (`3be1c22`, backup `ace-2026-11-20_18-51-11.sql`): ordine nuovo, approvato dal signore: "Lani è a casa oggi?" in cima (prima delle 14), Da fare per voi (con la foto che tocca ai genitori, contata), Dai passi / Segna, Lani oggi ("Una cosa da dirle" prima della tabellina), Foto delle pagine in fondo. "Da sapere" tolto.
 - ACE Prova (`gioco-con-tabellina`, `app-tmp-merge`) era indietro di 16 commit: allineata il 20/11 alle 19:00 (unione locale, non pushata; `npm install` rifatto). Da ora l'hook `pre-push` blocca il push su `main` se il ramo di prova non contiene il commit (runbook, "Ambiente di prova").
+- 19:27 (`2354ee6`, backup `ace-2026-11-20_19-26-08.sql`): `passi()` dei genitori restituisce null se la funzione non risponde (Dai passi: "passi non arrivati" + Riprova, non più "tetto pieno"; Riprova anche su firma, Segna, partita); Stato di ACE rosso solo per giri non riusciti; Settimana "Nessuna serata da chiudere finora" il lunedì; prova `astra › figurina e album` sistemata (7,25, media delle medie). Restano di genitori-ux solo gergo e conferma modifiche fuori da Sera.
 - **Da fare:** il signore prova Oggi dei genitori sul telefono.
+
+## Piano studio: pronto da provare (20/11 sera, ramo `studio`)
+
+- Notifiche: nelle sere di sport tardo la chiusura si anticipa all'ultimo giro prima del silenzio (scelta del signore, 20/11); prove riscritte con i margini 30/60. `studio` ha ricevuto `main` e `rifinitura`: giro completo verde (487 unità, 362 schema, 221 e2e; l'unica rossa era la figurina, ora corretta).
+- Ramo di prova `gioco-con-tabellina` = gioco + tabellina + main + studio (`8f63041`, 521 unità verdi); DB locale con 0045–0070, cron `genera-mate` e `foto-studio` spenti in locale. Serve una build nuova (`npm run prova:telefono` in `app-tmp-merge`): la 5187 ora la usa la sessione del gioco (`ramo gioco`, scelta del signore), poi la rimette.
+- **Da fare:** il signore prova il piano studio su ACE Prova; poi pubblicazione (backup, migrazioni 0045–0070 `db push --remote --yes --include-all`, funzioni `spiega`, `notifiche`, `genera-studio`, `foto-studio`, `genera-mate`, `passi`, `sync-nuvola`, push di `studio` su `main`), fuori dalle finestre vietate.
+- Worktree tolti il 20/11: `app-studio-*` (4), `app-metacognizione`, `app-rilascio`, `app-sprint-2` (rami tenuti). Cartella `app-studio-notifiche` rimasta bloccata da un processo: si cancella a mano. `app-tabellina` è unito in main, si può togliere.
 
 ## Foto delle verifiche e voti pesati (19/11, in produzione)
 
