@@ -396,3 +396,24 @@ test('Esci dall’account: in Impostazioni, con conferma', async ({ page }) => {
   await page.getByRole('dialog').getByRole('button', { name: 'Annulla' }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
 });
+
+// 20/11: un errore della funzione "passi" non si legge più come "tetto pieno"; Riprova rifà solo la chiamata
+test('dare un gesto: se i passi non arrivano, lo dice e Riprova li chiede di nuovo', async ({ page }) => {
+  const { t, chiamate } = await finto(page, dati(), { passi: { passi: 2 } });
+  let primo = true;
+  await page.route('**/functions/v1/passi', (r) => {
+    if (!primo) return r.fallback();
+    primo = false;
+    return r.fulfill({ status: 500, contentType: 'application/json', body: '{"error":"giù"}' });
+  });
+  await page.goto('/');
+  await page.getByRole('button', { name: /^Dai passi/ }).click();
+  const foglio = page.getByRole('dialog', { name: 'Dai passi' });
+  await foglio.getByRole('button', { name: /^Scrivania in ordine/ }).click();
+  await expect(foglio.getByRole('status')).toContainText('Scrivania in ordine: passi non arrivati.');
+  await expect(foglio.getByRole('status')).not.toContainText('tetto');
+  await foglio.getByRole('status').getByRole('button', { name: 'Riprova' }).click();
+  await expect(foglio.getByRole('status')).toContainText('Scrivania in ordine: +2 a Lani.');
+  expect(t.gesti_casa).toHaveLength(1);
+  expect(chiamate.map((c) => c.tipo)).toEqual(['gesto']);
+});

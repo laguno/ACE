@@ -16,7 +16,7 @@ import { supabase } from './supabase';
 // I genitori possono solo correggere in campo / panchina dopo (PartiteFipav).
 
 type Avvisa = (s: string) => void;
-type Passi = (tipo: string, id: string) => Promise<number>;
+type Passi = (tipo: string, id: string) => Promise<number | null>;
 type PartitaFipav = { id: string; data: string; avversaria: string; set_nostri: number; set_loro: number; in_campo: boolean | null; approvata_il: string };
 
 /** "Com'è andata?" in R-Evolution: il popup più vecchio non ancora visto, finché Lani non risponde. */
@@ -88,6 +88,7 @@ export function PartiteFipav({ client, passi, avvisa }: { client: SupabaseClient
     const { data, error } = await client.rpc('correggi_partita', { p_id: p.id, p_in_campo: !p.in_campo });
     if (error || !data) return avvisa('Non si può più correggere: le chiavi di quella settimana sono già date.');
     const presi = await passi('partita', p.id);
+    if (presi === null) return avvisa(`Partita con ${p.avversaria} corretta, ma i passi non sono arrivati: riprova più tardi.`), carica();
     avvisa(`Partita con ${p.avversaria} corretta: ${p.in_campo ? 'in panchina' : 'in campo'}, +${presi} passi.`);
     carica();
   }

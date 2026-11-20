@@ -57,7 +57,7 @@ export default function Stato({ client }: { client: SupabaseClient }) {
         titolo={nome}
         sotto={
           <>
-            <span className={ok ? 'stato-ok' : 'stato-ko'}>{!g ? 'mai sincronizzato' : g.esito === null ? `in corso da ${quando(g.iniziato_il)}` : `${ok ? 'ok' : 'non riuscita'}, ${quando(g.iniziato_il)}`}</span>
+            <span className={ok ? 'stato-ok' : g?.esito ? 'stato-ko' : undefined}>{!g ? 'mai sincronizzato' : g.esito === null ? `in corso da ${quando(g.iniziato_il)}` : `${ok ? 'ok' : 'non riuscita'}, ${quando(g.iniziato_il)}`}</span>
             {orari && <span className="stato-riga">Prossima: {prossimo(orari)}</span>}
             {cosa && <span className="stato-riga">{cosa}</span>}
           </>
@@ -86,7 +86,7 @@ export default function Stato({ client }: { client: SupabaseClient }) {
         </Elenco>
       </section>
       <section className="ga-sezione" aria-labelledby="stato-errori">
-        <h2 id="stato-errori">Errori degli ultimi 7 giorni: {s.erroriSettimana}</h2>
+        <h2 id="stato-errori">Errori degli ultimi 7 giorni{s.erroriSettimana > 0 && `: ${s.erroriSettimana}`}</h2>
         {s.errori.length === 0 ? (
           <p className="ga-nota">Nessun errore registrato.</p>
         ) : (

@@ -85,6 +85,7 @@ export default function Settimana({ client, passi, avvisa }: Props) {
     const { error } = await client.from('fogli_firma').update({ consegnato_il: new Date().toISOString() }).eq('id', f.id);
     if (error) return avvisa(`${f.titolo}: firma non salvata.`, () => firma(f));
     const p = await passi('foglio', f.id);
+    if (p === null) return avvisa(`${f.titolo}: firmato, ma i passi non sono arrivati.`, () => firma(f));
     fatto(p ? `${f.titolo}: firmato, +${p} a Lani.` : `${f.titolo}: firmato.`);
   }
   async function aggiungi(e: FormEvent<HTMLFormElement>) {
@@ -135,7 +136,7 @@ export default function Settimana({ client, passi, avvisa }: Props) {
         </li>
         <li>{d.note ? <>{d.note} <span>{d.note === 1 ? 'nota della scuola' : 'note della scuola'}</span></> : <span>Nessuna nota</span>}</li>
         <li>
-          {d.serate.length} su {attese} <span>serate chiuse finora</span>
+          {attese ? <>{d.serate.length} su {attese} <span>serate chiuse finora</span></> : <span>Nessuna serata da chiudere finora</span>}
         </li>
       </ul>
 

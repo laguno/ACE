@@ -8,7 +8,8 @@ import { GIORNI } from '../spunte';
 
 export type Props = {
   client: SupabaseClient;
-  passi: (tipo: string, id: string) => Promise<number>;
+  /** passi dati; null se la funzione non ha risposto (si può riprovare: è idempotente) */
+  passi: (tipo: string, id: string) => Promise<number | null>;
   /** riprova: in caso di errore la pillola ha il bottone "Riprova", che rifà la stessa azione */
   avvisa: (s: string, riprova?: () => void) => void;
 };

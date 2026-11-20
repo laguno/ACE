@@ -34,7 +34,9 @@ export default function Genitori({ client, esci, chiudi }: { client: SupabaseCli
   const cambia = (s: Scheda) => (setScheda(s), setAvviso(undefined), setSospeso(false), setVaiA(undefined));
   const timer = useRef<number>(undefined);
   const passi = async (tipo: string, id: string) => {
-    const { data } = await client.functions.invoke('passi', { body: { tipo, id } });
+    // null = la funzione non ha risposto: distinto da 0 (tetto pieno, già dati), così l'errore non si legge come "tetto pieno"
+    const { data, error } = await client.functions.invoke('passi', { body: { tipo, id } });
+    if (error) return null;
     return (data?.passi as number) ?? 0;
   };
   // avviso in basso per 10 secondi; con "Riprova" resta finché non si tocca o si cambia scheda
