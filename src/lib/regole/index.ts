@@ -413,7 +413,8 @@ export type TipoSessione = 'rilettura_flashcard' | 'flashcard_mappa' | 'quiz' | 
 /**
  * Piano di ripasso di una verifica (docs/03): fino a 4 sessioni nei giorni prima, l'ultima la sera
  * prima. Con meno giorni si comprime tenendo l'inizio (rilettura) e la fine (quiz). I giorni
- * occupati (partite) si saltano. Nessuna sessione il giorno stesso della verifica.
+ * occupati si saltano: le sere piene, cioè partite e allenamenti tardi (C.seraPiena, dal 19/11:
+ * niente ripasso serale). Nessuna sessione il giorno stesso della verifica.
  */
 export function pianoRipasso(
   dataVerifica: Date,

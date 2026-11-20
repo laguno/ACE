@@ -55,7 +55,7 @@ describe('notifiche', () => {
     expect(testo).toMatch(/17:30/);
     expect(testo.length).toBeLessThanOrEqual(60);
   });
-  it('14:45 compiti nuovi per domani; chiusura alle 20:30; sollecito con compiti mancanti', async () => {
+  it('14:45 compiti nuovi per domani; chiusura alle 20:30; sollecito con compiti mancanti anticipato a prima delle 21', async () => {
     const c = stato.banco!.come;
     await c(null, `insert into impostazioni (chiave, valore) values ('ora_chiusura', '{"2": "20:30"}') on conflict (chiave) do update set valore = excluded.valore`);
     await c(null, `insert into compiti (testo, scadenza, creato_il) values ('Es. lungo pag. 40-45', '2026-11-25', '2026-11-24T14:31:00+01:00')`);
@@ -64,10 +64,55 @@ describe('notifiche', () => {
     expect((await json(await f(richiesta({}, { cron: true })))).corpo.inviate).toEqual({ pomeriggio: 1 });
     alle('2026-11-24T20:31:00+01:00');
     expect((await json(await f(richiesta({}, { cron: true })))).corpo.inviate).toEqual({ chiusura: 1 });
-    alle(`2026-11-24T${'21:16'}:00+01:00`);
+    // 20:30 + 45 minuti cadrebbe dopo le 21:00: il sollecito va all'ultimo giro prima (blocco G)
+    alle('2026-11-24T20:46:00+01:00');
     const s = (await json(await f(richiesta({}, { cron: true })))).corpo.inviate;
     expect(s).toEqual({ sollecito: 1 });
+    alle('2026-11-24T21:16:00+01:00');
+    expect((await json(await f(richiesta({}, { cron: true })))).corpo.inviate).toEqual({});
     expect(await valore(`select count(*)::int from notifiche_inviate`)).toBe(3);
+  });
+  it('mai durante l\'allenamento: i compiti nuovi delle 14:45 aspettano il rientro', async () => {
+    const c = stato.banco!.come;
+    await c(null, `insert into compiti (testo, scadenza, creato_il) values ('Es. pag. 40', '2026-11-25', '2026-11-24T14:31:00+01:00')`);
+    await c(null, `insert into impegni_famiglia (id, inizio, fine, titolo) values ('a1', '2026-11-24T14:30:00+01:00', '2026-11-24T16:00:00+01:00', 'Allenamento Pallavolo Leilani U-13')`);
+    const f = await carica('notifiche');
+    const turno = async (quando: string) => {
+      alle(`2026-11-24T${quando}:00+01:00`);
+      return (await json(await f(richiesta({}, { cron: true })))).corpo.inviate;
+    };
+    expect(await turno('14:46')).toEqual({});
+    expect(await turno('16:01')).toEqual({}); // ancora il margine del rientro
+    expect(await turno('16:31')).toEqual({ pomeriggio: 1 });
+    expect(await turno('16:46')).toEqual({});
+  });
+  it('martedì con allenamento alle 18:30: chiusura alle 18:00, sollecito solo al rientro', async () => {
+    const c = stato.banco!.come;
+    await c(null, `insert into impostazioni (chiave, valore) values ('ora_chiusura', '{"2": "20:30"}') on conflict (chiave) do update set valore = excluded.valore`);
+    await c(null, `insert into compiti (testo, scadenza) values ('Es. pag. 40', '2026-11-25')`);
+    await c(null, `insert into impegni_famiglia (id, inizio, fine, titolo) values ('a1', '2026-11-24T18:30:00+01:00', '2026-11-24T20:00:00+01:00', 'Allenamento Pallavolo Leilani U-13')`);
+    const f = await carica('notifiche');
+    const turno = async (quando: string) => {
+      alle(`2026-11-24T${quando}:00+01:00`);
+      return (await json(await f(richiesta({}, { cron: true })))).corpo.inviate;
+    };
+    expect(await turno('18:01')).toEqual({ chiusura: 1 });
+    expect(await turno('18:46')).toEqual({}); // in palestra
+    expect(await turno('20:31')).toEqual({ sollecito: 1 });
+  });
+  it('partita FIPAV la sera: niente sollecito, né in campo né dopo le 21', async () => {
+    const c = stato.banco!.come;
+    await c(null, `insert into impostazioni (chiave, valore) values ('ora_chiusura', '{"2": "20:30"}') on conflict (chiave) do update set valore = excluded.valore`);
+    await c(null, `insert into compiti (testo, scadenza) values ('Es. pag. 40', '2026-11-25')`);
+    await c(null, `insert into impegni_famiglia (id, inizio, titolo) values ('fipav:93399:9', '2026-11-24T19:00:00+01:00', 'Partita Lani U14: FOXES vs U14R-EVOLUTION')`);
+    const f = await carica('notifiche');
+    const turno = async (quando: string) => {
+      alle(`2026-11-24T${quando}:00+01:00`);
+      return (await json(await f(richiesta({}, { cron: true })))).corpo.inviate;
+    };
+    expect(await turno('18:31')).toEqual({ chiusura: 1 });
+    for (const q of ['19:16', '20:46', '21:16', '21:46', '22:01']) expect(await turno(q)).toEqual({});
+    expect(await valore(`select count(*)::int from notifiche_inviate where tipo = 'sollecito'`)).toBe(0);
   });
   it('domenica 21:45: riepilogo ai genitori; iscrizione scaduta cancellata', async () => {
     await iscrivi(PAPA, 'https://push.test/scaduto');

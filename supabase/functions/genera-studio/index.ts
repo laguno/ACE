@@ -116,9 +116,9 @@ async function prepara() {
     .order('data');
   if (error) throw new Error(`verifiche: ${error.message}`);
 
-  // giorni con una partita di Lani: niente sessioni di ripasso
-  const { data: impegni } = await db.from('impegni_famiglia').select('titolo, inizio');
-  const partite = (impegni ?? []).filter((i) => C.tipoImpegno(i.titolo) === 'partita').map((i) => R.iso(R.giornoRoma(i.inizio)));
+  // sere piene (partita di Lani, o allenamento dalle 17:00): niente sessioni di ripasso (blocco G, 19/11)
+  const { data: impegni } = await db.from('impegni_famiglia').select('titolo, inizio, tutto_il_giorno');
+  const partite = (impegni ?? []).filter((i) => C.seraPiena(i, R.CONFIG.notifiche)).map((i) => R.iso(R.giornoRoma(i.inizio)));
 
   let sessioni = 0;
   let generate = 0;
