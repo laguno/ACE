@@ -237,6 +237,25 @@ test('cartella segnata ma non fatta: Togli nella Settimana storna i passi e togl
   expect(t['rpc/storna_spunta']).toEqual([expect.objectContaining({ p_motivo: 'cartella', p_riferimento: 'serata:2026-11-23' })]);
 });
 
+test('dieci minuti segnati per sbaglio: Togli nella Settimana storna i passi e li rimette da fare', async ({ page }) => {
+  const { t } = await finto(page, {
+    ...dati(),
+    serate: [{ data: '2026-11-23', cartella_il: null, borsa_il: null, chiusa_il: null, dieci_minuti_da: '2026-11-23T06:30:00Z', dieci_minuti_il: '2026-11-23T06:41:00Z', dieci_minuti_esercizio: null }],
+    movimenti_passi: [
+      { motivo: 'dieci_minuti', riferimento: 'dieci_minuti:2026-11-23', passi: 3, giorno: '2026-11-23' },
+      { motivo: 'quiz', riferimento: '2026-11-22:1', passi: 2, giorno: '2026-11-22' },
+      { motivo: 'storno', riferimento: 'quiz:2026-11-22:1', passi: -2, giorno: '2026-11-23' },
+    ],
+  });
+  await page.goto('/');
+  await scheda(page, 'Settimana');
+  await page.getByRole('button', { name: 'Togli: Dieci minuti di allenamento' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Togli' }).click();
+  await expect(page.getByRole('status')).toContainText('Dieci minuti di allenamento: tolto');
+  expect(t.serate[0].dieci_minuti_il).toBeNull();
+  expect(t['rpc/storna_spunta']).toEqual([expect.objectContaining({ p_motivo: 'dieci_minuti', p_riferimento: 'dieci_minuti:2026-11-23' })]);
+});
+
 test('foto mancante: la fa Lani e la riga non compare; dopo le 20 o dalla scadenza la possono fare i genitori, senza passi', async ({ page }) => {
   const d = dati();
   d.compiti.push({ id: 'c2', testo: 'Leggere', materia_id: 'italiano', scadenza: '2026-11-25', fatto_il: null });

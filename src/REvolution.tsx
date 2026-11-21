@@ -30,7 +30,8 @@ export default function REvolution({ apri = () => {} }: { apri?: (v: 'Oggi') => 
     Promise.all([
       supabase.from('partite').select('id, data, avversaria, set_nostri, set_loro, in_campo, approvata_il').order('data', { ascending: false }).limit(20),
       supabase.from('serate').select('data', { count: 'exact', head: true }).gte('data', R.iso(inizioMese)).not('dieci_minuti_il', 'is', null),
-      supabase.from('movimenti_passi').select('passi').in('motivo', ['partita', 'partita_vinta', 'dieci_minuti']),
+      // con gli storni dei genitori (Togli), che hanno motivo 'storno' e riferimento "motivo:..."
+      supabase.from('movimenti_passi').select('passi, motivo, riferimento').in('motivo', ['partita', 'partita_vinta', 'dieci_minuti', 'storno']),
       supabase.from('classifiche').select('cid, campionato, girone, squadra, righe, aggiornata_il').order('campionato'),
       supabase.from('serate').select('dieci_minuti_da, dieci_minuti_il').eq('data', R.iso(oggi)).maybeSingle(),
     ]).then(([p, s, m, c, o]) => {
@@ -38,7 +39,9 @@ export default function REvolution({ apri = () => {} }: { apri?: (v: 'Oggi') => 
       setD({
         partite: (p.data ?? []) as Partita[],
         dieci: s.count ?? 0,
-        passiCampo: (m.data ?? []).reduce((a, x) => a + x.passi, 0),
+        passiCampo: (m.data ?? [])
+          .filter((x) => x.motivo !== 'storno' || /^(partita|partita_vinta|dieci_minuti):/.test(x.riferimento))
+          .reduce((a, x) => a + x.passi, 0),
         classifiche: (c.data ?? []) as Classifica[],
         mattino: o.data ? { da: o.data.dieci_minuti_da, il: o.data.dieci_minuti_il } : null,
       });

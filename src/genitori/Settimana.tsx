@@ -17,8 +17,24 @@ import { StoricoTutor } from './Tutor';
 type Compito = { id: string; testo: string; scadenza: string; scadenza_spostata: string | null; fatto_il: string | null; materie: { nome: string } | null };
 type Foglio_ = { id: string; titolo: string; scadenza: string | null; dato_il: string | null };
 type Sera = { data: string; cartella_il: string | null; borsa_il: string | null };
-type Dati = { media: number | null; obiettivo: number; note: number; serate: string[]; sere: Sera[]; chiusura: Record<string, string>; compiti: Compito[]; assenze: string[]; fogli: Foglio_[]; rEvolutionDa: string | null };
+type Segnato = { motivo: string; riferimento: string; passi: number; giorno: string };
+type Dati = { media: number | null; obiettivo: number; note: number; serate: string[]; sere: Sera[]; chiusura: Record<string, string>; compiti: Compito[]; assenze: string[]; fogli: Foglio_[]; rEvolutionDa: string | null; segnati: Segnato[] };
 const quando = (c: Compito) => c.scadenza_spostata ?? c.scadenza;
+// Tutto quello che Lani segna e le dà passi, oltre a compiti e sera (che hanno il loro Togli sopra).
+// Togli = storno dei passi (storna_spunta) e, dove c'è, la spunta rimessa a zero.
+const SEGNATI: Record<string, string> = {
+  dieci_minuti: 'Dieci minuti di allenamento',
+  foglio: 'Foglio consegnato',
+  ripasso: 'Ripasso per la verifica',
+  pillola: 'Pillola del giorno',
+  flashcard: 'Giro di flash card',
+  quiz: 'Quiz',
+  matematica: 'Serie di matematica',
+  video: 'Video',
+  foto: 'Foto delle pagine',
+  partita: 'Partita',
+  partita_vinta: 'Partita vinta',
+};
 
 export default function Settimana({ client, passi, avvisa }: Props) {
   const oggi = R.giornoRoma(new Date());
@@ -27,10 +43,10 @@ export default function Settimana({ client, passi, avvisa }: Props) {
   const [giorno, setGiorno] = useState(R.iso(oggi));
   const [d, setD] = useState<Dati>();
   const [vista, setVista] = useState<'foglio'>();
-  const [chiede, setChiede] = useState<'casa' | 'togliCasa' | { togli: Compito } | { sera: 'cartella' | 'borsa' } | { firma: Foglio_ } | { foto: () => void }>();
+  const [chiede, setChiede] = useState<'casa' | 'togliCasa' | { togli: Compito } | { sera: 'cartella' | 'borsa' } | { firma: Foglio_ } | { foto: () => void } | { revoca: Segnato }>();
 
   async function carica() {
-    const [v, o, n, s, c, a, f, re, ch] = await Promise.all([
+    const [v, o, n, s, c, a, f, re, ch, mp] = await Promise.all([
       client.from('voti').select('materia_id, voto, peso, fa_media'),
       client.from('impostazioni').select('valore').eq('chiave', 'obiettivo_media').maybeSingle(),
       client.from('note').select('id', { count: 'exact', head: true }).gte('data', R.iso(lun)).lte('data', R.iso(dom)),
@@ -41,7 +57,11 @@ export default function Settimana({ client, passi, avvisa }: Props) {
       client.from('fogli_firma').select('id, titolo, scadenza, dato_il').is('consegnato_il', null).order('scadenza'),
       client.from('impostazioni').select('valore').eq('chiave', R.CHIAVE_R_EVOLUTION).maybeSingle(),
       client.from('impostazioni').select('valore').eq('chiave', 'ora_chiusura').maybeSingle(),
+      client.from('movimenti_passi').select('motivo, riferimento, passi, giorno').gte('giorno', R.iso(lun)).lte('giorno', R.iso(dom)).in('motivo', [...Object.keys(SEGNATI), 'storno']),
     ]);
+    const righe = (mp.data ?? []) as Segnato[];
+    // uno storno arriva il giorno in cui si toglie: basta che sia della stessa settimana (le chiavi chiudono la domenica)
+    const stornati = new Set(righe.filter((x) => x.motivo === 'storno').map((x) => x.riferimento));
     setD({
       media: mediaGenerale(v.data ?? []),
       obiettivo: Number(o.data?.valore ?? 7.35),
@@ -53,6 +73,7 @@ export default function Settimana({ client, passi, avvisa }: Props) {
       assenze: (a.data ?? []).map((x) => x.giorno as string),
       fogli: f.data ?? [],
       rEvolutionDa: typeof re.data?.valore === 'string' ? re.data.valore : null,
+      segnati: righe.filter((x) => x.motivo !== 'storno' && x.passi > 0 && !stornati.has(`${x.motivo}:${x.riferimento}`)),
     });
   }
   useEffect(() => {
@@ -79,6 +100,21 @@ export default function Settimana({ client, passi, avvisa }: Props) {
     const { error: e2 } = await client.from('serate').update({ [`${cosa}_il`]: null }).eq('data', giorno);
     if (e2) return avvisa('Passi annullati, ma la spunta è rimasta.', () => togliSera(cosa));
     fatto(stornato ? `${nome}: spunta tolta e passi annullati.` : `${nome}: spunta tolta.`);
+  }
+  /** Qualunque altra cosa segnata da Lani: via i passi e, dove c'è, via la spunta (così può rifarla). */
+  async function revoca(m: Segnato) {
+    setChiede(undefined);
+    const nome = SEGNATI[m.motivo] ?? m.motivo;
+    const { data: stornato, error } = await client.rpc('storna_spunta', { p_motivo: m.motivo, p_riferimento: m.riferimento });
+    if (error) return avvisa(`${nome}: non tolto.`, () => revoca(m));
+    let e2 = null;
+    if (m.motivo === 'dieci_minuti') {
+      ({ error: e2 } = await client.from('serate').update({ dieci_minuti_da: null, dieci_minuti_il: null, dieci_minuti_esercizio: null }).eq('data', m.riferimento.split(':')[1]));
+    } else if (m.motivo === 'foglio') {
+      ({ error: e2 } = await client.from('fogli_firma').update({ dato_il: null, consegnato_il: null }).eq('id', m.riferimento));
+    }
+    if (e2) return avvisa('Passi annullati, ma la spunta è rimasta.', () => revoca(m));
+    fatto(stornato ? `${nome}: tolto, passi annullati.` : `${nome}: i passi erano già chiusi con le chiavi della settimana.`);
   }
   async function firma(f: Foglio_) {
     setChiede(undefined);
@@ -124,6 +160,7 @@ export default function Settimana({ client, passi, avvisa }: Props) {
   const delGiorno = d.compiti.filter((c) => quando(c) === giorno);
   const aCasa = d.assenze.includes(giorno);
   const sera = d.sere.find((s) => s.data === giorno);
+  const segnati = d.segnati.filter((m) => m.giorno === giorno);
   const scuola = R.giornoDiScuola(R.giorno(giorno));
   // serate da chiudere finora: i giorni passati con una chiusura, più oggi se è già chiusa
   const oggiIso = R.iso(oggi);
@@ -222,6 +259,23 @@ export default function Settimana({ client, passi, avvisa }: Props) {
               ))}
           </Elenco>
         )}
+        {segnati.length > 0 && (
+          <Elenco etichetta="Segnato da Lani">
+            {segnati.map((m) => (
+              <Riga
+                key={`${m.motivo}:${m.riferimento}`}
+                icona={<span className="ga-spunta si"><Check size={16} weight="bold" aria-hidden /></span>}
+                titolo={SEGNATI[m.motivo] ?? m.motivo}
+                sotto={`+${m.passi} passi`}
+                azione={
+                  <button type="button" className="ga-btn tenue" aria-label={`Togli: ${SEGNATI[m.motivo] ?? m.motivo}`} onClick={() => setChiede({ revoca: m })}>
+                    Togli
+                  </button>
+                }
+              />
+            ))}
+          </Elenco>
+        )}
       </section>
 
       <section className="ga-sezione" aria-labelledby="verifiche">
@@ -283,6 +337,14 @@ export default function Settimana({ client, passi, avvisa }: Props) {
           <p className="ga-nota">
             {chiede.sera === 'cartella' ? 'Cartella' : 'Borsa'} di {bello(giorno)} segnata ma non fatta: Lani perde i passi
             {chiede.sera === 'cartella' ? ' e la sera non conta per le chiavi della domenica' : ''}.
+          </p>
+        </Foglio>
+      )}
+      {typeof chiede === 'object' && 'revoca' in chiede && (
+        <Foglio titolo="Togliere?" azione="Togli" conferma={() => revoca(chiede.revoca)} chiudi={() => setChiede(undefined)}>
+          <p className="ga-nota">
+            {SEGNATI[chiede.revoca.motivo] ?? chiede.revoca.motivo} di {bello(chiede.revoca.giorno)}: Lani perde {chiede.revoca.passi} passi
+            {chiede.revoca.motivo === 'dieci_minuti' || chiede.revoca.motivo === 'foglio' ? ' e la spunta torna da fare' : ''}.
           </p>
         </Foglio>
       )}

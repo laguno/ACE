@@ -166,7 +166,9 @@ export function creaGestori(db: SupabaseClient) {
       const il = s.dieci_minuti_il ? new Date(s.dieci_minuti_il) : null;
       if (!R.rEvolutionAttiva(g, await rEvolutionDa())) return niente('R-Evolution spenta');
       if (!da || R.iso(R.giornoRoma(da)) !== s.data || !R.dieciMinutiValidi(da, il)) return niente('dieci minuti non validi');
-      return registra('dieci_minuti', `dieci_minuti:${s.data}`, P.obbligatori.dieci_minuti, g);
+      // dopo un "Togli" dei genitori si può rifare: riferimento nuovo, come per le foto
+      const storni = await conta('movimenti_passi', (q) => q.eq('motivo', 'storno').like('riferimento', `dieci_minuti:dieci_minuti:${s.data}%`));
+      return registra('dieci_minuti', storni ? `dieci_minuti:${s.data}:${storni}` : `dieci_minuti:${s.data}`, P.obbligatori.dieci_minuti, g);
     },
 
     async foglio(id) {
