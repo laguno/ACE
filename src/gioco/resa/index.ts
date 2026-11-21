@@ -14,7 +14,7 @@ const PASSO_MS = 1000 / HZ;
 // pulsante, in nessun punto del campo. Sotto c'è il pavimento in primo piano.
 const SOPRA_TASTI = 26; // px CSS tra la cima dei pulsanti e i piedi (ci sta l'anello di Schiaccia acceso)
 export const FONDO_RISERVA = 126; // px CSS se i pulsanti non si possono misurare
-const VISTA_MIN = 340; // unità che si vedono almeno sopra il pavimento: la palla della battuta (330) quasi tutta
+const VISTA_MIN = 366; // unità che si vedono almeno sopra il pavimento: la palla della battuta (330) tutta, col suo anello
 const DPR_MAX = 2; // oltre non si vede la differenza e il telefono scalda
 export const PUNTO_MS = 1200; // quanto resta la scritta del punto
 export const MOSSA_MS = 1000; // quanto resta il nome della mossa finale
@@ -74,8 +74,9 @@ function hud(o: Hud | null, nomi: [string, string], s: Stato, secondi: number, d
   const numeri = `${punti[0]} · ${punti[1]}`;
   ctx.font = NOMI;
   const barraMin = 60 * dpr;
-  const wA = Math.max(ctx.measureText(nomi[0]).width, barraMin);
-  const wB = Math.max(ctx.measureText(nomi[1]).width, barraMin);
+  const nomeMax = 90 * dpr; // i nomi lunghi si stringono: la pillola non arriva sopra la palla della battuta
+  const wA = Math.min(nomeMax, Math.max(ctx.measureText(nomi[0]).width, barraMin));
+  const wB = Math.min(nomeMax, Math.max(ctx.measureText(nomi[1]).width, barraMin));
   ctx.font = NUMERI;
   const wNum = ctx.measureText(numeri).width;
   const pad = 18 * dpr;
@@ -93,9 +94,9 @@ function hud(o: Hud | null, nomi: [string, string], s: Stato, secondi: number, d
   ctx.fillStyle = '#ffffff';
   ctx.font = NOMI;
   ctx.textAlign = 'left';
-  ctx.fillText(nomi[0], pad, 30 * dpr);
+  ctx.fillText(nomi[0], pad, 30 * dpr, wA);
   ctx.textAlign = 'right';
-  ctx.fillText(nomi[1], larga - pad, 30 * dpr);
+  ctx.fillText(nomi[1], larga - pad, 30 * dpr, wB);
   // barre della mossa, sotto i nomi: il colore va dal viola chiaro al viola scuro man mano che si riempie
   const barre: [Barra, Barra] = [
     { x: pad, y: 38 * dpr, w: wA, h: 10 * dpr },
@@ -206,8 +207,10 @@ export function disegna(c: HTMLCanvasElement, t: Tela, s: Stato, a: Vista, e: Ef
   a.giocatori.forEach((g, l) => disegnaGiocatore(ctx, g, l, squadra.figure[l], squadra.specchio[l], g.cm * s.uPerCm, e.moto[l], f, ora));
   disegnaPalla(ctx, a.palla, e, f, dpr / k, ora);
 
-  // in px dello schermo: pillola del punteggio, segno della palla fuori schermo, scritte
+  // in px dello schermo: pillola del punteggio, segno della palla fuori schermo, scritte; a fine
+  // partita niente di tutto questo: sotto il velo resta solo la scena
   ctx.setTransform(1, 0, 0, 1, 0, 0);
+  if (s.vincitore !== null) return;
   t.hud = hud(t.hud, squadra.nomi, s, Math.ceil(Math.max(0, s.durata - s.tic) / HZ), dpr);
   const hx = Math.round((w - t.hud.tela.width) / 2);
   const hy = Math.round(8 * dpr);
@@ -251,15 +254,18 @@ export function disegna(c: HTMLCanvasElement, t: Tela, s: Stato, a: Vista, e: Ef
     e.punto -= f * PASSO_MS;
   }
 
-  // nome della mossa finale, grande, col colore del personaggio; sotto la scritta del punto
+  // nome della mossa finale, col colore del personaggio: in alto, accanto alla pillola dal lato di chi
+  // l'ha fatta, così non copre né teste né rete
   if (e.mossa > 0) {
     const tt = 1 - e.mossa / MOSSA_MS;
-    ctx.font = '800 56px "Baloo 2", sans-serif';
+    const hw = t.hud.tela.width;
+    const posto = hx - 20 * dpr; // spazio libero tra la pillola e il bordo
+    ctx.font = '800 40px "Baloo 2", sans-serif';
     const largo = ctx.measureText(e.mossaTesto).width + 12;
-    const z = Math.min(dpr * (1 + 0.5 * Math.max(0, 1 - tt * 5)), (w * 0.92) / largo); // i nomi lunghi stanno nello schermo
+    const z = Math.min(dpr * (1 + 0.3 * Math.max(0, 1 - tt * 5)), posto / largo); // i nomi lunghi si stringono
     ctx.globalAlpha = Math.min(1, e.mossa / 200);
-    ctx.setTransform(z, 0, 0, z, w / 2, terra * 0.64);
-    ctx.lineWidth = 12;
+    ctx.setTransform(z, 0, 0, z, e.mossaLato === 0 ? hx / 2 : hx + hw + (w - hx - hw) / 2, hy + 30 * dpr);
+    ctx.lineWidth = 10;
     ctx.strokeStyle = INCHIOSTRO;
     ctx.fillStyle = e.mossaColore;
     ctx.strokeText(e.mossaTesto, 0, 0);

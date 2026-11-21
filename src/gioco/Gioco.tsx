@@ -131,6 +131,7 @@ export default function Gioco() {
         e.mossa = MOSSA_MS;
         e.mossaTesto = mosse[fn.lato];
         e.mossaColore = squadra.colori[fn.lato];
+        e.mossaLato = fn.lato;
         fermo = FERMO_MOSSA;
         colpo = true;
       }

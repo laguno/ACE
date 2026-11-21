@@ -20,6 +20,7 @@ export type Effetti = {
   mossa: number; // ms rimasti della scritta della mossa finale
   mossaTesto: string;
   mossaColore: string;
+  mossaLato: number;
 };
 const SCIA = 7;
 const LINEE = 14;
@@ -40,6 +41,7 @@ export const nuoviEffetti = (): Effetti => ({
   mossa: 0,
   mossaTesto: '',
   mossaColore: '',
+  mossaLato: 0,
 });
 
 /** trauma = quanto tremolio aggiunge (0 = niente, per chi chiede meno movimento); n = scintille. */

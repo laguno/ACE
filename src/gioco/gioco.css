@@ -8,8 +8,8 @@ main.gioco { position: fixed; inset: 0; width: 100%; margin: 0; padding: 0; back
    (più il bordo sicuro), pieni, contorno scuro spesso, sempre allo stesso posto: il pollice li
    trova senza guardare. Colori fissi (non cambiano col tema scuro): la scena resta la stessa.
    Nessun filter e animazioni solo con transform e opacity: costano poco anche sui telefoni lenti. */
-/* croce: una zona di tocco sola, più grande delle frecce (il margine fa parte della zona) */
-.gioco-croce { position: absolute; left: calc(16px + env(safe-area-inset-left)); bottom: calc(12px + env(safe-area-inset-bottom)); display: flex; gap: 4px; padding: 28px 16px 12px; }
+/* croce: una zona di tocco sola, più larga delle frecce ma non più alta (sopra c'è il campo) */
+.gioco-croce { position: absolute; left: calc(16px + env(safe-area-inset-left)); bottom: calc(12px + env(safe-area-inset-bottom)); display: flex; gap: 4px; padding: 0 16px 12px; }
 .gioco-freccia, .gioco-tasti button { display: flex; flex-direction: column; align-items: center; justify-content: center; border: 4px solid var(--notte); border-radius: 24px; color: #fff; box-shadow: 0 6px 0 var(--notte); transition: transform 50ms, box-shadow 50ms; }
 .gioco-freccia { width: 98px; height: 88px; background: var(--viola); }
 .gioco-tasti { position: absolute; right: calc(32px + env(safe-area-inset-right)); bottom: calc(24px + env(safe-area-inset-bottom)); display: flex; gap: 8px; }
@@ -30,8 +30,9 @@ main.gioco { position: fixed; inset: 0; width: 100%; margin: 0; padding: 0; back
 }
 @media (prefers-reduced-motion: reduce) { .gioco-schiaccia.pronto::after { animation: none; opacity: 1; } }
 
-/* Pausa: in alto a destra, lontano dalla pillola del punteggio (al centro) */
-.gioco-ferma { position: absolute; top: calc(10px + env(safe-area-inset-top)); right: calc(16px + env(safe-area-inset-right)); display: grid; place-items: center; width: 52px; height: 52px; padding: 0; border: 3px solid var(--notte); border-radius: 16px; background: rgba(255, 255, 255, 0.85); color: var(--notte); }
+/* Pausa: in basso, tra la croce e i tasti, sotto la linea dei piedi (in alto lo spazio è della palla e
+   dei giocatori); lontana dalla croce, così non si tocca correndo */
+.gioco-ferma { position: absolute; bottom: calc(24px + env(safe-area-inset-bottom)); left: calc(300px + env(safe-area-inset-left)); display: grid; place-items: center; width: 52px; height: 52px; padding: 0; border: 3px solid var(--notte); border-radius: 16px; background: rgba(255, 255, 255, 0.85); color: var(--notte); }
 /* velo della pausa (anche tornando nel gioco dopo essere usciti): si riparte solo col tocco */
 .gioco-velo { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 12px; background: rgba(47, 42, 110, 0.8); color: #fff; }
 .gioco-velo h1 { margin: 0 0 4px; font: 800 32px 'Baloo 2', sans-serif; }
