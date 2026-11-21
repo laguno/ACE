@@ -28,7 +28,7 @@ try {
     await p.waitForFunction(() => [...document.images].every((i) => i.complete));
     const rotte = await p.evaluate(() => [...document.images].filter((i) => i.naturalWidth === 0).map((i) => i.src));
     assert.deepEqual(rotte, [], 'immagini non caricate');
-    if (w > h) assert.ok(await p.evaluate(() => [...document.images].every((i) => i.getBoundingClientRect().height >= 70)), 'figure < 70 px in orizzontale');
+    if (w > h) assert.ok(await p.evaluate(() => [...document.images].every((i) => i.getBoundingClientRect().height >= 52)), 'figure < 52 px in orizzontale');
     assert.equal(await p.locator('.scheda').count(), 18, '9 schede per colonna');
     // bersagli >= 44 px, nessun overflow
     for (const b of await p.locator('.scheda, .selezione-gioca').all()) {
@@ -38,6 +38,9 @@ try {
     assert.ok(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'overflow orizzontale');
     assert.ok(await p.evaluate(() => { const s = document.querySelector('.selezione'); return s.scrollHeight <= s.clientHeight + 1; }), `overflow verticale ${nome}`);
     await p.screenshot({ path: `${FOTO}/${nome}.png` });
+    // testi interi: niente taglio né a capo a metà parola (una parola più larga della scheda)
+    const tagliati = await p.evaluate(() => [...document.querySelectorAll('.scheda')].filter((s) => s.scrollWidth > s.clientWidth + 1 || s.scrollHeight > s.clientHeight + 1 || [...s.querySelectorAll('b, .mossa')].some((e) => e.scrollWidth > e.clientWidth + 1)).map((s) => s.dataset.id));
+    assert.deepEqual(tagliati, [], `testo tagliato ${nome}`);
     // scelta a mano + Gioca
     await p.locator('[data-c="0"][data-id="bart"]').click();
     await p.locator('[data-c="1"][data-id="lady"]').click();

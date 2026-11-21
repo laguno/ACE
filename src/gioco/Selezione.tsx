@@ -88,18 +88,23 @@ export default function Selezione(props: { onGioca: (scelta: { tu: string; cpu: 
                   >
                     {s ? (
                       <>
-                        <img src={s.figura} alt="" draggable={false} />
+                        <span className="fig">
+                          <img src={s.figura} alt="" draggable={false} />
+                          <small>{cm} cm</small>
+                        </span>
                         <span className="testo">
                           <b>{s.nome}</b>
-                          <small>{cm} cm</small>
-                          <span className="mossa" title={s.mossa}>{s.mossa}</span>
+                          <span className="mossa">{s.mossa}</span>
                         </span>
                       </>
                     ) : (
-                      <span className="testo">
-                        <b>A caso</b>
-                        <span className="mossa">La sorte</span>
-                      </span>
+                      <>
+                        <span className="fig">?</span>
+                        <span className="testo">
+                          <b>A caso</b>
+                          <span className="mossa">La sorte</span>
+                        </span>
+                      </>
                     )}
                   </button>
                 );
