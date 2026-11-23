@@ -1142,3 +1142,60 @@ button.chip-pagina { cursor: pointer; }
 .mate-riga-ingresso .secondario.compatto { margin-top: 0; align-self: center; }
 .mate-ok { color: var(--accento); flex: none; }
 .mate-nota { margin: 0; font: 700 14px/1.4 Nunito, sans-serif; color: var(--testo-2); }
+
+/* La mia settimana (23/11): due barre, passi (fucsia) e cose (azzurro), con la tacca della soglia
+   della chiave; la striscia sopra la barra di navigazione ne è la versione piccola. */
+:root { --azzurro: #2a6fb0; --azzurro-chiaro: #dcefff; }
+.barre-settimana { display: grid; gap: 16px; }
+.riga-barra { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 6px; }
+.riga-barra .numero { font-weight: 900; font-size: 18px; }
+.riga-barra .numero.passi { color: var(--accento); }
+.riga-barra .numero.cose { color: var(--azzurro); }
+.sotto-barra { margin: 6px 0 0; font-size: 14px; color: var(--testo-2); }
+.barra-settimana { position: relative; border-radius: 999px; background: var(--rosa); }
+.barra-settimana.cose { background: var(--azzurro-chiaro); }
+.barra-settimana .riempita { display: block; height: 100%; border-radius: inherit; background: var(--fucsia); transition: width 0.6s ease; }
+.barra-settimana.cose .riempita { background: var(--azzurro); }
+.barra-settimana .tacca { position: absolute; top: -4px; bottom: -4px; width: 3px; margin-left: -1.5px; border-radius: 2px; background: var(--testo); }
+@media (prefers-reduced-motion: reduce) { .barra-settimana .riempita { transition: none; } }
+.chiavi-settimana { list-style: none; margin: 0; padding: 12px 0 0; border-top: 1px solid var(--rosa-bordo); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.chiavi-settimana li { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 13px; font-weight: 800; text-align: center; color: var(--testo-2); }
+.chiavi-settimana li.presa { color: var(--testo); }
+.chiavi-settimana li:not(.presa) .sticker { opacity: 0.55; }
+.prossime { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.prossime li { display: flex; align-items: center; gap: 10px; }
+.cerchio-vuoto { flex: none; width: 20px; height: 20px; border-radius: 999px; border: 2px solid var(--lilla-bordo); }
+.griglia-settimana-box { overflow-x: auto; }
+.griglia-settimana { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.griglia-settimana th, .griglia-settimana td { padding: 6px 0; text-align: center; border-top: 1px solid var(--rosa); }
+.griglia-settimana thead th { border-top: 0; font-size: 13px; color: var(--testo-2); font-weight: 800; }
+.griglia-settimana thead th.oggi { color: var(--accento); }
+.griglia-settimana thead th:first-child { width: 92px; }
+.griglia-settimana tbody th { text-align: left; display: flex; flex-direction: column; font-size: 14px; line-height: 1.2; }
+.griglia-settimana tbody th small { font-size: 12px; color: var(--testo-2); font-weight: 700; }
+.cella > span { width: 30px; height: 30px; margin: 0 auto; border-radius: 999px; display: grid; place-items: center; font-size: 11px; font-weight: 900; }
+.cella.fatta > span { background: var(--accento); color: var(--su-colore); }
+.cella.da_fare > span { border: 2px solid var(--lilla-bordo); color: var(--testo-2); }
+.cella.persa > span { border: 2px dashed var(--lilla-bordo); color: var(--testo-2); }
+.cella.jolly > span { background: var(--burro-chiaro); color: var(--testo); }
+.cella.vuota > span { width: 6px; height: 6px; background: var(--lilla-medio); }
+.legenda-settimana { list-style: none; margin: 10px 0 0; padding: 10px 0 0; border-top: 1px solid var(--rosa-bordo); display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 13px; color: var(--testo-2); }
+.legenda-settimana li { display: flex; align-items: center; gap: 6px; }
+.legenda-settimana .cella > span { width: 18px; height: 18px; }
+
+/* striscia sopra la barra: alta 32, staccata di 6; il fondo di main cresce di altrettanto */
+.striscia-settimana {
+  position: fixed; z-index: 5; left: 50%; transform: translateX(-50%);
+  bottom: calc(14px + 66px + 6px + env(safe-area-inset-bottom));
+  width: min(100% - 52px, 378px); min-height: 44px;
+  display: flex; align-items: center; gap: 12px; padding: 8px 14px;
+  border: 0; border-radius: 22px; background: var(--bianco); box-shadow: var(--ombra); cursor: pointer;
+}
+.striscia-settimana .barre-piccole { flex: 1; display: grid; gap: 6px; }
+.striscia-settimana .barra-settimana .tacca { top: -3px; bottom: -3px; width: 2px; margin-left: -1px; }
+.striscia-settimana .chiavi-piccole { display: flex; gap: 2px; }
+main:has(~ .striscia-settimana), body:has(.striscia-settimana) main { padding-bottom: calc(154px + env(safe-area-inset-bottom)); }
+body:has(.studio) .striscia-settimana { display: none; }
+body[data-sfondo='sera'] .striscia-settimana {
+  --bianco: var(--notte-carta); --testo: var(--notte-testo); --rosa: var(--notte-rosa); --azzurro-chiaro: #2d3f66; --ombra: 0 10px 24px rgba(0, 0, 0, 0.3);
+}

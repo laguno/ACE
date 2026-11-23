@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Check, Lightbulb } from '@phosphor-icons/react';
 import { supabase } from './supabase';
+import { avvisaPassi } from './settimana';
 import { senti } from './sensi';
 
 // Pezzi comuni a Oggi e Sera: la spunta di un compito e il suo aspetto.
@@ -25,6 +26,7 @@ export const SELECT_COMPITI = 'id, testo, fatto_il, scadenza_spostata, materie(n
 /** La funzione "passi" decide i passi dallo stato del database; restituisce quanti ne ha dati. */
 export async function passi(tipo: string, id: string): Promise<number> {
   const { data } = await supabase.functions.invoke('passi', { body: { tipo, id } });
+  avvisaPassi();
   return data?.passi ?? 0;
 }
 
