@@ -2,6 +2,17 @@
 
 Storia delle sessioni, decisioni prese e scelte approvate: `docs/storico.md`.
 
+## La mia settimana e regole del 23/11 (ramo `settimana`, su GitHub, NON in produzione)
+
+- Analisi della prima settimana (16-22/11, zero chiavi: 62% dei passi obbligatori, mancavano ripassi e dieci minuti) e prototipo approvato dal signore. Fatto in una sessione cloud; da provare su ACE Prova.
+- **Regole decise dal signore il 23/11** (config-gioco.json): borsa solo prima dello sport di lunedì e venerdì (`borsa.giorni_allenamento`), le altre sere promemoria senza passi; dieci minuti avviabili 6:00-21:20 (`finestra.ultimo_avvio`) e per le chiavi 6 giorni su 7 (`giorni_a_settimana`, il primo saltato è il jolly); chiavi domenica alle 23:00 (`chiavi_settimana.ora_conteggio`, migrazione `0071`, guardia nella funzione `chiavi`), riepilogo ai genitori alle 23:15.
+- **Calcolo unico della settimana** `src/lib/regole/settimana.ts` (`calcolaSettimana`, test in `settimana.test.ts`): lo usano la funzione `chiavi` (`_shared/chiavi.ts`) e l'app (`src/settimana.ts`, evento `ace:passi` dopo ogni spunta). Cambia rispetto a prima: compiti contati nella settimana della scadenza; spunte stornate fuori dal conto (prima restavano dentro).
+- **Lani**: schermata "La mia settimana" (`src/Settimana.tsx`: due barre con tacca della soglia, chiavi, prossime tre cose, griglia giorno per giorno) e striscia sopra la barra di navigazione che la apre (nascosta in Studio). Oggi: la tabellina mostra una tacca per ogni cosa che conta per le chiavi e separa i passi in più (`perLeChiavi` in `lib/regole/tabellina.ts`). La barra resta Oggi, Studio, Sera, R-Evo, Astra.
+- **Genitori**: Settimana apre con le stesse barre e griglia ("Verso le chiavi"); Forzieri esce dalla barra (tre schede) e si apre dal fondo della Settimana con il PIN ogni volta (`PinPremi` in `Genitori.tsx`).
+- Prove fatte nel cloud: unità verdi (tranne `cron.test.ts` ucciso per memoria e `genitori/comune.test.ts` senza `.env`, uguali su `main`), `prova:schema` 362 ok, `tsc` 0, build ok. **Non fatte**: Playwright (browser non scaricabile dal cloud): `genitori.e2e.ts` e `casi.ts` aggiornati a mano per i premi dietro il PIN, vanno girati sul PC; il finto potrebbe non rispondere alle letture nuove della striscia.
+- **Per ACE Prova**: unire `origin/settimana` nel ramo di prova; sul Supabase locale applicare `0071` e poi `select cron.unschedule('chiavi')` (in locale i cron restano spenti); servire le funzioni `passi`, `chiavi`, `tabellina`, `notifiche` cambiate; `npm run prova:telefono`.
+- **Prima della produzione**: backup, Playwright verde, `npm run simula` (borsa e dieci minuti cambiano i passi possibili: controllare la taratura), `db push` di `0071`, ripubblicare `chiavi`, `passi`, `tabellina`, `notifiche` e quelle che importano `_shared` cambiato.
+
 ## Togli su tutto quello che segna Lani (21/11, IN PRODUZIONE `fb18b5d`, backup `ace-2026-11-21_14-40-36.sql`)
 
 - Richiesta urgente del signore: Lani aveva segnato per sbaglio i dieci minuti e non si potevano togliere. Ora in Settimana, giorno per giorno, "Segnato da Lani" elenca ogni cosa con passi ancora validi (dieci minuti, foglio, ripasso, pillola, flash card, quiz, matematica, video, foto, partita): Togli = `storna_spunta` + per dieci minuti e fogli la spunta torna da fare. Compiti, cartella e borsa avevano già il loro Togli. R-Evolution ora conta gli storni nei passi di campo.

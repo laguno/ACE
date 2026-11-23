@@ -32,12 +32,14 @@ Quattro mondi (sfondi in `public/assets/sfondi/`): Colline di caramelle, Montagn
 |---|---|---|
 | Compiti per domani fatti | ogni giorno di scuola | 10 (13 se fatti almeno 2 giorni prima della scadenza) |
 | Cartella pronta | ogni sera di scuola | 5 |
-| Borsa pronta | sera prima di allenamento o partita | 2 |
+| Borsa pronta | sera prima di allenamento o partita del lunedì e del venerdì (domenica e giovedì sera; dal 23/11); le altre sere resta un promemoria senza passi | 2 |
 | Foglio da firmare consegnato | quando c'è (lo segna un genitore) | 2 |
 | Sessione di ripasso | 3-4 giorni prima di una verifica | 10 |
-| Dieci minuti di allenamento | ogni giorno, a qualsiasi ora, con il timer; vale solo se finito tutto | 10 (dallo sprint 2) |
+| Dieci minuti di allenamento | ogni giorno, avviati dalle 6:00 alle 21:20, con il timer; vale solo se finito tutto. Per le chiavi ne contano 6 su 7 (un giorno jolly, dal 23/11) | 10 (dallo sprint 2) |
 
 **Anticipo**: la serie di giorni in anticipo dura al massimo fino a fine settimana, poi riparte.
+
+**Conteggio della settimana (23/11)**: le chiavi si contano la domenica alle 23:00 (prima 21:30). Un compito conta nella settimana della sua scadenza, anche se fatto prima; una spunta tolta da un genitore (storno) non conta. Lo stesso calcolo (`src/lib/regole/settimana.ts`) dà a Lani le due barre di "La mia settimana" e la striscia sopra la barra, così durante la settimana vede quello che conterà la domenica.
 
 ## Passi: studio facoltativo (non conta per le chiavi)
 

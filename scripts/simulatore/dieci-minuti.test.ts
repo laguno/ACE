@@ -10,7 +10,7 @@ import { client } from './database.ts';
 const accendi = (pg: PGlite, da: string) =>
   pg.query(`insert into impostazioni (chiave, valore) values ($1, to_jsonb($2::text))`, [R.CHIAVE_R_EVOLUTION, da]);
 
-test('dieci minuti: passi solo con R-Evolution accesa, al mattino, col timer in fondo, una volta al giorno', { timeout: 60_000 }, async () => {
+test('dieci minuti: passi solo con R-Evolution accesa, nella finestra, col timer in fondo, una volta al giorno', { timeout: 60_000 }, async () => {
   const { db: pg } = (await creaDatabase()) as { db: PGlite };
   const db = client(pg) as unknown as SupabaseClient;
   const gestori = creaGestori(db);
@@ -32,11 +32,13 @@ test('dieci minuti: passi solo con R-Evolution accesa, al mattino, col timer in 
   expect(await passi('2026-11-30')).toBe(0); // prima del giorno di accensione
   await giorno('2026-12-01', '07:00', minuti - 1); // timer interrotto: niente
   expect(await passi('2026-12-01')).toBe(0);
-  await giorno('2026-12-02', '20:00', minuti); // la sera: fuori dalla finestra
+  await giorno('2026-12-02', '21:25', minuti); // dopo l'ultimo avvio delle 21:20: fuori dalla finestra
   expect(await passi('2026-12-02')).toBe(0);
   await giorno('2026-12-03', '12:55', minuti); // avviati alle 12:55: valgono
   expect(await passi('2026-12-03')).toBe(dieci);
   expect(await passi('2026-12-03')).toBe(0); // già registrato
+  await giorno('2026-12-04', '21:20', minuti); // la sera, all'ultimo avvio (23/11): valgono
+  expect(await passi('2026-12-04')).toBe(dieci);
   // la serata (cartella e borsa) non li conta più
   expect((await eseguiPassi(db, gestori, 'serata', '2026-12-03')).passi ?? 0).toBe(0);
 });
