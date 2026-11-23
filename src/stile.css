@@ -1478,3 +1478,34 @@ body[data-sfondo='sera'] .pillola-barra.p-cose .conto-p { color: var(--notte-tes
    i bottoni non ancora attivi non sono più trasparenti: fondo tenue e testo pieno, 4,5:1 anche da spenti */
 .esiti .principale { color: var(--su-colore); }
 .esiti button:disabled, .esiti .principale:disabled { opacity: 1; background: #f1ecf5; color: #5e4470; box-shadow: none; outline: 2px dashed #cdb8f5; outline-offset: -2px; cursor: default; }
+
+/* Sera v2 (design/v2/Sera-v2.dc.html, 23/11): notte di zucchero con stelle, nuvole di marshmallow e luna;
+   carte bianche sul cielo scuro (dentro la carta tornano i colori del giorno), righe chiuse traslucide */
+body[data-sfondo='sera'] {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='390' height='300' viewBox='0 0 390 300'%3E%3Cg fill='%23fff'%3E%3Ccircle cx='40' cy='40' r='1.6' opacity='.8'/%3E%3Ccircle cx='120' cy='22' r='1.2' opacity='.6'/%3E%3Ccircle cx='210' cy='58' r='1.8' opacity='.7'/%3E%3Ccircle cx='250' cy='16' r='1.1' opacity='.5'/%3E%3Ccircle cx='80' cy='120' r='1.3' opacity='.5'/%3E%3Ccircle cx='170' cy='150' r='1' opacity='.4'/%3E%3Ccircle cx='350' cy='190' r='1.4' opacity='.5'/%3E%3Ccircle cx='30' cy='230' r='1' opacity='.4'/%3E%3C/g%3E%3Cg opacity='.9'%3E%3Ccircle cx='300' cy='150' r='18' fill='%23F3C6E4'/%3E%3Ccircle cx='322' cy='140' r='24' fill='%23F7D6EC'/%3E%3Ccircle cx='348' cy='152' r='17' fill='%23F3C6E4'/%3E%3Crect x='290' y='150' width='70' height='18' rx='9' fill='%23F7D6EC'/%3E%3C/g%3E%3Cg opacity='.7'%3E%3Ccircle cx='30' cy='196' r='13' fill='%23CFC4FA'/%3E%3Ccircle cx='50' cy='188' r='18' fill='%23DDD4FF'/%3E%3Ccircle cx='72' cy='198' r='12' fill='%23CFC4FA'/%3E%3Crect x='22' y='196' width='56' height='13' rx='6.5' fill='%23DDD4FF'/%3E%3C/g%3E%3C/svg%3E") no-repeat top center / 390px 300px,
+    linear-gradient(180deg, #14123a 0, #24215a 420px, #2d2a66 100%) no-repeat,
+    #2d2a66;
+}
+.sera .testata.piccola { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='76' height='76' viewBox='0 0 76 76'%3E%3Cpath d='M50 8a30 30 0 1 0 18 46A26 26 0 0 1 50 8z' fill='%23FFE27A'/%3E%3C/svg%3E") no-repeat right 10px top 0 / 76px 76px; }
+.sera .testata.piccola .sopratitolo { color: #c9c6f0; }
+.sera .carta {
+  --bianco: #fff; --panna: #fff6fa; --testo: #3d2350; --testo-2: #5e4470; --accento: #c2185b; --accento-premuto: #8e1043; --su-colore: #fff;
+  --lilla: #f3e6fd; --rosa: #ffe3ef; --lilla-medio: #cdb8f5; --lilla-bordo: #9580cf; --rosa-bordo: #ffc8e1;
+  background: #fff; color: #3d2350;
+}
+.sera .carta.tratteggiata { background: transparent; color: var(--notte-testo); border: 2px dashed #8c88d8;
+  --bianco: var(--notte-carta); --testo: var(--notte-testo); --testo-2: #c9c6f0; --accento: var(--notte-accento); --su-colore: var(--notte-fondo); }
+.testa-sera { display: flex; align-items: center; gap: 12px; }
+.cerchio-gettone { width: 44px; height: 44px; flex: none; border-radius: 999px; display: grid; place-items: center; }
+.testa-sera-testo { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.testa-sera h2 { margin: 0; font: 800 20px/1.1 'Baloo 2', Nunito, sans-serif; }
+.testa-sera .nota { margin: 0; font-size: 13px; font-weight: 800; color: #5e4470; }
+.conto-sera { font: 900 15px Nunito, sans-serif; white-space: nowrap; }
+.chip-materia { display: inline-block; margin-right: 4px; padding: 4px 10px; border-radius: 999px; font: 900 12px Nunito, sans-serif; vertical-align: 1px; }
+.lady-riga { display: flex; align-items: center; gap: 8px; margin: -2px 0 0; font: 800 14px/1.35 Nunito, sans-serif; color: #5e4470; }
+.lady-riga .sticker { flex: none; }
+.sera .carta-chiusa { color: var(--notte-testo); }
+.sera .carta-chiusa .dopo { color: #c9c6f0; }
+.sera .testata.piccola { min-height: 0; }
+.sera .testata.piccola .testata-avatar { width: 84px; height: 84px; }

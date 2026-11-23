@@ -141,7 +141,7 @@ test('venerdì con partita sabato: chiusura breve con la sola borsa', async ({ p
   await expect(page.getByRole('heading', { name: 'Pronta per sabato?' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Borsa' })).toBeVisible();
   await expect(page.getByText('Partita domani alle 18:30.')).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Compiti per domani' })).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Compiti', exact: true })).toHaveCount(0);
   // 23/11: la borsa del sabato è solo promemoria, fuori dal conto delle cose pronte
   await expect(page.getByText('pronte', { exact: false })).toHaveCount(0);
 });

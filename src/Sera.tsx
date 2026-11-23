@@ -2,9 +2,9 @@ import { useCallback, useEffect, useState } from 'react';
 import * as C from './lib/calendario';
 import * as N from './lib/nuvola';
 import * as R from './lib/regole';
-import { GIORNI, RigaCompito, SELECT_COMPITI, adesso, maiuscola, mostraValore, passi, spuntaCompito, useAnnulla, type Compito } from './spunte';
+import { GIORNI, RigaCompito, SELECT_COMPITI, adesso, maiuscola, passi, spuntaCompito, useAnnulla, type Compito } from './spunte';
 import { supabase } from './supabase';
-import { Check } from '@phosphor-icons/react';
+import { Backpack, BookOpen, Check, Volleyball } from '@phosphor-icons/react';
 import { Sticker, Testata } from './kit';
 import { Frase } from './Frase';
 import { GETTONI, coloreMateria, type Gettone } from './colori';
@@ -30,7 +30,7 @@ function posaPersona(titolo: string): string {
 }
 
 /** Riga chiusa di una cosa pronta (v2): cerchio del colore del gettone con la spunta. */
-function Chiusa({ titolo, gettone, dopo, onAnnulla, valore }: { titolo: string; gettone: Gettone; dopo: string; onAnnulla?: () => void; valore?: number | null }) {
+function Chiusa({ titolo, gettone, dopo, onAnnulla }: { titolo: string; gettone: Gettone; dopo: string; onAnnulla?: () => void }) {
   return (
     <div className="carta-chiusa">
       <span className="cerchio-chiuso" style={{ background: GETTONI[gettone].segno }}>
@@ -38,7 +38,6 @@ function Chiusa({ titolo, gettone, dopo, onAnnulla, valore }: { titolo: string; 
       </span>
       <b>{titolo}</b>
       <span className="dopo">{dopo}</span>
-      {valore != null && <span className={`valore${onAnnulla ? ' appena' : ''}`}>+{valore}</span>}
       {onAnnulla && (
         <button className="lampadina annulla" onClick={onAnnulla}>
           Annulla
@@ -48,9 +47,33 @@ function Chiusa({ titolo, gettone, dopo, onAnnulla, valore }: { titolo: string; 
   );
 }
 
+const ICONE_SERA: Record<Gettone, typeof Check> = { compiti: BookOpen, ripasso: BookOpen, cartella: Backpack, borsa: Volleyball };
+
+/** Testa delle carte della sera (bozza v2): cerchio del gettone con l'icona, titolo e "N di M". */
+function TestaSera({ titolo, gettone, conto, children }: { titolo: string; gettone: Gettone; conto?: string; children?: React.ReactNode }) {
+  const g = GETTONI[gettone];
+  const Icona = ICONE_SERA[gettone];
+  return (
+    <div className="testa-sera">
+      <span className="cerchio-gettone" style={{ background: g.fondo, color: g.segno }} aria-hidden>
+        <Icona size={24} weight="bold" />
+      </span>
+      <span className="testa-sera-testo">
+        <h2>{titolo}</h2>
+        {children}
+      </span>
+      {conto && (
+        <span className="conto-sera" style={{ color: g.segno }}>
+          {conto}
+        </span>
+      )}
+    </div>
+  );
+}
+
 /** Lista a voci (cartella, borsa): spuntate una per una sul telefono, con l'ultima è pronta. */
 // ponytail: le voci spuntate si perdono se si chiude l'app prima dell'ultima.
-function Voci({ titolo, valore, voci, pronta, quandoPronta, onAnnulla, gettone, conPallini = false, children }: {
+function Voci({ titolo, voci, pronta, quandoPronta, onAnnulla, gettone, conPallini = false, children }: {
   titolo: string;
   /** passi che vale, preso dal config; null = promemoria senza passi (la borsa fuori da lun/ven) */
   valore: number | null;
@@ -75,14 +98,12 @@ function Voci({ titolo, valore, voci, pronta, quandoPronta, onAnnulla, gettone, 
   const g = GETTONI[gettone];
   // v2: quando una cosa è pronta la sua carta si chiude in una riga con la spunta
   if (pronta)
-    return <Chiusa titolo={titolo} gettone={gettone} dopo="pronta" onAnnulla={onAnnulla} valore={valore !== null && mostraValore(pronta) ? valore : null} />;
+    return <Chiusa titolo={titolo} gettone={gettone} dopo="pronta" onAnnulla={onAnnulla} />;
   return (
     <div className="carta">
-      <div className="testa-carta">
-        <h2>{titolo}</h2>
-        {valore !== null && mostraValore(pronta) && <span className={`valore${onAnnulla ? ' appena' : ''}`}>+{valore}</span>}
-      </div>
-      {children}
+      <TestaSera titolo={titolo} gettone={gettone} conto={`${voci.filter((v) => messe.has(v)).length} di ${voci.length}`}>
+        {children}
+      </TestaSera>
       <ul className="pastiglie">
         {voci.map((v) => (
           <li key={v}>
@@ -195,7 +216,7 @@ export default function Sera() {
     ) : (
       // intestazione subito (Lighthouse, 13/11); il giorno può cambiare solo nella chiusura breve del ven/sab
       <section className="schermo sera">
-        <Testata sfondo="sera" posa="lani-assonnata" sopra={`${maiuscola(GIORNI[oggi.getDay()])} sera`} titolo={`Pronta per ${GIORNI[domani.getDay()]}?`} />
+        <Testata sfondo="sera" posa="lani-assonnata" misura={84} piccola sopra={`${maiuscola(GIORNI[oggi.getDay()])} sera`} titolo={`Pronta per ${GIORNI[domani.getDay()]}?`} />
       </section>
     );
 
@@ -230,6 +251,8 @@ export default function Sera() {
       <Testata
         sfondo="sera"
         posa="lani-assonnata"
+        misura={84}
+        piccola
         sopra={`${maiuscola(GIORNI[oggi.getDay()])} sera`}
         titolo={`Pronta per ${GIORNI[(soloBorsa ? domaniCal : domani).getDay()]}?`}
         riga={
@@ -248,14 +271,20 @@ export default function Sera() {
         }
       />
       {errore && <p role="alert">{errore}</p>}
+      {tuttoPronto && (
+        <section className="buonanotte" aria-label="Tutto pronto">
+          <Sticker posa="bart-sonnecchia" misura={76} />
+          <div>
+            <b>Buonanotte!</b>
+            <span>Domani è tutto pronto. Bart dorme.</span>
+          </div>
+        </section>
+      )}
 
       {!soloBorsa && compiti.length > 0 && mancanti === 0 && <Chiusa titolo="Compiti" gettone="compiti" dopo="fatti" />}
       {!soloBorsa && !(compiti.length > 0 && mancanti === 0) && (
       <div className="carta">
-        <div className="testa-carta">
-          <h2>Compiti per domani</h2>
-          {mostraValore(compiti.some((c) => c.fatto_il)) && <span className="valore">+{R.CONFIG.passi.obbligatori.compiti} ciascuno</span>}
-        </div>
+        <TestaSera titolo="Compiti" gettone="compiti" conto={compiti.length ? `${compiti.length - mancanti} di ${compiti.length}` : undefined} />
         {compiti.length === 0 && <p>Nessun compito su Nuvola per domani.</p>}
         <ul className="spunte">
           {compiti.map((c) => (
@@ -272,14 +301,14 @@ export default function Sera() {
                   ? () => attesa.annulla(c.id, () => setCompiti((l) => l?.map((x) => (x.id === c.id ? { ...x, fatto_il: null } : x))))
                   : undefined
               }
-              valore={R.CONFIG.passi.obbligatori.compiti}
+              chip
             />
           ))}
         </ul>
         {mancanti > 0 && (
-          <p className="lady con-lady">
-            Lady si è sdraiata sui compiti: {mancanti === 1 ? 'ne manca uno' : `ne mancano ${mancanti}`}.
-            <Sticker posa="lady-compiti" misura={92} className="lady-sticker" />
+          <p className="lady-riga">
+            <Sticker posa="lady-compiti" misura={64} />
+            <span>Lady si è sdraiata sui compiti: {mancanti === 1 ? 'ne manca uno' : `ne mancano ${mancanti}`}.</span>
           </p>
         )}
       </div>
@@ -367,16 +396,6 @@ export default function Sera() {
             {famiglia.tutto_il_giorno ? '' : ` alle ${C.oraRoma(famiglia.inizio)}`}. Tienilo a mente per la cartella e la sveglia.
           </span>
         </p>
-      )}
-
-      {tuttoPronto && (
-        <section className="buonanotte" aria-label="Tutto pronto">
-          <Sticker posa="bart-sonnecchia" misura={76} />
-          <div>
-            <b>Buonanotte!</b>
-            <span>Domani è tutto pronto. Bart dorme.</span>
-          </div>
-        </section>
       )}
 
       {/* la sera prima di una verifica; se no a chiusura finita (al massimo una frase al giorno) */}

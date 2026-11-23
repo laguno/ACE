@@ -3,6 +3,7 @@ import { Check, Lightbulb } from '@phosphor-icons/react';
 import { supabase } from './supabase';
 import { avvisaPassi } from './datiSettimana';
 import { senti } from './sensi';
+import { coloreMateria } from './colori';
 
 // Pezzi comuni a Oggi e Sera: la spunta di un compito e il suo aspetto.
 
@@ -33,7 +34,7 @@ export async function passi(tipo: string, id: string): Promise<number> {
 /** Compito spostato dai genitori alla lezione dopo un giorno a casa (docs/02, Assenze). */
 const SPOSTATO = 'Spostato: eri a casa';
 
-export function RigaCompito({ c, numero, nota, onSpunta, onAiuto, onAnnulla, valore }: {
+export function RigaCompito({ c, numero, nota, onSpunta, onAiuto, onAnnulla, valore, chip = false }: {
   c: Compito;
   numero?: number;
   /** riga piccola sotto il testo (es. "Inizia da qui: è il più lungo") */
@@ -44,6 +45,8 @@ export function RigaCompito({ c, numero, nota, onSpunta, onAiuto, onAnnulla, val
   onAnnulla?: () => void;
   /** passi della spunta: "+N" che sale subito dopo il gesto */
   valore?: number;
+  /** materia come pillola nel suo colore (Sera v2) invece del grassetto */
+  chip?: boolean;
 }) {
   // appena spuntato (i 5 secondi dell'Annulla): il cerchio si riempie con un rimbalzo e il "+N" sale
   const appena = !!onAnnulla && !!c.fatto_il;
@@ -62,7 +65,18 @@ export function RigaCompito({ c, numero, nota, onSpunta, onAiuto, onAnnulla, val
           {c.fatto_il ? <Check size={18} weight="bold" /> : numero}
         </span>
         <span>
-          <b>{c.materie?.nome ?? 'Compito'}</b>: {c.testo}
+          {chip ? (
+            <>
+              <span className="chip-materia" style={{ background: coloreMateria(c.materie?.nome).fondo, color: coloreMateria(c.materie?.nome).testo }}>
+                {c.materie?.nome ?? 'Compito'}
+              </span>{' '}
+              {c.testo}
+            </>
+          ) : (
+            <>
+              <b>{c.materie?.nome ?? 'Compito'}</b>: {c.testo}
+            </>
+          )}
           {(nota ?? (c.scadenza_spostata && SPOSTATO)) && <small className="nota-riga">{nota ?? SPOSTATO}</small>}
         </span>
       </label>
