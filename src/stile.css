@@ -1474,3 +1474,7 @@ body[data-sfondo='sera'] .pillola-barra.p-cose .conto-p { color: var(--notte-tes
 .testata.piccola { min-height: 0; align-items: center; }
 .testata.piccola .testata-avatar { margin: -8px 0; }
 .testata.piccola .testata-testo { min-width: 0; overflow-wrap: anywhere; }
+/* flash card (23/11): Non lo so / Forse / Sicura in bianco sul fucsia (la regola di .esiti li faceva viola scuro, 2:1);
+   i bottoni non ancora attivi non sono più trasparenti: fondo tenue e testo pieno, 4,5:1 anche da spenti */
+.esiti .principale { color: var(--su-colore); }
+.esiti button:disabled, .esiti .principale:disabled { opacity: 1; background: #f1ecf5; color: #5e4470; box-shadow: none; outline: 2px dashed #cdb8f5; outline-offset: -2px; cursor: default; }
