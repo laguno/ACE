@@ -427,7 +427,7 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .tappe .forziere.sopra { top: -154px; }
 .tappe .forziere small { padding: 2px 9px; border-radius: 999px; background: var(--bianco); box-shadow: var(--ombra-etichetta); font: 800 14px 'Baloo 2', Nunito, sans-serif; color: var(--testo); white-space: nowrap; }
 .forziere.enigma img { filter: drop-shadow(0 0 8px var(--burro)); }
-.album-fluttuante { position: fixed; z-index: 4; right: max(16px, calc((100% - 430px) / 2 + 16px)); bottom: calc(142px + env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 6px; min-height: 48px; padding: 0 16px 0 10px; border-radius: 999px; background: var(--bianco); border: 3px solid var(--rosa-bordo); box-shadow: var(--ombra-alta); color: var(--testo); font: 800 14px Nunito, sans-serif; }
+.album-fluttuante { position: fixed; z-index: 4; right: max(16px, calc((100% - 430px) / 2 + 16px)); bottom: calc(176px + env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 6px; min-height: 48px; padding: 0 16px 0 10px; border-radius: 999px; background: var(--bianco); border: 3px solid var(--rosa-bordo); box-shadow: var(--ombra-alta); color: var(--testo); font: 800 14px Nunito, sans-serif; }
 .scheda-forziere { justify-items: center; text-align: center; }
 /* immagini dei premi: sagoma, vera o pacco regalo (Astra, popup del forziere, Premi dei genitori) */
 .premio-figura { margin: 0; display: grid; justify-items: center; gap: 8px; }
@@ -1187,22 +1187,28 @@ button.chip-pagina { cursor: pointer; }
 .legenda-settimana li { display: flex; align-items: center; gap: 6px; }
 .legenda-settimana .cella > span { width: 18px; height: 18px; }
 
-/* striscia sopra la barra: alta 32, staccata di 6; il fondo di main cresce di altrettanto */
-.striscia-settimana {
-  position: fixed; z-index: 5; left: 50%; transform: translateX(-50%);
-  bottom: calc(14px + 66px + 6px + env(safe-area-inset-bottom));
-  width: min(100% - 52px, 378px); min-height: 44px;
-  display: flex; align-items: center; gap: 12px; padding: 8px 14px;
-  border: 0; border-radius: 22px; background: var(--bianco); box-shadow: var(--ombra); cursor: pointer;
-}
-.striscia-settimana .barre-piccole { flex: 1; display: grid; gap: 6px; }
-.striscia-settimana .barra-settimana .tacca { top: -3px; bottom: -3px; width: 2px; margin-left: -1px; }
-.striscia-settimana .chiavi-piccole { display: flex; gap: 2px; }
-main:has(~ .striscia-settimana), body:has(.striscia-settimana) main { padding-bottom: calc(154px + env(safe-area-inset-bottom)); }
-body:has(.studio) .striscia-settimana { display: none; }
-body[data-sfondo='sera'] .striscia-settimana {
-  --bianco: var(--notte-carta); --testo: var(--notte-testo); --rosa: var(--notte-rosa); --azzurro-chiaro: #2d3f66; --ombra: 0 10px 24px rgba(0, 0, 0, 0.3);
-}
+/* Pillola di navigazione (v2, 23/11): Passi sopra, le cinque sezioni, Cose sotto. La tacca scura è dove
+   dovrebbe essere la barra a fine giornata. Il fondo di main cresce quanto la pillola. */
+.pillola { position: fixed; z-index: 5; left: 50%; bottom: calc(14px + env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(100% - 28px, 402px); border-radius: 32px; background: var(--bianco); box-shadow: var(--ombra-alta); overflow: hidden; }
+.pillola .barra { position: static; transform: none; width: auto; height: 62px; box-shadow: none; background: none; border-radius: 0; }
+.pillola-barra { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 6px 18px; border: 0; background: none; color: var(--testo); font: 900 12px Nunito, sans-serif; cursor: pointer; text-align: left; }
+.pillola-barra.p-passi { border-bottom: 1px solid #ffe3ef; padding-top: 10px; }
+.pillola-barra.p-cose { border-top: 1px solid #dcefff; padding-bottom: 11px; }
+.pillola-barra .et { width: 38px; }
+.pillola-barra .pista { position: relative; flex: 1; height: 8px; border-radius: 999px; }
+.pillola-barra.p-passi .pista { background: #ffe3ef; }
+.pillola-barra.p-cose .pista { background: #dcefff; }
+.pillola-barra .piena { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 999px; transition: width 0.6s ease; }
+.pillola-barra.p-passi .piena { background: #e23d8e; }
+.pillola-barra.p-cose .piena { background: #2a6fb0; }
+.pillola-barra .tacca-oggi { position: absolute; top: -4px; width: 3px; height: 16px; margin-left: -1.5px; border-radius: 2px; background: var(--testo); }
+.pillola-barra .chiavi-p { display: flex; gap: 1px; }
+.pillola-barra .conto-p { width: 56px; text-align: right; color: #2a6fb0; }
+main:has(~ .pillola .pillola-barra) { padding-bottom: calc(176px + env(safe-area-inset-bottom)); }
+body:has(.studio) .pillola, body:has(.ga) .pillola { display: none; }
+body[data-sfondo='sera'] .pillola { --bianco: var(--notte-carta); --testo: var(--notte-testo); --testo-2: var(--notte-testo-2); --accento: var(--notte-accento); }
+body[data-sfondo='sera'] .pillola-barra.p-cose .conto-p { color: var(--notte-testo); }
+@media (prefers-reduced-motion: reduce) { .pillola-barra .piena { transition: none; } }
 
 /* Tabellina di Oggi (23/11): una tacca per ogni cosa che conta per le chiavi; passi in più a parte */
 .cose-di-oggi { margin-bottom: 10px; }

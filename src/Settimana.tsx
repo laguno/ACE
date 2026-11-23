@@ -242,26 +242,3 @@ export default function LaMiaSettimana() {
     </section>
   );
 }
-
-/** Striscia sopra la barra di navigazione: le due barre in piccolo e le chiavi; si tocca e si apre la settimana. */
-export function Striscia({ apri }: { apri: () => void }) {
-  const s = useSettimana();
-  if (!s) return null;
-  return (
-    <button
-      className="striscia-settimana"
-      onClick={apri}
-      aria-label={`La mia settimana: passi ${s.percentualePassi} per cento, cose ${s.percentualeCose} per cento, ${s.chiavi} chiavi su 3`}
-    >
-      <span className="barre-piccole" aria-hidden>
-        <Barra tipo="passi" valore={s.percentualePassi} soglia={SOGLIA_PASSI} etichetta="" alto={6} />
-        <Barra tipo="cose" valore={s.percentualeCose} soglia={SOGLIA_COSE} etichetta="" alto={6} />
-      </span>
-      <span className="chiavi-piccole" aria-hidden>
-        {chiaviPrese(s).map((k) => (
-          <Sticker key={k.nome} posa={k.presa ? 'chiave-piena' : 'chiave-vuota'} cartella="oggetti" misura={22} />
-        ))}
-      </span>
-    </button>
-  );
-}

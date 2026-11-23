@@ -195,3 +195,24 @@ export function prossimeCose(s: Settimana, oggi: Date, n = 3): { voce: VoceObbli
     }
   return out;
 }
+
+/**
+ * La tacca di oggi delle barre (v2): dove dovrebbe essere la barra a fine giornata per restare in
+ * pari, cioè le cose possibili fino a oggi (compreso) sul totale della settimana. 0..100.
+ */
+export function tacceDiOggi(s: Settimana, oggi: Date): { passi: number; cose: number } {
+  const fino = iso(oggi);
+  let passi = 0;
+  let cose = 0;
+  for (const r of s.righe) {
+    // i dieci minuti contano fino al tetto: il cumulo non supera le possibili della riga
+    const cumulo = Math.min(
+      r.possibili,
+      r.caselle.filter((c) => c.giorno <= fino).reduce((a, c) => a + c.possibili, 0),
+    );
+    cose += cumulo;
+    passi += cumulo * r.valore;
+  }
+  const pct = (x: number, tot: number) => (tot > 0 ? Math.round((x / tot) * 100) : 0);
+  return { passi: pct(passi, s.passiPossibili), cose: pct(cose, s.cosePossibili) };
+}

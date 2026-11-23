@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CONFIG, giorno } from './index';
-import { calcolaSettimana, prossimeCose, type DatiSettimana } from './settimana';
+import { calcolaSettimana, prossimeCose, tacceDiOggi, type DatiSettimana } from './settimana';
 
 const O = CONFIG.passi.obbligatori;
 // settimana di prova: lunedì 23 novembre 2026, R-Evolution accesa dal 16/11
@@ -106,5 +106,26 @@ describe('settimana in corso', () => {
     expect(p.length).toBe(3);
     expect(p.every((x) => x.giorno >= '2026-11-25')).toBe(true);
     expect(p[0]).toMatchObject({ voce: 'compiti', giorno: '2026-11-25' });
+  });
+});
+
+describe('tacca di oggi (v2)', () => {
+  it('lunedì: solo le cose possibili fino a oggi sul totale della settimana', () => {
+    const s = calcolaSettimana(base({ oggi: giorno('2026-11-23') }));
+    const t = tacceDiOggi(s, giorno('2026-11-23'));
+    // lunedì: cartella (1 su 5) e dieci minuti (1 su 6 che contano) tra le possibili
+    expect(t.cose).toBeGreaterThan(0);
+    expect(t.cose).toBeLessThan(50);
+    expect(t.passi).toBeGreaterThan(0);
+  });
+
+  it('domenica: la tacca è a fine corsa', () => {
+    const s = calcolaSettimana(base({ oggi: giorno('2026-11-29') }));
+    expect(tacceDiOggi(s, giorno('2026-11-29'))).toEqual({ passi: 100, cose: 100 });
+  });
+
+  it('senza cose possibili la tacca resta a zero', () => {
+    const s = calcolaSettimana(base({ rEvolutionDa: null, assenze: ['2026-11-23', '2026-11-24', '2026-11-25', '2026-11-26', '2026-11-27', '2026-11-28', '2026-11-29', '2026-11-22', '2026-11-30'] }));
+    expect(tacceDiOggi(s, giorno('2026-11-25'))).toEqual({ passi: 0, cose: 0 });
   });
 });

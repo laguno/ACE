@@ -17,7 +17,8 @@ import { cambioSchermata } from './sensi';
 import { cercaAncora } from './ancora';
 import type { Dove } from './lib/regole/tabellina';
 // la striscia è sempre in vista: la settimana sta nel pacchetto principale, non si carica dopo
-import LaMiaSettimana, { Striscia } from './Settimana';
+import LaMiaSettimana from './Settimana';
+import Pillola from './Pillola';
 
 // L'app si apre su Oggi o Sera: le altre schermate si caricano al primo tocco (il service worker
 // le tiene già in memoria, anche senza rete).
@@ -196,8 +197,8 @@ function Lani() {
         </button>
       </main>
       <CodaPopup apriEnigma={(n) => (setForziere(n), setVoce('Astra'))} apriStudio={() => setVoce('Studio')} apriREvolution={() => setVoce('R-Evolution')} />
-      {/* la settimana sempre sotto gli occhi (23/11): tocca e si apre "La mia settimana" */}
-      {voce !== 'Settimana' && <Striscia apri={() => setVoce('Settimana')} />}
+      {/* v2 (23/11): la barra sta dentro la pillola con le due barre della settimana */}
+      <Pillola apri={() => setVoce('Settimana')}>
       <nav className={`barra${barra.length > 4 ? ' cinque' : ''}`} aria-label="Sezioni">
         {barra.map((v) => {
           const attiva = v === voce || (v === 'Astra' && (voce === 'Figurina' || voce === 'Album'));
@@ -211,6 +212,7 @@ function Lani() {
           );
         })}
       </nav>
+      </Pillola>
     </>
   );
 }
