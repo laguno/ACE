@@ -1519,3 +1519,45 @@ body[data-sfondo='sera'] {
 .forziere-prossimo .chiavi-servono { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; }
 .forziere-prossimo .chiavi-servono small { margin-left: 4px; font: 800 13px Nunito, sans-serif; color: var(--testo-2); }
 .tappe .qui > span { white-space: nowrap; }
+
+/* R-Evolution v2 come la bozza: manifesto della prossima partita, tabellone scuro dell'ultima, coach a fumetto con VIA, posto in grande */
+.campo-testata .sopratitolo { margin: 0 0 2px; font: 900 13px Nunito, sans-serif; letter-spacing: 0.08em; text-transform: uppercase; color: #F6D3DE; }
+.r-evolution .carta.prossima-partita { display: block; padding: 0; overflow: hidden; border-radius: 26px; }
+.prossima-partita .manifesto-testa { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0; padding: 8px 16px; background: #FFE27A; color: #3D0E22; }
+.prossima-partita .manifesto-testa b { font: 400 20px/1.1 'Bebas Neue', Impact, 'Arial Narrow', sans-serif; letter-spacing: 0.06em; text-transform: uppercase; }
+.r-evolution .prossima-partita .quanto { margin: 0; padding: 0; background: none; color: #3D0E22; font: 800 13px Nunito, sans-serif; }
+.prossima-partita .squadre { display: grid; grid-template-columns: 1fr auto 1fr; align-items: start; gap: 8px; padding: 14px 12px 6px; }
+.prossima-partita .squadra { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; font: 800 14px/1.15 Nunito, sans-serif; color: #3D0E22; overflow-wrap: anywhere; }
+.prossima-partita .squadra i { display: grid; place-items: center; width: 54px; height: 54px; border-radius: 999px; background: #EDE4E8; color: #3D0E22; font: 400 22px 'Bebas Neue', Impact, 'Arial Narrow', sans-serif; font-style: normal; letter-spacing: 0.04em; }
+.prossima-partita .squadra.noi i { background: #7B2342; color: #fff; }
+.r-evolution .prossima-partita .avversaria { margin: 0; font: inherit; }
+.prossima-partita .vs { align-self: center; margin-top: -18px; font: 400 30px 'Bebas Neue', Impact, 'Arial Narrow', sans-serif; color: #7B2342; }
+.prossima-partita .manifesto-piede { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 10px; margin: 0; padding: 6px 16px 14px; }
+.r-evolution .prossima-partita .giorno { display: block; height: auto; padding: 0; background: none; border-radius: 0; color: #3D0E22; font: 400 34px/1 'Bebas Neue', Impact, 'Arial Narrow', sans-serif; letter-spacing: 0.02em; text-transform: uppercase; }
+.prossima-partita .dove { padding: 4px 12px; border-radius: 999px; background: var(--granata-velo); color: var(--granata-scuro); font: 800 13px Nunito, sans-serif; }
+.r-evolution .carta.tabellone-ultima { background: #2A0A17; color: #fff; border-radius: 22px; text-align: left; border: 0; }
+.tabellone-ultima .tabellone-testa { display: flex; align-items: center; justify-content: space-between; margin: 0; }
+.tabellone-ultima .tabellone-testa small { font: 400 18px 'Bebas Neue', Impact, 'Arial Narrow', sans-serif; letter-spacing: 0.08em; text-transform: uppercase; color: #F6D3DE; }
+.tabellone-ultima .esito { padding: 2px 10px; border-radius: 8px; font: 400 18px 'Bebas Neue', Impact, 'Arial Narrow', sans-serif; letter-spacing: 0.08em; text-transform: uppercase; }
+.tabellone-ultima .esito.vinta { background: #2E7D32; color: #fff; }
+.tabellone-ultima .esito.persa { background: #4A2532; color: #F6D3DE; }
+.tabellone-ultima .risultato { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; margin: 6px 0 10px; font: 800 14px/1.15 Nunito, sans-serif; }
+.tabellone-ultima .risultato .contro { margin: 0; text-align: right; overflow-wrap: anywhere; }
+.tabellone-ultima .punteggio { font: 400 54px/1 'Bebas Neue', Impact, 'Arial Narrow', sans-serif; color: #FFE27A; font-variant-numeric: tabular-nums; }
+.tabellone-ultima .forma { display: flex; align-items: center; gap: 10px; }
+.tabellone-ultima .forma small { font: 400 16px 'Bebas Neue', Impact, 'Arial Narrow', sans-serif; letter-spacing: 0.08em; color: #F6D3DE; }
+.tabellone-ultima .ultime-cinque { justify-content: flex-start; gap: 6px; }
+.tabellone-ultima .ultime-cinque li { width: 26px; height: 26px; border-radius: 6px; font-size: 13px; }
+.tabellone-ultima .ultime-cinque li.vinta { background: #2E7D32; }
+.tabellone-ultima .ultime-cinque li.persa { background: #4A2532; color: #F6D3DE; }
+.r-evolution .coach { display: flex; align-items: flex-end; gap: 6px; margin: 4px 0; }
+.r-evolution .coach .sticker, .r-evolution .coach > img { flex: none; }
+.r-evolution .coach .fumetto { position: relative; flex: 1; padding: 12px 14px; border-radius: 20px; background: #fff; box-shadow: var(--ombra-etichetta); }
+.r-evolution .coach .fumetto::before { content: ''; position: absolute; left: -6px; bottom: 22px; width: 14px; height: 14px; background: #fff; transform: rotate(45deg); }
+.r-evolution .coach p { position: relative; margin: 0; font-weight: 800; color: var(--testo); }
+.r-evolution .coach .via { position: relative; min-height: 44px; margin-top: 8px; padding: 0 22px; border: 0; border-radius: 12px; background: #14162E; color: #C6FF3D; font: 400 20px 'Bebas Neue', Impact, 'Arial Narrow', sans-serif; letter-spacing: 0.08em; cursor: pointer; }
+.classifica-testa { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+.r-evolution .classifica-testa .posto { font: 400 48px/1 'Bebas Neue', Impact, 'Arial Narrow', sans-serif; color: #7B2342; }
+.classifica-testa h2 { display: flex; flex-direction: column; margin: 0; font: 800 18px/1.1 'Baloo 2', Nunito, sans-serif; }
+.classifica-testa h2 small { font: 700 13px Nunito, sans-serif; color: #6E4A5A; }
+.classifica-corta li.lani { background: #FFE27A; color: #3D0E22; }

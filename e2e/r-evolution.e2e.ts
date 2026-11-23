@@ -139,7 +139,7 @@ test('il coach: dieci minuti del mattino, il collegamento porta alla carta in Og
   const coach = page.getByLabel('Il coach');
   await expect(coach).toContainText('Dieci minuti di allenamento, da avviare entro le 21:20. Forza, ti aspetto.');
   await expect(coach.locator('img')).toHaveAttribute('src', /allenatore/);
-  await coach.getByRole('button', { name: 'Si parte' }).click();
+  await coach.getByRole('button', { name: 'VIA' }).click();
   await expect(page.getByRole('button', { name: 'Oggi' })).toHaveAttribute('aria-current', 'page');
   await expect(page.locator('#dieci-minuti')).toBeInViewport();
   await page.screenshot({ path: 'e2e/risultati/coach-oggi.png' });
@@ -216,9 +216,9 @@ test('tema campo: carta della prossima partita e nastro Ultim’ora dal calendar
   await page.goto('/');
   await page.getByRole('button', { name: 'R-Evolution' }).click();
   const carta = page.getByLabel('Prossima partita');
-  await expect(carta.locator('.giorno')).toHaveText('sab 23 gennaio');
+  await expect(carta.locator('.giorno')).toHaveText('sab 23 · 17:00');
   await expect(carta.locator('.avversaria')).toHaveText('FOXES VOLLEY');
-  await expect(carta).toContainText('Alle 17:00, in trasferta');
+  await expect(carta.locator('.dove')).toContainText('in trasferta');
   await expect(carta.locator('.quanto')).toContainText('tra 5 giorni');
   await expect(page.locator('.ultimora .solo-lettori')).toContainText('Ultim’ora. Prossima partita: FOXES VOLLEY. sabato 23 gennaio alle 17:00. tra 5 giorni.'.replace('’', "'"));
   // il nastro non allarga la pagina

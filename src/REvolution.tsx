@@ -2,7 +2,7 @@ import { Fragment, useEffect, useState } from 'react';
 import * as R from './lib/regole';
 import { stessaSquadra, type RigaClassifica } from './lib/classifiche';
 import { Attesa, Emoji, Sticker, useSfondo } from './kit';
-import { MESI } from './spunte';
+import { GIORNI, MESI } from './spunte';
 import { supabase } from './supabase';
 import { PopupPartita } from './Partita';
 import { vaiAiDieciMinuti } from './DieciMinuti';
@@ -84,6 +84,7 @@ export default function REvolution({ apri = () => {} }: { apri?: (v: 'Oggi') => 
         <span className="campo-numero" aria-hidden>
           9
         </span>
+        <p className="sopratitolo">R-Evolution</p>
         <h1>In campo</h1>
         <Sticker posa={posaTestata} misura={236} className="campo-sticker" />
       </header>
@@ -101,38 +102,53 @@ export default function REvolution({ apri = () => {} }: { apri?: (v: 'Oggi') => 
       <CartaProssimaPartita p={prossima} />
       {ultima && (
         <div className="carta tabellone-ultima" aria-label="Ultima partita">
-          <small>ULTIMA PARTITA</small>
-          <p className="risultato">
-            <b>{ultima.set_nostri}</b>
-            <span aria-hidden> – </span>
-            <b>{ultima.set_loro}</b>
+          <p className="tabellone-testa">
+            <small>Ultima · {GIORNI[new Date(ultima.data + 'T12:00:00').getDay()]} {new Date(ultima.data + 'T12:00:00').getDate()}</small>
+            <b className={`esito ${ultima.set_nostri > ultima.set_loro ? 'vinta' : 'persa'}`}>{ultima.set_nostri > ultima.set_loro ? 'Vinta' : 'Persa'}</b>
           </p>
-          <p className="contro">{ultima.avversaria}</p>
-          <ul className="ultime-cinque" aria-label="Ultime cinque partite">
-            {giocate.slice(0, 5).map((x) => (
-              <li key={x.id} className={x.set_nostri > x.set_loro ? 'vinta' : 'persa'}>
-                {x.set_nostri > x.set_loro ? 'V' : 'P'}
-              </li>
-            ))}
-          </ul>
+          <p className="risultato">
+            <span className="noi">R-Evolution</span>
+            <span className="punteggio">
+              <b>{ultima.set_nostri}</b>
+              <span aria-hidden> — </span>
+              <b>{ultima.set_loro}</b>
+            </span>
+            <span className="contro">{ultima.avversaria}</span>
+          </p>
+          <div className="forma">
+            <small>Ultime 5</small>
+            <ul className="ultime-cinque" aria-label="Ultime cinque partite">
+              {giocate.slice(0, 5).map((x) => (
+                <li key={x.id} className={x.set_nostri > x.set_loro ? 'vinta' : 'persa'}>
+                  {x.set_nostri > x.set_loro ? 'V' : 'P'}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       )}
       <Coach mattino={d.mattino} ultima={ultima} apri={apri} />
       {d.classifiche.map((c) => (
         <div className="carta" key={c.cid}>
-          <div className="testa-carta">
-            <h2>
-              <Emoji e="🏆" /> Classifica {c.campionato}
-            </h2>
-          </div>
           {(() => {
             const i = c.righe.findIndex((x) => stessaSquadra(x.squadra, c.squadra));
-            const da = Math.max(0, Math.min(i - 1, c.righe.length - 4));
+            // v2: il posto in grande e le squadre vicine, una sopra e una sotto
+            const da = Math.max(0, Math.min(i - 1, c.righe.length - 3));
+            const girone = c.girone.match(/girone \S+/i)?.[0];
             return (
               <>
-                {i >= 0 && <p className="posto">{c.righe[i].pos}°</p>}
+                <div className="classifica-testa">
+                  {i >= 0 && <b className="posto">{c.righe[i].pos}°</b>}
+                  <h2>
+                    {i >= 0 ? 'in classifica' : 'Classifica'}
+                    <small>
+                      {c.campionato}
+                      {girone ? ` · ${girone}` : ''}
+                    </small>
+                  </h2>
+                </div>
                 <ol className="classifica-corta">
-                  {c.righe.slice(da, da + 4).map((r) => (
+                  {c.righe.slice(da, da + 3).map((r) => (
                     <li key={r.pos + r.squadra} className={stessaSquadra(r.squadra, c.squadra) ? 'lani' : undefined}>
                       <b>{r.pos}°</b> <span>{r.squadra}</span> <small>{r.punti} pt</small>
                     </li>
@@ -267,16 +283,13 @@ function Coach({ mattino, ultima, apri }: { mattino: { da: string | null; il: st
         ? `Dieci minuti di allenamento, da avviare entro le ${ora(FINESTRA.ultimo_avvio)}. Forza, ti aspetto.`
         : `I dieci minuti si avviano dalle ${ora(FINESTRA.da)} alle ${ora(FINESTRA.ultimo_avvio)}. Domani ti aspetto.`;
   return (
-    <div className="carta coach" aria-label="Il coach">
-      <Sticker posa={posa} misura={72} />
-      <div>
-        <h2>
-          <Emoji e="📋" /> Il coach
-        </h2>
+    <div className="coach" role="group" aria-label="Il coach">
+      <Sticker posa={posa} misura={88} />
+      <div className="fumetto">
         <p>{riga}</p>
         {(finestra || avviati) && (
-          <button className="collegamento" onClick={() => (vaiAiDieciMinuti(), apri('Oggi'))}>
-            {fatti ? 'Guarda in Oggi' : 'Si parte'}
+          <button className={fatti ? 'collegamento' : 'via'} onClick={() => (vaiAiDieciMinuti(), apri('Oggi'))}>
+            {fatti ? 'Guarda in Oggi' : 'VIA'}
           </button>
         )}
       </div>

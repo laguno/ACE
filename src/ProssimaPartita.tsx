@@ -51,26 +51,46 @@ export function notizieProssima(p: Prossima, ora: Date): string[] {
   return [`Prossima partita: ${p.avversaria}`, `${GIORNI[g.getDay()]} ${g.getDate()} ${MESI[g.getMonth()]} alle ${oraDiRoma(p.inizio)}`, traQuanto(p.inizio, ora)];
 }
 
+/** Sigla per il cerchio della squadra: le iniziali delle prime due parole ("Gazze Canossa" → "GC"). */
+const sigla = (nome: string) =>
+  nome
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0].toUpperCase())
+    .join('');
+
 export function CartaProssimaPartita({ p }: { p: Prossima | null | undefined }) {
   if (!p) return null;
   const g = R.giornoRoma(p.inizio);
   return (
     <div className="carta prossima-partita" aria-label="Prossima partita">
-      <div className="giorno">
-        {GIORNI[g.getDay()].slice(0, 3)} <b>{g.getDate()}</b> {MESI[g.getMonth()]}
-      </div>
-      <div>
-        <h2>
-          <Emoji e="🏐" /> Prossima partita
-        </h2>
-        <p className="avversaria">{p.avversaria}</p>
-        <p>
-          Alle {oraDiRoma(p.inizio)}, {p.inCasa ? 'in casa' : 'in trasferta'} <Emoji e={p.inCasa ? '🏠' : '🚌'} />
-        </p>
-        <span className="quanto">
-          <Emoji e="⏳" /> {traQuanto(p.inizio, new Date())}
+      <p className="manifesto-testa">
+        <b>Prossima partita</b>
+        <span className="quanto">{traQuanto(p.inizio, new Date())}</span>
+      </p>
+      <div className="squadre">
+        <span className="squadra noi">
+          <i aria-hidden>R-E</i>
+          R-Evolution
+        </span>
+        <b className="vs" aria-hidden>
+          VS
+        </b>
+        <span className="solo-lettori">contro</span>
+        <span className="squadra">
+          <i aria-hidden>{sigla(p.avversaria)}</i>
+          <span className="avversaria">{p.avversaria}</span>
         </span>
       </div>
+      <p className="manifesto-piede">
+        <b className="giorno">
+          {GIORNI[g.getDay()].slice(0, 3)} {g.getDate()} · {oraDiRoma(p.inizio)}
+        </b>
+        <span className="dove">
+          <Emoji e={p.inCasa ? '🏠' : '🚌'} /> {p.inCasa ? 'in casa' : 'in trasferta'}
+        </span>
+      </p>
     </div>
   );
 }
