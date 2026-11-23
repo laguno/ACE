@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Lani — Sera, versione pulita</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&amp;family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#C2185B}a:hover{color:#8E1043}
+</style>
+</helmet>
+<div style="width: 390px; height: 1240px; box-sizing: border-box; position: relative; overflow: hidden; display: flex; flex-direction: column; background: linear-gradient(180deg, #14123A 0, #24215A 420px, #2D2A66 100%); font-family: Nunito, system-ui, sans-serif; color: #FFFFFF">
+
+  <svg width="390" height="300" viewBox="0 0 390 300" aria-hidden="true" style="position: absolute; left: 0; top: 0">
+    <circle cx="40" cy="40" r="1.6" fill="#FFFFFF" opacity="0.8"></circle>
+    <circle cx="120" cy="22" r="1.2" fill="#FFFFFF" opacity="0.6"></circle>
+    <circle cx="210" cy="58" r="1.8" fill="#FFFFFF" opacity="0.7"></circle>
+    <circle cx="250" cy="16" r="1.1" fill="#FFFFFF" opacity="0.5"></circle>
+    <circle cx="80" cy="120" r="1.3" fill="#FFFFFF" opacity="0.5"></circle>
+    <circle cx="170" cy="150" r="1" fill="#FFFFFF" opacity="0.4"></circle>
+    <circle cx="350" cy="190" r="1.4" fill="#FFFFFF" opacity="0.5"></circle>
+    <circle cx="30" cy="230" r="1" fill="#FFFFFF" opacity="0.4"></circle>
+    <!-- notte di zucchero: nuvole di marshmallow (nell'app lo sfondo illustrato della sera) -->
+    <g opacity="0.9"><circle cx="300" cy="150" r="18" fill="#F3C6E4"></circle><circle cx="322" cy="140" r="24" fill="#F7D6EC"></circle><circle cx="348" cy="152" r="17" fill="#F3C6E4"></circle><rect x="290" y="150" width="70" height="18" rx="9" fill="#F7D6EC"></rect></g>
+    <g opacity="0.7"><circle cx="30" cy="196" r="13" fill="#CFC4FA"></circle><circle cx="50" cy="188" r="18" fill="#DDD4FF"></circle><circle cx="72" cy="198" r="12" fill="#CFC4FA"></circle><rect x="22" y="196" width="56" height="13" rx="6.5" fill="#DDD4FF"></rect></g>
+  </svg>
+
+  <div style="position: relative; padding: 22px 20px 0; display: flex; flex-direction: column; gap: 14px">
+
+    <div style="display: flex; justify-content: space-between; align-items: center">
+      <div style="display: flex; flex-direction: column">
+        <span style="font-size: 14px; font-weight: 800; color: #C9C6F0">Lunedì sera</span>
+        <h1 style="margin: 0; font-family: 'Baloo 2', Nunito, sans-serif; font-size: 30px; font-weight: 800; line-height: 1.1">Pronta per martedì?</h1>
+      </div>
+      <div style="position: relative; width: 76px; height: 76px; flex: none">
+        <svg width="76" height="76" viewBox="0 0 76 76" aria-hidden="true" style="position: absolute; inset: 0"><path d="M50 8a30 30 0 1 0 18 46A26 26 0 0 1 50 8z" fill="#FFE27A"></path></svg>
+        <img src="assets/lani-assonnata.webp" alt="" width="84" height="84" style="display: block; width: 84px; height: 84px; object-fit: contain; position: absolute; right: -10px; bottom: -14px;">
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <div style="display: grid; grid-template-columns: repeat({{totale}}, minmax(0, 1fr)); gap: 6px" role="progressbar" aria-label="Cose pronte per domani" aria-valuemin="0" aria-valuemax="{{totale}}" aria-valuenow="{{fatte}}">
+        <sc-for list="{{segmenti}}" as="s" hint-placeholder-count="3">
+          <span style="height: 10px; border-radius: 999px; background: {{s.colore}}"></span>
+        </sc-for>
+      </div>
+      <span style="font-size: 15px; font-weight: 900">{{fatte}} di {{totale}} pronte</span>
+    </div>
+
+    <sc-if value="{{tutto}}" hint-placeholder-val="{{ false }}">
+      <section aria-label="Tutto pronto" style="display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 24px; background: #FFE27A; color: #2D2A66">
+        <img src="assets/bart-sonnecchia.webp" alt="" width="76" height="76" style="display: block; width: 76px; height: 76px; object-fit: contain; flex: none; margin: -8px 0;">
+        <div style="display: flex; flex-direction: column; gap: 2px">
+          <span style="font-family: 'Baloo 2', sans-serif; font-size: 24px; font-weight: 800; line-height: 1.1">Buonanotte!</span>
+          <span style="font-size: 14px; font-weight: 800">Domani è tutto pronto. Bart dorme.</span>
+        </div>
+      </section>
+    </sc-if>
+
+    <!-- COMPITI · lilla -->
+    <sc-if value="{{compitiAperti}}" hint-placeholder-val="{{ true }}">
+      <section aria-label="Compiti per domani" style="background: #FFFFFF; color: #3D2350; border-radius: 24px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+        <div style="display: flex; align-items: center; gap: 12px">
+          <span style="width: 44px; height: 44px; flex: none; border-radius: 999px; background: #F3E6FD; display: flex; align-items: center; justify-content: center">
+            <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z" fill="none" stroke="#6B4FC0" stroke-width="2.2" stroke-linejoin="round"></path><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5" fill="none" stroke="#6B4FC0" stroke-width="2.2" stroke-linejoin="round"></path></svg>
+          </span>
+          <h2 style="flex: 1; margin: 0; font-family: 'Baloo 2', sans-serif; font-size: 20px; font-weight: 800">Compiti</h2>
+          <span style="font-size: 15px; font-weight: 900; color: #6B4FC0">{{compitiConto}}</span>
+        </div>
+        <sc-for list="{{compiti}}" as="c" hint-placeholder-count="2">
+          <button type="button" aria-label="{{c.aria}}" style="display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 6px 6px 6px 10px; border: 0; border-radius: 16px; background: #FBF7FF; font-family: inherit; color: #3D2350; text-align: left; cursor: pointer">
+            <span style="flex: none; padding: 4px 10px; border-radius: 999px; background: {{c.fondo}}; color: {{c.colore}}; font-size: 12px; font-weight: 900">{{c.materia}}</span>
+            <span style="flex: 1; font-size: 14px; font-weight: 800; {{c.testo}}">{{c.cosa}}</span>
+            <span style="width: 34px; height: 34px; flex: none; border-radius: 999px; display: flex; align-items: center; justify-content: center; {{c.cerchio}}">
+              <sc-if value="{{c.fatto}}" hint-placeholder-val="{{ false }}">
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#FFFFFF" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              </sc-if>
+            </span>
+          </button>
+        </sc-for>
+        <div style="display: flex; align-items: center; gap: 8px; margin-top: -2px">
+          <img src="assets/lady-compiti.webp" alt="" width="64" height="64" style="display: block; width: 64px; height: 64px; object-fit: contain; flex: none">
+          <span style="font-size: 14px; font-weight: 800; color: #5E4470">Lady dorme sui compiti: ne manca uno.</span>
+        </div>
+      </section>
+    </sc-if>
+    <sc-if value="{{compitiChiusi}}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 20px; background: rgba(255,255,255,0.1)">
+        <span style="width: 36px; height: 36px; flex: none; border-radius: 999px; background: #6B4FC0; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#FFFFFF" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+        <span style="flex: 1; font-size: 16px; font-weight: 900">Compiti</span>
+        <span style="font-size: 13px; font-weight: 800; color: #C9C6F0">fatti</span>
+      </div>
+    </sc-if>
+
+    <!-- CARTELLA · azzurra -->
+    <sc-if value="{{cartellaAperta}}" hint-placeholder-val="{{ true }}">
+      <section aria-label="Cartella" style="background: #FFFFFF; color: #3D2350; border-radius: 24px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+        <div style="display: flex; align-items: center; gap: 12px">
+          <span style="width: 44px; height: 44px; flex: none; border-radius: 999px; background: #DCEFFF; display: flex; align-items: center; justify-content: center">
+            <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0v11a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 20z" fill="none" stroke="#2A6FB0" stroke-width="2.2" stroke-linejoin="round"></path><path d="M9 5V3.5h6V5M9 14h6v4H9z" fill="none" stroke="#2A6FB0" stroke-width="2.2" stroke-linejoin="round"></path></svg>
+          </span>
+          <h2 style="flex: 1; margin: 0; font-family: 'Baloo 2', sans-serif; font-size: 20px; font-weight: 800">Cartella</h2>
+          <span style="font-size: 15px; font-weight: 900; color: #2A6FB0">{{cartellaConto}}</span>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px">
+          <sc-for list="{{cartella}}" as="m" hint-placeholder-count="5">
+            <button type="button" aria-pressed="{{m.messo}}" style="display: inline-flex; align-items: center; gap: 7px; min-height: 44px; padding: 0 14px 0 10px; border-radius: 999px; font-family: inherit; font-size: 14px; font-weight: 900; cursor: pointer; {{m.stile}}">
+              <span style="width: 14px; height: 14px; border-radius: 999px; background: {{m.pallino}}"></span>
+              {{m.nome}}
+            </button>
+          </sc-for>
+        </div>
+      </section>
+    </sc-if>
+    <sc-if value="{{cartellaChiusa}}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 20px; background: rgba(255,255,255,0.1)">
+        <span style="width: 36px; height: 36px; flex: none; border-radius: 999px; background: #2A6FB0; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#FFFFFF" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+        <span style="flex: 1; font-size: 16px; font-weight: 900">Cartella</span>
+        <span style="font-size: 13px; font-weight: 800; color: #C9C6F0">pronta</span>
+      </div>
+    </sc-if>
+
+    <!-- BORSA · rosa (conta solo la sera prima di lunedì e venerdì) -->
+    <sc-if value="{{borsaAperta}}" hint-placeholder-val="{{ true }}">
+      <section aria-label="Borsa della pallavolo" style="background: #FFFFFF; color: #3D2350; border-radius: 24px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+        <div style="display: flex; align-items: center; gap: 12px">
+          <span style="width: 44px; height: 44px; flex: none; border-radius: 999px; background: #FFE3EF; display: flex; align-items: center; justify-content: center">
+            <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="#C2185B" stroke-width="2.2"></circle><path d="M12 3.5c-2 3-2 6 0 8.5s2 5.5 0 8.5M4 9.5c3.5.5 6 0 8-2.5M20 14.5c-3.5-.5-6 0-8 2.5" fill="none" stroke="#C2185B" stroke-width="2" stroke-linecap="round"></path></svg>
+          </span>
+          <div style="flex: 1; display: flex; flex-direction: column">
+            <h2 style="margin: 0; font-family: 'Baloo 2', sans-serif; font-size: 20px; font-weight: 800; line-height: 1.1">Borsa</h2>
+            <span style="font-size: 13px; font-weight: 800; color: #5E4470">Allenamento domani 16:00 · a scuola</span>
+          </div>
+          <span style="font-size: 15px; font-weight: 900; color: #C2185B">{{borsaConto}}</span>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px">
+          <sc-for list="{{borsa}}" as="b" hint-placeholder-count="4">
+            <button type="button" aria-pressed="{{b.messo}}" style="display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 14px; border-radius: 999px; font-family: inherit; font-size: 14px; font-weight: 900; cursor: pointer; {{b.stile}}">{{b.nome}}</button>
+          </sc-for>
+        </div>
+      </section>
+    </sc-if>
+    <sc-if value="{{borsaChiusa}}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 20px; background: rgba(255,255,255,0.1)">
+        <span style="width: 36px; height: 36px; flex: none; border-radius: 999px; background: #C2185B; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#FFFFFF" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+        <span style="flex: 1; font-size: 16px; font-weight: 900">Borsa</span>
+        <span style="font-size: 13px; font-weight: 800; color: #C9C6F0">pronta</span>
+      </div>
+    </sc-if>
+    <sc-if value="{{borsaPromemoria}}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 20px; border: 2px dashed #8C88D8">
+        <span style="width: 36px; height: 36px; flex: none; border-radius: 999px; background: #FFE3EF; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="#C2185B" stroke-width="2.2"></circle><path d="M12 3.5c-2 3-2 6 0 8.5s2 5.5 0 8.5" fill="none" stroke="#C2185B" stroke-width="2" stroke-linecap="round"></path></svg></span>
+        <div style="flex: 1; display: flex; flex-direction: column">
+          <span style="font-size: 15px; font-weight: 900">Ricordati la borsa</span>
+          <span style="font-size: 13px; font-weight: 800; color: #C9C6F0">Allenamento domani 18:30</span>
+        </div>
+      </div>
+    </sc-if>
+
+    <div style="display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 6px 6px 6px 16px; border-radius: 20px; background: rgba(255,255,255,0.1)">
+      <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.2-4.4L16 4.8a2 2 0 0 1 2.8 0l.4.4a2 2 0 0 1 0 2.8L8.4 18.8z M14 7l3 3" fill="none" stroke="#FFE27A" stroke-width="2" stroke-linejoin="round"></path></svg>
+      <span style="flex: 1; font-size: 14px; font-weight: 800">Firma: uscita al museo</span>
+      <button type="button" style="min-height: 40px; padding: 0 14px; border: 0; border-radius: 14px; background: #FFFFFF; color: #2D2A66; font-family: inherit; font-size: 14px; font-weight: 900; cursor: pointer">L'ho dato</button>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 8px; padding: 0 4px">
+      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3" fill="none" stroke="#C9C6F0" stroke-width="2"></rect><path d="M3.5 10h17M8 3v4M16 3v4" fill="none" stroke="#C9C6F0" stroke-width="2" stroke-linecap="round"></path></svg>
+      <span style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 11px 3px 4px; border-radius: 999px; background: rgba(255,255,255,0.12); font-size: 13px; font-weight: 800"><img src="assets/nonno-pollice.webp" alt="" width="30" height="30" style="display: block; width: 30px; height: 30px; object-fit: contain; border-radius: 999px; background: #FFFFFF"><b style="font-weight: 900">Domani 19:30</b>cena dai nonni</span>
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 14px; right: 14px; bottom: 14px; border-radius: 32px; background: #FFFFFF; color: #3D2350; box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35); overflow: hidden">
+    <a href="Settimana-v2.dc.html" aria-label="La mia settimana" style="display: flex; align-items: center; gap: 10px; padding: 10px 18px 8px; border-bottom: 1px solid #FFE3EF; text-decoration: none; color: #3D2350">
+      <span style="width: 38px; font-size: 12px; font-weight: 900">Passi</span>
+      <span style="position: relative; flex: 1; height: 8px; border-radius: 999px; background: #FFE3EF">
+        <span style="position: absolute; left: 0; top: 0; bottom: 0; width: 22%; border-radius: 999px; background: #E23D8E"></span>
+        <span style="position: absolute; left: 18%; top: -4px; width: 3px; height: 16px; margin-left: -1.5px; border-radius: 2px; background: #3D2350"></span>
+      </span>
+      <span style="display: flex; gap: 1px" aria-hidden="true">
+        <sc-for list="{{chiavi}}" as="k" hint-placeholder-count="3">
+          <svg width="18" height="18" viewBox="0 0 24 24"><circle cx="8" cy="12" r="5" fill="#FFF3C4" stroke="#C99A1E" stroke-width="2"></circle><path d="M13 12h9M18 12v3" fill="none" stroke="#C99A1E" stroke-width="2.4" stroke-linecap="round"></path></svg>
+        </sc-for>
+      </span>
+    </a>
+    <nav aria-label="Sezioni" style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; padding: 6px">
+      <sc-for list="{{voci}}" as="v" hint-placeholder-count="5">
+        <a href="#" style="{{v.stile}}">{{v.nome}}</a>
+      </sc-for>
+    </nav>
+    <a href="Settimana-v2.dc.html" aria-label="Cose della settimana" style="display: flex; align-items: center; gap: 10px; padding: 8px 18px 11px; border-top: 1px solid #DCEFFF; text-decoration: none; color: #3D2350">
+      <span style="width: 38px; font-size: 12px; font-weight: 900">Cose</span>
+      <span style="position: relative; flex: 1; height: 8px; border-radius: 999px; background: #DCEFFF">
+        <span style="position: absolute; left: 0; top: 0; bottom: 0; width: 20%; border-radius: 999px; background: #2A6FB0"></span>
+        <span style="position: absolute; left: 18%; top: -4px; width: 3px; height: 16px; margin-left: -1.5px; border-radius: 2px; background: #3D2350"></span>
+      </span>
+      <span style="width: 56px; font-size: 12px; font-weight: 900; text-align: right; color: #2A6FB0">6 di 30</span>
+    </a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"pronte":{"editor":"range","default":1,"min":0,"max":3,"step":1,"section":"Prototipo"},"borsa":{"editor":"enum","options":["conta","promemoria","niente"],"default":"conta","section":"Prototipo"},"$preview":{"width":390,"height":1240}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const borsaTipo = this.props.borsa ?? 'conta';
+    const conta = borsaTipo === 'conta';
+    const totale = conta ? 3 : 2;
+    const n = Math.max(0, Math.min(totale, this.props.pronte ?? 1));
+    const compitiOk = n >= 1, cartellaOk = n >= 2, borsaOk = conta && n >= 3;
+    // colori fissi delle cose obbligatorie: compiti lilla, cartella azzurra, borsa rosa
+    const colori = ['#6B4FC0', '#2A6FB0', '#C2185B'].slice(0, totale);
+    const segmenti = colori.map((c, i) => ({ colore: i < n ? c : '#3A3770' }));
+    // un colore fisso per materia (tavolozza di prova)
+    const M = {
+      Inglese: ['#1F5FA8', '#DCEBFF'], Storia: ['#A0522D', '#FBE6D6'], Scienze: ['#2E7D32', '#E3F4E1'],
+      Matematica: ['#C62828', '#FDE3E3'], Tecnologia: ['#00796B', '#DDF3F0']
+    };
+    const compitiDef = [
+      { materia: 'Inglese', cosa: 'Esercizi 4 e 5, pag. 62', fatto: true },
+      { materia: 'Storia', cosa: 'Leggi pag. 88–90', fatto: compitiOk }
+    ];
+    const compiti = compitiDef.map((c) => ({
+      materia: c.materia, cosa: c.cosa, fatto: c.fatto,
+      colore: M[c.materia][0], fondo: M[c.materia][1],
+      testo: c.fatto ? 'text-decoration: line-through; color: #8A7A99;' : '',
+      cerchio: c.fatto ? 'background: #6B4FC0;' : 'border: 2.5px solid #CDB8F5;',
+      aria: c.materia + ': ' + c.cosa + (c.fatto ? ', fatto' : ', da fare')
+    }));
+    const fattiC = compiti.filter((c) => c.fatto).length;
+    const messeCartella = ['Inglese', 'Storia'];
+    const cartella = ['Inglese', 'Storia', 'Matematica', 'Scienze', 'Tecnologia'].map((nome) => {
+      const messo = messeCartella.includes(nome);
+      return {
+        nome, messo: messo ? 'true' : 'false', pallino: messo ? '#FFFFFF' : M[nome][0],
+        stile: messo ? 'border: 0; background: #2A6FB0; color: #FFFFFF;' : 'border: 2px solid #DCEFFF; background: #FFFFFF; color: #3D2350;'
+      };
+    });
+    const borsa = ['Divisa', 'Ginocchiere', 'Scarpe', 'Borraccia'].map((nome, i) => {
+      const messo = i < 1;
+      return {
+        nome, messo: messo ? 'true' : 'false',
+        stile: messo ? 'border: 0; background: #C2185B; color: #FFFFFF;' : 'border: 2px solid #FFE3EF; background: #FFFFFF; color: #3D2350;'
+      };
+    });
+    const tutto = n === totale;
+    const voci = ['Oggi', 'Studio', 'Sera', 'R-Evo', 'Astra'].map((nome, i) => ({
+      nome,
+      stile: 'display: flex; align-items: center; justify-content: center; min-height: 48px; border-radius: 24px; text-decoration: none; font-size: 12px; font-weight: 800;' + (i === 2 ? ' background: #2D2A66; color: #FFFFFF;' : ' color: #5E4470;')
+    }));
+    return {
+      totale, fatte: n, segmenti, tutto,
+      compitiAperti: !compitiOk, compitiChiusi: compitiOk, compiti, compitiConto: fattiC + ' di ' + compiti.length,
+      cartellaAperta: !cartellaOk, cartellaChiusa: cartellaOk, cartella, cartellaConto: messeCartella.length + ' di 5',
+      borsaAperta: conta && !borsaOk, borsaChiusa: borsaOk, borsaPromemoria: borsaTipo === 'promemoria', borsa, borsaConto: '1 di 4',
+      chiavi: [1, 2, 3], voci
+    };
+  }
+}
+</script>
+</body>
+</html>

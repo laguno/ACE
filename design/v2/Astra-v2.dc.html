@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Lani — Astra, versione pulita</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&amp;family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#C2185B}a:hover{color:#8E1043}
+</style>
+</helmet>
+<div style="width: 390px; height: 1160px; box-sizing: border-box; position: relative; overflow: hidden; background: linear-gradient(180deg, #FFE1F0 0, #FFF1E2 520px, #FFF8EC 100%); font-family: Nunito, system-ui, sans-serif; color: #3D2350">
+
+  <!-- sfondo illustrato del mondo (public/assets/sfondi), come nell'app -->
+  <div aria-hidden="true" style="position: absolute; inset: 0; background-image: url(assets/sfondo-1-colline.webp); background-size: cover; background-position: center bottom"></div>
+
+  <header style="position: absolute; left: 14px; right: 14px; top: 16px; background: #FFFFFF; border-radius: 24px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 10px 26px rgba(194, 24, 91, 0.14)">
+    <div style="display: flex; align-items: center; gap: 12px">
+      <div style="flex: 1; display: flex; flex-direction: column">
+        <span style="font-size: 12px; font-weight: 900; color: #5E4470">MONDO 1 DI 4</span>
+        <span style="font-family: 'Baloo 2', sans-serif; font-size: 20px; font-weight: 800; line-height: 1.1">Colline di caramelle</span>
+      </div>
+      <button type="button" aria-label="Come si fanno i passi" style="width: 44px; height: 44px; flex: none; border: 2px solid #FFE3EF; border-radius: 999px; background: #FFFFFF; font-family: 'Baloo 2', sans-serif; font-size: 22px; font-weight: 800; color: #C2185B; cursor: pointer">?</button>
+      <span style="width: 52px; height: 52px; flex: none; border-radius: 999px; background: #FFE3EF; overflow: hidden; display: flex; align-items: center; justify-content: center"><img src="assets/lani-contenta.webp" alt="" width="52" height="52" style="display: block; width: 52px; height: 52px; object-fit: contain;"></span>
+    </div>
+    <div style="display: flex; align-items: baseline; gap: 8px">
+      <img src="assets/passo.webp" alt="" width="32" height="32" style="display: block; width: 32px; height: 32px; object-fit: contain; align-self: center;">
+      <span style="font-family: 'Baloo 2', sans-serif; font-size: 38px; font-weight: 800; line-height: 1; color: #E23D8E">{{passiTesto}}</span>
+      <span style="font-size: 16px; font-weight: 900">passi</span>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <span style="position: relative; height: 12px; border-radius: 999px; background: #FFE3EF" role="progressbar" aria-label="Verso la prossima tappa" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{pctTappa}}">
+        <span style="position: absolute; left: 0; top: 0; bottom: 0; width: {{pctTappa}}%; border-radius: 999px; background: #E23D8E"></span>
+      </span>
+      <span style="font-size: 14px; font-weight: 800">Tappa {{prossima}}: mancano <b style="font-weight: 900; color: #C2185B">{{mancano}} passi</b></span>
+    </div>
+  </header>
+
+  <svg width="390" height="1160" viewBox="0 0 390 1160" aria-hidden="true" style="position: absolute; inset: 0">
+    <path d="{{strada}}" fill="none" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round"></path>
+    <path d="{{strada}}" fill="none" stroke="#F4C9DD" stroke-width="3" stroke-dasharray="2 10" stroke-linecap="round"></path>
+    <path d="{{fatta}}" fill="none" stroke="#E23D8E" stroke-width="8" stroke-linecap="round"></path>
+  </svg>
+
+  <sc-for list="{{tappe}}" as="t" hint-placeholder-count="9">
+    <div style="position: absolute; left: {{t.x}}px; top: {{t.y}}px; transform: translate(-50%, -50%); width: {{t.d}}px; height: {{t.d}}px; border-radius: 999px; display: flex; align-items: center; justify-content: center; font-family: 'Baloo 2', sans-serif; font-weight: 800; {{t.stile}}">
+      <sc-if value="{{t.fatta}}" hint-placeholder-val="{{ false }}">
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#FFFFFF" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </sc-if>
+      <sc-if value="{{t.numero}}" hint-placeholder-val="{{ false }}">
+        <span style="font-size: {{t.font}}px">{{t.n}}</span>
+      </sc-if>
+    </div>
+  </sc-for>
+
+  <sc-for list="{{forzieri}}" as="f" hint-placeholder-count="3">
+    <div style="position: absolute; left: {{f.x}}px; top: {{f.y}}px; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 2px">
+      <img src="{{f.img}}" alt="" width="72" height="72" style="display: block; width: 72px; height: 72px; object-fit: contain">
+      <span style="padding: 2px 9px; border-radius: 999px; background: #FFFFFF; font-size: 12px; font-weight: 900; color: #7A4A12; box-shadow: 0 3px 8px rgba(122, 74, 18, 0.18)">{{f.etichetta}}</span>
+    </div>
+  </sc-for>
+
+  <div style="position: absolute; left: {{lani.x}}px; top: {{lani.y}}px; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 4px">
+    <img src="assets/lani-saluta.webp" alt="" width="116" height="116" style="display: block; width: 116px; height: 116px; object-fit: contain;">
+    <span style="padding: 3px 10px; border-radius: 999px; background: #C2185B; color: #FFFFFF; font-size: 12px; font-weight: 900">Sei qui</span>
+  </div>
+
+  <div style="position: absolute; left: {{bandiera.x}}px; top: {{bandiera.y}}px; transform: translate(-50%, -100%); display: flex; align-items: flex-end; gap: 4px">
+    <img src="assets/bandierina.webp" alt="" width="40" height="40" style="display: block; width: 40px; height: 40px; object-fit: contain">
+    <span style="margin-bottom: 18px; padding: 2px 8px; border-radius: 999px; background: #FFFFFF; font-size: 11px; font-weight: 900; color: #2A6FB0">calendario</span>
+  </div>
+
+  <div style="position: absolute; left: {{natale.x}}px; top: {{natale.y}}px; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: #2E7D32; color: #FFFFFF; font-size: 13px; font-weight: 900; box-shadow: 0 6px 14px rgba(46, 125, 50, 0.3)">
+    <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5-4.8-4.6 6.6-.9z" fill="#FFE27A"></path></svg>
+    Natale
+  </div>
+
+  <button type="button" aria-label="Album delle figurine" style="position: absolute; right: 18px; bottom: 184px; width: 56px; height: 56px; border: 0; border-radius: 18px; background: #FFFFFF; box-shadow: 0 8px 20px rgba(123, 106, 224, 0.25); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; font-family: inherit; color: #6B4FC0; cursor: pointer">
+    <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="3" fill="none" stroke="#6B4FC0" stroke-width="2.2"></rect><circle cx="9" cy="9" r="2" fill="#6B4FC0"></circle><path d="M5 18l5-5 3 3 2-2 4 4" fill="none" stroke="#6B4FC0" stroke-width="2.2" stroke-linejoin="round"></path></svg>
+    <span style="font-size: 11px; font-weight: 900">12/64</span>
+  </button>
+
+  <div style="position: absolute; left: 14px; right: 14px; bottom: 14px; border-radius: 32px; background: #FFFFFF; box-shadow: 0 16px 36px rgba(123, 106, 224, 0.3); overflow: hidden">
+    <a href="Settimana-v2.dc.html" aria-label="La mia settimana" style="display: flex; align-items: center; gap: 10px; padding: 10px 18px 8px; border-bottom: 1px solid #FFE3EF; text-decoration: none; color: #3D2350">
+      <span style="width: 38px; font-size: 12px; font-weight: 900">Passi</span>
+      <span style="position: relative; flex: 1; height: 8px; border-radius: 999px; background: #FFE3EF">
+        <span style="position: absolute; left: 0; top: 0; bottom: 0; width: 22%; border-radius: 999px; background: #E23D8E"></span>
+        <span style="position: absolute; left: 18%; top: -4px; width: 3px; height: 16px; margin-left: -1.5px; border-radius: 2px; background: #3D2350"></span>
+      </span>
+      <span style="display: flex; gap: 1px" aria-hidden="true">
+        <sc-for list="{{chiaviSett}}" as="k" hint-placeholder-count="3">
+          <svg width="18" height="18" viewBox="0 0 24 24"><circle cx="8" cy="12" r="5" fill="#FFF3C4" stroke="#C99A1E" stroke-width="2"></circle><path d="M13 12h9M18 12v3" fill="none" stroke="#C99A1E" stroke-width="2.4" stroke-linecap="round"></path></svg>
+        </sc-for>
+      </span>
+    </a>
+    <nav aria-label="Sezioni" style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; padding: 6px">
+      <sc-for list="{{voci}}" as="v" hint-placeholder-count="5">
+        <a href="#" style="{{v.stile}}">{{v.nome}}</a>
+      </sc-for>
+    </nav>
+    <a href="Settimana-v2.dc.html" aria-label="Cose della settimana" style="display: flex; align-items: center; gap: 10px; padding: 8px 18px 11px; border-top: 1px solid #DCEFFF; text-decoration: none; color: #3D2350">
+      <span style="width: 38px; font-size: 12px; font-weight: 900">Cose</span>
+      <span style="position: relative; flex: 1; height: 8px; border-radius: 999px; background: #DCEFFF">
+        <span style="position: absolute; left: 0; top: 0; bottom: 0; width: 20%; border-radius: 999px; background: #2A6FB0"></span>
+        <span style="position: absolute; left: 18%; top: -4px; width: 3px; height: 16px; margin-left: -1.5px; border-radius: 2px; background: #3D2350"></span>
+      </span>
+      <span style="width: 56px; font-size: 12px; font-weight: 900; text-align: right; color: #2A6FB0">6 di 30</span>
+    </a>
+  </div>
+
+  <!-- prossimo forziere: l'unico posto di Astra dove si vedono le chiavi -->
+  <a href="#" style="position: absolute; left: 14px; right: 84px; bottom: 184px; min-height: 56px; display: flex; align-items: center; gap: 10px; padding: 8px 14px; border-radius: 18px; background: #FFFFFF; box-shadow: 0 8px 20px rgba(122, 74, 18, 0.18); text-decoration: none; color: #3D2350">
+    <img src="assets/forziere-chiuso.webp" alt="" width="44" height="44" style="display: block; width: 44px; height: 44px; object-fit: contain">
+    <span style="flex: 1; display: flex; flex-direction: column; min-width: 0">
+      <span style="font-size: 14px; font-weight: 900">Forziere {{fz.n}} · tappa {{fz.tappa}}</span>
+      <span style="display: flex; align-items: center; gap: 2px">
+        <sc-for list="{{fz.chiavi}}" as="k" hint-placeholder-count="4">
+          <img src="{{k.img}}" alt="" width="22" height="22" style="display: block; width: 22px; height: 22px; object-fit: contain">
+        </sc-for>
+        <span style="margin-left: 4px; font-size: 12px; font-weight: 800; color: #5E4470">{{fz.testo}}</span>
+      </span>
+    </span>
+  </a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"qui":{"editor":"range","default":5,"min":2,"max":8,"step":1,"section":"Prototipo"},"$preview":{"width":390,"height":1160}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const qui = Math.max(2, Math.min(8, this.props.qui ?? 5));
+    // prime nove tappe del mondo 1, dal basso verso l'alto (come la mappa vera); numeri di prova
+    const soglie = [0, 150, 320, 520, 750, 1000, 1280, 1580, 1900];
+    const pos = (t) => ({ x: Math.round(195 + 100 * Math.sin(t * 0.9)), y: 1000 - (t - 1) * 88 });
+    const punti = soglie.map((_, i) => pos(i + 1));
+    const curva = (p) => {
+      if (p.length < 2) return '';
+      let d = 'M ' + p[0].x + ' ' + p[0].y;
+      for (let i = 0; i < p.length - 1; i++) {
+        const p0 = p[i - 1] || p[i], p1 = p[i], p2 = p[i + 1], p3 = p[i + 2] || p[i + 1];
+        d += ' C ' + (p1.x + (p2.x - p0.x) / 6) + ' ' + (p1.y + (p2.y - p0.y) / 6) + ', ' + (p2.x - (p3.x - p1.x) / 6) + ' ' + (p2.y - (p3.y - p1.y) / 6) + ', ' + p2.x + ' ' + p2.y;
+      }
+      return d;
+    };
+    const forziereSu = { 3: 1, 6: 2, 9: 3 };
+    const chiaviForziere = { 1: 2, 2: 4, 3: 7 };
+    const tappe = punti.map((p, i) => {
+      const t = i + 1;
+      const fatta = t < qui, attuale = t === qui;
+      return {
+        n: t, x: p.x, y: p.y, fatta, numero: !fatta,
+        d: attuale ? 58 : 40, font: attuale ? 24 : 16,
+        stile: fatta ? 'background: #E23D8E; box-shadow: 0 4px 0 #A8195E;'
+          : attuale ? 'background: #FFFFFF; border: 5px solid #E23D8E; color: #C2185B; box-shadow: 0 6px 16px rgba(194, 24, 91, 0.3);'
+          : 'background: rgba(255,255,255,0.75); border: 2px dashed #E7A9C6; color: #8A7A99;'
+      };
+    }).filter((t) => !forziereSu[t.n]);
+    const forzieri = Object.keys(forziereSu).map((k) => {
+      const t = Number(k), n = forziereSu[t], p = punti[t - 1];
+      const aperto = t < qui;
+      return {
+        x: p.x, y: p.y,
+        coperchio: aperto ? '#FFD84A' : '#C98A3A', cassa: aperto ? '#F5C542' : '#E0A458',
+        etichetta: aperto ? 'aperto' : chiaviForziere[n] + ' chiavi',
+        img: aperto ? 'assets/forziere-aperto.webp' : 'assets/forziere-chiuso.webp'
+      };
+    });
+    const pq = punti[qui - 1];
+    const lato = pq.x < 195 ? 1 : -1;
+    const lani = { x: pq.x + lato * 92, y: pq.y - 10 };
+    const pb = punti[Math.min(8, qui + 1) - 1];
+    const bandiera = { x: pb.x - lato * 46, y: pb.y - 14 };
+    const pn = punti[7];
+    const natale = { x: pn.x + (pn.x < 195 ? 70 : -70), y: pn.y };
+    const passi = soglie[qui - 1] + Math.round((soglie[qui] - soglie[qui - 1]) * 0.6);
+    const mancano = soglie[qui] - passi;
+    const pct = Math.round(((passi - soglie[qui - 1]) / (soglie[qui] - soglie[qui - 1])) * 100);
+    const prossimoN = qui <= 3 ? 1 : qui <= 6 ? 2 : 3;
+    const servono = chiaviForziere[prossimoN], hai = 3;
+    const fzChiavi = Array.from({ length: servono }, (_, i) => ({ img: i < hai ? 'assets/chiave-piena.webp' : 'assets/chiave-vuota.webp' }));
+    const voci = ['Oggi', 'Studio', 'Sera', 'R-Evo', 'Astra'].map((nome, i) => ({
+      nome,
+      stile: 'display: flex; align-items: center; justify-content: center; min-height: 48px; border-radius: 24px; text-decoration: none; font-size: 12px; font-weight: 800;' + (i === 4 ? ' background: #FFE3EF; color: #C2185B;' : ' color: #5E4470;')
+    }));
+    return {
+      passiTesto: passi.toLocaleString('it-IT'), mancano, pctTappa: pct, prossima: qui + 1,
+      strada: curva(punti), fatta: curva(punti.slice(0, qui)),
+      tappe, forzieri, lani, bandiera, natale,
+      fz: { n: prossimoN, tappa: prossimoN * 3, chiavi: fzChiavi, testo: 'ne hai ' + Math.min(hai, servono) },
+      chiaviSett: [1, 2, 3], voci
+    };
+  }
+}
+</script>
+</body>
+</html>

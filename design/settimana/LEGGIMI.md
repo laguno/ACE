@@ -1,5 +1,7 @@
 # Prototipo "La mia settimana" (23/11/2026)
 
+> **Superato dalla v2**: le bozze da seguire sono in `design/v2/` (vedi `design/v2/LEGGIMI.md`). Questo resta come storia.
+
 Bozze disegnate da Jarvis sul canvas di claude.ai e approvate dal signore il 23/11. Il canvas non si
 vede da Claude Code: queste sono le sorgenti copiate da lì. Sono file `.dc.html` (formato del canvas):
 il markup ha gli stili scritti in linea, le liste stanno in `<sc-for>` e i valori di prova nello

@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Lani — Studio, versione pulita</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&amp;family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#C2185B}a:hover{color:#8E1043}
+</style>
+</helmet>
+<div style="width: 390px; height: 1260px; box-sizing: border-box; position: relative; overflow: hidden; background: linear-gradient(180deg, #F3E6FD 0, #FFF6FA 360px); font-family: Nunito, system-ui, sans-serif; color: #3D2350">
+
+  <div style="padding: 22px 20px 0; display: flex; flex-direction: column; gap: 14px">
+
+    <div style="display: flex; justify-content: space-between; align-items: center">
+      <div style="display: flex; flex-direction: column">
+        <span style="font-size: 14px; font-weight: 800; color: #5E4470">Studio</span>
+        <h1 style="margin: 0; font-family: 'Baloo 2', Nunito, sans-serif; font-size: 30px; font-weight: 800; line-height: 1.1">Le verifiche</h1>
+      </div>
+      <img src="assets/lani-concentrata.webp" alt="" width="92" height="92" style="display: block; width: 92px; height: 92px; object-fit: contain; margin: -8px -6px -8px 0;">
+    </div>
+
+    <sc-for list="{{verifiche}}" as="v" hint-placeholder-count="3">
+      <section aria-label="{{v.aria}}" style="{{v.carta}}">
+        <div style="display: grid; grid-template-columns: 64px 1fr; gap: 12px; align-items: center">
+          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 68px; border-radius: 16px; background: {{v.timbro}}; color: #FFFFFF">
+            <span style="font-size: 11px; font-weight: 900; letter-spacing: 0.04em">{{v.giorno}}</span>
+            <span style="font-family: 'Baloo 2', sans-serif; font-size: 28px; font-weight: 800; line-height: 1">{{v.numero}}</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 3px; min-width: 0">
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
+              <span style="font-family: 'Baloo 2', sans-serif; font-size: 21px; font-weight: 800; line-height: 1.1">{{v.materia}}</span>
+              <span style="padding: 2px 9px; border-radius: 999px; background: #FFFFFF; font-size: 12px; font-weight: 900; color: #3D2350">{{v.quando}}</span>
+            </div>
+            <sc-if value="{{v.importante}}" hint-placeholder-val="{{ false }}">
+              <span style="display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 900; letter-spacing: 0.05em">
+                <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5-4.8-4.6 6.6-.9z" fill="#3D2350"></path></svg>
+                IMPORTANTE
+              </span>
+            </sc-if>
+            <span style="font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{v.argomento}}</span>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px">
+          <span style="font-size: 12px; font-weight: 900; color: #5E4470">Ripasso</span>
+          <sc-for list="{{v.pallini}}" as="p" hint-placeholder-count="3">
+            <span style="{{p}}"></span>
+          </sc-for>
+          <span style="flex: 1"></span>
+          <sc-if value="{{v.oggiRipasso}}" hint-placeholder-val="{{ false }}">
+            <button type="button" style="min-height: 40px; padding: 0 16px; border: 0; border-radius: 999px; background: {{v.timbro}}; color: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 900; cursor: pointer">Ripassa ora</button>
+          </sc-if>
+        </div>
+
+        <sc-if value="{{v.foto}}" hint-placeholder-val="{{ false }}">
+          <button type="button" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 14px; border: 2px dashed #3D2350; border-radius: 16px; background: rgba(255, 255, 255, 0.6); font-family: inherit; font-size: 14px; font-weight: 900; color: #3D2350; cursor: pointer">
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-2.5h6L17 8h3v11H4z" fill="none" stroke="#3D2350" stroke-width="2.2" stroke-linejoin="round"></path><circle cx="12" cy="13.5" r="3.2" fill="none" stroke="#3D2350" stroke-width="2.2"></circle></svg>
+            <span style="flex: 1; text-align: left">Fotografa {{v.foto}}</span>
+            <span style="font-size: 12px; font-weight: 800">poi faccio le carte</span>
+          </button>
+        </sc-if>
+
+        <sc-if value="{{v.chiediVoto}}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; flex-direction: column; gap: 8px; padding-top: 10px; border-top: 1px solid rgba(61, 35, 80, 0.12)">
+            <span style="font-size: 14px; font-weight: 900">Che voto pensi di prendere?</span>
+            <div role="radiogroup" aria-label="Voto previsto" style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px">
+              <sc-for list="{{voti}}" as="n" hint-placeholder-count="5">
+                <button type="button" role="radio" aria-checked="{{n.scelto}}" style="{{n.stile}}">{{n.voto}}</button>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+      </section>
+    </sc-for>
+
+    <button type="button" style="display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 0 16px; border: 0; border-radius: 20px; background: #FFFFFF; box-shadow: 0 8px 18px rgba(123, 106, 224, 0.12); font-family: inherit; color: #3D2350; cursor: pointer">
+      <span style="width: 36px; height: 36px; border-radius: 999px; background: #F3E6FD; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-2.5h6L17 8h3v11H4z" fill="none" stroke="#7B6AE0" stroke-width="2.2" stroke-linejoin="round"></path><circle cx="12" cy="13.5" r="3.2" fill="none" stroke="#7B6AE0" stroke-width="2.2"></circle></svg></span>
+      <span style="flex: 1; text-align: left; font-size: 16px; font-weight: 900">Foto dei compiti</span>
+      <span style="display: flex; gap: 4px">
+        <span style="padding: 3px 9px; border-radius: 999px; background: #DCEBFF; color: #1F5FA8; font-size: 12px; font-weight: 900">Inglese</span>
+        <span style="padding: 3px 9px; border-radius: 999px; background: #FBE6D6; color: #A0522D; font-size: 12px; font-weight: 900">Storia</span>
+      </span>
+      <span style="min-width: 26px; height: 26px; border-radius: 999px; background: #7B6AE0; color: #FFFFFF; font-size: 13px; font-weight: 900; display: flex; align-items: center; justify-content: center">2</span>
+    </button>
+
+    <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 10px">
+      <button type="button" style="display: flex; flex-direction: column; align-items: flex-start; gap: 6px; min-height: 112px; padding: 14px; border: 0; border-radius: 24px; background: #7B6AE0; color: #FFFFFF; font-family: inherit; text-align: left; cursor: pointer; box-shadow: 0 10px 22px rgba(123, 106, 224, 0.35)">
+        <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="13" height="15" rx="2.5" fill="none" stroke="#FFFFFF" stroke-width="2.2"></rect><path d="M8 3h10.5A2.5 2.5 0 0 1 21 5.5V17" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round"></path></svg>
+        <span style="font-family: 'Baloo 2', sans-serif; font-size: 20px; font-weight: 800; line-height: 1.05">Ripassa 6 carte</span>
+        <span style="font-size: 13px; font-weight: 800; color: #E6E0FF">4 minuti</span>
+      </button>
+      <button type="button" style="display: flex; flex-direction: column; align-items: flex-start; gap: 6px; min-height: 112px; padding: 14px; border: 2px solid #CDB8F5; border-radius: 24px; background: #FFFFFF; color: #3D2350; font-family: inherit; text-align: left; cursor: pointer">
+        <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v10H9l-5 4z" fill="none" stroke="#7B6AE0" stroke-width="2.2" stroke-linejoin="round"></path></svg>
+        <span style="font-family: 'Baloo 2', sans-serif; font-size: 18px; font-weight: 800; line-height: 1.05">Spiegamelo tu</span>
+      </button>
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 14px; right: 14px; bottom: 14px; border-radius: 32px; background: #FFFFFF; box-shadow: 0 16px 36px rgba(123, 106, 224, 0.3); overflow: hidden">
+    <div style="display: flex; align-items: center; gap: 10px; padding: 10px 18px 8px; border-bottom: 1px solid #FFE3EF">
+      <span style="width: 38px; font-size: 12px; font-weight: 900">Passi</span>
+      <span style="position: relative; flex: 1; height: 8px; border-radius: 999px; background: #FFE3EF"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 12%; border-radius: 999px; background: #E23D8E"></span><span style="position: absolute; left: 18%; top: -4px; width: 3px; height: 16px; border-radius: 2px; background: #3D2350"></span></span>
+      <span style="width: 56px"></span>
+    </div>
+    <nav aria-label="Sezioni" style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; padding: 6px">
+      <sc-for list="{{voci}}" as="x" hint-placeholder-count="5">
+        <a href="#" style="{{x.stile}}">{{x.nome}}</a>
+      </sc-for>
+    </nav>
+    <div style="display: flex; align-items: center; gap: 10px; padding: 8px 18px 11px; border-top: 1px solid #DCEFFF">
+      <span style="width: 38px; font-size: 12px; font-weight: 900">Cose</span>
+      <span style="position: relative; flex: 1; height: 8px; border-radius: 999px; background: #DCEFFF"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 10%; border-radius: 999px; background: #2A6FB0"></span><span style="position: absolute; left: 18%; top: -4px; width: 3px; height: 16px; border-radius: 2px; background: #3D2350"></span></span>
+      <span style="width: 56px; font-size: 12px; font-weight: 900; text-align: right; color: #2A6FB0">3 di 30</span>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"voto":{"editor":"enum","options":["nessuno","5","6","7","8","9"],"default":"nessuno","section":"Prototipo"},"$preview":{"width":390,"height":1260}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const scelto = this.props.voto ?? 'nessuno';
+    // un colore per materia, uguale in tutta l'app
+    const MATERIE = {
+      inglese: { nome: 'Inglese', colore: '#1F5FA8', velo: '#DCEBFF' },
+      scienze: { nome: 'Scienze', colore: '#2E7D32', velo: '#E3F4E1' },
+      storia: { nome: 'Storia', colore: '#A0522D', velo: '#FBE6D6' }
+    };
+    const def = [
+      { m: 'inglese', giorno: 'MAR', numero: 24, quando: 'domani', argomento: 'Present perfect e vocabolario unit 4', fatti: 2, totali: 2, chiediVoto: true },
+      { m: 'scienze', giorno: 'GIO', numero: 26, quando: 'fra 3 giorni', argomento: 'Atomi e molecole', fatti: 1, totali: 3, importante: true, oggiRipasso: true, foto: 'pag. 100–117' },
+      { m: 'storia', giorno: 'MAR', numero: 1, quando: 'fra 8 giorni', argomento: 'Il Medioevo: dal feudalesimo ai Comuni', fatti: 0, totali: 3 }
+    ];
+    const verifiche = def.map((v) => {
+      const m = MATERIE[v.m];
+      const pallini = Array.from({ length: v.totali }, (_, i) => 'width: 14px; height: 14px; border-radius: 999px; box-sizing: border-box;' + (i < v.fatti ? ' background: ' + m.colore + ';' : ' border: 2px solid ' + m.colore + '; background: #FFFFFF;'));
+      return {
+        materia: m.nome, giorno: v.giorno, numero: v.numero, quando: v.quando, argomento: v.argomento,
+        timbro: m.colore, pallini, foto: v.foto || '', importante: !!v.importante, oggiRipasso: !!v.oggiRipasso, chiediVoto: !!v.chiediVoto,
+        aria: 'Verifica di ' + m.nome + ', ' + v.quando,
+        carta: 'display: flex; flex-direction: column; gap: 12px; padding: 14px; border-radius: 24px;' + (v.importante ? ' background: #FFE27A; box-shadow: 0 12px 26px rgba(201, 154, 30, 0.3);' : ' background: ' + m.velo + ';')
+      };
+    });
+    const voti = ['5', '6', '7', '8', '9'].map((n) => ({
+      voto: n, scelto: n === scelto ? 'true' : 'false',
+      stile: 'min-height: 48px; border-radius: 16px; font-family: inherit; font-size: 22px; font-weight: 900; cursor: pointer;' + (n === scelto ? ' border: 0; background: #1F5FA8; color: #FFFFFF;' : ' border: 2px solid #1F5FA8; background: #FFFFFF; color: #1F5FA8;')
+    }));
+    const voci = ['Oggi', 'Studio', 'Sera', 'R-Evo', 'Astra'].map((nome, i) => ({
+      nome,
+      stile: 'display: flex; align-items: center; justify-content: center; min-height: 48px; border-radius: 24px; text-decoration: none; font-size: 12px; font-weight: 800;' + (i === 1 ? ' background: #F3E6FD; color: #5B3FB0;' : ' color: #5E4470;')
+    }));
+    return { verifiche, voti, voci };
+  }
+}
+</script>
+</body>
+</html>

@@ -2,6 +2,12 @@
 
 Storia delle sessioni, decisioni prese e scelte approvate: `docs/storico.md`.
 
+## Restyling v2 (23/11 pomeriggio, bozze approvate, da implementare sul ramo `settimana`)
+
+- Il signore ha provato la v1 su ACE Prova e non gli piace: troppo testo e troppe informazioni per Lani. Jarvis ha ridisegnato sul canvas Oggi, La mia settimana, Studio, Sera, Astra, R-Evolution e il timer dei dieci minuti, una schermata alla volta, e il signore le ha approvate.
+- **Istruzioni complete in `design/v2/LEGGIMI.md`**, bozze in `design/v2/*.dc.html`: principi (una moneta per schermata, gettoni a colori fissi, un colore per materia, sticker dei personaggi ovunque, ambientazione caramella, stacchi solo per R-Evolution e dieci minuti), pillola di navigazione con le due barre al posto della `Striscia`, regola nuova della **verifica importante** (numeri da mettere in config), notifiche soprattutto a Lani, passi per ACE Prova.
+- Regola sugli e-book riscritta in CLAUDE.md su decisione del signore (`83bdda0`): le piattaforme degli editori si usano con le loro funzioni di stampa e PDF. Prova della stampa su HUB Young rimandata: serve che il signore rifaccia l'accesso.
+
 ## La mia settimana e regole del 23/11 (ramo `settimana`, su GitHub, NON in produzione)
 
 - Analisi della prima settimana (16-22/11, zero chiavi: 62% dei passi obbligatori, mancavano ripassi e dieci minuti) e prototipo approvato dal signore. Fatto in una sessione cloud; da provare su ACE Prova.
