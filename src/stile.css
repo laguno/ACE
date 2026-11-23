@@ -1509,3 +1509,13 @@ body[data-sfondo='sera'] {
 .sera .carta-chiusa .dopo { color: #c9c6f0; }
 .sera .testata.piccola { min-height: 0; }
 .sera .testata.piccola .testata-avatar { width: 84px; height: 84px; }
+
+/* Astra v2 come la bozza: "passi" accanto al numero, album quadrato, carta del prossimo forziere con le chiavi sotto il titolo */
+.astra-passi .saldo .unita { align-self: flex-end; margin: 0 0 6px 2px; font: 800 15px Nunito, sans-serif; color: var(--testo); }
+.album-fluttuante { flex-direction: column; justify-content: center; gap: 1px; width: 56px; height: 56px; min-height: 56px; padding: 0; border: 0; border-radius: 18px; box-shadow: 0 8px 20px rgba(123, 106, 224, 0.25); color: #6B4FC0; font: 900 12px Nunito, sans-serif; }
+.forziere-prossimo { gap: 10px; margin-right: 70px; padding: 8px 14px; border-radius: 18px; }
+.forziere-prossimo .forziere-testo { min-width: 0; }
+.forziere-prossimo .forziere-testo b { font: 900 15px Nunito, sans-serif; }
+.forziere-prossimo .chiavi-servono { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; }
+.forziere-prossimo .chiavi-servono small { margin-left: 4px; font: 800 13px Nunito, sans-serif; color: var(--testo-2); }
+.tappe .qui > span { white-space: nowrap; }

@@ -38,21 +38,21 @@ test('percorso: sei qui, forzieri, bandierina, chiavi della settimana', async ({
   await expect(page.getByText('Tappa 3: mancano 95 passi')).toBeVisible();
   await expect(page.getByRole('progressbar', { name: 'Verso la prossima tappa' })).toBeVisible();
   await expect(page.getByText('300 passi')).toBeAttached();
-  await expect(page.getByText('Sei qui: mancano 95')).toBeVisible();
+  await expect(page.getByRole('button', { name: /Sei qui.*mancano 95 passi/ })).toBeVisible();
   await expect(page.locator('.tappa', { hasText: 'Sei qui' })).toContainText('Tappa 3');
   await expect(page.getByText('Il calendario è qui')).toBeVisible();
   // le chiavi stanno solo nella carta del prossimo forziere: ne servono 2, Lani ne ha 1
-  await expect(page.getByRole('region', { name: 'Prossimo forziere' }).getByLabel('Chiavi: 1 su 2')).toBeAttached();
+  await expect(page.getByRole('region', { name: 'Prossimo forziere' }).getByText('1 di 2 chiavi')).toBeVisible();
   await expect(page.getByRole('button', { name: /Forziere \d/ })).toHaveCount(9);
   // l'etichetta dice cosa sono i due numeri, e il nome per i lettori di schermo la contiene
   await expect(page.getByRole('button', { name: /^Forziere 1: [\d.]+ passi, 2 chiavi$/ })).toContainText(/[\d.]+ passi, 2 chiavi/);
   await page.screenshot({ path: 'e2e/risultati/astra.png' });
   // "mancano N" si tocca: apre Come si fanno i passi
-  await page.getByRole('button', { name: /Sei qui: mancano 95/ }).click();
+  await page.getByRole('button', { name: /Sei qui.*mancano 95 passi/ }).click();
   // le regole si aprono dall'inizio, non dal punto della mappa; al ritorno Astra riscende a "Sei qui"
   await expect(page.getByRole('heading', { name: 'Come si fanno i passi' })).toBeInViewport();
   await page.getByRole('button', { name: 'Torna a Astra' }).click();
-  await expect(page.getByText('Sei qui: mancano 95')).toBeInViewport();
+  await expect(page.getByRole('button', { name: /Sei qui.*mancano 95 passi/ })).toBeInViewport();
 });
 
 test('forziere con enigma: risposta giusta, +20', async ({ page }) => {

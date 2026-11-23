@@ -154,6 +154,7 @@ export default function Astra({ apri, forziere: aperto }: { apri: (pagina: 'Figu
           <span className="saldo grande">
             <img src={img('oggetti', 'passo')} alt="" width={44} height={44} />
             <Contapassi prima={dati.prima} adesso={dati.passi} />
+            <small className="unita">passi</small>
           </span>
           <div className="barra-tappa" role="progressbar" aria-label="Verso la prossima tappa" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pos.avanzamentoTappa * 100)}>
             <span style={{ width: `${Math.round(pos.avanzamentoTappa * 100)}%` }} />
@@ -184,7 +185,9 @@ export default function Astra({ apri, forziere: aperto }: { apri: (pagina: 'Figu
                   {/* al tocco apre "Come si fanno i passi": è la domanda che viene leggendo "mancano N" */}
                   <button className="qui" onClick={() => setRegole(true)}>
                     <b>{SOGLIE[t - 1].toLocaleString('it-IT')}</b>
-                    <span>Sei qui: mancano {pos.mancanoPassi}</span>
+                    <span>
+                      Sei qui<span className="solo-lettori">, mancano {pos.mancanoPassi} passi</span>
+                    </span>
                   </button>
                   <img className={`lani-sentiero ${aDestra ? 'destra' : 'sinistra'}`} src={img('avatar/lani', 'lani-saluta')} alt="Lani" width={120} height={120} />
                 </>
@@ -222,21 +225,28 @@ export default function Astra({ apri, forziere: aperto }: { apri: (pagina: 'Figu
 
       {prossimo && (
         <section className="carta forziere-prossimo" aria-label="Prossimo forziere">
-          <img src={img('oggetti', prossimo.n === 9 ? 'forziere-cima' : 'forziere-chiuso')} alt="" width={56} height={56} />
+          <img src={img('oggetti', prossimo.n === 9 ? 'forziere-cima' : 'forziere-chiuso')} alt="" width={44} height={44} />
+          {/* v2: l'unico posto di Astra dove si vedono le chiavi */}
           <span className="forziere-testo">
-            <b>Forziere {prossimo.n}</b>
-            <small>alla tappa {prossimo.tappa}</small>
-          </span>
-          <span className="chiavi-servono" role="img" aria-label={`Chiavi: ${Math.min(dati.chiavi, prossimo.chiavi)} su ${prossimo.chiavi}`}>
-            {Array.from({ length: prossimo.chiavi }, (_, c) => (
-              <img key={c} src={img('oggetti', c < dati.chiavi ? 'chiave-piena' : 'chiave-vuota')} alt="" width={30} height={30} />
-            ))}
+            <b>
+              Forziere {prossimo.n} · tappa {prossimo.tappa}
+            </b>
+            <span className="chiavi-servono">
+              {Array.from({ length: prossimo.chiavi }, (_, c) => (
+                <img key={c} src={img('oggetti', c < dati.chiavi ? 'chiave-piena' : 'chiave-vuota')} alt="" width={22} height={22} />
+              ))}
+              <small>
+                {Math.min(dati.chiavi, prossimo.chiavi)} di {prossimo.chiavi} chiavi
+              </small>
+            </span>
           </span>
         </section>
       )}
 
       <button className="album-fluttuante" onClick={() => apri('Album')}>
-        <ImageSquare size={24} weight="bold" aria-hidden /> Album {dati.album}/64
+        <ImageSquare size={22} weight="bold" aria-hidden />
+        <span className="solo-lettori">Album delle figurine </span>
+        <span>{dati.album}/64</span>
       </button>
     </section>
   );
