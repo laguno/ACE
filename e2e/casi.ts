@@ -87,7 +87,7 @@ export const CASI: Record<string, Caso> = {
     quando: LUNEDI_POMERIGGIO,
     vai: async (p) => {
       await p.getByRole('button', { name: 'Studio' }).click();
-      await p.locator('.carta', { hasText: 'Tecnologia' }).getByRole('button', { name: 'Inizia' }).click();
+      await p.locator('.studio-verifica', { hasText: 'Tecnologia' }).getByRole('button', { name: 'Ripassa ora' }).click();
       await p.getByRole('button', { name: 'Sicura' }).click({ timeout: 10000 }); // si gira dopo 7 secondi
     },
   },

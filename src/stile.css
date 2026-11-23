@@ -1472,4 +1472,5 @@ body[data-sfondo='sera'] .pillola-barra.p-cose .conto-p { color: var(--notte-tes
 .tessera:focus-visible, .ripassa-ora:focus-visible, .foto-compiti summary:focus-visible { outline: 3px solid #3d2350; outline-offset: 3px; }
 /* testata piccola delle bozze v2 (Studio, Oggi): sticker da 92 px, niente altezza minima */
 .testata.piccola { min-height: 0; align-items: center; }
-.testata.piccola .testata-avatar { margin: -8px -6px -8px 0; }
+.testata.piccola .testata-avatar { margin: -8px 0; }
+.testata.piccola .testata-testo { min-width: 0; overflow-wrap: anywhere; }

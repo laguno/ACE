@@ -106,7 +106,7 @@ test('niente richieste aperte: niente carta', async ({ page }) => {
   await page.clock.setFixedTime(new Date('2026-12-01T15:00:00+01:00'));
   await finto(page, { ...base(), richieste_foto: [{ ...RICHIESTA, stato: 'fatta' }] });
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: /^Compiti per/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Ciao, Lani' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Da fotografare' })).toHaveCount(0);
 });
 

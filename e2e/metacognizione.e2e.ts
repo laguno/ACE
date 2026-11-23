@@ -49,7 +49,7 @@ test('Studio: micro-lezione della settimana, voto previsto e tendenza delle prev
   await expect(page.getByRole('heading', { name: LEZIONE.titolo })).toHaveCount(0);
   expect(t.micro_lezioni_lette).toMatchObject([{ settimana: '2026-11-23', lezione: LEZIONE.id }]);
 
-  const carta = page.locator('.carta', { hasText: 'Frazioni' });
+  const carta = page.locator('.studio-verifica', { hasText: 'Frazioni' });
   await carta.getByLabel('Che voto pensi di prendere?').selectOption('7.5');
   await expect.poll(() => t.voti_previsti.find((v) => v.verifica_id === 'v1')?.voto).toBe(7.5);
 

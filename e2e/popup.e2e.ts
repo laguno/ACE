@@ -88,5 +88,5 @@ test('voto: "Guardo il piano" porta a Studio', async ({ page }) => {
   await finto(page, { ...uno({ situazione: 'voto_6', titolo: 'Un 6 in Storia', testo: 'Il ripasso è già nel piano.' }), verifiche: [] });
   await page.goto('/');
   await page.getByRole('button', { name: 'Guardo il piano' }).click();
-  await expect(page.getByRole('heading', { name: 'Le tue verifiche' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Le verifiche' })).toBeVisible();
 });

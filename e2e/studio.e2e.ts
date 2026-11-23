@@ -42,11 +42,12 @@ test('sessione di flash card: si gira dopo 7 secondi, intervalli e giro salvati'
   await page.getByRole('button', { name: 'Studio' }).click();
 
   await expect(page.getByRole('heading', { name: 'Matematica' })).toBeVisible();
-  await expect(page.getByText('Sessione 2 di 3: flash card e mappa, 15 minuti.')).toBeVisible();
+  // v2: il ripasso si legge dai pallini nel colore della materia (una sessione su tre fatta)
+  await expect(page.getByRole('list', { name: '1 di 3 fatti' })).toBeVisible();
   await expect(page.getByText('Da ripassare: pag. 340-345')).toBeVisible();
   await page.screenshot({ path: 'e2e/risultati/studio.png', fullPage: true });
 
-  await page.locator('.carta', { hasText: 'Matematica' }).getByRole('button', { name: 'Inizia' }).click();
+  await page.locator('.studio-verifica', { hasText: 'Matematica' }).getByRole('button', { name: 'Ripassa ora' }).click();
   await expect(page.getByText('Il numero sotto la linea si chiama ___.')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Sicura' })).toBeDisabled();
   await expect(page.getByText('Pensa alla risposta: si gira tra 7 secondi.')).toBeVisible();
@@ -109,7 +110,7 @@ test('carte del giorno e avviso dei compiti', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Studio' }).click();
   await expect(page.locator('.studio-verifica').first().getByText('Finiti i compiti, flash card e quiz valgono passi')).toBeVisible();
-  await expect(page.getByText('2 da ripassare oggi', { exact: false })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Ripassa 2 carte/ })).toBeVisible();
 });
 
 test('assenze: la verifica del giorno a casa è da recuperare, quella spostata a "settimana prossima" non ha giorno', async ({ page }) => {
@@ -133,10 +134,6 @@ test('assenze: la verifica del giorno a casa è da recuperare, quella spostata a
   await expect(carta('Geografia')).toContainText('settimana prossima');
   await expect(carta('Geografia')).toContainText('Settimana prossima, il giorno lo dice la prof');
   await expect(carta('Matematica')).toContainText('fra 2 giorni');
-  // fucsia solo entro 2 giorni o da recuperare; il resto col colore dei testi secondari
-  await expect(carta('Matematica').locator('.valore')).not.toHaveClass(/quieto/);
-  await expect(carta('Spagnolo').locator('.valore')).not.toHaveClass(/quieto/);
-  await expect(carta('Geografia').locator('.valore')).toHaveClass(/quieto/);
 });
 
 test('spiegamelo tu: Lani spiega, il tutor dice cosa c’è e cosa manca, senza voto', async ({ page }) => {
@@ -150,7 +147,7 @@ test('spiegamelo tu: Lani spiega, il tutor dice cosa c’è e cosa manca, senza 
   });
   await page.goto('/');
   await page.getByRole('button', { name: 'Studio' }).click();
-  await page.getByRole('button', { name: 'Prova' }).click();
+  await page.getByRole('button', { name: 'Spiegamelo tu' }).click();
   await expect(page.getByRole('heading', { name: 'Spiegamelo tu' })).toBeVisible();
   await page.getByLabel('Argomento').fill('Le frazioni');
   await page.getByLabel('La tua spiegazione').fill('Corta.');
