@@ -1417,3 +1417,59 @@ body[data-sfondo='sera'] .pillola-barra.p-cose .conto-p { color: var(--notte-tes
 .voce-pallino i { width: 10px; height: 10px; border-radius: 999px; }
 .cella.futura { filter: saturate(0.55); }
 @media (prefers-reduced-motion: reduce) { .pista-grande .piena { transition: none; } }
+
+/* Studio v2 (design/v2/Studio-v2.dc.html, 23/11): carta nel velo della materia, gialla se importante */
+.studio-verifica { display: flex; flex-direction: column; gap: 12px; padding: 14px; border-radius: 24px; background: var(--velo, #f1ecf5); color: #3d2350; }
+.studio-verifica.importante { background: #ffe27a; box-shadow: 0 12px 26px rgb(201 154 30 / 0.3); }
+.studio-verifica p { margin: 0; font-size: 14px; line-height: 1.4; }
+.studio-verifica .nota { font-size: 13px; color: #5e4470; }
+.studio-verifica .verifica-testa { display: grid; grid-template-columns: 64px 1fr; gap: 12px; align-items: center; }
+.studio-verifica .timbro-materia { width: 64px; height: 68px; background: var(--materia); color: #fff; }
+.studio-verifica .timbro-materia b { font-size: 28px; }
+.verifica-titolo { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.riga-materia { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.riga-materia h2 { margin: 0; font: 800 21px/1.1 'Baloo 2', Nunito, sans-serif; }
+.riga-materia .quando { padding: 2px 9px; border-radius: 999px; background: #fff; font: 900 12px Nunito, sans-serif; color: #3d2350; }
+.studio-verifica .importante { margin: 0; padding: 0; background: none; display: flex; align-items: center; gap: 5px; font: 900 12px Nunito, sans-serif; letter-spacing: 0.05em; color: #3d2350; }
+.studio-verifica p.argomento { font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.riga-ripasso { display: flex; align-items: center; gap: 8px; }
+.riga-ripasso .et { font: 900 12px Nunito, sans-serif; color: #5e4470; }
+.riga-ripasso .allarga { flex: 1; }
+.pallini-materia { display: flex; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.pallini-materia li { width: 14px; height: 14px; box-sizing: border-box; border-radius: 999px; border: 2px solid var(--materia); background: #fff; }
+.pallini-materia li.fatta { background: var(--materia); }
+.ripassa-ora { min-height: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: var(--materia); color: #fff; font: 900 14px Nunito, sans-serif; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.ripassa-ora.vuoto { align-self: flex-start; border: 2px solid var(--materia); background: #fff; color: var(--materia); }
+.foto-verifica { display: flex; flex-direction: column; gap: 8px; padding: 10px 14px; border: 2px dashed #3d2350; border-radius: 16px; background: rgb(255 255 255 / 0.6); }
+.foto-verifica-testo { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+.foto-verifica-testo b { flex: 1; font-weight: 900; }
+.foto-verifica-testo small { font: 800 12px Nunito, sans-serif; }
+.foto-verifica .fotografa { display: flex; flex-wrap: wrap; gap: 8px; }
+.studio-verifica .voto-previsto { margin: 0; padding-top: 10px; border-top: 1px solid rgb(61 35 80 / 0.12); }
+.studio-verifica .voto-previsto span { font: 900 14px Nunito, sans-serif; }
+.studio-verifica .voto-previsto select { border-color: var(--materia); color: var(--materia); font-weight: 900; }
+.studio-verifica .avviso-compiti { margin: 0; }
+.foto-compiti { border-radius: 20px; background: #fff; box-shadow: 0 8px 18px rgb(123 106 224 / 0.12); }
+.foto-compiti summary { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 0 16px; list-style: none; cursor: pointer; color: #3d2350; }
+.foto-compiti summary::-webkit-details-marker { display: none; }
+.foto-compiti summary .allarga { flex: 1; font-size: 16px; font-weight: 900; }
+.foto-compiti[open] summary svg:last-child { transform: rotate(180deg); }
+.cerchio-foto { width: 36px; height: 36px; flex: none; border-radius: 999px; background: #f3e6fd; display: grid; place-items: center; color: #3d2350; }
+.chip-materie { display: flex; gap: 4px; }
+.chip-materie span { padding: 3px 9px; border-radius: 999px; font: 900 12px Nunito, sans-serif; }
+.conta-foto { min-width: 26px; height: 26px; padding: 0 6px; border-radius: 999px; background: #6b4fc0; color: #fff; font: 900 13px Nunito, sans-serif; display: grid; place-items: center; }
+.foto-compiti .lista-foto { padding: 0 16px 12px; }
+.tessere-studio { display: grid; grid-template-columns: 1.4fr 1fr; gap: 10px; }
+.tessere-studio.sola { grid-template-columns: 1fr; }
+.tessera { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; min-height: 112px; padding: 14px; border: 2px solid #cdb8f5; border-radius: 24px; background: #fff; color: #3d2350; font: inherit; text-align: left; cursor: pointer; }
+.tessera svg { color: #6b4fc0; }
+.tessera b { font: 800 18px/1.05 'Baloo 2', Nunito, sans-serif; }
+.tessera.piena { border: 0; background: #6b4fc0; color: #fff; }
+.tessera.piena svg { color: #fff; }
+.tessera.piena b { font-size: 20px; }
+.tessera small { font: 800 13px Nunito, sans-serif; color: #ece7ff; }
+.tessera.ferma { cursor: default; }
+.tessera:focus-visible, .ripassa-ora:focus-visible, .foto-compiti summary:focus-visible { outline: 3px solid #3d2350; outline-offset: 3px; }
+/* testata piccola delle bozze v2 (Studio, Oggi): sticker da 92 px, niente altezza minima */
+.testata.piccola { min-height: 0; align-items: center; }
+.testata.piccola .testata-avatar { margin: -8px -6px -8px 0; }

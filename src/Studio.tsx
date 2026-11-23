@@ -1,18 +1,21 @@
-import { useEffect, useState } from 'react';
-import { Calculator, Cards, ChatCircleText, ClipboardText } from '@phosphor-icons/react';
-import { Riquadro, Testata } from './kit';
+import { useEffect, useState, type CSSProperties } from 'react';
+import { Calculator, Camera, CaretDown, Cards, ChatCircleText, Star } from '@phosphor-icons/react';
+import { Testata } from './kit';
+import { Fotografa, SELECT_RICHIESTE, descrizione, type RichiestaFoto } from './Foto';
 import * as R from './lib/regole';
 import { Flashcard, Quiz, SELECT_CARTA, type Carta, type Domanda } from './Ripasso';
 import { componiPillola } from './lib/regole/pillola';
 import { Matematica, type Serie } from './Matematica';
-import { GIORNI, MESI, maiuscola } from './spunte';
+import { GIORNI, MESI } from './spunte';
 import { supabase } from './supabase';
 import { ComeTiConosci, MicroLezione, VotoPrevisto, usePrevisioni } from './Metacognizione';
 import { Spiegamelo } from './Tutor';
 import { useVerificaImportante } from './verificaImportante';
 import { coloreMateria } from './colori';
 
-// Studio — design/Studio.html. Verifiche in arrivo con il piano di ripasso (sessioni da 15 minuti),
+// Studio — design/v2/Studio-v2.dc.html (23/11): carte delle verifiche nel colore della materia (gialla se
+// importante), timbro della data, pallini del ripasso, foto delle pagine, tessere Ripassa e Spiegamelo tu.
+// Prima: design/Studio.html. Verifiche in arrivo con il piano di ripasso (sessioni da 15 minuti),
 // carte del giorno (ripetizione a intervalli) e quiz liberi. Video più avanti.
 
 type Sessione = {
@@ -31,6 +34,7 @@ type Verifica = {
   recupero_vago: boolean;
   /** caduta in un giorno a casa e non ancora spostata dai genitori (docs/02, Assenze) */
   daRecuperare?: boolean;
+  materia_id: string | null;
   materie: { nome: string } | null;
   sessioni_ripasso: Sessione[];
   quiz: { id: string; domande: Domanda[] }[];
@@ -61,12 +65,14 @@ export default function Studio() {
   const [attivita, setAttivita] = useState<Attivita>();
   const previsioni = usePrevisioni();
   const [spiegamelo, setSpiegamelo] = useState(false);
+  const [foto, setFoto] = useState<RichiestaFoto[]>([]);
+  const [fotoFatta, setFotoFatta] = useState('');
 
   async function carica() {
     const domani = R.iso(R.prossimoGiornoDiScuola(R.giornoRoma(new Date())));
-    const sel = 'id, data, tipo, argomento, pagine_probabili, recupero_vago, materie(nome), sessioni_ripasso(id, numero, data_prevista, tipo, fatta_il), quiz(id, domande), mate_serie(id, problemi)';
+    const sel = 'id, data, tipo, argomento, pagine_probabili, recupero_vago, materia_id, materie(nome), sessioni_ripasso(id, numero, data_prevista, tipo, fatta_il), quiz(id, domande), mate_serie(id, problemi)';
     const { data: casa } = await supabase.from('assenze').select('giorno').lt('giorno', oggi);
-    const [v, r, c, k, n] = await Promise.all([
+    const [v, r, c, k, n, rf] = await Promise.all([
       supabase.from('verifiche').select(sel).gte('data', oggi).order('data').limit(6),
       casa?.length
         ? supabase
@@ -78,6 +84,7 @@ export default function Studio() {
       supabase.from('flashcard').select(SELECT_CARTA).lte('prossima_revisione', oggi).eq('segnalata_sbagliata', false).neq('da_riprendere', true).order('prossima_revisione').limit(DA_PESCARE),
       supabase.from('compiti').select('id', { count: 'exact', head: true }).eq('scadenza', domani).is('fatto_il', null),
       supabase.from('flashcard').select('id', { count: 'exact', head: true }).eq('segnalata_sbagliata', false),
+      supabase.from('richieste_foto').select(SELECT_RICHIESTE).eq('stato', 'aperta').order('creato_il'),
     ]);
     // prima quelle da recuperare: la data la decidono mamma e papà con la prof
     const recuperare = ((r.data ?? []) as unknown as Verifica[]).map((x) => ({ ...x, daRecuperare: true }));
@@ -85,6 +92,7 @@ export default function Studio() {
     setCarteDelGiorno(componiPillola((c.data ?? []) as unknown as Carta[]));
     setCompitiAperti(k.count ?? 0);
     setCarteTotali(n.count ?? 0);
+    setFoto((rf.data ?? []) as unknown as RichiestaFoto[]);
   }
 
   useEffect(() => {
@@ -116,7 +124,7 @@ export default function Studio() {
     setAttivita(undefined);
     carica();
   };
-  const testata = <Testata sfondo="panna" posa="lani-pensierosa" misura={132} sopra="Studio" titolo="Le tue verifiche" riga={<p>Il ripasso è già organizzato nei pomeriggi liberi.</p>} />;
+  const testata = <Testata sfondo="pomeriggio" posa="lani-concentrata" misura={92} piccola sopra="Studio" titolo="Le verifiche" />;
   if (spiegamelo) return <Spiegamelo chiudi={() => setSpiegamelo(false)} />;
   if (attivita?.tipo === 'carte') return <Flashcard carte={attivita.carte} titolo={attivita.titolo} sessione={attivita.sessione} chiudi={chiudi} />;
   if (attivita?.tipo === 'mate') return <Matematica serie={attivita.serie} titolo={attivita.titolo} chiudi={chiudi} />;
@@ -124,10 +132,17 @@ export default function Studio() {
   // intestazione subito, i dati dopo: titolo e avatar sono il primo disegno (Lighthouse, 13/11)
   if (!verifiche) return <section className="schermo schermo-studio">{testata}</section>;
 
+  const materieVerifiche = new Set(verifiche.map((v) => v.materia_id).filter(Boolean));
+  const fotoSenzaVerifica = foto.filter((r) => !r.materia_id || !materieVerifiche.has(r.materia_id));
+  const fotoTolta = (id: string) => (p: number) => {
+    setFoto((l) => l.filter((x) => x.id !== id));
+    setFotoFatta(p > 0 ? `Foto salvata: +${p}.` : 'Foto salvata.');
+  };
+  const minutiCarte = Math.max(2, Math.round((Math.min(carteDelGiorno.length, 12) * 25) / 60));
+
   return (
     <section className="schermo schermo-studio">
       {testata}
-      <MicroLezione />
 
       {verifiche.length === 0 && (
         <div className="carta">
@@ -138,16 +153,25 @@ export default function Studio() {
       {verifiche.map((v, i) => {
         const sessioni = [...v.sessioni_ripasso].sort((a, b) => a.numero - b.numero);
         const daFare = sessioni.find((s) => !s.fatta_il && s.data_prevista <= oggi);
-        const prossima = sessioni.find((s) => !s.fatta_il && s.data_prevista > oggi);
         const g = R.giorno(v.data);
         const fra = Math.round((g.getTime() - R.giorno(oggi).getTime()) / 86400000);
         const materia = v.materie?.nome ?? 'Verifica';
         const argomento = v.argomento?.split('\n')[0];
+        const col = coloreMateria(materia);
+        const eImportante = importante?.id === v.id;
+        const quando = v.daRecuperare ? 'da recuperare' : v.recupero_vago ? 'settimana prossima' : fra === 0 ? 'oggi' : fra === 1 ? 'domani' : `fra ${fra} giorni`;
+        const fatte = sessioni.filter((s) => s.fatta_il).length;
+        const fotoQui = v.materia_id ? foto.filter((r) => r.materia_id === v.materia_id) : [];
         return (
-          <div className="carta studio-verifica" key={v.id}>
+          <section
+            className={`studio-verifica${eImportante ? ' importante' : ''}`}
+            key={v.id}
+            aria-label={`Verifica di ${materia}, ${quando}`}
+            style={{ '--materia': col.testo, '--velo': col.fondo } as CSSProperties}
+          >
             <div className="verifica-testa">
-              {/* v2: timbro della data nel colore della materia (un solo file: src/colori.ts) */}
-              <div className="timbro-materia" aria-hidden style={{ background: coloreMateria(materia).fondo, color: coloreMateria(materia).testo }}>
+              {/* timbro della data pieno, nel colore della materia (un solo file: src/colori.ts) */}
+              <div className="timbro-materia" aria-hidden>
                 {v.daRecuperare || v.recupero_vago ? (
                   <b>?</b>
                 ) : (
@@ -157,51 +181,48 @@ export default function Studio() {
                   </>
                 )}
               </div>
-            <div className="testa-carta">
-              <h2>
-                {materia}
-                {importante?.id === v.id && <span className="importante"> IMPORTANTE</span>}
-              </h2>
-              {/* fucsia solo se è vicina (entro 2 giorni) o da recuperare; oltre, il colore dei testi secondari */}
-              <span className={`valore${v.daRecuperare || (!v.recupero_vago && fra <= 2) ? '' : ' quieto'}`}>{v.daRecuperare ? 'da recuperare' : v.recupero_vago ? 'settimana prossima' : fra === 0 ? 'oggi' : fra === 1 ? 'domani' : `fra ${fra} giorni`}</span>
+              <div className="verifica-titolo">
+                <div className="riga-materia">
+                  <h2>{materia}</h2>
+                  <span className="quando">{quando}</span>
+                </div>
+                {eImportante && (
+                  <span className="importante">
+                    <Star size={13} weight="fill" aria-hidden /> IMPORTANTE
+                  </span>
+                )}
+                {argomento && argomento !== materia && <p className="argomento">{argomento}</p>}
+              </div>
             </div>
-            </div>
-            <p className="data-verifica">
-              {v.daRecuperare
-                ? `Era ${GIORNI[g.getDay()]} ${g.getDate()} ${MESI[g.getMonth()]}, eri a casa`
-                : v.recupero_vago
-                  ? 'Settimana prossima, il giorno lo dice la prof'
-                  : `${maiuscola(GIORNI[g.getDay()])} ${g.getDate()} ${MESI[g.getMonth()]}`}
-              {v.tipo === 'interrogazione' ? ' · interrogazione' : ''}
-            </p>
-            {argomento && argomento !== materia && <p>{argomento}</p>}
-            {v.pagine_probabili && <p className="nota">Da ripassare: {v.pagine_probabili}</p>}
-            {daFare ? (
-              <p>
-                Sessione {daFare.numero} di {sessioni.length}: {COSA[daFare.tipo]}, 15 minuti.
+            {(v.daRecuperare || v.recupero_vago || v.tipo === 'interrogazione') && (
+              <p className="nota">
+                {v.daRecuperare
+                  ? `Era ${GIORNI[g.getDay()]} ${g.getDate()} ${MESI[g.getMonth()]}, eri a casa`
+                  : v.recupero_vago
+                    ? 'Settimana prossima, il giorno lo dice la prof'
+                    : 'Interrogazione'}
               </p>
-            ) : prossima ? (
-              <p className="nota">Prossima sessione: {GIORNI[R.giorno(prossima.data_prevista).getDay()]}.</p>
-            ) : null}
-            {!v.daRecuperare && !v.recupero_vago && <VotoPrevisto verifica={v} previsto={previsioni.previste.get(v.id)} ricarica={previsioni.ricarica} />}
+            )}
+            {v.pagine_probabili && <p className="nota">Da ripassare: {v.pagine_probabili}</p>}
             {i === 0 && compitiAperti > 0 && <p className="avviso-compiti">{AVVISO_COMPITI}</p>}
             {(sessioni.length > 0 || daFare || v.quiz[0]) && (
-              <div className="riga-pallini">
-                <ol className="pallini" aria-label="Sessioni di ripasso">
-                  {sessioni.map((s) => (
-                    <li key={s.id} className={s.fatta_il ? 'fatta' : s.data_prevista === oggi ? 'oggi' : ''}>
-                      <span aria-hidden />
-                      {s.data_prevista === oggi ? 'oggi' : GIORNI[R.giorno(s.data_prevista).getDay()].slice(0, 3)}
-                    </li>
-                  ))}
-                </ol>
+              <div className="riga-ripasso">
+                <span className="et">Ripasso</span>
+                {sessioni.length > 0 && (
+                  <ol className="pallini-materia" aria-label={`${fatte} di ${sessioni.length} fatti`}>
+                    {sessioni.map((s) => (
+                      <li key={s.id} className={s.fatta_il ? 'fatta' : ''} />
+                    ))}
+                  </ol>
+                )}
+                <span className="allarga" />
                 {daFare ? (
-                  <button className="secondario compatto" onClick={() => iniziaSessione(v, daFare)}>
-                    <Cards size={20} weight="bold" aria-hidden /> Inizia
+                  <button className="ripassa-ora" onClick={() => iniziaSessione(v, daFare)}>
+                    Ripassa ora
                   </button>
                 ) : v.quiz[0] ? (
                   <button
-                    className="secondario compatto"
+                    className="ripassa-ora"
                     onClick={() =>
                       setAttivita({
                         tipo: 'quiz',
@@ -211,63 +232,91 @@ export default function Studio() {
                       })
                     }
                   >
-                    <ClipboardText size={20} weight="bold" aria-hidden /> Prova il quiz
+                    Prova il quiz
                   </button>
                 ) : null}
               </div>
             )}
             {v.mate_serie?.map((serie) => (
-              <button key={serie.id} className="secondario compatto" onClick={() => setAttivita({ tipo: 'mate', serie, titolo: 'Esercizi di matematica' })}>
+              <button key={serie.id} className="ripassa-ora vuoto" onClick={() => setAttivita({ tipo: 'mate', serie, titolo: 'Esercizi di matematica' })}>
                 <Calculator size={20} weight="bold" aria-hidden /> Esercizi
               </button>
             ))}
-          </div>
+            {fotoQui.map((r) => (
+              <div className="foto-verifica" key={r.id}>
+                <span className="foto-verifica-testo">
+                  <Camera size={18} weight="bold" aria-hidden />
+                  <b>Fotografa {r.pagine}</b>
+                  <small>poi faccio le carte</small>
+                </span>
+                <Fotografa client={supabase} richiesta={r} studio fatto={fotoTolta(r.id)} />
+              </div>
+            ))}
+            {!v.daRecuperare && !v.recupero_vago && <VotoPrevisto verifica={v} previsto={previsioni.previste.get(v.id)} ricarica={previsioni.ricarica} />}
+          </section>
         );
       })}
 
-      <ComeTiConosci {...previsioni} />
-
-      {carteTotali > 0 && (
-        <div className="carta">
-          <ul className="cose">
-            <li>
-              <Riquadro colore="rosa">
-                <Cards size={24} weight="bold" aria-hidden />
-              </Riquadro>
-              <span className="allarga">
-                <b>Le tue carte</b>
-                <small>
-                  {carteTotali} carte
-                  {carteDelGiorno.length > 0 ? `, ${carteDelGiorno.length} da ripassare oggi` : ', nessuna da ripassare oggi'}
-                </small>
-              </span>
-              {carteDelGiorno.length > 0 && (
-                <button className="secondario compatto" onClick={() => setAttivita({ tipo: 'carte', carte: carteDelGiorno, titolo: 'Carte del giorno' })}>
-                  Ripassa
-                </button>
-              )}
-            </li>
-          </ul>
-        </div>
-      )}
-      {/* tutor (blocco E): spiegare con parole proprie, il tutor dice cosa manca; nessun voto, nessun passo */}
-      <div className="carta">
-        <ul className="cose">
-          <li>
-            <Riquadro colore="lilla">
-              <ChatCircleText size={24} weight="bold" aria-hidden />
-            </Riquadro>
-            <span className="allarga">
-              <b>Spiegamelo tu</b>
-              <small>Spiega un argomento con parole tue</small>
+      {fotoSenzaVerifica.length > 0 && (
+        <details className="foto-compiti">
+          <summary>
+            <span className="cerchio-foto" aria-hidden>
+              <Camera size={18} weight="bold" />
             </span>
-            <button className="secondario compatto" onClick={() => setSpiegamelo(true)}>
-              Prova
+            <b className="allarga">Foto dei compiti</b>
+            <span className="chip-materie" aria-hidden>
+              {[...new Set(fotoSenzaVerifica.map((r) => r.materie?.nome).filter((x): x is string => !!x))].slice(0, 2).map((nome) => (
+                <span key={nome} style={{ background: coloreMateria(nome).fondo, color: coloreMateria(nome).testo }}>
+                  {nome}
+                </span>
+              ))}
+            </span>
+            <span className="conta-foto">
+              {fotoSenzaVerifica.length}
+              <span className="solo-lettori"> da fotografare</span>
+            </span>
+            <CaretDown size={18} weight="bold" aria-hidden />
+          </summary>
+          <ul className="lista-foto">
+            {fotoSenzaVerifica.map((r) => (
+              <li key={r.id}>
+                <span>{descrizione(r)}</span>
+                <Fotografa client={supabase} richiesta={r} studio fatto={fotoTolta(r.id)} />
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+      {fotoFatta && (
+        <p className="nota accento" role="status">
+          {fotoFatta}
+        </p>
+      )}
+
+      <div className={`tessere-studio${carteTotali > 0 ? '' : ' sola'}`}>
+        {carteTotali > 0 &&
+          (carteDelGiorno.length > 0 ? (
+            <button className="tessera piena" onClick={() => setAttivita({ tipo: 'carte', carte: carteDelGiorno, titolo: 'Carte del giorno' })}>
+              <Cards size={30} weight="bold" aria-hidden />
+              <b>Ripassa {carteDelGiorno.length} carte</b>
+              <small>{minutiCarte} minuti</small>
             </button>
-          </li>
-        </ul>
+          ) : (
+            <div className="tessera piena ferma">
+              <Cards size={30} weight="bold" aria-hidden />
+              <b>Carte a posto</b>
+              <small>{carteTotali} carte, nessuna oggi</small>
+            </div>
+          ))}
+        {/* tutor (blocco E): spiegare con parole proprie, il tutor dice cosa manca; nessun voto, nessun passo */}
+        <button className="tessera" onClick={() => setSpiegamelo(true)}>
+          <ChatCircleText size={30} weight="bold" aria-hidden />
+          <b>Spiegamelo tu</b>
+        </button>
       </div>
 
+      <MicroLezione />
+      <ComeTiConosci {...previsioni} />
     </section>
   );
 }

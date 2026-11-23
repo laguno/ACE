@@ -33,10 +33,10 @@ export function Sticker({ posa, cartella, alt = '', misura = 160, className = ''
 }
 
 /** Intestazione delle schermate: sopratitolo, titolo grande, una riga, e l'avatar che sborda a destra. */
-export function Testata({ sopra, titolo, riga, posa, sfondo, misura = 170 }: { sopra?: ReactNode; titolo: ReactNode; riga?: ReactNode; posa?: string; sfondo: Sfondo; misura?: number }) {
+export function Testata({ sopra, titolo, riga, posa, sfondo, misura = 170, piccola = false }: { sopra?: ReactNode; titolo: ReactNode; riga?: ReactNode; posa?: string; sfondo: Sfondo; misura?: number; piccola?: boolean }) {
   useSfondo(sfondo);
   return (
-    <header className="testata">
+    <header className={piccola ? 'testata piccola' : 'testata'}>
       <div className="testata-testo">
         {sopra && <p className="sopratitolo">{sopra}</p>}
         <h1>{titolo}</h1>
