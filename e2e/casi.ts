@@ -171,7 +171,14 @@ export const CASI: Record<string, Caso> = {
     },
   },
   'Genitori-settimana': { bozza: 'Genitori-v2', quando: LUNEDI_POMERIGGIO, genitore: true, vai: async (p) => p.getByRole('navigation', { name: 'Sezioni genitori' }).getByRole('button', { name: 'Settimana' }).click() },
-  'Genitori-forzieri': { bozza: 'Genitori-v2', quando: LUNEDI_POMERIGGIO, genitore: true, vai: async (p) => p.getByRole('navigation', { name: 'Sezioni genitori' }).getByRole('button', { name: 'Forzieri' }).click() },
+  'Genitori-forzieri': { bozza: 'Genitori-v2', quando: LUNEDI_POMERIGGIO, genitore: true, vai: async (p) => {
+      // 23/11: i premi si aprono dal fondo della Settimana, con il PIN
+      await p.route('https://finto.supabase.test/rest/v1/rpc/controlla_pin', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: '"ok"' }));
+      await p.getByRole('navigation', { name: 'Sezioni genitori' }).getByRole('button', { name: 'Settimana' }).click();
+      await p.getByRole('button', { name: /Premi e forzieri/ }).click();
+      await p.getByLabel('PIN').fill('1234');
+      await p.getByRole('button', { name: 'Apri i premi' }).click();
+    } },
   'Genitori-impostazioni': {
     bozza: 'Genitori-v2',
     quando: LUNEDI_POMERIGGIO,

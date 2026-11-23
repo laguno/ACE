@@ -1207,3 +1207,14 @@ body[data-sfondo='sera'] .striscia-settimana {
 .segmenti li.fatto { background: var(--fucsia); }
 .passi-in-piu { margin-top: 14px; padding: 4px 12px 8px; border: 2px dashed var(--rosa-bordo); border-radius: 16px; }
 .passi-in-piu .tabellina-titolo { margin-top: 8px; }
+
+/* Area genitori (23/11): la settimana verso le chiavi in cima e i premi dietro il PIN */
+.settimana-genitori { display: grid; gap: 16px; }
+.settimana-genitori h2 { margin: 0; }
+.ga-premi {
+  display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; margin: 16px 0 0; padding: 12px 16px;
+  border: 2px dashed var(--lilla-bordo); border-radius: 24px; background: none; color: var(--testo); text-align: left; font: inherit; cursor: pointer;
+}
+.ga-premi span { flex: 1; display: flex; flex-direction: column; }
+.ga-premi small { color: var(--testo-2); font-weight: 700; }
+.ga-pin-premi { display: grid; gap: 12px; }

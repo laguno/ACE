@@ -313,8 +313,13 @@ test('consegnare un forziere da Oggi, con conferma', async ({ page }) => {
 
 test('cambiare un premio: Forzieri, riga, premio, salva e crea l’enigma', async ({ page }) => {
   const { t } = await finto(page, dati(), { enigma: { enigma: 'Ho due ruote…', soluzione: 'bici' } });
+  // 23/11: i premi non sono più nella barra, si aprono dal fondo della Settimana con il PIN
+  await page.route('https://finto.supabase.test/rest/v1/rpc/controlla_pin', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: '"ok"' }));
   await page.goto('/');
-  await scheda(page, 'Forzieri');
+  await scheda(page, 'Settimana');
+  await page.getByRole('button', { name: /Premi e forzieri/ }).click();
+  await page.getByLabel('PIN').fill('1234');
+  await page.getByRole('button', { name: 'Apri i premi' }).click();
   await expect(page.getByText('9 forzieri senza premio.', { exact: false })).toBeVisible();
   await page.getByRole('button', { name: 'Scegli', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Forziere 1' })).toBeVisible();
@@ -324,6 +329,19 @@ test('cambiare un premio: Forzieri, riga, premio, salva e crea l’enigma', asyn
   expect(t.forzieri[0].premio).toBe('Una bici nuova');
   await page.getByRole('button', { name: '‹ Forzieri' }).click();
   await expect(page.getByRole('list', { name: 'Forzieri' })).toContainText('1 · Una bici nuova');
+});
+
+test('premi dietro il PIN: senza il PIN giusto i forzieri non si vedono', async ({ page }) => {
+  await finto(page, dati());
+  await page.route('https://finto.supabase.test/rest/v1/rpc/controlla_pin', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: '"sbagliato"' }));
+  await page.goto('/');
+  await expect(page.getByRole('navigation', { name: 'Sezioni genitori' }).getByRole('button', { name: 'Forzieri' })).toHaveCount(0);
+  await scheda(page, 'Settimana');
+  await page.getByRole('button', { name: /Premi e forzieri/ }).click();
+  await page.getByLabel('PIN').fill('0000');
+  await page.getByRole('button', { name: 'Apri i premi' }).click();
+  await expect(page.getByText('PIN non giusto. Riprova.')).toBeVisible();
+  await expect(page.getByText('forzieri senza premio', { exact: false })).toHaveCount(0);
 });
 
 test('Impostazioni: R-Evolution con conferma, dieci minuti, frasi, orari', async ({ page }) => {

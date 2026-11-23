@@ -10,6 +10,8 @@ import { GIORNI } from '../spunte';
 import { bello, piu, type Props } from './comune';
 import Riepilogo from './Riepilogo';
 import { StoricoTutor } from './Tutor';
+import { Barre, Griglia } from '../Settimana';
+import { avvisaPassi, useSettimana } from '../settimana';
 
 // Settimana: giorno per giorno compiti e spunte (con "Togli" sul posto) e "Lani a casa"; sotto
 // verifiche, partite, fogli da firmare e foto salvate. Assorbe Correzioni, Fogli e Lani a casa.
@@ -43,6 +45,8 @@ export default function Settimana({ client, passi, avvisa }: Props) {
   const [giorno, setGiorno] = useState(R.iso(oggi));
   const [d, setD] = useState<Dati>();
   const [vista, setVista] = useState<'foglio'>();
+  // le due barre e la griglia di Lani (23/11): lo stesso calcolo delle chiavi della domenica
+  const sett = useSettimana(client);
   const [chiede, setChiede] = useState<'casa' | 'togliCasa' | { togli: Compito } | { sera: 'cartella' | 'borsa' } | { firma: Foglio_ } | { foto: () => void } | { revoca: Segnato }>();
 
   async function carica() {
@@ -79,7 +83,9 @@ export default function Settimana({ client, passi, avvisa }: Props) {
   useEffect(() => {
     carica();
   }, []);
-  const fatto = (s: string) => (avvisa(s), carica());
+  // dopo un Togli o una spunta dei genitori si ricarica: anche le barre si rileggono
+  const ricarica = () => carica().then(avvisaPassi);
+  const fatto = (s: string) => (avvisa(s), ricarica());
 
   async function togli(c: Compito) {
     setChiede(undefined);
@@ -167,6 +173,14 @@ export default function Settimana({ client, passi, avvisa }: Props) {
   const attese = giorni.filter((g) => (g < oggiIso && d.chiusura[R.giorno(g).getDay()]) || (g === oggiIso && d.serate.includes(g))).length;
   return (
     <>
+      {sett && (
+        <section className="ga-sezione carta settimana-genitori" aria-labelledby="settimana-chiavi">
+          <h2 id="settimana-chiavi">Verso le chiavi</h2>
+          <Barre s={sett} genitori />
+          <Griglia s={sett} oggi={oggi} />
+          <p className="ga-nota">Le chiavi si contano domenica alle {R.CONFIG.chiavi_settimana.ora_conteggio}. Ogni Togli qui sotto aggiorna le barre.</p>
+        </section>
+      )}
       <ul className="ga-riassunto" aria-label="La settimana in numeri">
         <li>
           {fmt(d.media)} <span>{d.media === null ? 'media' : `media, ${d.media >= d.obiettivo ? 'sopra' : 'sotto'} l’obiettivo ${fmt(d.obiettivo)}`}</span>

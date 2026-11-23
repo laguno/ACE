@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
-import { CalendarBlank, GearSix, LockSimple, Sun, TreasureChest } from '@phosphor-icons/react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { CalendarBlank, CaretRight, GearSix, LockSimple, Sun, TreasureChest } from '@phosphor-icons/react';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { Attesa, Foglio, Sticker } from './kit';
+import { Attesa, CampoTesto, Foglio, Sticker } from './kit';
 import * as R from './lib/regole';
 import { installata } from './Benvenuta';
 import { GIORNI, MESI } from './spunte';
@@ -16,12 +16,14 @@ import Impostazioni from './genitori/Impostazioni';
 // riconosce come genitore e la funzione "passi" decide i passi come per Lani.
 
 type Scheda = 'oggi' | 'settimana' | 'forzieri' | 'impostazioni';
+// 23/11: i premi escono dalla barra (al loro posto la Settimana con le barre delle chiavi): si
+// aprono dal fondo della Settimana e chiedono il PIN ogni volta, anche sul telefono di un genitore.
 const SCHEDE = [
   ['oggi', 'Oggi', Sun],
   ['settimana', 'Settimana', CalendarBlank],
-  ['forzieri', 'Forzieri', TreasureChest],
   ['impostazioni', 'Impostazioni', GearSix],
 ] as const;
+const TITOLI: Record<Scheda, string> = { oggi: 'Oggi', settimana: 'Settimana', forzieri: 'Premi e forzieri', impostazioni: 'Impostazioni' };
 
 /** esci: sul telefono di un genitore (logout, in Impostazioni). chiudi: sui dispositivi di Lani ("Chiudi l'area"). */
 export default function Genitori({ client, esci, chiudi }: { client: SupabaseClient; esci?: () => void; chiudi?: () => void }) {
@@ -31,7 +33,9 @@ export default function Genitori({ client, esci, chiudi }: { client: SupabaseCli
   // Impostazioni con modifiche non salvate: prima di cambiare scheda si chiede
   const [sospeso, setSospeso] = useState(false);
   const [vaiA, setVaiA] = useState<Scheda>();
-  const cambia = (s: Scheda) => (setScheda(s), setAvviso(undefined), setSospeso(false), setVaiA(undefined));
+  // i premi si sbloccano col PIN e si richiudono appena si cambia scheda
+  const [premiAperti, setPremiAperti] = useState(false);
+  const cambia = (s: Scheda) => (setScheda(s), setAvviso(undefined), setSospeso(false), setVaiA(undefined), setPremiAperti(false));
   const timer = useRef<number>(undefined);
   const passi = async (tipo: string, id: string) => {
     // null = la funzione non ha risposto: distinto da 0 (tetto pieno, già dati), così l'errore non si legge come "tetto pieno"
@@ -79,7 +83,7 @@ export default function Genitori({ client, esci, chiudi }: { client: SupabaseCli
       <header className="ga-testa">
         <div>
           <p>{sopra}</p>
-          <h1 id="titolo-area">{SCHEDE.find(([s]) => s === scheda)?.[1]}</h1>
+          <h1 id="titolo-area">{TITOLI[scheda]}</h1>
         </div>
         {chiudi && (
           <button type="button" className="ga-btn tenue" onClick={chiudi}>
@@ -89,8 +93,20 @@ export default function Genitori({ client, esci, chiudi }: { client: SupabaseCli
         )}
       </header>
       {scheda === 'oggi' && <Oggi {...props} conta={setDaFare} />}
-      {scheda === 'settimana' && <Settimana {...props} />}
-      {scheda === 'forzieri' && <Forzieri {...props} />}
+      {scheda === 'settimana' && (
+        <>
+          <Settimana {...props} />
+          <button type="button" className="ga-premi" onClick={() => cambia('forzieri')}>
+            <TreasureChest size={22} weight="bold" aria-hidden />
+            <span>
+              <b>Premi e forzieri</b>
+              <small>Protetti dal PIN</small>
+            </span>
+            <CaretRight size={18} weight="bold" aria-hidden />
+          </button>
+        </>
+      )}
+      {scheda === 'forzieri' && (premiAperti ? <Forzieri {...props} /> : <PinPremi client={client} apri={() => setPremiAperti(true)} torna={() => cambia('settimana')} />)}
       {scheda === 'impostazioni' && <Impostazioni {...props} esci={esci} sospeso={setSospeso} />}
       {vaiA && (
         <Foglio titolo="Modifiche non salvate" azione="Esci senza salvare" conferma={() => cambia(vaiA)} chiudi={() => setVaiA(undefined)} chiudiTesto="Resta qui">
@@ -122,6 +138,36 @@ export default function Genitori({ client, esci, chiudi }: { client: SupabaseCli
         ))}
       </nav>
     </section>
+  );
+}
+
+const MESSAGGI_PIN: Record<string, string> = {
+  sbagliato: 'PIN non giusto. Riprova.',
+  bloccato: 'Troppi tentativi sbagliati: si riprova tra 15 minuti.',
+  manca: 'Il PIN non è ancora impostato: si sceglie in Impostazioni.',
+  no: 'Questo accesso non è di un genitore.',
+};
+
+/** Il PIN prima dei premi: Lani può avere in mano il telefono di mamma o papà. */
+function PinPremi({ client, apri, torna }: { client: SupabaseClient; apri: () => void; torna: () => void }) {
+  const [errore, setErrore] = useState('');
+  async function prova(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const { data, error } = await client.rpc('controlla_pin', { p_pin: String(new FormData(form).get('pin')) });
+    if (!error && data === 'ok') return apri();
+    form.reset();
+    setErrore(error ? 'Non riesco a controllare il PIN adesso. Riprova.' : (MESSAGGI_PIN[data as string] ?? 'Non riesco a controllare il PIN adesso. Riprova.'));
+  }
+  return (
+    <form className="ga-modulo ga-pin-premi" onSubmit={prova}>
+      <p className="ga-nota">I premi dei forzieri sono una sorpresa per Lani: per vederli serve il PIN.</p>
+      <CampoTesto etichetta="PIN" name="pin" type="password" inputMode="numeric" pattern="\d{4,8}" autoComplete="off" required errore={errore || undefined} />
+      <button className="ga-btn pieno largo">Apri i premi</button>
+      <button type="button" className="ga-btn tenue largo" onClick={torna}>
+        Torna alla settimana
+      </button>
+    </form>
   );
 }
 
