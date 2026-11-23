@@ -1311,3 +1311,38 @@ body[data-sfondo='sera'] .pillola-barra.p-cose .conto-p { color: var(--notte-tes
 .evento.verifica .evento-testo b { font-size: 22px; }
 .evento.verifica .evento-testo span { font-size: 13px; font-weight: 800; }
 .studio-verifica .importante { margin-left: 6px; padding: 2px 8px; border-radius: 999px; background: #ffe27a; color: #3d2350; font: 900 12px Nunito, sans-serif; letter-spacing: 0.06em; vertical-align: middle; }
+
+/* Sera v2 (23/11): segmenti nei colori dei gettoni, carte che si chiudono in una riga, Buonanotte */
+.segmenti-sera { display: grid; gap: 6px; margin-bottom: 8px; }
+.segmenti-sera span { height: 10px; border-radius: 999px; }
+.carta-chiusa { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 12px 16px; border-radius: 20px; background: rgba(255, 255, 255, 0.1); color: var(--testo); }
+.carta-chiusa .cerchio-chiuso { width: 36px; height: 36px; flex: none; border-radius: 999px; display: flex; align-items: center; justify-content: center; }
+.carta-chiusa b { font: 800 16px Nunito, sans-serif; }
+.carta-chiusa .dopo { color: var(--testo-2); font-weight: 800; }
+.carta-chiusa .valore, .carta-chiusa .annulla { margin-left: auto; }
+.chip.chip-gettone { background: var(--g-fondo); border: 2px solid transparent; }
+.chip.chip-gettone:has(input:checked) { background: var(--g-segno); color: #fff; }
+.chip.chip-gettone .pallino-materia { width: 10px; height: 10px; border-radius: 999px; flex: none; }
+.promemoria-borsa h2 { margin: 0 0 4px; }
+.buonanotte { display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 24px; background: #ffe27a; color: #2d2a66; }
+.buonanotte img { margin: -8px 0; flex: none; }
+.buonanotte b { display: block; font: 800 24px/1.1 'Baloo 2', sans-serif; }
+.buonanotte span { font-weight: 800; }
+.nota-famiglia.con-persona { display: flex; align-items: center; gap: 10px; }
+.nota-famiglia.con-persona img { flex: none; }
+
+/* Astra v2 (23/11): testata ridotta, passi in grande, chiavi solo nella carta del prossimo forziere */
+.astra-azioni { display: flex; align-items: center; gap: 8px; }
+.astra-aiuto { width: 44px; height: 44px; border-radius: 999px; border: 2px solid var(--rosa-bordo); background: var(--bianco); color: var(--accento); font: 900 20px Nunito, sans-serif; cursor: pointer; }
+.astra-passi { display: grid; gap: 8px; margin-top: 10px; }
+.saldo.grande { display: flex; align-items: center; gap: 10px; }
+.saldo.grande .contapassi, .saldo.grande b, .saldo.grande span { font-size: 40px; line-height: 1; font-family: 'Baloo 2', Nunito, sans-serif; font-weight: 800; }
+.barra-tappa { height: 12px; border-radius: 999px; background: var(--rosa); overflow: hidden; }
+.barra-tappa span { display: block; height: 100%; border-radius: inherit; background: var(--fucsia); transition: width 0.6s ease; }
+.astra-passi .nota { margin: 0; font-weight: 800; }
+.forziere-prossimo { display: flex; align-items: center; gap: 12px; margin: 16px 0 0; }
+.forziere-prossimo .forziere-testo { display: flex; flex-direction: column; flex: 1; }
+.forziere-prossimo .forziere-testo b { font: 800 17px 'Baloo 2', Nunito, sans-serif; }
+.forziere-prossimo .forziere-testo small { color: var(--testo-2); font-weight: 700; }
+.chiavi-servono { display: flex; gap: 2px; }
+@media (prefers-reduced-motion: reduce) { .barra-tappa span { transition: none; } }

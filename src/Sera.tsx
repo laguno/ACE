@@ -7,6 +7,7 @@ import { supabase } from './supabase';
 import { Check } from '@phosphor-icons/react';
 import { Sticker, Testata } from './kit';
 import { Frase } from './Frase';
+import { GETTONI, coloreMateria, type Gettone } from './colori';
 
 // Sera — design/Domani.html. Lani spunta; i passi li decide la funzione "passi" sul server.
 // Cartella dalle lezioni di Nuvola (orario) più il materiale del giorno (impostazioni);
@@ -18,6 +19,15 @@ type Impegno = { titolo: string; inizio: string; tutto_il_giorno: boolean };
 // ponytail: voci fisse dalla bozza; con l'area genitori (tappa 7) passano alle impostazioni.
 const VOCI_BORSA = ['Divisa', 'Ginocchiere', 'Scarpe', 'Borraccia'];
 const PRIMA_DI_USCIRE_DA_SCUOLA = '16:00';
+/** Lo sticker della persona dell'impegno di famiglia (dal titolo); poi Leo, mamma, papà o nonno. */
+function posaPersona(titolo: string): string {
+  const t = titolo.toLowerCase();
+  if (/\bleo\b/.test(t)) return /tennis/.test(t) ? 'leo-tennis' : 'leo-ride';
+  if (/nonn[oi]/.test(t)) return 'nonno-pollice';
+  if (/mamma|lucrezia/.test(t)) return 'mamma-pollice';
+  if (/pap[àa]|alessandro/.test(t)) return 'papa-applaude';
+  return 'mamma-passaggio';
+}
 // sere in cui la borsa conta: quelle prima dei giorni del config ("la domenica e il giovedì sera")
 const SERE_BORSA = (R.CONFIG.borsa.giorni_allenamento as number[])
   .map((g) => `il ${GIORNI[(g + 6) % 7]}`)
@@ -25,9 +35,28 @@ const SERE_BORSA = (R.CONFIG.borsa.giorni_allenamento as number[])
   .replace('il domenica', 'la domenica')
   .concat(' sera');
 
+/** Riga chiusa di una cosa pronta (v2): cerchio del colore del gettone con la spunta. */
+function Chiusa({ titolo, gettone, dopo, onAnnulla, valore }: { titolo: string; gettone: Gettone; dopo: string; onAnnulla?: () => void; valore?: number | null }) {
+  return (
+    <div className="carta-chiusa">
+      <span className="cerchio-chiuso" style={{ background: GETTONI[gettone].segno }}>
+        <Check size={18} weight="bold" color="#fff" aria-hidden />
+      </span>
+      <b>{titolo}</b>
+      <span className="dopo">{dopo}</span>
+      {valore != null && <span className={`valore${onAnnulla ? ' appena' : ''}`}>+{valore}</span>}
+      {onAnnulla && (
+        <button className="lampadina annulla" onClick={onAnnulla}>
+          Annulla
+        </button>
+      )}
+    </div>
+  );
+}
+
 /** Lista a voci (cartella, borsa): spuntate una per una sul telefono, con l'ultima è pronta. */
 // ponytail: le voci spuntate si perdono se si chiude l'app prima dell'ultima.
-function Voci({ titolo, valore, voci, pronta, quandoPronta, onAnnulla, colore, children }: {
+function Voci({ titolo, valore, voci, pronta, quandoPronta, onAnnulla, gettone, conPallini = false, children }: {
   titolo: string;
   /** passi che vale, preso dal config; null = promemoria senza passi (la borsa fuori da lun/ven) */
   valore: number | null;
@@ -35,8 +64,10 @@ function Voci({ titolo, valore, voci, pronta, quandoPronta, onAnnulla, colore, c
   pronta: boolean;
   quandoPronta: () => void;
   onAnnulla?: () => void;
-  /** pastiglie lilla per la cartella, rosa per la borsa (bozza Domani) */
-  colore: 'lilla' | 'rosa';
+  /** colori fissi del gettone (v2): azzurro per la cartella, rosa per la borsa */
+  gettone: Gettone;
+  /** un pallino del colore della materia davanti a ogni voce (la cartella) */
+  conPallini?: boolean;
   children?: React.ReactNode;
 }) {
   const [messe, setMesse] = useState(new Set<string>());
@@ -47,6 +78,10 @@ function Voci({ titolo, valore, voci, pronta, quandoPronta, onAnnulla, colore, c
     setMesse(nuove);
     if (voci.every((x) => nuove.has(x))) quandoPronta();
   }
+  const g = GETTONI[gettone];
+  // v2: quando una cosa è pronta la sua carta si chiude in una riga con la spunta
+  if (pronta)
+    return <Chiusa titolo={titolo} gettone={gettone} dopo="pronta" onAnnulla={onAnnulla} valore={valore !== null && mostraValore(pronta) ? valore : null} />;
   return (
     <div className="carta">
       <div className="testa-carta">
@@ -57,9 +92,10 @@ function Voci({ titolo, valore, voci, pronta, quandoPronta, onAnnulla, colore, c
       <ul className="pastiglie">
         {voci.map((v) => (
           <li key={v}>
-            <label className={`chip chip-${colore}`}>
+            <label className="chip chip-gettone" style={{ ['--g-fondo' as string]: g.fondo, ['--g-segno' as string]: g.segno }}>
               <input type="checkbox" checked={pronta || messe.has(v)} disabled={pronta} onChange={() => metti(v)} />
               <Check size={16} weight="bold" aria-hidden className="segno" />
+              {conPallini && <i className="pallino-materia" aria-hidden style={{ background: coloreMateria(v).testo }} />}
               <span>{v}</span>
             </label>
           </li>
@@ -189,6 +225,14 @@ export default function Sera() {
     (conCartella && serata.cartella ? 1 : 0) +
     (conBorsa && serata.borsa ? 1 : 0);
   const mancanti = compiti.filter((c) => !c.fatto_il).length;
+  // v2: un segmento per carta (compiti, cartella, borsa) nel colore del suo gettone
+  const compitiFatti = visti.every((c) => c.fatto_il) && fogliVisti.every((f) => f.dato_il);
+  const segmenti: { g: Gettone; fatto: boolean }[] = [
+    ...(visti.length + fogliVisti.length > 0 ? [{ g: 'compiti' as Gettone, fatto: compitiFatti }] : []),
+    ...(conCartella ? [{ g: 'cartella' as Gettone, fatto: serata.cartella }] : []),
+    ...(conBorsa ? [{ g: 'borsa' as Gettone, fatto: serata.borsa }] : []),
+  ];
+  const tuttoPronto = segmenti.length > 0 && segmenti.every((x) => x.fatto);
 
   return (
     <section className="schermo sera">
@@ -200,12 +244,13 @@ export default function Sera() {
         riga={
           cose > 0 && (
             <>
-              <div className="avanzamento" role="progressbar" aria-label="Cose pronte per domani" aria-valuemin={0} aria-valuemax={cose} aria-valuenow={fatte}>
-                <span style={{ width: `${(fatte / cose) * 100}%` }} />
+              <div className="segmenti-sera" style={{ gridTemplateColumns: `repeat(${segmenti.length}, minmax(0, 1fr))` }} role="progressbar" aria-label="Cose pronte per domani" aria-valuemin={0} aria-valuemax={segmenti.length} aria-valuenow={segmenti.filter((x) => x.fatto).length}>
+                {segmenti.map((x) => (
+                  <span key={x.g} style={{ background: x.fatto ? GETTONI[x.g].segno : 'rgba(255,255,255,0.18)' }} />
+                ))}
               </div>
               <p className="conto">
-                {fatte} su {cose} pronte
-                {passiOggi > 0 && `, già +${passiOggi} passi`}.{fatte < cose && ' Chiudi tutto e Bart va a dormire.'}
+                {segmenti.filter((x) => x.fatto).length} su {segmenti.length} pronte.{fatte < cose && ' Chiudi tutto e Bart va a dormire.'}
               </p>
             </>
           )
@@ -213,7 +258,8 @@ export default function Sera() {
       />
       {errore && <p role="alert">{errore}</p>}
 
-      {!soloBorsa && (
+      {!soloBorsa && compiti.length > 0 && mancanti === 0 && <Chiusa titolo="Compiti" gettone="compiti" dopo="fatti" />}
+      {!soloBorsa && !(compiti.length > 0 && mancanti === 0) && (
       <div className="carta">
         <div className="testa-carta">
           <h2>Compiti per domani</h2>
@@ -255,25 +301,34 @@ export default function Sera() {
           voci={orario.length ? orario : [`Cartella pronta per ${GIORNI[domani.getDay()]}`]}
           pronta={serata.cartella}
           quandoPronta={() => chiudiSerata('cartella')}
-          colore="lilla"
+          gettone="cartella"
+          conPallini
           onAnnulla={attesa.inAttesa('cartella') ? () => attesa.annulla('cartella', () => setSerata((s) => ({ ...s, cartella: false }))) : undefined}
         />
       )}
 
-      {sport && (
+      {sport && !conBorsa && (
+        <div className="carta tratteggiata promemoria-borsa">
+          <h2>Ricordati la borsa</h2>
+          <p className="nota accento">
+            {C.tipoImpegno(sport.titolo) === 'partita' ? 'Partita' : 'Allenamento'} domani alle {C.oraRoma(sport.inizio)}
+            {R.giornoDiScuola(domaniCal) && C.oraRoma(sport.inizio) < PRIMA_DI_USCIRE_DA_SCUOLA ? ': la porti a scuola.' : '.'}
+          </p>
+        </div>
+      )}
+      {sport && conBorsa && (
         <Voci
           titolo="Borsa"
           valore={conBorsa ? R.CONFIG.passi.obbligatori.borsa : null}
           voci={VOCI_BORSA}
           pronta={serata.borsa}
           quandoPronta={() => chiudiSerata('borsa')}
-          colore="rosa"
+          gettone="borsa"
           onAnnulla={attesa.inAttesa('borsa') ? () => attesa.annulla('borsa', () => setSerata((s) => ({ ...s, borsa: false }))) : undefined}
         >
           <p className="nota accento">
             {C.tipoImpegno(sport.titolo) === 'partita' ? 'Partita' : 'Allenamento'} domani alle {C.oraRoma(sport.inizio)}
             {R.giornoDiScuola(domaniCal) && C.oraRoma(sport.inizio) < PRIMA_DI_USCIRE_DA_SCUOLA ? ': la porti a scuola.' : '.'}
-            {!conBorsa && ` Stasera è un promemoria: la borsa dà passi ${SERE_BORSA}.`}
           </p>
         </Voci>
       )}
@@ -314,10 +369,23 @@ export default function Sera() {
       )}
 
       {famiglia && (
-        <p className="famiglia nota-famiglia">
-          Domani in famiglia: {famiglia.titolo}
-          {famiglia.tutto_il_giorno ? '' : ` alle ${C.oraRoma(famiglia.inizio)}`}. Tienilo a mente per la cartella e la sveglia.
+        <p className="famiglia nota-famiglia con-persona">
+          <Sticker posa={posaPersona(famiglia.titolo)} misura={56} />
+          <span>
+            Domani in famiglia: {famiglia.titolo}
+            {famiglia.tutto_il_giorno ? '' : ` alle ${C.oraRoma(famiglia.inizio)}`}. Tienilo a mente per la cartella e la sveglia.
+          </span>
         </p>
+      )}
+
+      {tuttoPronto && (
+        <section className="buonanotte" aria-label="Tutto pronto">
+          <Sticker posa="bart-sonnecchia" misura={76} />
+          <div>
+            <b>Buonanotte!</b>
+            <span>Domani è tutto pronto. Bart dorme.</span>
+          </div>
+        </section>
       )}
 
       {/* la sera prima di una verifica; se no a chiusura finita (al massimo una frase al giorno) */}

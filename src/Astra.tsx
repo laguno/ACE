@@ -44,13 +44,6 @@ function useSfondoScelto(nMondo: number, predefinito: string) {
 const SOGLIE = R.soglieTappe();
 const tappaDi = (passi: number) => Math.min(SOGLIE.length, R.posizione(passi).tappeFatte + 1);
 
-/** Sotto le chiavi della settimana: quante ne ha Lani e quante ne vuole il prossimo forziere chiuso. */
-function fraseChiavi(chiavi: number, servono?: number) {
-  const hai = `Hai ${chiavi} ${chiavi === 1 ? 'chiave' : 'chiavi'}`;
-  if (servono === undefined) return `${hai}.`;
-  return chiavi >= servono ? `${hai}: bastano per il prossimo forziere.` : `${hai}: il prossimo forziere ne vuole ${servono}.`;
-}
-
 // Mappa del sentiero (bozza Main): 27 tappe dal basso (la terra) all'alto (le stelle), a serpentina.
 // Unico posto con posizioni assolute (indicazioni di Jarvis). x in percentuale, y in px.
 const PASSO = 130;
@@ -146,55 +139,27 @@ export default function Astra({ apri, forziere: aperto }: { apri: (pagina: 'Figu
           <span>
             <p className="sopratitolo">Mondo {nMondo + 1} di 4</p>
             <h1>{mondo.nome}</h1>
-            <p className="mantra">Ogni giorno, passino passino.</p>
           </span>
-          <button className="astra-figurina" onClick={() => apri('Figurina')} aria-label="La tua figurina">
-            <img src={img('avatar-piccoli/lani', 'lani-contenta')} alt="" width={50} height={50} />
-          </button>
+          <span className="astra-azioni">
+            <button className="astra-aiuto" onClick={() => setRegole(true)} aria-label="Come si fanno i passi">
+              ?
+            </button>
+            <button className="astra-figurina" onClick={() => apri('Figurina')} aria-label="La tua figurina">
+              <img src={img('avatar-piccoli/lani', 'lani-contenta')} alt="" width={50} height={50} />
+            </button>
+          </span>
         </div>
-        <div className="astra-saldi">
-          {dati.settimana !== null ? (
-            <span className="chiavi-settimana">
-              <small>Chiavi della settimana</small>
-              <span role="img" aria-label={`Chiavi dell'ultima settimana: ${dati.settimana} su 3`}>
-                {[1, 2, 3].map((k) => (
-                  <img key={k} src={img('oggetti', k <= (dati.settimana ?? 0) ? 'chiave-piena' : 'chiave-vuota')} alt="" width={30} height={30} />
-                ))}
-              </span>
-            </span>
-          ) : (
-            <span className="chiavi-settimana">
-              <img src={img('oggetti', 'mazzo-chiavi')} alt="" width={30} height={30} />
-              <small>
-                {dati.chiavi} {dati.chiavi === 1 ? 'chiave' : 'chiavi'}
-              </small>
-            </span>
-          )}
-          <span className="saldo">
-            <img src={img('oggetti', 'passo')} alt="" width={30} height={30} />
+        {/* v2: i passi in grande e la barra verso la prossima tappa; le chiavi stanno nella carta del forziere */}
+        <div className="astra-passi">
+          <span className="saldo grande">
+            <img src={img('oggetti', 'passo')} alt="" width={44} height={44} />
             <Contapassi prima={dati.prima} adesso={dati.passi} />
           </span>
-          <button className="link come-passi-apri" onClick={() => setRegole(true)}>
-            Come si fanno i passi
-          </button>
-          {sfondo.piuDiUno && (
-            <button className="link come-passi-apri" onClick={sfondo.cambia}>
-              Cambia sfondo
-            </button>
-          )}
+          <div className="barra-tappa" role="progressbar" aria-label="Verso la prossima tappa" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pos.avanzamentoTappa * 100)}>
+            <span style={{ width: `${Math.round(pos.avanzamentoTappa * 100)}%` }} />
+          </div>
+          <p className="nota">{pos.inCima ? 'Sei in cima!' : `Tappa ${pos.tappeFatte + 1}: mancano ${pos.mancanoPassi.toLocaleString('it-IT')} passi`}</p>
         </div>
-        {dati.settimana !== null && (
-          <p className="nota astra-chiavi-totali">{fraseChiavi(dati.chiavi, prossimo?.chiavi)}</p>
-        )}
-        {Math.abs(bandierina - qui) >= 2 && (
-          // la bandierina è lontana e fuori dallo schermo: lo dice la testata (revisione di Jarvis)
-          <p className="chip-bandiera">
-            <img src={img('oggetti', 'bandierina')} alt="" width={24} height={24} />
-            {bandierina > qui
-              ? `Bandierina: ${bandierina - qui} tappe avanti`
-              : `Sei avanti di ${qui - bandierina} tappe`}
-          </p>
-        )}
       </header>
 
       <div className="mappa" style={{ height: ALTEZZA }}>
@@ -254,6 +219,21 @@ export default function Astra({ apri, forziere: aperto }: { apri: (pagina: 'Figu
         })}
         </ol>
       </div>
+
+      {prossimo && (
+        <section className="carta forziere-prossimo" aria-label="Prossimo forziere">
+          <img src={img('oggetti', prossimo.n === 9 ? 'forziere-cima' : 'forziere-chiuso')} alt="" width={56} height={56} />
+          <span className="forziere-testo">
+            <b>Forziere {prossimo.n}</b>
+            <small>alla tappa {prossimo.tappa}</small>
+          </span>
+          <span className="chiavi-servono" role="img" aria-label={`Chiavi: ${Math.min(dati.chiavi, prossimo.chiavi)} su ${prossimo.chiavi}`}>
+            {Array.from({ length: prossimo.chiavi }, (_, c) => (
+              <img key={c} src={img('oggetti', c < dati.chiavi ? 'chiave-piena' : 'chiave-vuota')} alt="" width={30} height={30} />
+            ))}
+          </span>
+        </section>
+      )}
 
       <button className="album-fluttuante" onClick={() => apri('Album')}>
         <ImageSquare size={24} weight="bold" aria-hidden /> Album {dati.album}/64
