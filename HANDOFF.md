@@ -2,6 +2,12 @@
 
 Storia delle sessioni, decisioni prese e scelte approvate: `docs/storico.md`.
 
+## Restyling v2: conformità alle bozze (23/11 sera, worktree `app-tmp-merge`, ramo `gioco-con-tabellina`, solo locale, NON in produzione)
+
+- Controllate a 390 px contro le bozze e allineate, un commit per schermata: Oggi, Studio, Sera, flash card, Astra ("passi" accanto al numero, album quadrato, "Sei qui", carta forziere con chiavi sotto), R-Evolution (manifesto partita, tabellone scuro con esito e ultime 5, coach a fumetto con VIA, posto in grande, 3 righe di classifica), La mia settimana (pallini nel colore della voce, colonna di oggi, futuri tenui, testata piccola). Timer dei dieci minuti non ricontrollato a vista.
+- Differenze lasciate apposta, da decidere col signore: voto previsto resta select (bozza 5-9, config 3-10 a mezzi); liste di Oggi sotto i gettoni; Oggi pomeriggio lilla; legenda in La mia settimana; "Tutte le partite" in R-Evolution; il ritrovo della partita non c'è nei dati.
+- Prima della produzione (solo quando lo dice il signore): rifare il ramo di rilascio `app-rilascio-v2` (vecchio) da origin/main + origin/settimana + commit v2, senza gioco e Sensi; `npm run backup`, `npm run simula`, `db push` 0071, ripubblicare chiavi, passi, tabellina, notifiche e chi importa `_shared` cambiati; finestre vietate 14:20-14:45 e 19:45-21:00.
+
 ## Restyling v2 (23/11 pomeriggio, bozze approvate, da implementare sul ramo `settimana`)
 
 - Il signore ha provato la v1 su ACE Prova e non gli piace: troppo testo e troppe informazioni per Lani. Jarvis ha ridisegnato sul canvas Oggi, La mia settimana, Studio, Sera, Astra, R-Evolution e il timer dei dieci minuti, una schermata alla volta, e il signore le ha approvate.
