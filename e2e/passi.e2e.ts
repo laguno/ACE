@@ -21,17 +21,19 @@ const base = (visti?: number) => ({
   compiti: [],
 });
 
-test('Oggi: il saldo sale da 250 a 300 con +50, poi Astra è fermo', async ({ page }) => {
+// v2 (23/11): una moneta per schermata, il saldo che sale sta in Astra; Oggi non lo mostra più
+test('Astra: il saldo sale da 250 a 300 con +50, la volta dopo è fermo', async ({ page }) => {
   await page.clock.setFixedTime(MATTINA);
-  await finto(page, base(250));
+  const { t } = await finto(page, base(250));
   await page.goto('/');
-  const saldo = page.locator('.testata .saldo');
+  await expect(page.locator('.testata .saldo')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Astra' }).click();
+  const saldo = page.locator('.astra-passi');
   await expect(saldo.getByText('+50')).toBeVisible();
-  await expect(saldo.locator('b')).toHaveText('300');
-  await expect(saldo.getByText('300 passi')).toBeAttached();
-  // la meta accanto al totale: a 300 passi ne mancano 95 alla prossima tappa, come in Astra
-  await expect(saldo.getByText('mancano 95')).toBeVisible();
-  await page.screenshot({ path: 'e2e/risultati/passi-oggi.png' });
+  await expect(saldo.locator('.saldo b')).toHaveText('300');
+  await page.screenshot({ path: 'e2e/risultati/passi-astra-sale.png' });
+  t.saldo_visto = [{ passi: 300 }];
+  await page.getByRole('button', { name: 'Oggi' }).click();
   await page.getByRole('button', { name: 'Astra' }).click();
   await expect(page.locator('.astra-passi .saldo b')).toHaveText('300');
   await expect(page.locator('.contapassi-delta')).toHaveCount(0);
@@ -41,8 +43,7 @@ test('Astra: il saldo scende con −20', async ({ page }) => {
   await page.clock.setFixedTime(POMERIGGIO);
   const { t } = await finto(page, { ...base(320), saldo_visto: [{ passi: 320 }] });
   await page.goto('/');
-  // Oggi ha già visto 320; poi arriva uno storno e Lani apre Astra
-  await expect(page.locator('.testata .saldo b')).toHaveText('300');
+  // Lani aveva visto 320; poi arriva uno storno e Lani apre Astra
   t.saldo_visto = [{ passi: 320 }];
   await page.getByRole('button', { name: 'Astra' }).click();
   await expect(page.locator('.astra-passi').getByText('−20')).toBeVisible();
@@ -55,7 +56,8 @@ test('la prima volta niente animazione', async ({ page }) => {
   await page.clock.setFixedTime(MATTINA);
   await finto(page, base());
   await page.goto('/');
-  await expect(page.locator('.testata .saldo b')).toHaveText('300');
+  await page.getByRole('button', { name: 'Astra' }).click();
+  await expect(page.locator('.astra-passi .saldo b')).toHaveText('300');
   await expect(page.locator('.contapassi-delta')).toHaveCount(0);
 });
 
@@ -64,6 +66,7 @@ test('movimento ridotto: subito il numero nuovo, niente +N', async ({ page }) =>
   await page.clock.setFixedTime(MATTINA);
   await finto(page, base(250));
   await page.goto('/');
-  await expect(page.locator('.testata .saldo b')).toHaveText('300');
+  await page.getByRole('button', { name: 'Astra' }).click();
+  await expect(page.locator('.astra-passi .saldo b')).toHaveText('300');
   await expect(page.locator('.contapassi-delta')).toHaveCount(0);
 });

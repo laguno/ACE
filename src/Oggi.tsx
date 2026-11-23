@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Bell, CaretDown, CaretRight, Cards, ClipboardText, Lightbulb, Volleyball } from '@phosphor-icons/react';
 import { impegniTra, piuGiorni, oraAdesso, useGiornata, type Impegno } from './giornata';
 import { Attesa, Riquadro, Sticker, Testata } from './kit';
-import { PillolaSaldo } from './Contapassi';
 import { Frase, type Momento } from './Frase';
 import { Fotografa, SELECT_RICHIESTE, descrizione, type RichiestaFoto } from './Foto';
 import * as C from './lib/calendario';
@@ -136,12 +135,7 @@ function Mattina({ impegni, apri, vai }: { impegni: Impegno[]; apri: Apri; vai?:
         piccola
         sopra={`${maiuscola(GIORNI[oggi.getDay()])} ${oggi.getDate()} ${MESI[oggi.getMonth()]}`}
         titolo="Buongiorno, Lani"
-        riga={
-          <>
-            <p>{riga}</p>
-            <PillolaSaldo />
-          </>
-        }
+        riga={<p>{riga}</p>}
       />
       <CartaOggi vai={vai} />
 
@@ -296,7 +290,6 @@ function Pomeriggio({ chiusura, apri, vai }: { chiusura: string | null; apri: Ap
         piccola
         sopra={`${maiuscola(GIORNI[oggi.getDay()])} ${oggi.getDate()}`}
         titolo="Ciao, Lani"
-        riga={<PillolaSaldo />}
       />
       <CartaOggi vai={vai} />
       {errore && <p role="alert">{errore}</p>}

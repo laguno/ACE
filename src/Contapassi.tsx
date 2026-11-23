@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { supabase } from './supabase';
-import * as R from './lib/regole';
 
 // Passi che salgono (decisione del signore, 9/11): se il saldo è cambiato dall'ultima volta che Lani
 // l'ha visto (su qualsiasi dispositivo: lo ricorda il server con vedi_saldo), il numero va dal vecchio
@@ -30,32 +29,6 @@ export function vediSaldo(): Promise<Saldo> {
 const DURATA = 1000;
 const movimentoRidotto = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
 const formato = (n: number) => n.toLocaleString('it-IT');
-
-/** Pillola del saldo per le testate (Oggi): impronta e numero che sale. */
-export function PillolaSaldo() {
-  const [saldo, setSaldo] = useState<Saldo>();
-  useEffect(() => {
-    vediSaldo().then(setSaldo);
-  }, []);
-  // mentre il saldo arriva la pillola tiene il suo posto (invisibile): prima compariva dopo e
-  // spingeva giù le carte (Lighthouse, spostamento 0,25 sul Pomeriggio)
-  if (!saldo)
-    return (
-      <span className="saldo" aria-hidden style={{ visibility: 'hidden' }}>
-        <img src="/assets/oggetti/passo.webp" alt="" width={30} height={30} />
-        <b>0</b>
-      </span>
-    );
-  const pos = R.posizione(saldo.adesso);
-  return (
-    <span className="saldo">
-      <img src="/assets/oggetti/passo.webp" alt="" width={30} height={30} />
-      <Contapassi {...saldo} />
-      {/* la meta accanto al totale: lo stesso conto di "Sei qui" in Astra */}
-      {!pos.inCima && <small>mancano {pos.mancanoPassi}</small>}
-    </span>
-  );
-}
 
 export function Contapassi({ prima, adesso, className = '' }: Saldo & { className?: string }) {
   const sale = prima !== adesso && !movimentoRidotto();
