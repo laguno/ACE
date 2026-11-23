@@ -128,6 +128,11 @@ export function DieciMinuti({ oggi }: { oggi: Date }) {
   return (
     <>
       <section className={`fascia-dieci${stato.il ? ' fatta' : ''}`} id="dieci-minuti" ref={carta} aria-label="Dieci minuti">
+        <svg className="campo-righe" viewBox="0 0 390 240" preserveAspectRatio="xMidYMid slice" aria-hidden>
+          <path d="M-20 200 L410 120 M-20 225 L410 145" stroke="#c6ff3d" strokeOpacity="0.18" strokeWidth="10" />
+          <path d="M195 14 V240 M20 70 H370 M20 210 H370" stroke="#fff" strokeOpacity="0.07" strokeWidth="3" />
+          <circle cx="195" cy="140" r="46" fill="none" stroke="#fff" strokeOpacity="0.07" strokeWidth="3" />
+        </svg>
         <div className="fascia-testa">
           <span className="tag">{tipo}</span>
           <span className="entro">{stato.il ? 'fatti' : `entro le ${FINESTRA.ultimo_avvio}`}</span>
@@ -188,6 +193,10 @@ export function DieciMinuti({ oggi }: { oggi: Date }) {
 
       {aperto && inCorso && (
         <div className="timer-dieci" role="dialog" aria-modal="true" aria-label="Dieci minuti, timer">
+          <svg className="campo-righe" viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice" aria-hidden>
+            <path d="M-40 640 L430 470 M-40 680 L430 510" stroke="#c6ff3d" strokeOpacity="0.14" strokeWidth="14" />
+            <path d="M195 0 V844 M20 130 H370 M20 720 H370" stroke="#fff" strokeOpacity="0.06" strokeWidth="3" />
+          </svg>
           <div className="timer-testa">
             <span className="tag">{tipo}</span>
             <button className="esci" onClick={() => setAperto(false)}>

@@ -1306,6 +1306,11 @@ body[data-sfondo='sera'] .pillola-barra.p-cose .conto-p { color: var(--notte-tes
 .timer-dieci .pausa, .timer-dieci .segna { position: relative; width: 100%; max-width: 430px; min-height: 60px; display: flex; align-items: center; justify-content: center; gap: 10px; border-radius: 18px; font: 400 28px 'Bebas Neue', Impact, 'Arial Narrow', sans-serif; letter-spacing: 0.06em; cursor: pointer; }
 .timer-dieci .pausa { border: 3px solid #c6ff3d; background: transparent; color: #c6ff3d; }
 .timer-dieci .segna { border: 0; background: #c6ff3d; color: #14162e; box-shadow: 0 6px 0 #8dba1f; }
+/* righe del campo e "10" in filigrana, come nelle bozze (Oggi-v2 e Dieci-v2) */
+.campo-righe { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.fascia-dieci > :not(.campo-righe), .timer-dieci > :not(.campo-righe) { position: relative; }
+.fascia-dieci { overflow: hidden; }
+.fascia-dieci::before { content: '10'; position: absolute; right: -6px; top: 0; font: 400 170px/1 'Bebas Neue', Impact, 'Arial Narrow', sans-serif; color: #c6ff3d; opacity: 0.1; pointer-events: none; }
 .timer-dieci :focus-visible, .fascia-dieci :focus-visible { outline: 3px solid #c6ff3d; outline-offset: 3px; }
 
 /* Verifica importante (v2): giallo con il timbro della data; IMPORTANTE nelle carte di Studio */
