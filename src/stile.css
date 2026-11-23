@@ -1561,3 +1561,12 @@ body[data-sfondo='sera'] {
 .classifica-testa h2 { display: flex; flex-direction: column; margin: 0; font: 800 18px/1.1 'Baloo 2', Nunito, sans-serif; }
 .classifica-testa h2 small { font: 700 13px Nunito, sans-serif; color: #6E4A5A; }
 .classifica-corta li.lani { background: #FFE27A; color: #3D0E22; }
+
+/* La mia settimana v2 come la bozza: pallino nel colore della voce, colonna di oggi evidenziata, giorni futuri piccoli e tenui */
+.griglia-settimana .cella.fatta > span { background: var(--voce, var(--accento)); color: #fff; }
+.griglia-settimana .cella.oggi { background: var(--panna); box-shadow: inset 2px 0 0 var(--rosa-bordo), inset -2px 0 0 var(--rosa-bordo); }
+.griglia-settimana tbody tr:last-child .cella.oggi { box-shadow: inset 2px 0 0 var(--rosa-bordo), inset -2px 0 0 var(--rosa-bordo), inset 0 -2px 0 var(--rosa-bordo); }
+.griglia-settimana thead th.oggi { background: var(--panna); border-radius: 12px 12px 0 0; box-shadow: inset 0 2px 0 var(--rosa-bordo), inset 2px 0 0 var(--rosa-bordo), inset -2px 0 0 var(--rosa-bordo); }
+.griglia-settimana .cella.da_fare.oggi > span { border: 3px solid var(--voce, var(--lilla-bordo)); background: var(--bianco); }
+.cella.futura { filter: none; }
+.griglia-settimana .cella.da_fare.futura > span { width: 18px; height: 18px; border: 2px solid var(--lilla-medio); color: transparent; }

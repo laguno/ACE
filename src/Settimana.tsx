@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import { Check, X } from '@phosphor-icons/react';
 import * as R from './lib/regole';
 import { tacceDiOggi, type Casella, type Settimana } from './lib/regole/settimana';
@@ -142,17 +143,17 @@ export function Barre({ s, genitori = false }: { s: Settimana; genitori?: boolea
 
 const STATI: Record<NonNullable<Casella['stato']>, string> = { fatta: 'fatta', da_fare: 'da fare', persa: 'persa', jolly: 'saltato, non conta' };
 
-function Cella({ c, nome, futura = false }: { c: Casella; nome: string; futura?: boolean }) {
+function Cella({ c, nome, futura = false, oggi = false }: { c: Casella; nome: string; futura?: boolean; oggi?: boolean }) {
   const g = R.giorno(c.giorno);
   if (!c.stato)
     return (
-      <td className="cella vuota" aria-label={`${GIORNI[g.getDay()]}: ${nome.toLowerCase()} non serve`}>
+      <td className={`cella vuota${oggi ? ' oggi' : ''}`} aria-label={`${GIORNI[g.getDay()]}: ${nome.toLowerCase()} non serve`}>
         <span aria-hidden />
       </td>
     );
   const conto = c.possibili > 1 ? `${c.fatte}/${c.possibili}` : '';
   return (
-    <td className={`cella ${c.stato}${futura ? ' futura' : ''}`} aria-label={`${GIORNI[g.getDay()]}: ${nome.toLowerCase()} ${STATI[c.stato]}${conto ? `, ${c.fatte} su ${c.possibili}` : ''}`}>
+    <td className={`cella ${c.stato}${futura ? ' futura' : ''}${oggi ? ' oggi' : ''}`} aria-label={`${GIORNI[g.getDay()]}: ${nome.toLowerCase()} ${STATI[c.stato]}${conto ? `, ${c.fatte} su ${c.possibili}` : ''}`}>
       <span aria-hidden>
         {c.stato === 'fatta' ? (c.possibili > 1 ? conto : <Check size={16} weight="bold" />) : c.stato === 'persa' ? <X size={14} weight="bold" /> : c.stato === 'jolly' ? 'J' : conto}
       </span>
@@ -182,7 +183,8 @@ export function Griglia({ s, oggi }: { s: Settimana; oggi: Date }) {
         </thead>
         <tbody>
           {righe.map((r) => (
-            <tr key={r.voce}>
+            // v2: ogni riga col colore della sua voce (i dieci minuti in inchiostro, come la fascia)
+            <tr key={r.voce} style={{ '--voce': r.voce === 'dieci_minuti' ? '#14162E' : (COLORE_VOCE[r.voce]?.segno ?? '#5E4470') } as CSSProperties}>
               <th scope="row">
                 <span className="voce-pallino" aria-hidden style={{ background: COLORE_VOCE[r.voce]?.fondo ?? '#F1ECF5' }}>
                   <i style={{ background: COLORE_VOCE[r.voce]?.segno ?? '#5E4470' }} />
@@ -190,7 +192,7 @@ export function Griglia({ s, oggi }: { s: Settimana; oggi: Date }) {
                 <b>{r.nome}</b>
               </th>
               {r.caselle.map((c) => (
-                <Cella key={c.giorno} c={c} nome={r.nome} futura={c.giorno > R.iso(oggi)} />
+                <Cella key={c.giorno} c={c} nome={r.nome} futura={c.giorno > R.iso(oggi)} oggi={c.giorno === R.iso(oggi)} />
               ))}
             </tr>
           ))}
@@ -257,7 +259,7 @@ export default function LaMiaSettimana() {
     );
   return (
     <section className="schermo settimana">
-      <Testata sfondo="rosa" posa="lani-determinata" misura={130} sopra={sopra} titolo="La mia settimana" />
+      <Testata sfondo="rosa" posa="lani-determinata" misura={92} piccola sopra={sopra} titolo="La mia settimana" />
       <CartaChiavi s={s} oggi={oggi} />
 
       <div className="carta">
