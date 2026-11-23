@@ -6,7 +6,7 @@ import { caricaConAvanzamento, erroreDi, fotoPerMateria, intervalli, MESSAGGI, m
 
 // Da fotografare: pagine chieste da ACE (sincronizzazione di Nuvola). Le foto vanno nel bucket
 // privato foto-pagine; con "Ho finito" la funzione "passi" chiude la richiesta e dà i passi a Lani se la foto è sua.
-// Solo pagine del libro di carta: niente e-book degli editori.
+// Pagine dal libro di carta o dalla stampa/PDF della piattaforma dell'editore (CLAUDE.md, 23/11).
 
 export type RichiestaFoto = { id: string; motivo: string; materia_id: string | null; pagine: string; materie?: { nome: string } | null };
 export const SELECT_RICHIESTE = 'id, motivo, materia_id, pagine, materie(nome)';

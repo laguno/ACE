@@ -30,7 +30,7 @@ API di Anthropic (chiave `ANTHROPIC_API_KEY`, solo lato server, costo di pochi e
 - enigma dei forzieri dal premio inserito dai genitori; valutazione della risposta con sinonimi;
 - varianti dei testi del copione (rotazione, mai lo stesso testo prima di 7 giorni).
 
-Vincoli: niente dati personali superflui nei prompt; mai il testo degli e-book delle piattaforme degli editori (Claude non vi accede con le credenziali e non ne copia il testo); le foto delle pagine le fanno i genitori o Lani dal libro di carta.
+Vincoli: niente dati personali superflui nei prompt; le pagine dei libri arrivano dalle foto del libro di carta o dalle funzioni di stampa e PDF delle piattaforme degli editori, con l'accesso fatto dal signore e senza aggirare protezioni (23/11); restano private nel bucket foto-pagine.
 
 ## Mappa dei libri — `data/mappa-libri.json`
 
