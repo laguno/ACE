@@ -30,7 +30,7 @@ test('dieci minuti al mattino: si sceglie dal menu, si avvia, si spunta solo in 
   const { chiamate, t } = await finto(page, dati(), { passi: { passi: 10 } });
   await page.goto('/');
   const c = carta(page);
-  await expect(c.getByText(/^Dieci minuti: oggi .+\. Si parte entro le 13:00\. Pronta\?$/)).toBeVisible();
+  await expect(c.getByText(/^Dieci minuti: oggi .+\. Si parte entro le 21:20. Pronta\?$/)).toBeVisible();
   await expect(c.getByRole('radio')).toHaveCount(3);
   await c.getByRole('radio', { name: 'Salti con la corda' }).check();
   await c.getByRole('button', { name: 'Avvia il timer' }).click();

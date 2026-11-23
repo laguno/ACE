@@ -133,7 +133,7 @@ test('il coach: dieci minuti del mattino, il collegamento porta alla carta in Og
   await page.goto('/');
   await page.getByRole('button', { name: 'R-Evolution' }).click();
   const coach = page.getByLabel('Il coach');
-  await expect(coach).toContainText('Dieci minuti di allenamento prima delle 13:00. Forza, ti aspetto.');
+  await expect(coach).toContainText('Dieci minuti di allenamento, da avviare entro le 21:20. Forza, ti aspetto.');
   await expect(coach.locator('img')).toHaveAttribute('src', /allenatore/);
   await coach.getByRole('button', { name: 'Si parte' }).click();
   await expect(page.getByRole('button', { name: 'Oggi' })).toHaveAttribute('aria-current', 'page');
@@ -142,12 +142,12 @@ test('il coach: dieci minuti del mattino, il collegamento porta alla carta in Og
 });
 
 test('il coach fuori dal mattino: niente collegamento a una carta che non c’è', async ({ page }) => {
-  await page.clock.setFixedTime(new Date('2027-01-18T16:00:00+01:00'));
+  await page.clock.setFixedTime(new Date('2027-01-18T22:00:00+01:00'));
   await finto(page, dati());
   await page.goto('/');
   await page.getByRole('button', { name: 'R-Evolution' }).click();
   const coach = page.getByLabel('Il coach');
-  await expect(coach).toContainText('I dieci minuti si fanno al mattino, dalle 6:00 alle 13:00. Domani ti aspetto.');
+  await expect(coach).toContainText('I dieci minuti si avviano dalle 6:00 alle 21:20. Domani ti aspetto.');
   await expect(coach.getByRole('button')).toHaveCount(0);
 });
 
@@ -165,7 +165,7 @@ test('R-Evolution spenta: la voce non c’è', async ({ page }) => {
 for (const larga of [320, 360, 375, 384, 390, 393, 412, 430, 480, 768])
   test(`barra a cinque voci: a ${larga} px nessuna etichetta esce dal suo pulsante, anche selezionata`, async ({ page }) => {
     await page.setViewportSize({ width: larga, height: 800 });
-    await page.clock.setFixedTime(new Date('2027-01-18T16:00:00+01:00'));
+    await page.clock.setFixedTime(new Date('2027-01-18T22:00:00+01:00'));
     await finto(page, dati());
     await page.goto('/');
     const voci = page.locator('.barra button');
@@ -225,7 +225,7 @@ test('tema campo: carta della prossima partita e nastro Ultim’ora dal calendar
 // 17/11: oltre 96 px di scorrimento la testata tornava grande sopra le carte (il minificatore toglieva il fill)
 test('testata compatta anche in fondo alla pagina, a 412 px', async ({ page }) => {
   await page.setViewportSize({ width: 412, height: 400 });
-  await page.clock.setFixedTime(new Date('2027-01-18T16:00:00+01:00'));
+  await page.clock.setFixedTime(new Date('2027-01-18T22:00:00+01:00'));
   await finto(page, dati());
   await page.goto('/');
   await expect(page.locator('.testata h1')).toBeVisible();

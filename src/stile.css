@@ -427,7 +427,7 @@ body[data-sfondo='viola'] .indietro { padding: 0 14px 0 10px; border-radius: 999
 .tappe .forziere.sopra { top: -154px; }
 .tappe .forziere small { padding: 2px 9px; border-radius: 999px; background: var(--bianco); box-shadow: var(--ombra-etichetta); font: 800 14px 'Baloo 2', Nunito, sans-serif; color: var(--testo); white-space: nowrap; }
 .forziere.enigma img { filter: drop-shadow(0 0 8px var(--burro)); }
-.album-fluttuante { position: fixed; z-index: 4; right: max(16px, calc((100% - 430px) / 2 + 16px)); bottom: calc(92px + env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 6px; min-height: 48px; padding: 0 16px 0 10px; border-radius: 999px; background: var(--bianco); border: 3px solid var(--rosa-bordo); box-shadow: var(--ombra-alta); color: var(--testo); font: 800 14px Nunito, sans-serif; }
+.album-fluttuante { position: fixed; z-index: 4; right: max(16px, calc((100% - 430px) / 2 + 16px)); bottom: calc(142px + env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 6px; min-height: 48px; padding: 0 16px 0 10px; border-radius: 999px; background: var(--bianco); border: 3px solid var(--rosa-bordo); box-shadow: var(--ombra-alta); color: var(--testo); font: 800 14px Nunito, sans-serif; }
 .scheda-forziere { justify-items: center; text-align: center; }
 /* immagini dei premi: sagoma, vera o pacco regalo (Astra, popup del forziere, Premi dei genitori) */
 .premio-figura { margin: 0; display: grid; justify-items: center; gap: 8px; }
@@ -1202,9 +1202,9 @@ body[data-sfondo='sera'] .striscia-settimana {
 
 /* Tabellina di Oggi (23/11): una tacca per ogni cosa che conta per le chiavi; passi in più a parte */
 .cose-di-oggi { margin-bottom: 10px; }
-.segmenti { list-style: none; margin: 0; padding: 0; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 5px; }
-.segmenti li { height: 10px; border-radius: 999px; background: var(--rosa); }
-.segmenti li.fatto { background: var(--fucsia); }
+.segmenti { margin: 0; padding: 0; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 5px; }
+.segmenti span { height: 10px; border-radius: 999px; background: var(--rosa); }
+.segmenti span.fatto { background: var(--fucsia); }
 .passi-in-piu { margin-top: 14px; padding: 4px 12px 8px; border: 2px dashed var(--rosa-bordo); border-radius: 16px; }
 .passi-in-piu .tabellina-titolo { margin-top: 8px; }
 

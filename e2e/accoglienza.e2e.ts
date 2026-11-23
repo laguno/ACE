@@ -31,6 +31,7 @@ test('genitori: le quattro cose con lo stato vero', async ({ page }) => {
     forzieri: [{ n: 1, premio: 'Bici' }, ...Array.from({ length: 8 }, (_, i) => ({ n: i + 2, premio: null }))],
     voti: [], impostazioni: [], note: [], serate: [], movimenti_passi: [],
   });
+  await page.route('https://finto.supabase.test/rest/v1/rpc/controlla_pin', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: '"ok"' }));
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Prepariamo ACE' })).toBeVisible();
   await expect(page.locator('.avvio li').nth(0)).toHaveClass(/\bfatto\b/);
@@ -38,5 +39,8 @@ test('genitori: le quattro cose con lo stato vero', async ({ page }) => {
   await page.screenshot({ path: 'e2e/risultati/avvio-genitori.png' });
   await expect(page.getByText('(ne mancano 8)', { exact: false })).toBeVisible();
   await page.getByRole('button', { name: 'Scegli i premi' }).click();
+  // 23/11: i premi stanno dietro il PIN
+  await page.getByLabel('PIN').fill('1234');
+  await page.getByRole('button', { name: 'Apri i premi' }).click();
   await expect(page.getByText('8 forzieri senza premio.', { exact: false })).toBeVisible();
 });

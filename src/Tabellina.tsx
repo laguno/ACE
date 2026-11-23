@@ -57,11 +57,11 @@ export default function Tabellina({ vai, genitori = false, client = supabase }: 
               {fatteOggi} di {obbligatorie.length}
             </span>
           </p>
-          <ol className="segmenti" role="img" aria-label={`Cose di oggi per le chiavi: ${fatteOggi} fatte su ${obbligatorie.length}`}>
+          <div className="segmenti" role="img" aria-label={`Cose di oggi per le chiavi: ${fatteOggi} fatte su ${obbligatorie.length}`}>
             {obbligatorie.map((v) => (
-              <li key={v.id} className={v.presi >= v.valore ? 'fatto' : ''} />
+              <span key={v.id} className={v.presi >= v.valore ? 'fatto' : ''} />
             ))}
-          </ol>
+          </div>
         </div>
       )}
       <p className="tabellina-conto" role="status">
