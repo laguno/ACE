@@ -5,7 +5,7 @@ Storia delle sessioni, decisioni prese e scelte approvate: `docs/storico.md`.
 ## Togli su tutto quello che segna Lani (21/11, IN PRODUZIONE `fb18b5d`, backup `ace-2026-11-21_14-40-36.sql`)
 
 - Richiesta urgente del signore: Lani aveva segnato per sbaglio i dieci minuti e non si potevano togliere. Ora in Settimana, giorno per giorno, "Segnato da Lani" elenca ogni cosa con passi ancora validi (dieci minuti, foglio, ripasso, pillola, flash card, quiz, matematica, video, foto, partita): Togli = `storna_spunta` + per dieci minuti e fogli la spunta torna da fare. Compiti, cartella e borsa avevano già il loro Togli. R-Evolution ora conta gli storni nei passi di campo.
-- **Da fare:** ripubblicare le Edge Functions (`npx supabase functions deploy --yes` da un worktree con `supabase/.temp`): con il codice nuovo di `_shared/passi.ts` i dieci minuti tolti si possono rifare con passi (riferimento `dieci_minuti:<data>:<n>`). Il deploy delle funzioni il 21/11 è stato bloccato dai permessi automatici: senza, il Togli funziona ma i dieci minuti rifatti lo stesso giorno non danno passi.
+- Edge Functions ripubblicate il 23/11 alle 10:05: i dieci minuti tolti si possono rifare con passi (riferimento `dieci_minuti:<data>:<n>`).
 - Ramo `sensi-2` (worktree `app-sensi`, non pushato): suoni varianti/combo/aptica Haptics/scintille, APK 1.3 pronto a compilare. Mappa delle situazioni in `docs/mappa-sensi.md` (18 famiglie). Il signore cerca i suoni una famiglia alla volta, si parte dalla spunta (`C:\progetti\ace\suoni-nuovi\spunta\`). Non pubblicare finché non ci sono suoni decenti.
 
 ## Piano studio basato sulle evidenze (19-20/11, ramo `studio`, worktree `C:\progetti\ace\app-studio`, non in produzione)
