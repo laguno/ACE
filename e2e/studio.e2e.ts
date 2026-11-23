@@ -160,5 +160,5 @@ test('spiegamelo tu: Lani spiega, il tutor dice cosa c’è e cosa manca, senza 
   await expect(page.getByRole('heading', { name: 'Da sistemare' })).toHaveCount(0);
   expect(corpi).toEqual([{ azione: 'spiegamelo', argomento: 'Le frazioni', testo: 'Una frazione è quando divido un intero in parti uguali e ne prendo alcune.' }]);
   await page.getByRole('button', { name: 'Torna allo studio' }).click();
-  await expect(page.getByRole('heading', { name: 'Le tue verifiche' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Le verifiche' })).toBeVisible();
 });

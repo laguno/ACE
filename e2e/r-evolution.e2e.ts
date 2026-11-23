@@ -239,5 +239,5 @@ test('testata compatta anche in fondo alla pagina, a 412 px', async ({ page }) =
   await expect
     .poll(() => page.locator('.testata h1').evaluate((h) => getComputedStyle(h).transform))
     .not.toBe('none');
-  await expect(page.locator('.testata .riga').first()).toHaveCSS('opacity', '0');
+  await expect(page.locator('.testata .sopratitolo').first()).toHaveCSS('opacity', '0');
 });
