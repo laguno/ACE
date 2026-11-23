@@ -1208,7 +1208,10 @@ main:has(~ .pillola .pillola-barra) { padding-bottom: calc(176px + env(safe-area
 body:has(.studio) .pillola, body:has(.ga) .pillola { display: none; }
 body[data-sfondo='sera'] .pillola { --bianco: var(--notte-carta); --testo: var(--notte-testo); --testo-2: var(--notte-testo-2); --accento: var(--notte-accento); }
 body[data-sfondo='sera'] .pillola-barra.p-cose .conto-p { color: var(--notte-testo); }
-@media (prefers-reduced-motion: reduce) { .pillola-barra .piena { transition: none; } }
+/* 23/11: le barre si aprono solo in fondo alla pagina, come la testata che si compatta scorrendo */
+.pillola-barra { max-height: 44px; transition: max-height 0.25s ease, min-height 0.25s ease, padding 0.25s ease, opacity 0.2s ease; }
+.pillola:not(.aperta) .pillola-barra { max-height: 0; min-height: 0; padding-top: 0; padding-bottom: 0; border-width: 0; opacity: 0; overflow: hidden; }
+@media (prefers-reduced-motion: reduce) { .pillola-barra .piena, .pillola-barra { transition: none; } }
 
 /* Tabellina di Oggi (23/11): una tacca per ogni cosa che conta per le chiavi; passi in più a parte */
 .cose-di-oggi { margin-bottom: 10px; }
