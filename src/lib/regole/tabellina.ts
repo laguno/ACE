@@ -153,6 +153,10 @@ export function vociDelGiorno(f: FattiGiorno, gesti: { voce: string; id: string 
   return voci.map((v) => ({ ...v, dove: doveSiFa(v.id) }));
 }
 
+/** Voci che contano per le chiavi (le cose obbligatorie); le altre sono passi in più (23/11). */
+const PER_LE_CHIAVI = new Set(['compito', 'cartella', 'borsa', 'ripasso', 'dieci_minuti', 'foglio']);
+export const perLeChiavi = (v: Pick<VoceTabellina, 'id'>) => PER_LE_CHIAVI.has(v.id.split(':')[0]);
+
 /** Motivi che le voci del giorno contano già: il resto (voti, enigma...) sono passi in più. */
 const MOTIVI_DELLE_VOCI = new Set(['compito', 'compito_rifatto', 'cartella', 'borsa', 'foglio', 'ripasso', 'dieci_minuti', 'foto', 'flashcard', 'video', 'quiz', 'gesto', 'partita', 'partita_vinta']);
 

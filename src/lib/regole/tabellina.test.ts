@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CONFIG } from './index';
-import { contatore, motivoInParole, vociDelGiorno, type FattiGiorno } from './tabellina';
+import { contatore, motivoInParole, perLeChiavi, vociDelGiorno, type FattiGiorno } from './tabellina';
 
 const P = CONFIG.passi;
 const vuoto: FattiGiorno = { giorno: '2026-11-24', compiti: [], cartella: false, borsa: false, fogli: [], ripassi: [], dieciMinuti: false, foto: [], partita: null, movimenti: [] };
@@ -84,6 +84,21 @@ describe('tabellina dei passi', () => {
     const c = contatore(v, movimenti);
     expect(c.presi).toBe(P.partite.giocata + P.voti['8']);
     expect(c.disponibili).toBe(studioMassimo + P.gesti_casa.tetto_giornaliero + P.partite.giocata + P.partite.vinta_in_piu + P.voti['8']);
+  });
+
+  it('per le chiavi solo le cose obbligatorie: foto, studio, casa e partita sono passi in più', () => {
+    const f: FattiGiorno = {
+      ...vuoto,
+      compiti: [{ id: 'c1', testo: 'Es. 1', materia: 'Matematica', scadenza: '2026-11-25' }],
+      cartella: true,
+      dieciMinuti: true,
+      foto: [{ id: 'r1', pagine: '12' }],
+      partita: { titolo: 'Partita Lani' },
+    };
+    const v = vociDelGiorno(f);
+    expect(v.filter(perLeChiavi).map((x) => x.id)).toEqual(['compito:c1', 'cartella', 'dieci_minuti']);
+    expect(v.filter((x) => !perLeChiavi(x)).map((x) => x.id)).toContain('foto:r1');
+    expect(v.filter((x) => !perLeChiavi(x)).map((x) => x.id)).toContain('partita');
   });
 
   it('motivi in parole di casa', () => {

@@ -1199,3 +1199,11 @@ body:has(.studio) .striscia-settimana { display: none; }
 body[data-sfondo='sera'] .striscia-settimana {
   --bianco: var(--notte-carta); --testo: var(--notte-testo); --rosa: var(--notte-rosa); --azzurro-chiaro: #2d3f66; --ombra: 0 10px 24px rgba(0, 0, 0, 0.3);
 }
+
+/* Tabellina di Oggi (23/11): una tacca per ogni cosa che conta per le chiavi; passi in più a parte */
+.cose-di-oggi { margin-bottom: 10px; }
+.segmenti { list-style: none; margin: 0; padding: 0; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 5px; }
+.segmenti li { height: 10px; border-radius: 999px; background: var(--rosa); }
+.segmenti li.fatto { background: var(--fucsia); }
+.passi-in-piu { margin-top: 14px; padding: 4px 12px 8px; border: 2px dashed var(--rosa-bordo); border-radius: 16px; }
+.passi-in-piu .tabellina-titolo { margin-top: 8px; }
