@@ -44,12 +44,6 @@ type Verifica = {
 type Attivita = ({ tipo: 'carte'; carte: Carta[] } | { tipo: 'quiz'; quizId: string; domande: Domanda[] } | { tipo: 'mate'; serie: Serie }) & { titolo: string; sessione?: string };
 const titoloQuiz = (v: Verifica) => `Quiz di ${(v.materie?.nome ?? 'ripasso').toLowerCase()}`;
 
-const COSA: Record<R.TipoSessione, string> = {
-  rilettura_flashcard: 'rilettura e flash card',
-  flashcard_mappa: 'flash card e mappa',
-  quiz: 'quiz',
-  quiz_errori: 'quiz breve sugli errori',
-};
 // pillola: si pescano le carte in scadenza e si mescolano tra argomenti (config ripasso.pillola)
 const DA_PESCARE = R.CONFIG.ripasso.pillola.carte_da_pescare;
 // finché i compiti di domani non sono spuntati, dentro la prima carta (decisione del signore, 9/11)
