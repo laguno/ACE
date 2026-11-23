@@ -1382,3 +1382,26 @@ body[data-sfondo='sera'] .pillola-barra.p-cose .conto-p { color: var(--notte-tes
 .timbro-materia { width: 56px; height: 62px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 16px; }
 .timbro-materia small { font: 900 11px Nunito, sans-serif; letter-spacing: 0.08em; }
 .timbro-materia b { font: 800 26px/1 'Baloo 2', sans-serif; }
+
+/* La mia settimana v2: carta chiavi con tacca di oggi e chiave alla soglia, pallino per voce, giorni futuri tenui */
+.carta-chiavi { display: grid; gap: 16px; }
+.chiavi-testa { display: flex; align-items: center; gap: 12px; }
+.chiavi-testa > span:last-child { display: flex; flex-direction: column; }
+.chiavi-testa b { font: 800 22px/1.1 'Baloo 2', Nunito, sans-serif; }
+.chiavi-testa small { font-size: 14px; font-weight: 800; color: var(--testo-2); }
+.chiavi-testa small.in-pari { color: #1f7a3a; }
+.tre-chiavi { display: flex; gap: 2px; }
+.pista-grande { position: relative; height: 18px; border-radius: 999px; }
+.pista-grande.passi { background: #ffe3ef; }
+.pista-grande.cose { background: #dcefff; }
+.pista-grande .piena { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 999px; transition: width 0.6s ease; }
+.pista-grande.passi .piena { background: #e23d8e; }
+.pista-grande.cose .piena { background: #2a6fb0; }
+.pista-grande .tacca-oggi { position: absolute; top: -6px; width: 3px; height: 30px; margin-left: -1.5px; border-radius: 2px; background: var(--testo); }
+.pista-grande .chiave-soglia { position: absolute; top: 50%; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 999px; background: #fff; border: 2px solid #c99a1e; display: flex; align-items: center; justify-content: center; }
+.etichette-grandi { display: flex; justify-content: space-between; margin-top: 6px; font-size: 12px; font-weight: 900; }
+.etichette-grandi span { color: var(--testo-2); }
+.voce-pallino { display: inline-flex; width: 30px; height: 30px; margin-right: 8px; vertical-align: middle; border-radius: 999px; align-items: center; justify-content: center; }
+.voce-pallino i { width: 10px; height: 10px; border-radius: 999px; }
+.cella.futura { opacity: 0.55; }
+@media (prefers-reduced-motion: reduce) { .pista-grande .piena { transition: none; } }
