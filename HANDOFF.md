@@ -2,14 +2,21 @@
 
 Storia delle sessioni, decisioni prese e scelte approvate: `docs/storico.md`.
 
+## DA RICORDARE AL SIGNORE all'inizio della prossima sessione (chiesto il 23/11)
+
+1. **Controlli dopo la pubblicazione del 23/11**: `sync_log` e Stato di ACE; il telefono di Lani (pillola, Studio, Sera: le carte bianche a letto abbagliano?); **domenica 29/11 alle 23** il primo conteggio delle chiavi con la `0071` (cron `chiavi`, riepilogo ai genitori alle 23:15).
+2. **Taratura dei passi**: non ritoccata. Con le regole del 23/11, a 7200 passi la cima resta al 100% con impegno 90% e "furbetta"; all'80% scende da 80% a 70%; al 75% da 30% a 10%. **Verso il 14/12** (tre settimane di dati veri) guardare passi e cose fatte da Lani e decidere se ritarare (`npm run simula`, con tutti i `TOTALI`). I numeri li decide il signore.
+3. **Sensi 2: cosa manca per pubblicarli** (codice pronto in `sensi-2`, dentro `gioco-con-tabellina`, NON in produzione; in produzione c'è la prima versione con i suoni Kenney):
+   - **i suoni**, il blocco vero. Famiglie senza suono in `docs/mappa-sensi.md` (worktree `app-sensi`): scatto della foto, passi che salgono, traguardo, tempo finito, bel voto, novità, gesto di famiglia. Da rivedere: spunta (anche voci di cartella e borsa) e chiave. Partita vinta non scatta mai (il popup chiede sempre "com'è andata"). Da decidere silenzio o suono morbido: calmo, qualcosa non va. Si parte dalla spunta: il signore mette i candidati in `C:\progetti\ace\suoni-nuovi\spunta\` (la cartella non c'è ancora);
+   - **APK 1.3** da compilare e installare sul telefono di Lani (vibrazione nativa con `@capacitor/haptics`);
+   - **prova sull'iPad e sul Samsung**: suono dopo il rientro dal background, tasto silenzioso, vibrazione.
+4. **Differenze dalle bozze v2 da decidere**: voto previsto a bottoni come la bozza (5-9) o select (3-10 a mezzi, come ora); liste di Oggi sotto i gettoni; Oggi pomeriggio lilla o azzurro come la bozza; legenda in La mia settimana; "Tutte le partite" in R-Evolution; testata compatta di Oggi con i passi (chiesta dal signore prima della regola "una moneta per schermata").
+
 ## La mia settimana, regole del 23/11 e restyling v2: IN PRODUZIONE (23/11 ~22:00, `c1bc408`)
 
 - **Pubblicato** fuori dalle finestre vietate: backup `ace-2026-11-23_21-51-29.sql`; `db push` della `0071` (cron `chiavi` domenica 21 e 22 UTC, controllato); tutte le 13 funzioni ripubblicate (le regole condivise e `config-gioco.json` sono cambiati); `main` portato a `c1bc408` con avanzamento semplice, Vercel success, sito controllato. Ramo di rilascio `rilascio-v2` (worktree `app-rilascio-v2`) = `main` + `origin/settimana` + commit v2, **senza gioco di pallavolo e Sensi 2**; unito anche in `gioco-con-tabellina` (hook `pre-push`).
 - **Cosa c'è**: regole del 23/11 (borsa solo prima dello sport di lunedì e venerdì, dieci minuti 6:00-21:20 e 6 giorni su 7, chiavi domenica alle 23:00, calcolo unico in `src/lib/regole/settimana.ts`); La mia settimana di Lani e dei genitori (Forzieri dietro il PIN); restyling v2 di Jarvis (`design/v2/LEGGIMI.md`) su Oggi, Studio, Sera, Astra, R-Evolution, La mia settimana, timer dei dieci minuti, flash card; verifica importante; pillola che apre le barre solo in fondo alla pagina; testata compatta con saldo e chiavi.
 - **Decisioni del signore del 23/11**: Oggi senza saldo dei passi (una moneta per schermata, il numero che sale resta in Astra); Sera senza numeri di passi e con carte bianche (bozza; prima erano scure per la notte: se a letto abbagliano, si torna indietro).
-- **Differenze dalle bozze lasciate apposta**: voto previsto resta select (bozza 5-9, config 3-10 a mezzi); liste di Oggi sotto i gettoni; Oggi pomeriggio lilla; legenda in La mia settimana; "Tutte le partite" in R-Evolution; il ritrovo della partita non c'è nei dati.
-- **Taratura** (`npm run simula`, solo 7200 passi, file non aggiornato): con le regole nuove la cima resta al 100% con impegno 90% (12/5) e "furbetta"; 80% scende da 80% a 70% (2/6); 75% da 30% a 10%. Proposta: non ritarare ora, guardare i dati veri delle prime settimane.
-- **Da controllare domani**: `sync_log`, Stato di ACE, telefono di Lani (pillola, Studio, Sera), domenica 29/11 alle 23 il conteggio delle chiavi.
 - Nota tecnica: in Git Bash `TZ=Europe/Rome date` dà l'ora UTC; l'ora di Roma si legge con `node -e` e `Intl` (lo fa `rilascio:controlla`). Nella cartella di rilascio `node_modules` è un collegamento: con vite in sviluppo i font non si caricano e 4 prove di misura falliscono (con `server.fs.allow` passano tutte); la build è a posto.
 
 ## Togli su tutto quello che segna Lani (21/11, IN PRODUZIONE `fb18b5d`, backup `ace-2026-11-21_14-40-36.sql`)
