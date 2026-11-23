@@ -63,6 +63,7 @@ export default function REvolution({ apri = () => {} }: { apri?: (v: 'Oggi') => 
   const vinte = giocate.filter((p) => p.set_nostri > p.set_loro).length;
   // nastro "Ultim'ora": prossima partita e quanto manca, ultimo risultato, posto in classifica
   const ultima = giocate[0];
+  const posaTestata = !ultima ? 'lani-battuta' : ultima.set_nostri > ultima.set_loro ? 'lani-festeggia' : 'lani-partita-persa';
   const notizie = [
     ...(prossima ? notizieProssima(prossima, new Date()) : []),
     ...(ultima ? [`ultima partita: ${ultima.set_nostri}-${ultima.set_loro} con ${ultima.avversaria}`] : []),
@@ -84,12 +85,8 @@ export default function REvolution({ apri = () => {} }: { apri?: (v: 'Oggi') => 
           9
         </span>
         <h1>In campo</h1>
-        <p className="conto">
-          <b>+{d.passiCampo}</b> passi presi in campo.
-        </p>
-        <Sticker posa="lani-battuta" misura={236} className="campo-sticker" />
+        <Sticker posa={posaTestata} misura={236} className="campo-sticker" />
       </header>
-
       {notizie.length > 0 && (
         <div className="ultimora" tabIndex={0}>
           <strong aria-hidden>Ultim'ora</strong>
@@ -101,32 +98,26 @@ export default function REvolution({ apri = () => {} }: { apri?: (v: 'Oggi') => 
           </div>
         </div>
       )}
-
-      <Coach mattino={d.mattino} ultima={ultima} apri={apri} />
-
       <CartaProssimaPartita p={prossima} />
-
-      <dl className="numeri tabellone">
-        <div>
-          <dt>
-            <Emoji e="🏐" /> partite
-          </dt>
-          <dd>{giocate.length}</dd>
+      {ultima && (
+        <div className="carta tabellone-ultima" aria-label="Ultima partita">
+          <small>ULTIMA PARTITA</small>
+          <p className="risultato">
+            <b>{ultima.set_nostri}</b>
+            <span aria-hidden> – </span>
+            <b>{ultima.set_loro}</b>
+          </p>
+          <p className="contro">{ultima.avversaria}</p>
+          <ul className="ultime-cinque" aria-label="Ultime cinque partite">
+            {giocate.slice(0, 5).map((x) => (
+              <li key={x.id} className={x.set_nostri > x.set_loro ? 'vinta' : 'persa'}>
+                {x.set_nostri > x.set_loro ? 'V' : 'P'}
+              </li>
+            ))}
+          </ul>
         </div>
-        <div>
-          <dt>
-            <Emoji e="🏆" /> vinte
-          </dt>
-          <dd>{vinte}</dd>
-        </div>
-        <div>
-          <dt>
-            <Emoji e="⏱️" /> dieci minuti a {MESI[oggi.getMonth()]}
-          </dt>
-          <dd>{d.dieci}</dd>
-        </div>
-      </dl>
-
+      )}
+      <Coach mattino={d.mattino} ultima={ultima} apri={apri} />
       {d.classifiche.map((c) => (
         <div className="carta" key={c.cid}>
           <div className="testa-carta">
@@ -134,6 +125,24 @@ export default function REvolution({ apri = () => {} }: { apri?: (v: 'Oggi') => 
               <Emoji e="🏆" /> Classifica {c.campionato}
             </h2>
           </div>
+          {(() => {
+            const i = c.righe.findIndex((x) => stessaSquadra(x.squadra, c.squadra));
+            const da = Math.max(0, Math.min(i - 1, c.righe.length - 4));
+            return (
+              <>
+                {i >= 0 && <p className="posto">{c.righe[i].pos}°</p>}
+                <ol className="classifica-corta">
+                  {c.righe.slice(da, da + 4).map((r) => (
+                    <li key={r.pos + r.squadra} className={stessaSquadra(r.squadra, c.squadra) ? 'lani' : undefined}>
+                      <b>{r.pos}°</b> <span>{r.squadra}</span> <small>{r.punti} pt</small>
+                    </li>
+                  ))}
+                </ol>
+              </>
+            );
+          })()}
+          <details className="classifica-tutta">
+          <summary>Tutta la classifica</summary>
           <table className="classifica">
             <thead>
               <tr>
@@ -164,14 +173,39 @@ export default function REvolution({ apri = () => {} }: { apri?: (v: 'Oggi') => 
               ))}
             </tbody>
           </table>
+          </details>
           <p className="nota">
             {c.girone}, dal portale FIPAV. Aggiornata il {new Date(c.aggiornata_il).getDate()} {MESI[new Date(c.aggiornata_il).getMonth()]}.
           </p>
         </div>
       ))}
-
-      <div className="carta">
-        <div className="testa-carta">
+      <dl className="numeri tabellone">
+        <div>
+          <dt>
+            <Emoji e="🏐" /> partite
+          </dt>
+          <dd>{giocate.length}</dd>
+        </div>
+        <div>
+          <dt>
+            <Emoji e="🏆" /> vinte
+          </dt>
+          <dd>{vinte}</dd>
+        </div>
+        <div>
+          <dt>
+            <Emoji e="⏱️" /> dieci minuti a {MESI[oggi.getMonth()]}
+          </dt>
+          <dd>{d.dieci}</dd>
+        </div>
+      </dl>
+      <details className="carta tutte-le-partite">
+        <summary>
+          <h2>
+            <Emoji e="📣" /> Tutte le partite
+          </h2>
+        </summary>
+        <div className="testa-carta" hidden>
           <h2>
             <Emoji e="📣" /> Partite
           </h2>
@@ -200,8 +234,7 @@ export default function REvolution({ apri = () => {} }: { apri?: (v: 'Oggi') => 
             })}
           </ul>
         )}
-      </div>
-
+      </details>
       {avviso && (
         <p className="nota" role="status">
           {avviso}

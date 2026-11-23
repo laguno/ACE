@@ -1346,3 +1346,32 @@ body[data-sfondo='sera'] .pillola-barra.p-cose .conto-p { color: var(--notte-tes
 .forziere-prossimo .forziere-testo small { color: var(--testo-2); font-weight: 700; }
 .chiavi-servono { display: flex; gap: 2px; }
 @media (prefers-reduced-motion: reduce) { .barra-tappa span { transition: none; } }
+
+/* R-Evolution v2 (23/11): sfondo come la maglia (granata sulle spalle, mezzatinta a puntini verso il bianco, fianchi granata
+   con i puntini), manifesto e tabellone dell'ultima, classifica corta */
+.r-evolution { position: relative; isolation: isolate; }
+.r-evolution::before {
+  content: ''; position: absolute; inset: 0; z-index: -3; pointer-events: none;
+  background:
+    radial-gradient(circle, rgba(255, 255, 255, 0.32) 1.3px, transparent 1.6px) 0 0 / 9px 9px,
+    var(--granata);
+  -webkit-mask-image: linear-gradient(180deg, #000 0, transparent 420px), linear-gradient(90deg, #000 0 14px, transparent 14px calc(100% - 14px), #000 calc(100% - 14px));
+  mask-image: linear-gradient(180deg, #000 0, transparent 420px), linear-gradient(90deg, #000 0 14px, transparent 14px calc(100% - 14px), #000 calc(100% - 14px));
+  -webkit-mask-composite: source-over;
+  mask-composite: add;
+}
+.tabellone-ultima { text-align: center; }
+.tabellone-ultima small { font: 900 12px Nunito, sans-serif; letter-spacing: 0.08em; color: var(--testo-2); }
+.tabellone-ultima .risultato { margin: 4px 0; font: 800 54px/1 'Baloo 2', Nunito, sans-serif; font-variant-numeric: tabular-nums; }
+.tabellone-ultima .contro { margin: 0 0 10px; font-weight: 800; overflow-wrap: anywhere; }
+.ultime-cinque { list-style: none; margin: 0; padding: 0; display: flex; justify-content: center; gap: 8px; }
+.ultime-cinque li { width: 32px; height: 32px; border-radius: 999px; display: flex; align-items: center; justify-content: center; font: 900 14px Nunito, sans-serif; }
+.ultime-cinque li.vinta { background: #1f7a3a; color: #fff; }
+.ultime-cinque li.persa { background: #5e4470; color: #fff; }
+.r-evolution .posto { margin: 0; font: 800 54px/1 'Baloo 2', Nunito, sans-serif; color: var(--granata); }
+.classifica-corta { list-style: none; margin: 4px 0 8px; padding: 0; display: grid; gap: 4px; }
+.classifica-corta li { display: grid; grid-template-columns: 36px 1fr auto; gap: 8px; align-items: baseline; padding: 6px 8px; border-radius: 12px; }
+.classifica-corta li.lani { background: var(--granata); color: #fff; }
+.classifica-corta small { font-weight: 800; }
+.classifica-tutta summary, .tutte-le-partite summary { min-height: 44px; display: flex; align-items: center; font-weight: 800; cursor: pointer; }
+.tutte-le-partite summary h2 { margin: 0; }
