@@ -1190,7 +1190,7 @@ button.chip-pagina { cursor: pointer; }
 /* Pillola di navigazione (v2, 23/11): Passi sopra, le cinque sezioni, Cose sotto. La tacca scura è dove
    dovrebbe essere la barra a fine giornata. Il fondo di main cresce quanto la pillola. */
 .pillola { position: fixed; z-index: 5; left: 50%; bottom: calc(14px + env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(100% - 28px, 402px); border-radius: 32px; background: var(--bianco); box-shadow: var(--ombra-alta); overflow: hidden; }
-.pillola .barra { position: static; transform: none; width: auto; height: 62px; box-shadow: none; background: none; border-radius: 0; }
+.pillola .barra { position: static; transform: none; width: auto; height: 62px; padding: 6px 4px; gap: 2px; box-shadow: none; background: none; border-radius: 0; }
 .pillola-barra { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 6px 18px; border: 0; background: none; color: var(--testo); font: 900 12px Nunito, sans-serif; cursor: pointer; text-align: left; }
 .pillola-barra.p-passi { border-bottom: 1px solid #ffe3ef; padding-top: 10px; }
 .pillola-barra.p-cose { border-top: 1px solid #dcefff; padding-bottom: 11px; }
@@ -1320,7 +1320,7 @@ body[data-sfondo='sera'] .pillola-barra.p-cose .conto-p { color: var(--notte-tes
 .carta-chiusa b { font: 800 16px Nunito, sans-serif; }
 .carta-chiusa .dopo { color: var(--testo-2); font-weight: 800; }
 .carta-chiusa .valore, .carta-chiusa .annulla { margin-left: auto; }
-.chip.chip-gettone { background: var(--g-fondo); border: 2px solid transparent; }
+.chip.chip-gettone { background: var(--g-fondo); color: #3d2350; border: 2px solid transparent; }
 .chip.chip-gettone:has(input:checked) { background: var(--g-segno); color: #fff; }
 .chip.chip-gettone .pallino-materia { width: 10px; height: 10px; border-radius: 999px; flex: none; }
 .promemoria-borsa h2 { margin: 0 0 4px; }
@@ -1403,5 +1403,5 @@ body[data-sfondo='sera'] .pillola-barra.p-cose .conto-p { color: var(--notte-tes
 .etichette-grandi span { color: var(--testo-2); }
 .voce-pallino { display: inline-flex; width: 30px; height: 30px; margin-right: 8px; vertical-align: middle; border-radius: 999px; align-items: center; justify-content: center; }
 .voce-pallino i { width: 10px; height: 10px; border-radius: 999px; }
-.cella.futura { opacity: 0.55; }
+.cella.futura { filter: saturate(0.55); }
 @media (prefers-reduced-motion: reduce) { .pista-grande .piena { transition: none; } }

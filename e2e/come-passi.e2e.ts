@@ -34,7 +34,7 @@ for (const accesa of [false, true]) {
     await expect(dettaglio).toBeVisible();
     await page.screenshot({ path: `e2e/risultati/come-passi-${accesa ? 'accesa' : 'spenta'}.png`, fullPage: true });
     await page.getByRole('button', { name: 'Torna a Astra' }).click();
-    await expect(page.getByText('Ogni giorno, passino passino.')).toBeAttached();
+    await expect(page.getByRole('button', { name: 'Come si fanno i passi' })).toBeVisible();
   });
 }
 

@@ -15,7 +15,7 @@ export default function Pillola({ apri, children }: { apri: () => void; children
   return (
     <div className="pillola">
       {s && t && (
-        <button className="pillola-barra p-passi" onClick={apri} aria-label={`La mia settimana: passi ${s.percentualePassi} per cento, ${s.chiavi} chiavi su 3`}>
+        <button className="pillola-barra p-passi" onClick={apri} aria-label={`Passi ${s.percentualePassi} per cento, ${s.chiavi} chiavi su 3: la mia settimana`}>
           <span className="et" aria-hidden>Passi</span>
           <span className="pista" aria-hidden>
             <span className="piena" style={{ width: `${s.percentualePassi}%` }} />
@@ -30,13 +30,13 @@ export default function Pillola({ apri, children }: { apri: () => void; children
       )}
       {children}
       {s && t && (
-        <button className="pillola-barra p-cose" onClick={apri} aria-label={`Cose della settimana: ${s.coseFatte} di ${s.cosePossibili}`}>
-          <span className="et" aria-hidden>Cose</span>
+        <button className="pillola-barra p-cose" onClick={apri} aria-label={`Cose ${s.coseFatte} di ${s.cosePossibili}: la mia settimana`}>
+          <span className="et" aria-hidden>Cose</span>{' '}
           <span className="pista" aria-hidden>
             <span className="piena" style={{ width: `${s.percentualeCose}%` }} />
             <span className="tacca-oggi" style={{ left: `${t.cose}%` }} />
           </span>
-          <span className="conto-p" aria-hidden>{s.coseFatte} di {s.cosePossibili}</span>
+          {' '}<span className="conto-p" aria-hidden>{s.coseFatte} di {s.cosePossibili}</span>
         </button>
       )}
     </div>

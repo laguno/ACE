@@ -33,7 +33,7 @@ test('Oggi: il saldo sale da 250 a 300 con +50, poi Astra è fermo', async ({ pa
   await expect(saldo.getByText('mancano 95')).toBeVisible();
   await page.screenshot({ path: 'e2e/risultati/passi-oggi.png' });
   await page.getByRole('button', { name: 'Astra' }).click();
-  await expect(page.locator('.astra-saldi .saldo b')).toHaveText('300');
+  await expect(page.locator('.astra-passi .saldo b')).toHaveText('300');
   await expect(page.locator('.contapassi-delta')).toHaveCount(0);
 });
 
@@ -45,10 +45,10 @@ test('Astra: il saldo scende con −20', async ({ page }) => {
   await expect(page.locator('.testata .saldo b')).toHaveText('300');
   t.saldo_visto = [{ passi: 320 }];
   await page.getByRole('button', { name: 'Astra' }).click();
-  await expect(page.locator('.astra-saldi').getByText('−20')).toBeVisible();
+  await expect(page.locator('.astra-passi').getByText('−20')).toBeVisible();
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: 'e2e/risultati/passi-astra.png' });
-  await expect(page.locator('.astra-saldi .saldo b')).toHaveText('300');
+  await expect(page.locator('.astra-passi .saldo b')).toHaveText('300');
 });
 
 test('la prima volta niente animazione', async ({ page }) => {

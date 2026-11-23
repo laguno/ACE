@@ -104,13 +104,14 @@ export default function CartaOggi({ vai, promemoria }: { vai?: (d: Dove) => void
                   <button
                     className={`gettone${x.fatto ? ' fatto' : ''}`}
                     style={{ background: c.fondo, color: '#3D2350' }}
-                    aria-label={`${x.nome}: ${x.sotto}`}
+                    aria-label={`${x.nome} ${x.sotto}`}
                     onClick={() => vai?.(x.dove)}
                   >
                     <span className="cerchio" style={{ background: x.fatto ? c.segno : '#fff' }}>
                       {x.fatto ? <Check size={26} weight="bold" color="#fff" aria-hidden /> : <Icona size={28} weight="bold" color={c.segno} aria-hidden />}
                     </span>
                     <b>{x.nome}</b>
+                    {' '}
                     <small style={{ color: c.segno }}>{x.sotto}</small>
                   </button>
                 </li>

@@ -39,14 +39,17 @@ test('R-Evolution: classifica, partite con il risultato e passi presi in campo',
   await page.goto('/');
   await page.getByRole('button', { name: 'R-Evolution' }).click();
   await expect(page.getByRole('heading', { name: 'In campo' })).toBeVisible();
-  await expect(page.getByText('+25 passi presi in campo.')).toBeVisible();
+  // v2: R-Evolution non mostra più i passi presi in campo
+  await expect(page.getByText('passi presi in campo')).toHaveCount(0);
 
   const classifica = page.locator('.carta', { has: page.getByRole('heading', { name: 'Classifica Under 13' }) });
+  await classifica.getByText('Tutta la classifica').click(); // v2: prima la classifica corta
   await expect(classifica.getByRole('row', { name: /13R-EVOLUT\. POLO DIGITALE/ })).toHaveClass(/lani/);
   await expect(classifica.getByRole('row', { name: /DENTI ALBINETANA/ })).not.toHaveClass(/lani/);
   await expect(classifica.getByText('U13 Femminile girone C, dal portale FIPAV. Aggiornata il 18 gennaio.')).toBeVisible();
 
   // le partite stanno anche nel nastro dell'ultim'ora: qui si guarda la lista
+  await page.getByText('Tutte le partite').click();
   const partite = page.locator('.partite');
   await expect(partite.getByText('Volley Bibbiano')).toBeVisible();
   await expect(partite.getByText('3-1')).toHaveClass(/vinta/);
@@ -113,6 +116,7 @@ test('partita risposta "Assente": nell’elenco con "assente", non tra le giocat
   await finto(page, { ...dati(), partite: [{ ...P4, approvata_il: '2027-01-23T21:00:00Z' }] });
   await page.goto('/');
   await page.getByRole('button', { name: 'R-Evolution' }).click();
+  await page.getByText('Tutte le partite').click(); // v2: l'elenco sta in un riquadro che si apre
   await expect(page.getByText('23 gennaio, assente')).toBeVisible();
   await expect(page.locator('.numeri dd').first()).toHaveText('0');
 });

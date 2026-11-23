@@ -135,10 +135,14 @@ export function DieciMinuti({ oggi }: { oggi: Date }) {
         <div className="fascia-corpo">
           <div className="fascia-testo">
             {stato.il ? (
-              <>
-                <b className="grande">FATTI!</b>
-                <span>{Nome}, 10 minuti. Il coach approva.</span>
-              </>
+              errore ? (
+                <span>Segnati, ma i passi non sono arrivati.</span>
+              ) : (
+                <>
+                  <b className="grande">FATTI!</b>
+                  <span>{Nome}, 10 minuti. Il coach approva.</span>
+                </>
+              )
             ) : (
               <>
                 <span className="tempo-grande">{mmss(inCorso ? tempo : SECONDI)}</span>

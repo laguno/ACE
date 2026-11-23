@@ -20,22 +20,19 @@ const TABELLINA = {
   ],
 };
 
-test('contatore sempre in vista, cosa manca e già presi, il gesto porta alle regole', async ({ page }) => {
+test('Oggi v2: i gettoni con N di M, i passi in più in una riga, il gesto porta alle regole', async ({ page }) => {
   await page.clock.setFixedTime(new Date('2026-11-09T07:10:00+01:00'));
   await finto(page, { movimenti_passi: [], compiti: [], fogli_firma: [], serate: [], impegni_famiglia: [] }, { tabellina: TABELLINA });
   await page.goto('/');
-  await expect(page.locator('.tabellina-conto')).toHaveText('Oggi hai preso 10 passi su 20 disponibili');
-  const elenco = page.locator('.tabellina details');
-  await expect(elenco).not.toHaveAttribute('open');
-  // 23/11: i passi in più stanno sempre in vista, fuori dall'elenco chiuso
+  const oggi = page.getByRole('region', { name: 'Per le chiavi, oggi' });
+  // compiti già presi, dieci minuti ancora da fare: 1 di 2
+  await expect(oggi.getByText('1 di 2')).toBeVisible();
+  await expect(oggi.getByRole('button', { name: 'Compiti fatto' })).toBeVisible();
+  // i passi in più stanno in una riga che si apre
+  await expect(page.getByText('Letto fatto')).toBeHidden();
+  await page.getByText('Passi in più').click();
   await expect(page.getByText('Letto fatto')).toBeVisible();
-
-  await page.getByText('Guarda cosa manca').click();
-  // il compito già preso non manca più: resta solo tra i presi
-  await expect(page.locator('.tabellina-voci li')).toHaveCount(2);
-  await expect(page.locator('.tabellina-data')).toHaveText(['Oggi', 'Ieri']);
-  await expect(page.getByText('Compiti fatti: Inglese')).toBeVisible();
-  expect((await new AxeBuilder({ page }).include('.tabellina').analyze()).violations).toEqual([]);
+  expect((await new AxeBuilder({ page }).include('.oggi-gettoni').analyze()).violations).toEqual([]);
 
   await page.getByRole('button', { name: /Letto fatto/ }).click();
   await expect(page.getByRole('heading', { name: 'Come si fanno i passi' })).toBeVisible();
@@ -49,7 +46,7 @@ test('senza risposta del server la tabellina non compare', async ({ page }) => {
   await finto(page, { movimenti_passi: [], compiti: [], fogli_firma: [], serate: [], impegni_famiglia: [] });
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Buongiorno, Lani' })).toBeVisible();
-  await expect(page.locator('.tabellina')).toHaveCount(0);
+  await expect(page.locator('.oggi-gettoni')).toHaveCount(0);
 });
 
 test('area genitori: stessa tabellina, con chi ha dato i passi e senza collegamenti', async ({ page }) => {

@@ -23,34 +23,40 @@ const dati = (impostazioni: Record<string, unknown>[] = ACCESA) => ({
   ],
 });
 
-const carta = (page: import('@playwright/test').Page) => page.locator('.carta', { has: page.getByRole('heading', { name: 'Dieci minuti' }) });
+// v2: la fascia in stile allenamento (regione "Dieci minuti") e, dopo VIA, il timer a tutto schermo
+const carta = (page: import('@playwright/test').Page) => page.getByRole('region', { name: 'Dieci minuti' });
+const timer = (page: import('@playwright/test').Page) => page.getByRole('dialog', { name: 'Dieci minuti, timer' });
 
 test('dieci minuti al mattino: si sceglie dal menu, si avvia, si spunta solo in fondo', async ({ page }) => {
   await page.clock.install({ time: LUNEDI_MATTINA });
   const { chiamate, t } = await finto(page, dati(), { passi: { passi: 10 } });
   await page.goto('/');
   const c = carta(page);
-  await expect(c.getByText(/^Dieci minuti: oggi .+\. Si parte entro le 21:20. Pronta\?$/)).toBeVisible();
+  await expect(c.getByText('entro le 21:20')).toBeVisible();
+  await c.getByRole('button', { name: 'Cambia esercizio' }).click();
   await expect(c.getByRole('radio')).toHaveCount(3);
   await c.getByRole('radio', { name: 'Salti con la corda' }).check();
-  await c.getByRole('button', { name: 'Avvia il timer' }).click();
+  await c.getByRole('button', { name: 'VIA' }).click();
   await expect.poll(() => t.serate[0]).toMatchObject({ data: '2027-01-11', dieci_minuti_esercizio: 'corda' });
-  await expect(c.getByRole('button', { name: 'Vai fino in fondo' })).toBeDisabled();
+  // il timer è a tutto schermo e non si salta: SEGNA FATTO compare solo in fondo
+  await expect(timer(page).getByRole('button', { name: 'PAUSA' })).toBeVisible();
+  await expect(timer(page).getByRole('button', { name: 'SEGNA FATTO' })).toHaveCount(0);
   await page.screenshot({ path: 'e2e/risultati/dieci-minuti.png', fullPage: true });
 
   await page.clock.runFor(10 * 60 * 1000 + 5000);
-  await c.getByRole('button', { name: 'Fatto' }).click();
-  await expect(c.getByText('Fatto: salti con la corda. Bart approva.')).toBeVisible();
+  await timer(page).getByRole('button', { name: 'SEGNA FATTO' }).click();
+  await expect(c.getByText('FATTI!')).toBeVisible();
+  await expect(c.getByText(/Salti con la corda, 10 minuti/)).toBeVisible();
   await expect.poll(() => t.serate[0]?.dieci_minuti_il).toBeTruthy();
   await expect.poll(() => chiamate).toEqual([{ tipo: 'dieci_minuti', id: '2027-01-11' }]);
 });
 
-test('dieci minuti: dopo le 13 non si avviano più', async ({ page }) => {
-  await page.clock.install({ time: new Date('2027-01-11T13:30:00+01:00') });
+test('dieci minuti: dopo l\'ultimo avvio delle 21:20 non si avviano più', async ({ page }) => {
+  await page.clock.install({ time: new Date('2027-01-11T21:40:00+01:00') });
   await finto(page, dati());
   await page.goto('/');
   await expect(page.getByRole('button', { name: 'R-Evolution' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Dieci minuti' })).toHaveCount(0);
+  await expect(carta(page)).toHaveCount(0);
 });
 
 test('dieci minuti: con R-Evolution spenta non ci sono', async ({ page }) => {
@@ -66,9 +72,9 @@ test('dieci minuti: se il server non li conta, niente "Bart approva" e lo dice',
   await finto(page, dati());
   await page.goto('/');
   const c = carta(page);
-  await c.getByRole('button', { name: 'Avvia il timer' }).click();
+  await c.getByRole('button', { name: 'VIA' }).click();
   await page.clock.runFor(10 * 60 * 1000 + 5000);
-  await c.getByRole('button', { name: 'Fatto' }).click();
+  await timer(page).getByRole('button', { name: 'SEGNA FATTO' }).click();
   await expect(c.getByRole('alert')).toHaveText("Questa volta non li ho potuti contare: l'ora del telefono non torna. Domani si riprova.");
-  await expect(c.getByText(/Bart approva/)).toHaveCount(0);
+  await expect(c.getByText(/Il coach approva/)).toHaveCount(0);
 });

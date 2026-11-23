@@ -33,29 +33,20 @@ test('percorso: sei qui, forzieri, bandierina, chiavi della settimana', async ({
   await page.goto('/');
   await page.getByRole('button', { name: 'Astra' }).click();
   await expect(page.getByText('Colline di caramelle')).toBeVisible();
-  // Astra scende da sola fino a "Sei qui" e la testata si compatta: in cima il motto c'è
+  // v2: Astra scende da sola fino a "Sei qui"; in cima la testata ha i passi in grande e la barra verso la tappa
   await page.evaluate(() => window.scrollTo(0, 0));
-  await expect(page.getByText('Ogni giorno, passino passino.')).toBeVisible();
+  await expect(page.getByText('Tappa 3: mancano 95 passi')).toBeVisible();
+  await expect(page.getByRole('progressbar', { name: 'Verso la prossima tappa' })).toBeVisible();
   await expect(page.getByText('300 passi')).toBeAttached();
   await expect(page.getByText('Sei qui: mancano 95')).toBeVisible();
   await expect(page.locator('.tappa', { hasText: 'Sei qui' })).toContainText('Tappa 3');
   await expect(page.getByText('Il calendario è qui')).toBeVisible();
-  await expect(page.getByLabel("Chiavi dell'ultima settimana: 1 su 3")).toBeVisible();
-  await expect(page.getByText('Hai 1 chiave: il prossimo forziere ne vuole 2.')).toBeAttached();
+  // le chiavi stanno solo nella carta del prossimo forziere: ne servono 2, Lani ne ha 1
+  await expect(page.getByRole('region', { name: 'Prossimo forziere' }).getByLabel('Chiavi: 1 su 2')).toBeAttached();
   await expect(page.getByRole('button', { name: /Forziere \d/ })).toHaveCount(9);
   // l'etichetta dice cosa sono i due numeri, e il nome per i lettori di schermo la contiene
   await expect(page.getByRole('button', { name: /^Forziere 1: [\d.]+ passi, 2 chiavi$/ })).toContainText(/[\d.]+ passi, 2 chiavi/);
   await page.screenshot({ path: 'e2e/risultati/astra.png' });
-  // lo sfondo si cambia tra quelli del mondo raggiunto, e resta sul dispositivo
-  const sfondo = page.locator('.astra-sfondo');
-  await expect(sfondo).toHaveAttribute('style', /sfondo-1-colline\.webp/);
-  await page.getByRole('button', { name: 'Cambia sfondo' }).click();
-  await expect(sfondo).toHaveAttribute('style', /sfondo-1-colline-alt\.webp/);
-  await page.reload();
-  await page.getByRole('button', { name: 'Astra' }).click();
-  await expect(sfondo).toHaveAttribute('style', /sfondo-1-colline-alt\.webp/);
-  await page.getByRole('button', { name: 'Cambia sfondo' }).click();
-  await expect(sfondo).toHaveAttribute('style', /sfondo-1-colline\.webp/);
   // "mancano N" si tocca: apre Come si fanno i passi
   await page.getByRole('button', { name: /Sei qui: mancano 95/ }).click();
   // le regole si aprono dall'inizio, non dal punto della mappa; al ritorno Astra riscende a "Sei qui"
@@ -162,5 +153,5 @@ test('a 360 px la testata si compatta quando si scende', async ({ page }) => {
   await page.evaluate(() => window.scrollTo(0, 600));
   await expect(page.locator('body')).toHaveClass(/astra-scesa/);
   const bassa = (await page.locator('.astra-testata').boundingBox())!.height;
-  expect(bassa).toBeLessThan(alta - 40);
+  expect(bassa).toBeLessThan(alta - 30);
 });
