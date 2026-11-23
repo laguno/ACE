@@ -65,7 +65,7 @@ export async function leggiTabellina(db: SupabaseClient, adesso: Date, genitore:
       .filter((c) => R.aScuola(R.giorno(c.scadenza), assenze))
       .map((c) => ({ id: c.id, testo: c.testo, scadenza: c.scadenza, materia: c.materia_id ? (nomeMateria.get(c.materia_id) ?? null) : null })),
     cartella: R.cartellaConta(g, assenze),
-    borsa: C.serveBorsa(imp.filter((i) => i.giorno === R.iso(piu(g, 1))).map((i) => i.titolo)),
+    borsa: R.borsaConta(piu(g, 1), C.serveBorsa(imp.filter((i) => i.giorno === R.iso(piu(g, 1))).map((i) => i.titolo))),
     fogli: ok<{ id: string; titolo: string }[]>(fogli, 'fogli').map((f) => ({ id: f.id, titolo: f.titolo })),
     ripassi: ses.map((s) => ({ id: s.id, materia: materiaVerifica.get(s.verifica_id) ?? null })),
     dieciMinuti: rEvolution && !assenze.has(oggi),

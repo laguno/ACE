@@ -118,10 +118,10 @@ describe('notifiche', () => {
     for (const q of ['18:31', '19:16', '20:46', '21:16', '21:46', '22:01']) expect(await turno(q)).toEqual({});
     expect(await valore(`select count(*)::int from notifiche_inviate where tipo = 'sollecito'`)).toBe(0);
   });
-  it('domenica 21:45: riepilogo ai genitori; iscrizione scaduta cancellata', async () => {
+  it('domenica 23:15: riepilogo ai genitori; iscrizione scaduta cancellata', async () => {
     await iscrivi(PAPA, 'https://push.test/scaduto');
     await stato.banco!.come(null, `insert into settimane (inizio, chiavi) values ('2026-11-23', 2)`);
-    alle('2026-11-29T21:50:00+01:00');
+    alle('2026-11-29T23:20:00+01:00');
     const f = await carica('notifiche');
     expect((await json(await f(richiesta({}, { cron: true })))).corpo.inviate).toMatchObject({ genitori_riepilogo: 1 });
     expect(await valore(`select count(*)::int from push_iscrizioni where endpoint like '%scaduto%'`)).toBe(0);

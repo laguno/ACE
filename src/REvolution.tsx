@@ -231,8 +231,8 @@ function Coach({ mattino, ultima, apri }: { mattino: { da: string | null; il: st
     : avviati
       ? 'Timer partito. Fino in fondo, poi spunta.'
       : finestra
-        ? `Dieci minuti di allenamento prima delle ${ora(FINESTRA.a)}. Forza, ti aspetto.`
-        : `I dieci minuti si fanno al mattino, dalle ${ora(FINESTRA.da)} alle ${ora(FINESTRA.a)}. Domani ti aspetto.`;
+        ? `Dieci minuti di allenamento, da avviare entro le ${ora(FINESTRA.ultimo_avvio)}. Forza, ti aspetto.`
+        : `I dieci minuti si avviano dalle ${ora(FINESTRA.da)} alle ${ora(FINESTRA.ultimo_avvio)}. Domani ti aspetto.`;
   return (
     <div className="carta coach" aria-label="Il coach">
       <Sticker posa={posa} misura={72} />

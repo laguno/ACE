@@ -5,7 +5,7 @@ import * as R from './lib/regole';
 import { adesso, passi } from './spunte';
 import { supabase } from './supabase';
 
-// Dieci minuti di allenamento al mattino (sprint 2, decisione del 13/11): si avviano nella finestra
+// Dieci minuti di allenamento (sprint 2, decisione del 13/11; dal 23/11 dalle 6:00 alle 21:20): si avviano nella finestra
 // del config (dalle 6 alle 13), Lani sceglie l'esercizio dal menu dei genitori (tabella
 // esercizi_dieci_minuti), avvia il timer e spunta solo quando arriva in fondo. Le ore stanno sulla
 // riga di serate del giorno e le mette il server (trigger timbra_ora); la funzione "passi" (tipo
@@ -116,7 +116,7 @@ export function DieciMinuti({ oggi }: { oggi: Date }) {
       ) : (
         <>
           <p className="nota">
-            Dieci minuti: oggi {nome}. Si parte entro le {FINESTRA.a}. Pronta?
+            Dieci minuti: oggi {nome}. Si parte entro le {FINESTRA.ultimo_avvio}. Pronta?
           </p>
           <ul className="pastiglie" aria-label="Scegli l'esercizio">
             {menu.map((e) => (

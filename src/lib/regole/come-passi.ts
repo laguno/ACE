@@ -94,13 +94,13 @@ export function blocchiPassi(c: Config, opzioni: { rEvolution: boolean }): Blocc
       titolo: 'R-Evolution',
       posa: 'lani-divisa',
       voci: [
-        { testo: 'Dieci minuti di allenamento', valore: piu(o.dieci_minuti), icona: 'Timer', spiega: `Il timer di Oggi fino in fondo, dalle ${c.dieci_minuti.finestra.da} alle ${c.dieci_minuti.finestra.a}.` },
+        { testo: 'Dieci minuti di allenamento', valore: piu(o.dieci_minuti), icona: 'Timer', spiega: `Il timer di Oggi fino in fondo: si avvia dalle ${c.dieci_minuti.finestra.da} alle ${c.dieci_minuti.finestra.ultimo_avvio}.` },
         { testo: 'Partita giocata', valore: piu(p.partite.giocata), icona: 'Volleyball', spiega: 'Dopo la partita rispondi a “Com’è andata?”.' },
         { testo: 'Partita vinta, in più', valore: piu(p.partite.vinta_in_piu), icona: 'Trophy', spiega: 'In più, se la squadra vince.' },
         { testo: 'In panchina tutta la partita', valore: piu(p.partite.panchina), icona: 'Armchair', spiega: 'Vale anche se resti in panchina.' },
       ],
       dettagli: [
-        `I dieci minuti valgono solo finiti, dalle ${c.dieci_minuti.finestra.da} alle ${c.dieci_minuti.finestra.a}.`,
+        `I dieci minuti valgono solo finiti, avviati dalle ${c.dieci_minuti.finestra.da} alle ${c.dieci_minuti.finestra.ultimo_avvio}. Per le chiavi ne bastano ${c.dieci_minuti.giorni_a_settimana} a settimana: un giorno puoi saltarli.`,
         `Vinta stando in panchina: ${piu(p.partite.panchina_vinta_in_piu)} in più.`,
       ],
     });

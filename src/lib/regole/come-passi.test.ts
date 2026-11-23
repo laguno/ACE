@@ -43,7 +43,7 @@ describe('Come si fanno i passi', () => {
       // compiti in anticipo: base × moltiplicatore
       ammessi.add(String(Math.round(finto.passi.obbligatori.compiti * finto.passi.compiti_anticipo.moltiplicatore)));
       // orari dei dieci minuti: stringhe del config
-      for (const d of `${finto.dieci_minuti.finestra.da} ${finto.dieci_minuti.finestra.a}`.match(/\d+/g) ?? []) ammessi.add(d);
+      for (const d of `${finto.dieci_minuti.finestra.da} ${finto.dieci_minuti.finestra.a} ${finto.dieci_minuti.finestra.ultimo_avvio} ${finto.dieci_minuti.giorni_a_settimana}`.match(/\d+/g) ?? []) ammessi.add(d);
       const testo = JSON.stringify(blocchiPassi(finto, { rEvolution }));
       const trovati = testo.match(/\d+/g) ?? [];
       expect(trovati.length).toBeGreaterThan(10);

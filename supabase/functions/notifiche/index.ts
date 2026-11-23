@@ -43,6 +43,9 @@ async function avvisoNuvola(giorno: string) {
   return manda('genitore', 'genitori_nuvola', K.notifica('genitori_nuvola'), giorno);
 }
 
+// riepilogo ai genitori: un quarto d'ora dopo il conteggio delle chiavi della domenica (23:00 dal 23/11)
+const RIEPILOGO = C.sposta(R.CONFIG.chiavi_settimana.ora_conteggio, 15);
+
 async function turno() {
   const adesso = new Date();
   const ora = C.oraRoma(adesso.toISOString());
@@ -55,7 +58,7 @@ async function turno() {
   const { data: assenza } = await db.from('assenze').select('giorno').eq('giorno', giorno).maybeSingle();
   if (assenza) {
     // a casa: niente notifiche a Lani; solo il riepilogo della domenica ai genitori, più sotto
-    if (!(oggi.getDay() === 0 && finestra(ora, '21:45'))) return { ora, a_casa: true, inviate };
+    if (!(oggi.getDay() === 0 && finestra(ora, RIEPILOGO))) return { ora, a_casa: true, inviate };
   }
 
   const impegniDi = async (d: Date) => {
@@ -132,8 +135,8 @@ async function turno() {
     }
   }
 
-  // domenica, dopo le chiavi delle 21:30: riepilogo ai genitori
-  if (oggi.getDay() === 0 && finestra(ora, '21:45')) {
+  // domenica, dopo il conteggio delle chiavi: riepilogo ai genitori
+  if (oggi.getDay() === 0 && finestra(ora, RIEPILOGO)) {
     const { data: s } = await db.from('settimane').select('chiavi').eq('inizio', R.iso(R.lunedi(oggi))).maybeSingle();
     if (s?.chiavi != null) inviate.genitori_riepilogo = await manda('genitore', 'genitori_riepilogo', K.notifica('genitori_riepilogo', { chiavi: s.chiavi }), giorno);
   }

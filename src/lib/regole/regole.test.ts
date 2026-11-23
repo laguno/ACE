@@ -348,14 +348,15 @@ describe('dieci minuti (sprint 2)', async () => {
     expect(inizioREvolution('2026-11-23')).toBe('2026-11-23');
     expect(inizioREvolution(null)).toBe(CONFIG.periodo.r_evolution_prevista);
   });
-  it('si avviano al mattino, nella finestra del config (ora di Roma)', () => {
-    const { da, a } = CONFIG.dieci_minuti.finestra;
-    expect([da, a]).toEqual(['06:00', '13:00']);
+  it('si avviano dalle 6:00 all\'ultimo avvio delle 21:20 (ora di Roma, decisione del 23/11)', () => {
+    const { da, a, ultimo_avvio } = CONFIG.dieci_minuti.finestra;
+    expect([da, a, ultimo_avvio]).toEqual(['06:00', '21:30', '21:20']);
     expect(dentroFinestraDieciMinuti(new Date('2026-11-24T05:59:00+01:00'))).toBe(false);
     expect(dentroFinestraDieciMinuti(new Date('2026-11-24T06:00:00+01:00'))).toBe(true);
-    expect(dentroFinestraDieciMinuti(new Date('2026-11-24T12:59:00+01:00'))).toBe(true);
-    expect(dentroFinestraDieciMinuti(new Date('2026-11-24T13:00:00+01:00'))).toBe(false);
-    expect(dentroFinestraDieciMinuti(new Date('2026-11-24T20:00:00+01:00'))).toBe(false);
+    expect(dentroFinestraDieciMinuti(new Date('2026-11-24T13:00:00+01:00'))).toBe(true);
+    expect(dentroFinestraDieciMinuti(new Date('2026-11-24T20:00:00+01:00'))).toBe(true);
+    expect(dentroFinestraDieciMinuti(new Date('2026-11-24T21:20:00+01:00'))).toBe(true);
+    expect(dentroFinestraDieciMinuti(new Date('2026-11-24T21:21:00+01:00'))).toBe(false);
   });
   it('solo se avviati nella finestra, il timer arriva in fondo e la spunta è dello stesso giorno', () => {
     const s = CONFIG.dieci_minuti.secondi;
@@ -367,11 +368,22 @@ describe('dieci minuti (sprint 2)', async () => {
     // avviati alle 12:55 e finiti dopo le 13: valgono (conta l'avvio)
     const tardi = new Date('2027-01-11T12:55:00+01:00');
     expect(dieciMinutiValidi(tardi, dopo(tardi, s))).toBe(true);
-    // la sera no
-    const sera = new Date('2027-01-11T20:00:00+01:00');
-    expect(dieciMinutiValidi(sera, dopo(sera, s))).toBe(false);
+    // la sera sì, fino all'ultimo avvio delle 21:20; dopo no
+    const sera = new Date('2027-01-11T21:20:00+01:00');
+    expect(dieciMinutiValidi(sera, dopo(sera, s))).toBe(true);
+    const tardissimo = new Date('2027-01-11T21:25:00+01:00');
+    expect(dieciMinutiValidi(tardissimo, dopo(tardissimo, s))).toBe(false);
     // spunta il giorno dopo: no
     expect(dieciMinutiValidi(mattina, dopo(mattina, 86400))).toBe(false);
+  });
+  it('borsa: conta solo la sera prima dello sport del lunedì e del venerdì (decisione del 23/11)', async () => {
+    const { borsaConta } = await import('./index');
+    expect(CONFIG.borsa.giorni_allenamento).toEqual([1, 5]);
+    expect(borsaConta(giorno('2026-11-23'), true)).toBe(true); // lunedì
+    expect(borsaConta(giorno('2026-11-27'), true)).toBe(true); // venerdì
+    expect(borsaConta(giorno('2026-11-24'), true)).toBe(false); // martedì
+    expect(borsaConta(giorno('2026-11-28'), true)).toBe(false); // sabato, partita
+    expect(borsaConta(giorno('2026-11-23'), false)).toBe(false); // lunedì senza sport
   });
   it('recupero nei giorni di pallavolo, forza e riflessi negli altri, a rotazione sul menu', () => {
     const g = giorno('2027-01-11');

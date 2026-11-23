@@ -125,7 +125,7 @@ export function vociDelGiorno(f: FattiGiorno, gesti: { voce: string; id: string 
   for (const x of f.ripassi)
     voci.push({ id: `ripasso:${x.id}`, gruppo: 'ogni-giorno', testo: x.materia ? `Ripasso di ${x.materia}` : 'Ripasso', come: 'Fai il ripasso in Studio', valore: o.ripasso, presi: preso('ripasso', x.id) });
   if (f.dieciMinuti)
-    voci.push({ id: 'dieci_minuti', gruppo: 'ogni-giorno', testo: 'Dieci minuti di allenamento', come: `Fai il timer fino in fondo, dalle ${CONFIG.dieci_minuti.finestra.da} alle ${CONFIG.dieci_minuti.finestra.a}`, valore: o.dieci_minuti, presi: preso('dieci_minuti', `dieci_minuti:${f.giorno}`) });
+    voci.push({ id: 'dieci_minuti', gruppo: 'ogni-giorno', testo: 'Dieci minuti di allenamento', come: `Fai il timer fino in fondo, avvialo entro le ${CONFIG.dieci_minuti.finestra.ultimo_avvio}`, valore: o.dieci_minuti, presi: preso('dieci_minuti', `dieci_minuti:${f.giorno}`) });
   for (const x of f.foto)
     voci.push({ id: `foto:${x.id}`, gruppo: 'ogni-giorno', testo: `Foto delle pagine ${x.pagine}`, come: 'Fotografa le pagine che ACE ti chiede', valore: P.foto_compito, presi: conPrefisso('foto', x.id) });
 

@@ -182,8 +182,14 @@
     "seconda": "in più nessuna nota (qualsiasi nota la toglie)",
     "terza": "in più almeno 95% delle cose obbligatorie fatte",
     "conteggio": "domenica sera",
+    "ora_conteggio": "23:00",
+    "_ora_conteggio": "Deciso dal signore il 23/11/2026: domenica alle 23:00 (prima 21:30), così la chiusura della sera di Lani entra sempre nel conto.",
     "soglia_passi_prima": 0.7,
     "soglia_cose_terza": 0.95
+  },
+  "borsa": {
+    "giorni_allenamento": [1, 5],
+    "_nota": "Deciso dal signore il 23/11/2026: la borsa conta (passi e chiavi) solo la sera prima di un allenamento o di una partita del lunedì e del venerdì (0 = domenica, 1 = lunedì). Gli altri giorni Lani ha tempo per prepararla: resta come promemoria, senza passi."
   },
   "rimonta": {
     "ritardo_tappe": 1.5,
@@ -229,9 +235,10 @@
     "non_ripetere_prima_di_giorni": 30
   },
   "dieci_minuti": {
-    "nota": "Sprint 2 (decisi dal signore il 13/11): al mattino, si avviano dalle 6:00 alle 13:00 tutti i giorni, da quando R-Evolution è accesa. Il menu sta nella tabella esercizi_dieci_minuti (lo cambiano i genitori in Impostazioni). Recupero nei giorni di pallavolo, forza e riflessi negli altri.",
+    "nota": "Sprint 2 (decisi dal signore il 13/11), finestra cambiata il 23/11/2026: si avviano dalle 6:00, l'ultimo avvio alle 21:20 (finiscono entro le 21:30), da quando R-Evolution è accesa. Per le chiavi contano 6 giorni su 7: un giorno jolly a settimana. Il menu sta nella tabella esercizi_dieci_minuti (lo cambiano i genitori in Impostazioni). Recupero nei giorni di pallavolo, forza e riflessi negli altri.",
     "secondi": 600,
-    "finestra": { "da": "06:00", "a": "13:00" }
+    "finestra": { "da": "06:00", "a": "21:30", "ultimo_avvio": "21:20" },
+    "giorni_a_settimana": 6
   },
   "metacognizione": {
     "nota": "Blocco D del piano di studio (approvato dal signore il 19/11/2026): piano del giorno con stima dei minuti, voto previsto prima di una verifica, micro-lezione della settimana, riepilogo della domenica per i genitori. Sta in una sezione sua per non toccare le righe degli altri blocchi.",

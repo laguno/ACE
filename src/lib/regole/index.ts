@@ -495,14 +495,17 @@ export function inizioREvolution(accesaDa: string | null | undefined): string {
 const oraRomana = (t: Date) =>
   new Intl.DateTimeFormat('it-IT', { timeZone: 'Europe/Rome', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(t);
 
-/** Si possono avviare adesso? Solo al mattino, nella finestra del config (ora di Roma). */
+/**
+ * Si possono avviare adesso? Dentro la finestra del config (ora di Roma): dalle `da` fino
+ * all'ultimo avvio compreso (23/11: 6:00-21:20, così il timer finisce entro le 21:30).
+ */
 export function dentroFinestraDieciMinuti(t: Date): boolean {
   const ora = oraRomana(t);
-  return ora >= CONFIG.dieci_minuti.finestra.da && ora < CONFIG.dieci_minuti.finestra.a;
+  return ora >= CONFIG.dieci_minuti.finestra.da && ora <= CONFIG.dieci_minuti.finestra.ultimo_avvio;
 }
 
 /**
- * Valgono solo se avviati dentro la finestra del mattino, con il timer arrivato in fondo (tra avvio
+ * Valgono solo se avviati dentro la finestra, con il timer arrivato in fondo (tra avvio
  * e spunta almeno i secondi del config) e spuntati lo stesso giorno.
  */
 export function dieciMinutiValidi(da: Date | null, il: Date | null): boolean {
@@ -538,6 +541,16 @@ export function passiPartita(setNostri: number, setLoro: number, inCampo = true)
   return inCampo
     ? { giocata: p.giocata, vinta: vinta ? p.vinta_in_piu : 0 }
     : { giocata: p.panchina, vinta: vinta ? p.panchina_vinta_in_piu : 0 };
+}
+
+// ---------------------------------------------------------------- borsa
+
+/**
+ * La borsa conta (passi e chiavi) solo la sera prima di un allenamento o di una partita nei giorni
+ * del config (lunedì e venerdì, decisione del 23/11). `domani` è il giorno dell'impegno.
+ */
+export function borsaConta(domani: Date, sportDomani: boolean): boolean {
+  return sportDomani && (CONFIG.borsa.giorni_allenamento as number[]).includes(domani.getDay());
 }
 
 // ---------------------------------------------------------------- conteggio della settimana

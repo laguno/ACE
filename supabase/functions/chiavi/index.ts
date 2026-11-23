@@ -1,4 +1,4 @@
-// Edge Function "chiavi": la domenica sera (21:30, cron) conta la settimana da lunedì a domenica,
+// Edge Function "chiavi": la domenica sera (23:00 dal 23/11, cron) conta la settimana da lunedì a domenica,
 // scrive le chiavi in settimane (da quel momento niente storni), applica la rimonta ×1,25 se Lani
 // era indietro e ha preso almeno la prima chiave, e aggiorna i forzieri.
 // Un genitore (o il cron) può chiedere una settimana precisa con { lunedi: 'YYYY-MM-DD' }.
@@ -21,7 +21,8 @@ Deno.serve(async (req) => {
   const oggi = R.giornoRoma(new Date());
   let lun = R.lunedi(oggi);
   if (corpo.lunedi) lun = R.lunedi(R.giorno(corpo.lunedi));
-  else if (oggi.getDay() !== 0 || C.oraRoma(new Date().toISOString()) < '21:00') return risposta({ saltato: 'non è domenica sera' });
+  else if (oggi.getDay() !== 0 || C.oraRoma(new Date().toISOString()) < C.sposta(R.CONFIG.chiavi_settimana.ora_conteggio, -15))
+    return risposta({ saltato: 'non è domenica sera' });
   // il gioco parte con periodo.inizio: le settimane di prima non danno chiavi
   if (R.iso(piu(lun, 6)) < R.CONFIG.periodo.inizio) return risposta({ saltato: 'settimana prima dell’inizio del gioco' });
 

@@ -90,7 +90,10 @@ export function creaGestori(db: SupabaseClient) {
     return data ? { passi, motivo } : niente('già registrato');
   }
 
-  /** Borsa: domani (giorno dopo la sera) c'è un allenamento o una partita di Lani nel calendario. */
+  /**
+   * Borsa: domani (giorno dopo la sera) c'è un allenamento o una partita di Lani nel calendario, e
+   * domani è un giorno in cui la borsa conta (lunedì e venerdì, config borsa, decisione del 23/11).
+   */
   async function borsaServe(sera: Date): Promise<boolean> {
     const da = new Date(sera);
     da.setDate(da.getDate() + 1);
@@ -103,7 +106,7 @@ export function creaGestori(db: SupabaseClient) {
       .gte('inizio', `${R.iso(da)}T00:00:00+01:00`)
       .lt('inizio', `${R.iso(a)}T00:00:00+01:00`);
     if (error) throw error;
-    return C.serveBorsa((data ?? []).map((x) => x.titolo));
+    return R.borsaConta(da, C.serveBorsa((data ?? []).map((x) => x.titolo)));
   }
 
   /**

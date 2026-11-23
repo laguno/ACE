@@ -18,13 +18,19 @@ type Impegno = { titolo: string; inizio: string; tutto_il_giorno: boolean };
 // ponytail: voci fisse dalla bozza; con l'area genitori (tappa 7) passano alle impostazioni.
 const VOCI_BORSA = ['Divisa', 'Ginocchiere', 'Scarpe', 'Borraccia'];
 const PRIMA_DI_USCIRE_DA_SCUOLA = '16:00';
+// sere in cui la borsa conta: quelle prima dei giorni del config ("la domenica e il giovedì sera")
+const SERE_BORSA = (R.CONFIG.borsa.giorni_allenamento as number[])
+  .map((g) => `il ${GIORNI[(g + 6) % 7]}`)
+  .join(' e ')
+  .replace('il domenica', 'la domenica')
+  .concat(' sera');
 
 /** Lista a voci (cartella, borsa): spuntate una per una sul telefono, con l'ultima è pronta. */
 // ponytail: le voci spuntate si perdono se si chiude l'app prima dell'ultima.
 function Voci({ titolo, valore, voci, pronta, quandoPronta, onAnnulla, colore, children }: {
   titolo: string;
-  /** passi che vale, preso dal config */
-  valore: number;
+  /** passi che vale, preso dal config; null = promemoria senza passi (la borsa fuori da lun/ven) */
+  valore: number | null;
   voci: string[];
   pronta: boolean;
   quandoPronta: () => void;
@@ -45,7 +51,7 @@ function Voci({ titolo, valore, voci, pronta, quandoPronta, onAnnulla, colore, c
     <div className="carta">
       <div className="testa-carta">
         <h2>{titolo}</h2>
-        {mostraValore(pronta) && <span className={`valore${onAnnulla ? ' appena' : ''}`}>+{valore}</span>}
+        {valore !== null && mostraValore(pronta) && <span className={`valore${onAnnulla ? ' appena' : ''}`}>+{valore}</span>}
       </div>
       {children}
       <ul className="pastiglie">
@@ -169,7 +175,9 @@ export default function Sera() {
   const conCartella = R.cartellaConta(oggi);
   const sport = impegni.find((i) => C.tipoImpegno(i.titolo) !== 'famiglia');
   const famiglia = impegni.find((i) => C.tipoImpegno(i.titolo) === 'famiglia');
-  const conBorsa = !!sport;
+  // la borsa conta (passi e chiavi) solo prima dello sport del lunedì e del venerdì (23/11):
+  // gli altri giorni resta come promemoria, fuori dal conto delle cose pronte
+  const conBorsa = !!sport && R.borsaConta(domaniCal, true);
   // venerdì e sabato con partita il giorno dopo: chiusura breve con la sola borsa (decisione 8/11)
   const soloBorsa = !conCartella && C.partitaTra(impegni);
   const visti = soloBorsa ? [] : compiti;
@@ -255,7 +263,7 @@ export default function Sera() {
       {sport && (
         <Voci
           titolo="Borsa"
-          valore={R.CONFIG.passi.obbligatori.borsa}
+          valore={conBorsa ? R.CONFIG.passi.obbligatori.borsa : null}
           voci={VOCI_BORSA}
           pronta={serata.borsa}
           quandoPronta={() => chiudiSerata('borsa')}
@@ -265,6 +273,7 @@ export default function Sera() {
           <p className="nota accento">
             {C.tipoImpegno(sport.titolo) === 'partita' ? 'Partita' : 'Allenamento'} domani alle {C.oraRoma(sport.inizio)}
             {R.giornoDiScuola(domaniCal) && C.oraRoma(sport.inizio) < PRIMA_DI_USCIRE_DA_SCUOLA ? ': la porti a scuola.' : '.'}
+            {!conBorsa && ` Stasera è un promemoria: la borsa dà passi ${SERE_BORSA}.`}
           </p>
         </Voci>
       )}

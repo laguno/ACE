@@ -3,6 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { Attesa, Elenco, Riga } from './kit';
 import { GIORNI, MESI } from './spunte';
 import { prossimo } from './lib/calendario';
+import { CONFIG } from './lib/regole';
 
 // Scheda "Stato" dell'area genitori (filone H): ACE sta lavorando? Ultime sincronizzazioni,
 // ultime chiavi, errori recenti e quando ripassano i cron. Solo conteggi e righe dei genitori.
@@ -79,7 +80,7 @@ export default function Stato({ client }: { client: SupabaseClient }) {
             sotto={
               <>
                 {s.chiavi ? `${s.chiavi.chiavi} ${s.chiavi.chiavi === 1 ? 'chiave' : 'chiavi'} nella settimana dal ${Number(s.chiavi.inizio.slice(8))}` : 'ancora nessuna settimana contata'}
-                <span className="stato-riga">Prossime: domenica alle 21:30</span>
+                <span className="stato-riga">Prossime: domenica alle {CONFIG.chiavi_settimana.ora_conteggio}</span>
               </>
             }
           />
