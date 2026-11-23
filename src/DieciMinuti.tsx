@@ -1,15 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
-import { Check } from '@phosphor-icons/react';
+import { Pause, Play } from '@phosphor-icons/react';
+import { Sticker } from './kit';
 import * as C from './lib/calendario';
 import * as R from './lib/regole';
 import { adesso, passi } from './spunte';
 import { supabase } from './supabase';
 
 // Dieci minuti di allenamento (sprint 2, decisione del 13/11; dal 23/11 dalle 6:00 alle 21:20): si avviano nella finestra
-// del config (dalle 6 alle 13), Lani sceglie l'esercizio dal menu dei genitori (tabella
-// esercizi_dieci_minuti), avvia il timer e spunta solo quando arriva in fondo. Le ore stanno sulla
-// riga di serate del giorno e le mette il server (trigger timbra_ora); la funzione "passi" (tipo
-// dieci_minuti) ricontrolla finestra e timer. Si vede solo con R-Evolution accesa.
+// del config, Lani sceglie l'esercizio dal menu dei genitori (tabella esercizi_dieci_minuti),
+// avvia il timer e spunta solo quando arriva in fondo. Le ore stanno sulla riga di serate del
+// giorno e le mette il server (trigger timbra_ora); la funzione "passi" (tipo dieci_minuti)
+// ricontrolla finestra e timer. Si vede solo con R-Evolution accesa.
+// v2 (23/11): in Oggi è una fascia in stile allenamento con VIA; il timer gira a tutto schermo.
 
 type Stato = { da: string | null; il: string | null; esercizio: string | null };
 
@@ -27,13 +29,18 @@ export const vaiAiDieciMinuti = () => {
 };
 
 export function DieciMinuti({ oggi }: { oggi: Date }) {
-  const carta = useRef<HTMLDivElement>(null);
+  const carta = useRef<HTMLElement>(null);
   const [stato, setStato] = useState<Stato>();
   const [menu, setMenu] = useState<R.EsercizioDieciMinuti[]>([]);
   const [pallavolo, setPallavolo] = useState(false);
   const [scelta, setScelta] = useState<string>();
+  const [cambia, setCambia] = useState(false);
   const [ora, setOra] = useState(Date.now());
   const [errore, setErrore] = useState('');
+  // v2: il timer sta a tutto schermo; la pausa allunga solo l'attesa (il server conta dall'avvio)
+  const [aperto, setAperto] = useState(false);
+  const [pausaDa, setPausaDa] = useState<number | null>(null);
+  const [pausato, setPausato] = useState(0);
 
   const data = R.iso(oggi);
   useEffect(() => {
@@ -62,12 +69,24 @@ export function DieciMinuti({ oggi }: { oggi: Date }) {
     carta.current.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   });
 
+  useEffect(() => {
+    if (!aperto) return;
+    const esci = (e: KeyboardEvent) => e.key === 'Escape' && setAperto(false);
+    window.addEventListener('keydown', esci);
+    return () => window.removeEventListener('keydown', esci);
+  }, [aperto]);
+
   if (!stato) return null;
   const proposto = R.esercizioDelGiorno(oggi, pallavolo, menu);
   const esercizio = menu.find((e) => e.id === (stato.esercizio ?? scelta)) ?? proposto;
   const nome = (esercizio?.nome ?? 'allenamento').toLowerCase();
-  const mancano = stato.da ? Math.max(0, SECONDI + MARGINE - Math.floor((ora - new Date(stato.da).getTime()) / 1000)) : SECONDI;
-  // prima di avviarli: solo nella finestra del mattino e con un menu
+  const Nome = nome[0].toUpperCase() + nome.slice(1);
+  const tipo = esercizio?.tipo === 'recupero' ? 'RECUPERO' : esercizio?.tipo === 'forza_riflessi' ? 'FORZA E RIFLESSI' : 'ALLENAMENTO';
+  const fermo = pausaDa !== null ? ora - pausaDa : 0;
+  const trascorsi = stato.da ? Math.floor((ora - new Date(stato.da).getTime() - pausato - fermo) / 1000) : 0;
+  const mancano = stato.da ? Math.max(0, SECONDI + MARGINE - trascorsi) : SECONDI;
+  const tempo = Math.min(mancano, SECONDI);
+  // prima di avviarli: solo nella finestra e con un menu
   if (!stato.da && (!R.dentroFinestraDieciMinuti(new Date()) || !proposto)) return null;
 
   async function avvia() {
@@ -79,7 +98,10 @@ export function DieciMinuti({ oggi }: { oggi: Date }) {
       .single();
     if (error) return setErrore('Timer non partito. Riprova.');
     setOra(Date.now());
+    setPausaDa(null);
+    setPausato(0);
     setStato({ da: s.dieci_minuti_da, il: s.dieci_minuti_il, esercizio: s.dieci_minuti_esercizio });
+    setAperto(true);
   }
 
   async function fatto() {
@@ -87,53 +109,129 @@ export function DieciMinuti({ oggi }: { oggi: Date }) {
     const { error } = await supabase.from('serate').update({ dieci_minuti_il: adesso() }).eq('data', data);
     if (error) return setErrore('Spunta non salvata. Riprova.');
     setStato((s) => s && { ...s, il: adesso() });
+    setAperto(false);
     if (!(await passi('dieci_minuti', data))) setErrore("Questa volta non li ho potuti contare: l'ora del telefono non torna. Domani si riprova.");
   }
 
-  return (
-    <div className="carta dieci-minuti" id="dieci-minuti" ref={carta}>
-      <div className="testa-carta">
-        <h2>Dieci minuti</h2>
-        <span className="valore">+{R.CONFIG.passi.obbligatori.dieci_minuti}</span>
-      </div>
-      {errore && <p role="alert">{errore}</p>}
+  function pausa() {
+    if (pausaDa === null) setPausaDa(Date.now());
+    else {
+      setPausato((p) => p + (Date.now() - pausaDa));
+      setPausaDa(null);
+    }
+  }
 
-      {stato.il ? (
-        !errore &&
-        <p className="nota accento">
-          <Check size={16} weight="bold" aria-hidden /> Fatto: {nome}. Bart approva.
-        </p>
-      ) : stato.da ? (
-        <>
-          <p className="nota">Oggi: {nome}.</p>
-          <p className="timer" role="timer" aria-live="off" aria-label={`Mancano ${mmss(Math.min(mancano, SECONDI))}`}>
-            {mmss(Math.min(mancano, SECONDI))}
+  const finito = inCorso && mancano === 0;
+  const giro = 741.4;
+  const offset = Math.round(giro * (1 - tempo / SECONDI) * 10) / 10; // l'anello mostra il tempo che resta
+
+  return (
+    <>
+      <section className={`fascia-dieci${stato.il ? ' fatta' : ''}`} id="dieci-minuti" ref={carta} aria-label="Dieci minuti">
+        <div className="fascia-testa">
+          <span className="tag">{tipo}</span>
+          <span className="entro">{stato.il ? 'fatti' : `entro le ${FINESTRA.ultimo_avvio}`}</span>
+        </div>
+        <div className="fascia-corpo">
+          <div className="fascia-testo">
+            {stato.il ? (
+              <>
+                <b className="grande">FATTI!</b>
+                <span>{Nome}, 10 minuti. Il coach approva.</span>
+              </>
+            ) : (
+              <>
+                <span className="tempo-grande">{mmss(inCorso ? tempo : SECONDI)}</span>
+                <b className="grande">DIECI MINUTI</b>
+                <span>{Nome}</span>
+              </>
+            )}
+          </div>
+          <Sticker posa={stato.il ? 'allenatore-applaude' : 'allenatore-pollice'} misura={96} className="fascia-allenatore" />
+        </div>
+        {errore && (
+          <p role="alert" className="fascia-errore">
+            {errore}
           </p>
-          <button className="principale largo" disabled={mancano > 0} onClick={fatto}>
-            {mancano > 0 ? 'Vai fino in fondo' : 'Fatto'}
-          </button>
-        </>
-      ) : (
-        <>
-          <p className="nota">
-            Dieci minuti: oggi {nome}. Si parte entro le {FINESTRA.ultimo_avvio}. Pronta?
-          </p>
-          <ul className="pastiglie" aria-label="Scegli l'esercizio">
-            {menu.map((e) => (
-              <li key={e.id}>
-                <label className="chip chip-lilla">
-                  <input type="radio" name="dieci-minuti" checked={esercizio?.id === e.id} onChange={() => setScelta(e.id)} />
-                  <Check size={16} weight="bold" aria-hidden className="segno" />
-                  <span>{e.nome}</span>
-                </label>
-              </li>
-            ))}
-          </ul>
-          <button className="principale largo" onClick={avvia}>
-            Avvia il timer
-          </button>
-        </>
+        )}
+        {!stato.il && (
+          <>
+            <button className="via" onClick={inCorso ? () => setAperto(true) : avvia}>
+              {inCorso ? 'APRI IL TIMER' : 'VIA'}
+            </button>
+            {!inCorso && menu.length > 1 && (
+              <>
+                <button className="cambia" aria-expanded={cambia} onClick={() => setCambia((c) => !c)}>
+                  Cambia esercizio
+                </button>
+                {cambia && (
+                  <ul className="pastiglie-dieci" aria-label="Scegli l'esercizio">
+                    {menu.map((e) => (
+                      <li key={e.id}>
+                        <label className="chip-dieci">
+                          <input type="radio" name="dieci-minuti" checked={esercizio?.id === e.id} onChange={() => setScelta(e.id)} />
+                          <span>{e.nome}</span>
+                        </label>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </>
+            )}
+          </>
+        )}
+      </section>
+
+      {aperto && inCorso && (
+        <div className="timer-dieci" role="dialog" aria-modal="true" aria-label="Dieci minuti, timer">
+          <div className="timer-testa">
+            <span className="tag">{tipo}</span>
+            <button className="esci" onClick={() => setAperto(false)}>
+              Esci
+            </button>
+          </div>
+          <div className="anello">
+            <svg width="270" height="270" viewBox="0 0 270 270" aria-hidden>
+              <circle cx="135" cy="135" r="118" fill="none" stroke="#24274A" strokeWidth="18" />
+              <circle cx="135" cy="135" r="118" fill="none" stroke="#C6FF3D" strokeWidth="18" strokeLinecap="round" strokeDasharray={giro} strokeDashoffset={finito ? 0 : offset} transform="rotate(-90 135 135)" />
+            </svg>
+            <div className="anello-dentro">
+              {finito ? (
+                <Sticker posa="lani-festeggia" misura={190} />
+              ) : (
+                <>
+                  <span className="tempo" role="timer" aria-live="off" aria-label={`Mancano ${mmss(tempo)}`}>
+                    {mmss(tempo)}
+                  </span>
+                  <span className="sotto-tempo">{pausaDa !== null ? 'in pausa' : `di ${mmss(SECONDI)}`}</span>
+                </>
+              )}
+            </div>
+          </div>
+          <div className="timer-titolo">
+            <h2>{finito ? 'FATTI!' : nome.toUpperCase()}</h2>
+          </div>
+          {errore && (
+            <p role="alert" className="fascia-errore">
+              {errore}
+            </p>
+          )}
+          <div className="timer-coach">
+            <Sticker posa={finito ? 'allenatore-applaude' : 'allenatore-pollice'} misura={84} />
+            <span>{finito ? 'Allenamento fatto. Brava, così si lavora.' : 'Timer partito. Fino in fondo, poi spunta.'}</span>
+          </div>
+          {finito ? (
+            <button className="segna" onClick={fatto} autoFocus>
+              SEGNA FATTO
+            </button>
+          ) : (
+            <button className="pausa" onClick={pausa}>
+              {pausaDa !== null ? <Play size={22} weight="fill" aria-hidden /> : <Pause size={22} weight="fill" aria-hidden />}
+              {pausaDa !== null ? 'RIPRENDI' : 'PAUSA'}
+            </button>
+          )}
+        </div>
       )}
-    </div>
+    </>
   );
 }

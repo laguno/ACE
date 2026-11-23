@@ -24,11 +24,17 @@ function nomeGiorno(giorno: string, oggi: string) {
   return `${GIORNI[g.getDay()]} ${g.getDate()}`;
 }
 
-export default function Tabellina({ vai, genitori = false, client = supabase }: { vai?: (d: Dove) => void; genitori?: boolean; client?: SupabaseClient }) {
+/** La tabellina del giorno dalla funzione: undefined mentre arriva, null se non risponde. */
+export function useTabellina(client: SupabaseClient = supabase): DatiTabellina | null | undefined {
   const [dati, setDati] = useState<DatiTabellina | null>();
   useEffect(() => {
     client.functions.invoke('tabellina', { method: 'GET' }).then(({ data, error }) => setDati(error || !data?.voci ? null : (data as DatiTabellina)));
   }, [client]);
+  return dati;
+}
+
+export default function Tabellina({ vai, genitori = false, client = supabase }: { vai?: (d: Dove) => void; genitori?: boolean; client?: SupabaseClient }) {
+  const dati = useTabellina(client);
 
   if (dati === undefined) return <div className="carta tabellina" aria-busy="true" style={{ minHeight: 64 }} />;
   if (dati === null) return null;
@@ -123,7 +129,7 @@ export default function Tabellina({ vai, genitori = false, client = supabase }: 
   );
 }
 
-function Voci({ voci, vai }: { voci: VoceTabellina[]; vai?: (d: Dove) => void }) {
+export function Voci({ voci, vai }: { voci: VoceTabellina[]; vai?: (d: Dove) => void }) {
   return (
     <ul className="tabellina-voci">
       {voci.map((v) => {

@@ -15,7 +15,7 @@ import { DieciMinuti } from './DieciMinuti';
 import { PillolaPartita } from './ProssimaPartita';
 import { useREvolutionDa } from './accensione';
 import { PianoDelGiorno } from './Metacognizione';
-import Tabellina from './Tabellina';
+import CartaOggi from './CartaOggi';
 import { Aiuto } from './Tutor';
 import type { Dove } from './lib/regole/tabellina';
 
@@ -141,7 +141,7 @@ function Mattina({ impegni, apri, vai }: { impegni: Impegno[]; apri: Apri; vai?:
           </>
         }
       />
-      <Tabellina vai={vai} />
+      <CartaOggi vai={vai} />
 
       <div className="carta">
         <h2>Tre cose per oggi</h2>
@@ -300,7 +300,7 @@ function Pomeriggio({ chiusura, apri, vai }: { chiusura: string | null; apri: Ap
           </>
         }
       />
-      <Tabellina vai={vai} />
+      <CartaOggi vai={vai} />
       {errore && <p role="alert">{errore}</p>}
 
       <div className="carta">

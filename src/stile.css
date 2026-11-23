@@ -1239,3 +1239,64 @@ body[data-sfondo='sera'] .pillola-barra.p-cose .conto-p { color: var(--notte-tes
 .ga-premi span { flex: 1; display: flex; flex-direction: column; }
 .ga-premi small { color: var(--testo-2); font-weight: 700; }
 .ga-pin-premi { display: grid; gap: 12px; }
+
+/* Oggi v2 (23/11): riquadro partita, gettoni, impegni a pillola, passi in più */
+.evento { position: relative; overflow: hidden; display: grid; grid-template-columns: 78px 1fr; gap: 14px; align-items: center; padding: 14px; border-radius: 24px; margin-bottom: 14px; }
+.evento.partita { background: #7b2342; color: #fff; box-shadow: 0 12px 26px rgba(86, 21, 48, 0.3); }
+.evento .nove { position: absolute; right: -10px; top: -30px; font: 800 150px/1 'Baloo 2', sans-serif; color: #561530; opacity: 0.7; }
+.evento .evento-sticker { position: absolute; right: -6px; bottom: -10px; width: 96px; height: 96px; object-fit: contain; }
+.evento-ora { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 86px; border-radius: 18px; background: #561530; }
+.evento-ora small { font-size: 12px; font-weight: 900; color: #f6d3de; }
+.evento-ora b { font: 800 28px/1 'Baloo 2', sans-serif; }
+.evento-testo { position: relative; display: flex; flex-direction: column; gap: 4px; min-width: 0; padding-right: 70px; }
+.evento-testo small { font-size: 12px; font-weight: 900; letter-spacing: 0.06em; color: #f6d3de; }
+.evento-testo b { font: 800 19px/1.1 'Baloo 2', sans-serif; overflow-wrap: anywhere; }
+.oggi-gettoni .testa-carta { align-items: baseline; }
+.oggi-gettoni h2 { font: 800 20px 'Baloo 2', Nunito, sans-serif; margin: 0; }
+.oggi-gettoni .valore { font-size: 16px; font-weight: 900; color: #c2185b; }
+.gettoni { list-style: none; margin: 14px 0 0; padding: 0; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 10px; }
+.gettone { width: 100%; min-height: 104px; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 4px 10px; border: 0; border-radius: 20px; font: 800 14px Nunito, sans-serif; cursor: pointer; }
+.gettone .cerchio { width: 52px; height: 52px; border-radius: 999px; display: flex; align-items: center; justify-content: center; }
+.gettone small { font-size: 12px; font-weight: 800; }
+.impegni-pillole { list-style: none; margin: 0 0 10px; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.impegni-pillole li { padding: 8px 14px; min-height: 36px; border-radius: 999px; background: #fff; font-size: 14px; font-weight: 700; box-shadow: 0 4px 12px rgba(123, 106, 224, 0.1); }
+.promemoria-giorno { margin: 0 0 10px; padding: 12px 16px; border-radius: 16px; background: #fff3c4; color: #5c4100; font-weight: 800; }
+.passi-in-piu-riga { margin: 0 0 14px; border: 2px dashed var(--rosa-bordo); border-radius: 20px; padding: 0 12px; }
+.passi-in-piu-riga summary { display: flex; align-items: center; gap: 8px; min-height: 48px; cursor: pointer; list-style: none; }
+.passi-in-piu-riga summary span { margin-left: auto; font-size: 12px; font-weight: 700; color: var(--testo-2); }
+
+/* Dieci minuti v2: fascia e timer a tutto schermo, in stile allenamento (inchiostro, lime, Bebas Neue) */
+.fascia-dieci { --lime: #c6ff3d; --inchiostro: #14162e; position: relative; margin: 10px -16px 0; padding: 14px 18px 18px; background: var(--inchiostro); color: #fff; clip-path: polygon(0 14px, 100% 0, 100% 100%, 0 100%); }
+.fascia-dieci .tag, .timer-dieci .tag { padding: 3px 10px; background: #c6ff3d; color: #14162e; font: 400 18px/1.2 'Bebas Neue', Impact, 'Arial Narrow', sans-serif; letter-spacing: 0.08em; transform: skewX(-10deg); }
+.fascia-testa { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+.fascia-testa .entro { font-size: 13px; font-weight: 800; color: #b9bce0; }
+.fascia-corpo { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.fascia-testo { display: flex; flex-direction: column; gap: 2px; font-weight: 800; color: #b9bce0; }
+.fascia-testo .tempo-grande { font: 400 54px/0.95 'Bebas Neue', Impact, 'Arial Narrow', sans-serif; color: var(--lime); letter-spacing: 0.02em; }
+.fascia-testo .grande { font: 400 32px/0.95 'Bebas Neue', Impact, 'Arial Narrow', sans-serif; letter-spacing: 0.02em; color: #fff; }
+.fascia-allenatore { width: 96px; height: 96px; object-fit: contain; flex: none; }
+.fascia-dieci .via { width: 100%; min-height: 56px; margin-top: 10px; border: 0; border-radius: 16px; background: var(--lime); color: var(--inchiostro); font: 400 28px 'Bebas Neue', Impact, 'Arial Narrow', sans-serif; letter-spacing: 0.06em; box-shadow: 0 5px 0 #8dba1f; cursor: pointer; }
+.fascia-dieci .cambia { width: 100%; min-height: 44px; margin-top: 8px; border: 0; background: none; color: #b9bce0; font: 800 14px Nunito, sans-serif; text-decoration: underline; cursor: pointer; }
+.pastiglie-dieci { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.chip-dieci { position: relative; display: inline-flex; min-height: 44px; align-items: center; padding: 0 14px; border: 2px solid #2f3260; border-radius: 999px; font-weight: 800; color: #fff; cursor: pointer; }
+.chip-dieci input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.chip-dieci:has(input:checked) { border-color: #c6ff3d; color: #c6ff3d; }
+.chip-dieci:has(input:focus-visible) { outline: 3px solid #c6ff3d; outline-offset: 2px; }
+.fascia-errore { margin: 8px 0 0; color: #ffd0d8; font-weight: 800; }
+.timer-dieci { position: fixed; inset: 0; z-index: 30; display: flex; flex-direction: column; align-items: center; padding: 20px 20px 28px; background: #14162e; color: #fff; overflow: hidden; }
+.timer-dieci::before { content: '10'; position: absolute; left: -10px; bottom: 40px; font: 400 260px/1 'Bebas Neue', Impact, 'Arial Narrow', sans-serif; color: #c6ff3d; opacity: 0.06; }
+.timer-testa { position: relative; width: 100%; max-width: 430px; display: flex; align-items: center; justify-content: space-between; }
+.timer-dieci .esci { min-width: 44px; min-height: 44px; padding: 0 14px; border: 2px solid #2f3260; border-radius: 999px; background: transparent; color: #b9bce0; font: 800 14px Nunito, sans-serif; cursor: pointer; }
+.anello { position: relative; margin-top: 36px; width: 270px; height: 270px; }
+.anello-dentro { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.anello .tempo { font: 400 96px/0.9 'Bebas Neue', Impact, 'Arial Narrow', sans-serif; letter-spacing: 0.02em; }
+.anello .sotto-tempo { font-size: 14px; font-weight: 800; color: #b9bce0; }
+.timer-titolo { position: relative; margin-top: 24px; text-align: center; }
+.timer-titolo h2 { margin: 0; font: 400 52px/0.9 'Bebas Neue', Impact, 'Arial Narrow', sans-serif; letter-spacing: 0.02em; overflow-wrap: anywhere; }
+.timer-coach { position: relative; width: 100%; max-width: 430px; margin: auto 0 14px; display: flex; align-items: center; gap: 10px; }
+.timer-coach img { width: 84px; height: 84px; object-fit: contain; flex: none; }
+.timer-coach span { flex: 1; padding: 12px 14px; border-radius: 16px; background: #24274a; font: 800 15px/1.3 Nunito, sans-serif; }
+.timer-dieci .pausa, .timer-dieci .segna { position: relative; width: 100%; max-width: 430px; min-height: 60px; display: flex; align-items: center; justify-content: center; gap: 10px; border-radius: 18px; font: 400 28px 'Bebas Neue', Impact, 'Arial Narrow', sans-serif; letter-spacing: 0.06em; cursor: pointer; }
+.timer-dieci .pausa { border: 3px solid #c6ff3d; background: transparent; color: #c6ff3d; }
+.timer-dieci .segna { border: 0; background: #c6ff3d; color: #14162e; box-shadow: 0 6px 0 #8dba1f; }
+.timer-dieci :focus-visible, .fascia-dieci :focus-visible { outline: 3px solid #c6ff3d; outline-offset: 3px; }
