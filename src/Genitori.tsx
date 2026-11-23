@@ -100,7 +100,7 @@ export default function Genitori({ client, esci, chiudi }: { client: SupabaseCli
             <TreasureChest size={22} weight="bold" aria-hidden />
             <span>
               <b>Premi e forzieri</b>
-              <small>Protetti dal PIN</small>
+              <small>Protetti dal PIN genitori</small>
             </span>
             <CaretRight size={18} weight="bold" aria-hidden />
           </button>

@@ -1145,17 +1145,21 @@ button.chip-pagina { cursor: pointer; }
 
 /* La mia settimana (23/11): due barre, passi (fucsia) e cose (azzurro), con la tacca della soglia
    della chiave; la striscia sopra la barra di navigazione ne è la versione piccola. */
-:root { --azzurro: #2a6fb0; --azzurro-chiaro: #dcefff; }
+:root { --azzurro: #2a6fb0; --azzurro-chiaro: #e3f1fc; --azzurro-riempi: #6fb6f0; }
 .barre-settimana { display: grid; gap: 16px; }
 .riga-barra { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 6px; }
 .riga-barra .numero { font-weight: 900; font-size: 18px; }
 .riga-barra .numero.passi { color: var(--accento); }
 .riga-barra .numero.cose { color: var(--azzurro); }
+.etichette-barra { position: relative; height: 16px; margin-top: 8px; font-size: 11px; line-height: 16px; }
+.etichette-barra .conto { position: absolute; left: 0; font-weight: 700; color: var(--testo-2); }
+.etichette-barra .nome-tacca { position: absolute; transform: translateX(-50%); font-weight: 800; color: var(--testo); white-space: nowrap; }
+.etichette-barra .nome-tacca.fine { transform: translateX(-100%); }
 .sotto-barra { margin: 6px 0 0; font-size: 14px; color: var(--testo-2); }
 .barra-settimana { position: relative; border-radius: 999px; background: var(--rosa); }
 .barra-settimana.cose { background: var(--azzurro-chiaro); }
 .barra-settimana .riempita { display: block; height: 100%; border-radius: inherit; background: var(--fucsia); transition: width 0.6s ease; }
-.barra-settimana.cose .riempita { background: var(--azzurro); }
+.barra-settimana.cose .riempita { background: var(--azzurro-riempi); }
 .barra-settimana .tacca { position: absolute; top: -4px; bottom: -4px; width: 3px; margin-left: -1.5px; border-radius: 2px; background: var(--testo); }
 @media (prefers-reduced-motion: reduce) { .barra-settimana .riempita { transition: none; } }
 .chiavi-settimana { list-style: none; margin: 0; padding: 12px 0 0; border-top: 1px solid var(--rosa-bordo); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
@@ -1206,10 +1210,21 @@ body[data-sfondo='sera'] .striscia-settimana {
 .segmenti span { height: 10px; border-radius: 999px; background: var(--rosa); }
 .segmenti span.fatto { background: var(--fucsia); }
 .passi-in-piu { margin-top: 14px; padding: 4px 12px 8px; border: 2px dashed var(--rosa-bordo); border-radius: 16px; }
-.passi-in-piu .tabellina-titolo { margin-top: 8px; }
+.passi-in-piu .tabellina-titolo { margin: 0; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--testo-2); }
+.passi-in-piu-testata { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin: 8px 0 4px; }
+.passi-in-piu-testata span { font-size: 11px; font-weight: 700; color: var(--testo-2); }
+.passi-in-piu .valore { color: var(--testo-2); }
+.passi-in-piu .valore.fatta { color: var(--accento); }
 
 /* Area genitori (23/11): la settimana verso le chiavi in cima e i premi dietro il PIN */
 .settimana-genitori { display: grid; gap: 16px; }
+.chiavi-previste { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 0; padding-top: 12px; border-top: 1px solid var(--rosa); font-size: 13px; font-weight: 800; }
+.chiavi-previste b { color: var(--oro-testo, #8a5a00); }
+.passi-per-voce h3 { margin: 0 0 4px; font-size: 16px; font-weight: 900; }
+.passi-per-voce ul { list-style: none; margin: 0; padding: 0; }
+.passi-per-voce li { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; align-items: baseline; padding: 4px 0; border-top: 1px solid var(--rosa); font-size: 14px; font-weight: 700; }
+.passi-per-voce li span:nth-child(2) { color: var(--testo-2); }
+.passi-per-voce li b { min-width: 64px; text-align: right; font-weight: 900; }
 .settimana-genitori h2 { margin: 0; }
 .ga-premi {
   display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; margin: 16px 0 0; padding: 12px 16px;

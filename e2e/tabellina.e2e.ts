@@ -27,7 +27,8 @@ test('contatore sempre in vista, cosa manca e già presi, il gesto porta alle re
   await expect(page.locator('.tabellina-conto')).toHaveText('Oggi hai preso 10 passi su 20 disponibili');
   const elenco = page.locator('.tabellina details');
   await expect(elenco).not.toHaveAttribute('open');
-  await expect(page.getByText('Letto fatto')).toBeHidden();
+  // 23/11: i passi in più stanno sempre in vista, fuori dall'elenco chiuso
+  await expect(page.getByText('Letto fatto')).toBeVisible();
 
   await page.getByText('Guarda cosa manca').click();
   // il compito già preso non manca più: resta solo tra i presi

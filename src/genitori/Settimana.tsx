@@ -178,6 +178,25 @@ export default function Settimana({ client, passi, avvisa }: Props) {
           <h2 id="settimana-chiavi">Verso le chiavi</h2>
           <Barre s={sett} genitori />
           <Griglia s={sett} oggi={oggi} />
+          <section className="passi-per-voce" aria-labelledby="passi-per-voce">
+            <h3 id="passi-per-voce">Passi per voce</h3>
+            <ul>
+              {sett.righe
+                .filter((r) => r.possibili > 0)
+                .map((r) => (
+                  <li key={r.voce}>
+                    <span>{r.nome}</span>
+                    <span>
+                      {r.fatte} di {r.possibili}
+                    </span>
+                    <b>
+                      {r.passiFatti} / {r.passiPossibili}
+                    </b>
+                  </li>
+                ))}
+            </ul>
+            <p className="ga-nota">Voti, partite e gesti di casa fanno salire il percorso, ma non contano per le chiavi.</p>
+          </section>
           <p className="ga-nota">Le chiavi si contano domenica alle {R.CONFIG.chiavi_settimana.ora_conteggio}. Ogni Togli qui sotto aggiorna le barre.</p>
         </section>
       )}

@@ -31,10 +31,20 @@ function Barra({ tipo, valore, soglia, etichetta, alto = 14 }: { tipo: 'passi' |
   );
 }
 
+/** Sotto la barra: il conto a sinistra e il nome della chiave sotto la tacca (bozza del 23/11). */
+function Etichette({ sinistra, tacca, soglia, allineaFine = false }: { sinistra: string; tacca: string; soglia: number; allineaFine?: boolean }) {
+  return (
+    <div className="etichette-barra">
+      <span className="conto">{sinistra}</span>
+      <span className={`nome-tacca${allineaFine ? ' fine' : ''}`} style={{ left: `${soglia}%` }} aria-hidden>
+        {tacca}
+      </span>
+    </div>
+  );
+}
+
 /** Le due barre con numeri e soglie (La mia settimana, Settimana dei genitori). */
 export function Barre({ s, genitori = false }: { s: Settimana; genitori?: boolean }) {
-  const mancaPassi = Math.max(0, s.sogliaPassi - s.passiFatti);
-  const mancaCose = Math.max(0, s.sogliaCose - s.coseFatte);
   return (
     <div className="barre-settimana">
       <div>
@@ -43,9 +53,7 @@ export function Barre({ s, genitori = false }: { s: Settimana; genitori?: boolea
           <span className="numero passi">{s.percentualePassi}%</span>
         </p>
         <Barra tipo="passi" valore={s.percentualePassi} soglia={SOGLIA_PASSI} etichetta="Passi della settimana" />
-        <p className="sotto-barra">
-          {s.passiFatti} di {s.passiPossibili} passi · {mancaPassi ? `alla prima chiave ne mancano ${mancaPassi}` : 'quota della prima chiave fatta'}
-        </p>
+        <Etichette sinistra={`${s.passiFatti} di ${s.passiPossibili} passi`} tacca="1ª chiave" soglia={SOGLIA_PASSI} />
       </div>
       <div>
         <p className="riga-barra">
@@ -53,9 +61,7 @@ export function Barre({ s, genitori = false }: { s: Settimana; genitori?: boolea
           <span className="numero cose">{s.percentualeCose}%</span>
         </p>
         <Barra tipo="cose" valore={s.percentualeCose} soglia={SOGLIA_COSE} etichetta="Cose fatte" />
-        <p className="sotto-barra">
-          {s.coseFatte} di {s.cosePossibili} cose · {mancaCose ? `alla terza chiave ne mancano ${mancaCose}` : 'abbastanza per la terza chiave'}
-        </p>
+        <Etichette sinistra={`${s.coseFatte} di ${s.cosePossibili} cose`} tacca="3ª chiave" soglia={SOGLIA_COSE} allineaFine />
       </div>
       <ul className="chiavi-settimana" aria-label={`Chiavi se la settimana finisse adesso: ${s.chiavi} su 3`}>
         {chiaviPrese(s).map((k) => (
@@ -65,6 +71,12 @@ export function Barre({ s, genitori = false }: { s: Settimana; genitori?: boolea
           </li>
         ))}
       </ul>
+      {genitori && (
+        <p className="chiavi-previste">
+          <span>Note in settimana: {s.note > 0 ? s.note : 'nessuna'}</span>
+          <b>Chiavi previste: {s.chiavi}</b>
+        </p>
+      )}
       {s.note > 0 && <p className="sotto-barra">Questa settimana c'è una nota: la seconda e la terza chiave sono andate. La prima si prende ancora.</p>}
     </div>
   );

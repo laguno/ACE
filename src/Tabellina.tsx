@@ -41,7 +41,8 @@ export default function Tabellina({ vai, genitori = false, client = supabase }: 
   const obbligatorie = dati.voci.filter(perLeChiavi);
   const fatteOggi = obbligatorie.filter((v) => v.presi >= v.valore).length;
   const mancanoChiavi = mancano.filter(perLeChiavi);
-  const mancanoInPiu = mancano.filter((v) => !perLeChiavi(v));
+  // i passi in più stanno sempre in vista (bozza del 23/11): fatti con la spunta, gli altri col valore che manca
+  const inPiu = dati.voci.filter((v) => !perLeChiavi(v) && (v.presi >= v.valore || !(v.gruppo === 'casa' && casaPiena)));
   const giorni = [...new Set(dati.storico.map((p) => p.giorno))];
   // nell'area genitori la tabellina sta dentro "Lani oggi" (h2): i titoli scendono di un livello
   const Titolo = genitori ? 'h3' : 'h2';
@@ -67,6 +68,16 @@ export default function Tabellina({ vai, genitori = false, client = supabase }: 
       <p className="tabellina-conto" role="status">
         {genitori ? 'Oggi Lani ha preso' : 'Oggi hai preso'} <b>{dati.presi}</b> passi su <b>{dati.disponibili}</b> disponibili
       </p>
+      {inPiu.length > 0 && (
+        <section className="passi-in-piu" aria-label="Passi in più">
+          <div className="passi-in-piu-testata">
+            <Titolo className="tabellina-titolo">Passi in più</Titolo>
+            <span>fanno salire Astra, non le chiavi</span>
+          </div>
+          <Voci voci={inPiu} vai={vai} />
+          {casaPiena && <p className="nota">Gesti di casa: per oggi il massimo è preso.</p>}
+        </section>
+      )}
       <details className="tabellina-dettagli">
         <summary>
           <span>Guarda cosa manca</span>
@@ -79,13 +90,6 @@ export default function Tabellina({ vai, genitori = false, client = supabase }: 
         ) : (
           <Voci voci={mancanoChiavi} vai={vai} />
         )}
-
-        <div className="passi-in-piu">
-          <Titolo className="tabellina-titolo">Passi in più</Titolo>
-          <p className="nota piccola">Fanno salire Astra, non le chiavi.</p>
-          {mancanoInPiu.length === 0 ? <p className="nota">{genitori ? 'Oggi Lani li ha presi tutti.' : 'Oggi li hai presi tutti.'}</p> : <Voci voci={mancanoInPiu} vai={vai} />}
-        </div>
-        {casaPiena && <p className="nota">Gesti di casa: per oggi il massimo è preso.</p>}
 
         <Titolo className="tabellina-titolo">Già presi</Titolo>
         {giorni.length === 0 ? (
@@ -125,11 +129,12 @@ function Voci({ voci, vai }: { voci: VoceTabellina[]; vai?: (d: Dove) => void })
       {voci.map((v) => {
         const dentro = (
           <>
+            {v.presi >= v.valore && <CheckCircle size={20} weight="fill" aria-label="fatto" role="img" />}
             <span>
               <b>{v.testo}</b>
               <small>{v.come}</small>
             </span>
-            <b className="valore">{segno(v.valore - v.presi)}</b>
+            <b className={`valore${v.presi >= v.valore ? ' fatta' : ''}`}>{v.presi >= v.valore ? segno(v.presi) : segno(v.valore - v.presi)}</b>
             {vai && <CaretRight size={18} weight="bold" aria-hidden />}
           </>
         );
