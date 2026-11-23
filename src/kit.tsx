@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
 import { CalendarBlank, CaretDown, CaretRight, Clock } from '@phosphor-icons/react';
-import { useSettimana } from './datiSettimana';
+import { EVENTO_PASSI, useSettimana } from './datiSettimana';
+import { supabase } from './supabase';
 
 // Kit "zucchero filato" (design/Stile.html): i pezzi che si ripetono in tutte le schermate.
 // Colori e misure stanno in stile.css come variabili; qui solo i pezzi con un po' di struttura.
@@ -47,15 +48,31 @@ export function Testata({ sopra, titolo, riga, posa, sfondo, misura = 170 }: { s
   );
 }
 
-/** Compare solo nella testata compatta (23/11): i passi della settimana e le chiavi, che mentre si scorre
- *  non si vedono più nella pillola chiusa. Muta per i lettori: le stesse cose le dicono le barre della pillola. */
+/** Compare solo nella testata compatta (23/11): il saldo dei passi (lo stesso numero della testata di Oggi
+ *  e di Astra) e le chiavi della settimana, che con la pillola chiusa non si vedono. Il saldo si legge da
+ *  saldo_passi e non con vedi_saldo, per non segnarlo come visto (il numero che sale resta ad Astra e Oggi).
+ *  Muta per i lettori: le stesse cose le dicono la testata e le barre della pillola. */
 function TestataMini() {
   const s = useSettimana();
-  if (!s) return null;
+  const [passi, setPassi] = useState<number>();
+  useEffect(() => {
+    let vivo = true;
+    const leggi = () =>
+      void supabase.from('saldo_passi').select('passi').maybeSingle().then(({ data }) => {
+        if (vivo && data) setPassi(data.passi as number);
+      });
+    leggi();
+    window.addEventListener(EVENTO_PASSI, leggi);
+    return () => {
+      vivo = false;
+      window.removeEventListener(EVENTO_PASSI, leggi);
+    };
+  }, []);
+  if (!s || passi === undefined) return null;
   return (
     <span className="testata-mini" aria-hidden>
       <Sticker posa="passo" cartella="oggetti" misura={22} />
-      <b>{s.passiFatti.toLocaleString('it-IT')}</b>
+      <b>{passi.toLocaleString('it-IT')}</b>
       <span className="testata-mini-chiavi">
         {[1, 2, 3].map((n) => (
           <Sticker key={n} posa={s.chiavi >= n ? 'chiave-piena' : 'chiave-vuota'} cartella="oggetti" misura={18} />
