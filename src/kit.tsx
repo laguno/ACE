@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
 import { CalendarBlank, CaretDown, CaretRight, Clock } from '@phosphor-icons/react';
+import { useSettimana } from './datiSettimana';
 
 // Kit "zucchero filato" (design/Stile.html): i pezzi che si ripetono in tutte le schermate.
 // Colori e misure stanno in stile.css come variabili; qui solo i pezzi con un po' di struttura.
@@ -42,6 +43,24 @@ export function Testata({ sopra, titolo, riga, posa, sfondo, misura = 170 }: { s
       </div>
       {posa && <Sticker posa={posa} misura={misura} className="testata-avatar" />}
     </header>
+  );
+}
+
+/** Compare solo nella testata compatta (23/11): i passi della settimana e le chiavi, che mentre si scorre
+ *  non si vedono più nella pillola chiusa. Muta per i lettori: le stesse cose le dicono le barre della pillola. */
+function TestataMini() {
+  const s = useSettimana();
+  if (!s) return null;
+  return (
+    <span className="testata-mini" aria-hidden>
+      <Sticker posa="passo" cartella="oggetti" misura={22} />
+      <b>{s.passiFatti.toLocaleString('it-IT')}</b>
+      <span className="testata-mini-chiavi">
+        {[1, 2, 3].map((n) => (
+          <Sticker key={n} posa={s.chiavi >= n ? 'chiave-piena' : 'chiave-vuota'} cartella="oggetti" misura={18} />
+        ))}
+      </span>
+    </span>
   );
 }
 
