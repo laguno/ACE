@@ -38,8 +38,8 @@ function sottoLaSufficienza(voti: VotoDellaMateria[]): boolean {
   if (voti.length === 0) return false;
   const soglia = CONFIG.verifica_importante.soglia_voto;
   const media = mediaPesata(voti);
-  const ultimo = [...voti].sort((a, b) => a.data.localeCompare(b.data)).at(-1)!;
-  return (media !== null && media < soglia) || Number(ultimo.voto) < soglia;
+  const ultimo = [...voti].sort((a, b) => a.data.localeCompare(b.data)).at(-1);
+  return (media !== null && media < soglia) || (!!ultimo && Number(ultimo.voto) < soglia);
 }
 
 export function verificaImportante(verifiche: VerificaCandidata[], voti: VotoDellaMateria[], oggi: Date): VerificaCandidata | null {

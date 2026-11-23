@@ -28,12 +28,6 @@ function posaPersona(titolo: string): string {
   if (/pap[àa]|alessandro/.test(t)) return 'papa-applaude';
   return 'mamma-passaggio';
 }
-// sere in cui la borsa conta: quelle prima dei giorni del config ("la domenica e il giovedì sera")
-const SERE_BORSA = (R.CONFIG.borsa.giorni_allenamento as number[])
-  .map((g) => `il ${GIORNI[(g + 6) % 7]}`)
-  .join(' e ')
-  .replace('il domenica', 'la domenica')
-  .concat(' sera');
 
 /** Riga chiusa di una cosa pronta (v2): cerchio del colore del gettone con la spunta. */
 function Chiusa({ titolo, gettone, dopo, onAnnulla, valore }: { titolo: string; gettone: Gettone; dopo: string; onAnnulla?: () => void; valore?: number | null }) {
@@ -118,7 +112,6 @@ export default function Sera() {
   const [compiti, setCompiti] = useState<Compito[]>();
   const [fogli, setFogli] = useState<Foglio[]>([]);
   const [serata, setSerata] = useState({ cartella: false, borsa: false });
-  const [passiOggi, setPassiOggi] = useState(0);
   const [orario, setOrario] = useState<string[]>([]);
   const [impegni, setImpegni] = useState<Impegno[]>([]);
   const [errore, setErrore] = useState('');
@@ -148,17 +141,15 @@ export default function Sera() {
   }, [R.iso(oggi)]);
 
   const carica = useCallback(async () => {
-    const [c, f, s, m] = await Promise.all([
+    const [c, f, s] = await Promise.all([
       supabase.from('compiti').select(SELECT_COMPITI).eq('scadenza', R.iso(domani)).order('creato_il'),
       supabase.from('fogli_firma').select('id, titolo, scadenza, dato_il').is('consegnato_il', null).order('scadenza'),
       supabase.from('serate').select('cartella_il, borsa_il').eq('data', R.iso(oggi)).maybeSingle(),
-      supabase.from('movimenti_passi').select('passi, moltiplicatore').eq('giorno', R.iso(oggi)),
     ]);
     if (c.error || f.error) return setErrore('Non riesco a leggere la sera. Riprova tra poco.');
     setCompiti(c.data as unknown as Compito[]);
     setFogli(f.data ?? []);
     setSerata({ cartella: !!s.data?.cartella_il, borsa: !!s.data?.borsa_il });
-    setPassiOggi((m.data ?? []).reduce((a, x) => a + Math.round(x.passi * x.moltiplicatore), 0));
   }, [R.iso(oggi)]);
 
   useEffect(() => {

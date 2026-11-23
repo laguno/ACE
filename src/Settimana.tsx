@@ -1,9 +1,9 @@
 import { Check, X } from '@phosphor-icons/react';
 import * as R from './lib/regole';
-import { tacceDiOggi, prossimeCose, type Casella, type Settimana } from './lib/regole/settimana';
+import { tacceDiOggi, type Casella, type Settimana } from './lib/regole/settimana';
 import { Attesa, Sticker, Testata } from './kit';
 import { GETTONI } from './colori';
-import { GIORNI, MESI, maiuscola } from './spunte';
+import { GIORNI, MESI } from './spunte';
 import { useSettimana } from './datiSettimana';
 
 // La mia settimana (23/11, prototipo approvato dal signore): due barre sempre visibili, passi e
@@ -231,12 +231,6 @@ export function Griglia({ s, oggi }: { s: Settimana; oggi: Date }) {
     </div>
   );
 }
-
-const quando = (g: string, oggi: Date) => {
-  const d = R.giorno(g);
-  const diff = Math.round((d.getTime() - oggi.getTime()) / 86_400_000);
-  return diff === 0 ? 'Oggi' : diff === 1 ? 'Domani' : maiuscola(GIORNI[d.getDay()]);
-};
 
 /** "La mia settimana" di Lani: si apre dalla striscia sopra la barra. */
 export default function LaMiaSettimana() {

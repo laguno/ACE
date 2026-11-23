@@ -24,7 +24,7 @@ export function useVerificaImportante(): Importante | null | undefined {
       const { data: ses } = await supabase.from('sessioni_ripasso').select('numero, data_prevista, fatta_il').eq('verifica_id', scelta.id).order('numero');
       const lista = ses ?? [];
       const prossimo = lista.find((s) => !s.fatta_il)?.data_prevista ?? null;
-      vivo && setV({ ...scelta, ripassi: { fatti: lista.filter((s) => s.fatta_il).length, totale: lista.length, prossimo } });
+      if (vivo) setV({ ...scelta, ripassi: { fatti: lista.filter((s) => s.fatta_il).length, totale: lista.length, prossimo } });
     })().catch(() => vivo && setV(null));
     return () => {
       vivo = false;

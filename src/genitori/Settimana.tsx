@@ -282,7 +282,7 @@ export default function Settimana({ client, passi, avvisa }: Props) {
                   key={cosa}
                   icona={cosa === 'cartella' ? <Backpack size={20} weight="bold" aria-hidden /> : <Bag size={20} weight="bold" aria-hidden />}
                   titolo={cosa === 'cartella' ? 'Cartella pronta' : 'Borsa pronta'}
-                  sotto={`Spuntata alle ${new Date(sera[`${cosa}_il`]!).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Rome' })}`}
+                  sotto={`Spuntata alle ${new Date(sera[`${cosa}_il`] ?? '').toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Rome' })}`}
                   azione={
                     <button type="button" className="ga-btn tenue" aria-label={`Togli la spunta: ${cosa}`} onClick={() => setChiede({ sera: cosa })}>
                       Togli
