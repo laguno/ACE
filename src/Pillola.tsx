@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Sticker } from './kit';
 import { chiaviPrese } from './Settimana';
 import { useSettimana } from './datiSettimana';
@@ -8,14 +8,17 @@ import { tacceDiOggi } from './lib/regole/settimana';
 // Pillola di navigazione (v2, 23/11): la barra di sempre chiusa tra le due barre della settimana.
 // Passi sopra con le tre chiavi, Cose sotto con "N di M". La tacca scura è dove dovrebbe essere la
 // barra a fine giornata per restare in pari. Al tocco sulle barre si apre La mia settimana.
+// Le due barre si aprono solo in fondo alla pagina (o se la pagina non scorre): mentre si scorre resta
+// la barra di sempre, e i passi stanno nella testata compatta.
 
 export default function Pillola({ apri, children }: { apri: () => void; children: ReactNode }) {
   const s = useSettimana();
   const t = s ? tacceDiOggi(s, R.giornoRoma(new Date())) : null;
+  const aperta = useInFondo();
   return (
-    <div className="pillola">
+    <div className={`pillola${aperta ? ' aperta' : ''}`}>
       {s && t && (
-        <button className="pillola-barra p-passi" onClick={apri} aria-label={`Passi ${s.percentualePassi} per cento, ${s.chiavi} chiavi su 3: la mia settimana`}>
+        <button className="pillola-barra p-passi" inert={!aperta} onClick={apri} aria-label={`Passi ${s.percentualePassi} per cento, ${s.chiavi} chiavi su 3: la mia settimana`}>
           <span className="et" aria-hidden>Passi</span>
           <span className="pista" aria-hidden>
             <span className="piena" style={{ width: `${s.percentualePassi}%` }} />
@@ -30,7 +33,7 @@ export default function Pillola({ apri, children }: { apri: () => void; children
       )}
       {children}
       {s && t && (
-        <button className="pillola-barra p-cose" onClick={apri} aria-label={`Cose ${s.coseFatte} di ${s.cosePossibili}: la mia settimana`}>
+        <button className="pillola-barra p-cose" inert={!aperta} onClick={apri} aria-label={`Cose ${s.coseFatte} di ${s.cosePossibili}: la mia settimana`}>
           <span className="et" aria-hidden>Cose</span>{' '}
           <span className="pista" aria-hidden>
             <span className="piena" style={{ width: `${s.percentualeCose}%` }} />
@@ -41,4 +44,26 @@ export default function Pillola({ apri, children }: { apri: () => void; children
       )}
     </div>
   );
+}
+
+/** Vero quando la pagina è in fondo (con 24 px di margine) o non scorre affatto. */
+function useInFondo() {
+  const [inFondo, setInFondo] = useState(true);
+  useEffect(() => {
+    const segna = () => {
+      const h = document.documentElement;
+      setInFondo(window.innerHeight + window.scrollY >= h.scrollHeight - 24);
+    };
+    segna();
+    const os = new ResizeObserver(segna);
+    os.observe(document.body);
+    window.addEventListener('scroll', segna, { passive: true });
+    window.addEventListener('resize', segna);
+    return () => {
+      os.disconnect();
+      window.removeEventListener('scroll', segna);
+      window.removeEventListener('resize', segna);
+    };
+  }, []);
+  return inFondo;
 }
