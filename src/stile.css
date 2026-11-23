@@ -1375,3 +1375,10 @@ body[data-sfondo='sera'] .pillola-barra.p-cose .conto-p { color: var(--notte-tes
 .classifica-corta small { font-weight: 800; }
 .classifica-tutta summary, .tutte-le-partite summary { min-height: 44px; display: flex; align-items: center; font-weight: 800; cursor: pointer; }
 .tutte-le-partite summary h2 { margin: 0; }
+
+/* Studio v2: timbro della data nel colore della materia */
+.verifica-testa { display: flex; align-items: center; gap: 12px; }
+.verifica-testa .testa-carta { flex: 1; min-width: 0; }
+.timbro-materia { width: 56px; height: 62px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 16px; }
+.timbro-materia small { font: 900 11px Nunito, sans-serif; letter-spacing: 0.08em; }
+.timbro-materia b { font: 800 26px/1 'Baloo 2', sans-serif; }

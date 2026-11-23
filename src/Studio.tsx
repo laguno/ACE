@@ -10,6 +10,7 @@ import { supabase } from './supabase';
 import { ComeTiConosci, MicroLezione, VotoPrevisto, usePrevisioni } from './Metacognizione';
 import { Spiegamelo } from './Tutor';
 import { useVerificaImportante } from './verificaImportante';
+import { coloreMateria } from './colori';
 
 // Studio — design/Studio.html. Verifiche in arrivo con il piano di ripasso (sessioni da 15 minuti),
 // carte del giorno (ripetizione a intervalli) e quiz liberi. Video più avanti.
@@ -144,6 +145,18 @@ export default function Studio() {
         const argomento = v.argomento?.split('\n')[0];
         return (
           <div className="carta studio-verifica" key={v.id}>
+            <div className="verifica-testa">
+              {/* v2: timbro della data nel colore della materia (un solo file: src/colori.ts) */}
+              <div className="timbro-materia" aria-hidden style={{ background: coloreMateria(materia).fondo, color: coloreMateria(materia).testo }}>
+                {v.daRecuperare || v.recupero_vago ? (
+                  <b>?</b>
+                ) : (
+                  <>
+                    <small>{GIORNI[g.getDay()].slice(0, 3).toUpperCase()}</small>
+                    <b>{g.getDate()}</b>
+                  </>
+                )}
+              </div>
             <div className="testa-carta">
               <h2>
                 {materia}
@@ -151,6 +164,7 @@ export default function Studio() {
               </h2>
               {/* fucsia solo se è vicina (entro 2 giorni) o da recuperare; oltre, il colore dei testi secondari */}
               <span className={`valore${v.daRecuperare || (!v.recupero_vago && fra <= 2) ? '' : ' quieto'}`}>{v.daRecuperare ? 'da recuperare' : v.recupero_vago ? 'settimana prossima' : fra === 0 ? 'oggi' : fra === 1 ? 'domani' : `fra ${fra} giorni`}</span>
+            </div>
             </div>
             <p className="data-verifica">
               {v.daRecuperare
