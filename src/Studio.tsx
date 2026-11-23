@@ -9,6 +9,7 @@ import { GIORNI, MESI, maiuscola } from './spunte';
 import { supabase } from './supabase';
 import { ComeTiConosci, MicroLezione, VotoPrevisto, usePrevisioni } from './Metacognizione';
 import { Spiegamelo } from './Tutor';
+import { useVerificaImportante } from './verificaImportante';
 
 // Studio — design/Studio.html. Verifiche in arrivo con il piano di ripasso (sessioni da 15 minuti),
 // carte del giorno (ripetizione a intervalli) e quiz liberi. Video più avanti.
@@ -50,6 +51,7 @@ const DA_PESCARE = R.CONFIG.ripasso.pillola.carte_da_pescare;
 const AVVISO_COMPITI = 'Finiti i compiti, flash card e quiz valgono passi';
 
 export default function Studio() {
+  const importante = useVerificaImportante();
   const oggi = R.iso(R.giornoRoma(new Date()));
   const [verifiche, setVerifiche] = useState<Verifica[]>();
   const [carteDelGiorno, setCarteDelGiorno] = useState<Carta[]>([]);
@@ -143,7 +145,10 @@ export default function Studio() {
         return (
           <div className="carta studio-verifica" key={v.id}>
             <div className="testa-carta">
-              <h2>{materia}</h2>
+              <h2>
+                {materia}
+                {importante?.id === v.id && <span className="importante"> IMPORTANTE</span>}
+              </h2>
               {/* fucsia solo se è vicina (entro 2 giorni) o da recuperare; oltre, il colore dei testi secondari */}
               <span className={`valore${v.daRecuperare || (!v.recupero_vago && fra <= 2) ? '' : ' quieto'}`}>{v.daRecuperare ? 'da recuperare' : v.recupero_vago ? 'settimana prossima' : fra === 0 ? 'oggi' : fra === 1 ? 'domani' : `fra ${fra} giorni`}</span>
             </div>

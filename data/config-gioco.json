@@ -326,5 +326,11 @@
     "spiegamelo_max_caratteri": 1500,
     "argomento_max_caratteri": 120,
     "storico_giorni_genitori": 14
+  },
+  "verifica_importante": {
+    "nota": "Regola del 23/11/2026 (approvata dal signore): una sola verifica merita il riquadro in Oggi, la più vicina entro giorni_prima giorni, mai le materie pratiche, solo se la materia è sotto la sufficienza (media pesata o ultimo voto sotto soglia_voto) o se è una prova comune; il recupero da solo non basta.",
+    "giorni_prima": 3,
+    "materie_escluse": ["Musica", "Arte e immagine", "Educazione fisica"],
+    "soglia_voto": 6
   }
 }

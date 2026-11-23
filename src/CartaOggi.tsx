@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BookOpen, Backpack, Cards, Handbag, Check, Plus } from '@phosphor-icons/react';
+import { BookOpen, Backpack, Cards, Handbag, Check, Plus, Star } from '@phosphor-icons/react';
 import { Sticker } from './kit';
 import { useTabellina, Voci } from './Tabellina';
 import { GETTONI, type Gettone } from './colori';
@@ -7,6 +7,8 @@ import { perLeChiavi, type Dove, type VoceTabellina } from './lib/regole/tabelli
 import * as C from './lib/calendario';
 import * as R from './lib/regole';
 import { impegniTra, piuGiorni, type Impegno } from './giornata';
+import { useVerificaImportante } from './verificaImportante';
+import { GIORNI } from './spunte';
 
 // Oggi v2 (23/11): "Oggi N di 4" con un gettone per cosa obbligatoria (compiti, ripasso, cartella,
 // borsa) più i dieci minuti, gli impegni di famiglia a pillola e "+ Passi in più". I dati sono quelli
@@ -31,6 +33,7 @@ export function gettoniDi(voci: VoceTabellina[]) {
 
 export default function CartaOggi({ vai, promemoria }: { vai?: (d: Dove) => void; promemoria?: string }) {
   const dati = useTabellina();
+  const importante = useVerificaImportante();
   const [impegni, setImpegni] = useState<Impegno[]>([]);
   useEffect(() => {
     const oggi = R.giornoRoma(new Date());
@@ -58,6 +61,28 @@ export default function CartaOggi({ vai, promemoria }: { vai?: (d: Dove) => void
           <div className="evento-testo">
             <small>PARTITA</small>
             <b>{partita.titolo.replace(/^[^:]+:\s*/, '')}</b>
+          </div>
+        </section>
+      )}
+
+      {/* un solo riquadro evento: la partita di oggi, se no la verifica importante */}
+      {!partita && importante && (
+        <section className="evento verifica" aria-label="Verifica importante">
+          <div className="evento-ora timbro">
+            <small>{GIORNI[R.giorno(importante.data).getDay()].toUpperCase()}</small>
+            <b>{R.giorno(importante.data).getDate()}</b>
+          </div>
+          <div className="evento-testo">
+            <small>
+              <Star size={14} weight="fill" aria-hidden /> VERIFICA IMPORTANTE
+            </small>
+            <b>{importante.materia}</b>
+            {importante.ripassi.totale > 0 && (
+              <span>
+                Ripasso {importante.ripassi.fatti} di {importante.ripassi.totale} fatto
+                {importante.ripassi.prossimo === R.iso(R.giornoRoma(new Date())) ? ' · oggi il prossimo' : ''}
+              </span>
+            )}
           </div>
         </section>
       )}
