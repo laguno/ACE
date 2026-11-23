@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Check, Lightbulb } from '@phosphor-icons/react';
 import { supabase } from './supabase';
-import { avvisaPassi } from './settimana';
+import { avvisaPassi } from './datiSettimana';
 import { senti } from './sensi';
 
 // Pezzi comuni a Oggi e Sera: la spunta di un compito e il suo aspetto.

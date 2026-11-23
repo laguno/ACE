@@ -11,7 +11,7 @@ import { bello, piu, type Props } from './comune';
 import Riepilogo from './Riepilogo';
 import { StoricoTutor } from './Tutor';
 import { Barre, Griglia } from '../Settimana';
-import { avvisaPassi, useSettimana } from '../settimana';
+import { avvisaPassi, useSettimana } from '../datiSettimana';
 
 // Settimana: giorno per giorno compiti e spunte (con "Togli" sul posto) e "Lani a casa"; sotto
 // verifiche, partite, fogli da firmare e foto salvate. Assorbe Correzioni, Fogli e Lani a casa.

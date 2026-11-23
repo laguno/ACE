@@ -3,7 +3,7 @@ import * as R from './lib/regole';
 import { prossimeCose, type Casella, type Settimana } from './lib/regole/settimana';
 import { Attesa, Sticker, Testata } from './kit';
 import { GIORNI, MESI, maiuscola } from './spunte';
-import { useSettimana } from './settimana';
+import { useSettimana } from './datiSettimana';
 
 // La mia settimana (23/11, prototipo approvato dal signore): due barre sempre visibili, passi e
 // cose obbligatorie, con la tacca della soglia di ogni chiave; sotto il dettaglio giorno per giorno.
