@@ -115,7 +115,7 @@ function Mattina({ impegni, apri, vai }: { impegni: Impegno[]; apri: Apri; vai?:
   if (!cose)
     return (
       <section className="schermo">
-        <Testata sfondo="mattina" posa="lani-buongiorno" sopra={`${maiuscola(GIORNI[oggi.getDay()])} ${oggi.getDate()} ${MESI[oggi.getMonth()]}`} titolo="Buongiorno, Lani" />
+        <Testata sfondo="mattina" posa="lani-buongiorno" misura={92} piccola sopra={`${maiuscola(GIORNI[oggi.getDay()])} ${oggi.getDate()} ${MESI[oggi.getMonth()]}`} titolo="Buongiorno, Lani" />
       </section>
     );
   const sport = impegni.find((i) => C.tipoImpegno(i.titolo) !== 'famiglia');
@@ -132,6 +132,8 @@ function Mattina({ impegni, apri, vai }: { impegni: Impegno[]; apri: Apri; vai?:
       <Testata
         sfondo="mattina"
         posa="lani-buongiorno"
+        misura={92}
+        piccola
         sopra={`${maiuscola(GIORNI[oggi.getDay()])} ${oggi.getDate()} ${MESI[oggi.getMonth()]}`}
         titolo="Buongiorno, Lani"
         riga={
@@ -273,7 +275,7 @@ function Pomeriggio({ chiusura, apri, vai }: { chiusura: string | null; apri: Ap
       <p role="alert">{errore}</p>
     ) : (
       <section className="schermo pomeriggio">
-        <Testata sfondo="pomeriggio" posa="lani-concentrata" misura={140} sopra={`${maiuscola(GIORNI[oggi.getDay()])} pomeriggio`} titolo={`Compiti per ${GIORNI[domani.getDay()]}`} />
+        <Testata sfondo="pomeriggio" posa="lani-contenta" misura={92} piccola sopra={`${maiuscola(GIORNI[oggi.getDay()])} ${oggi.getDate()}`} titolo="Ciao, Lani" />
       </section>
     );
   if (aiuto) return <Aiuto compito={aiuto} chiudi={() => setAiuto(undefined)} />;
@@ -289,16 +291,12 @@ function Pomeriggio({ chiusura, apri, vai }: { chiusura: string | null; apri: Ap
     <section className="schermo pomeriggio">
       <Testata
         sfondo="pomeriggio"
-        posa="lani-concentrata"
-        misura={140}
-        sopra={`${maiuscola(GIORNI[oggi.getDay()])} pomeriggio`}
-        titolo={`Compiti per ${GIORNI[domani.getDay()]}`}
-        riga={
-          <>
-            {chiusura && compiti.length > 0 && <p>Hai tempo fino alle {chiusura}.</p>}
-            <PillolaSaldo />
-          </>
-        }
+        posa="lani-contenta"
+        misura={92}
+        piccola
+        sopra={`${maiuscola(GIORNI[oggi.getDay()])} ${oggi.getDate()}`}
+        titolo="Ciao, Lani"
+        riga={<PillolaSaldo />}
       />
       <CartaOggi vai={vai} />
       {errore && <p role="alert">{errore}</p>}
@@ -309,9 +307,12 @@ function Pomeriggio({ chiusura, apri, vai }: { chiusura: string | null; apri: Ap
         ) : (
           <>
             <div className="testa-carta" data-ancora="compiti">
-              <h2>In quest'ordine</h2>
+              <h2>Compiti per {GIORNI[domani.getDay()]}</h2>
               {mostraValore(compiti.some((c) => c.fatto_il)) && <span className="valore">+{P.compiti} ciascuno</span>}
             </div>
+            <p className="nota">
+              In quest'ordine.{chiusura && <> Hai tempo fino alle {chiusura}.</>}
+            </p>
             <ul className="spunte ordine">
               {ordinati.map((c, i) => (
                 <RigaCompito
