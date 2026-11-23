@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Genitori — Settimana di Lani</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#C2185B}a:hover{color:#8E1043}
+</style>
+</helmet>
+<div style="width: 390px; height: 1320px; box-sizing: border-box; padding: 20px; background: #F7F5FA; font-family: Nunito, 'Segoe UI', system-ui, sans-serif; color: #2B1D3A; display: flex; flex-direction: column; gap: 16px">
+
+  <div style="display: flex; justify-content: space-between; align-items: baseline">
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <span style="font-size: 12px; font-weight: 800; letter-spacing: 0.12em; color: #6E5A80">ACE · GENITORI</span>
+      <h1 style="margin: 0; font-size: 24px; font-weight: 900">Settimana di Lani</h1>
+    </div>
+    <span style="font-size: 13px; font-weight: 700; color: #6E5A80">23–29 nov</span>
+  </div>
+
+  <nav aria-label="Sezioni genitori" style="display: flex; gap: 6px; background: #FFFFFF; border: 1px solid #E9E2F0; border-radius: 999px; padding: 4px">
+    <a href="#" aria-current="page" style="flex: 1; text-align: center; padding: 10px 0; border-radius: 999px; background: #2B1D3A; color: #FFFFFF; font-size: 13px; font-weight: 800; text-decoration: none">Settimana</a>
+    <a href="#" style="flex: 1; text-align: center; padding: 10px 0; border-radius: 999px; color: #2B1D3A; font-size: 13px; font-weight: 800; text-decoration: none">Oggi</a>
+    <a href="#" style="flex: 1; text-align: center; padding: 10px 0; border-radius: 999px; color: #2B1D3A; font-size: 13px; font-weight: 800; text-decoration: none">Scuola</a>
+    <a href="#" style="flex: 1; text-align: center; padding: 10px 0; border-radius: 999px; color: #2B1D3A; font-size: 13px; font-weight: 800; text-decoration: none">Stato</a>
+  </nav>
+
+  <section aria-label="Avanzamento" style="background: #FFFFFF; border: 1px solid #E9E2F0; border-radius: 20px; padding: 18px; display: flex; flex-direction: column; gap: 16px">
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <div style="display: flex; justify-content: space-between; align-items: baseline">
+        <span style="font-size: 15px; font-weight: 800">Passi obbligatori</span>
+        <span style="font-size: 15px; font-weight: 900; color: #C2185B">{{passiFatti}} / {{passiTot}} · {{pctPassi}}%</span>
+      </div>
+      <div role="progressbar" aria-label="Passi obbligatori" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{pctPassi}}" style="position: relative; height: 12px; border-radius: 999px; background: #FBE3EF">
+        <div style="width: {{pctPassi}}%; height: 12px; border-radius: 999px; background: #C2185B"></div>
+        <div style="position: absolute; left: 70%; top: -4px; bottom: -4px; width: 2px; background: #2B1D3A"></div>
+      </div>
+      <span style="font-size: 12px; font-weight: 700; color: #6E5A80">{{frasePassi}}</span>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <div style="display: flex; justify-content: space-between; align-items: baseline">
+        <span style="font-size: 15px; font-weight: 800">Cose obbligatorie</span>
+        <span style="font-size: 15px; font-weight: 900; color: #1F6FB8">{{coseFatte}} / {{coseTot}} · {{pctCose}}%</span>
+      </div>
+      <div role="progressbar" aria-label="Cose obbligatorie" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{pctCose}}" style="position: relative; height: 12px; border-radius: 999px; background: #E3F1FC">
+        <div style="width: {{pctCose}}%; height: 12px; border-radius: 999px; background: #6FB6F0"></div>
+        <div style="position: absolute; left: 95%; top: -4px; bottom: -4px; width: 2px; background: #2B1D3A"></div>
+      </div>
+      <span style="font-size: 12px; font-weight: 700; color: #6E5A80">{{fraseCose}}</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #F0EAF5; padding-top: 12px; font-size: 13px; font-weight: 800">
+      <span>Note in settimana: nessuna</span>
+      <span style="color: #A86A00">Chiavi previste: {{chiaviPreviste}}</span>
+    </div>
+  </section>
+
+  <section aria-label="Giorno per giorno" style="background: #FFFFFF; border: 1px solid #E9E2F0; border-radius: 20px; padding: 16px 14px; display: flex; flex-direction: column; gap: 8px">
+    <h2 style="margin: 0 4px 4px; font-size: 16px; font-weight: 900">Giorno per giorno</h2>
+    <div style="display: grid; grid-template-columns: 92px repeat(7, minmax(0, 1fr)); gap: 4px; align-items: center">
+      <span></span>
+      <sc-for list="{{giorni}}" as="g" hint-placeholder-count="7">
+        <span style="text-align: center; font-size: 12px; font-weight: 800; color: #6E5A80">{{g}}</span>
+      </sc-for>
+    </div>
+    <sc-for list="{{righe}}" as="r" hint-placeholder-count="5">
+      <div style="display: grid; grid-template-columns: 92px repeat(7, minmax(0, 1fr)); gap: 4px; align-items: center; padding: 6px 0; border-top: 1px solid #F3EEF7">
+        <span style="font-size: 13px; font-weight: 800">{{r.nome}}</span>
+        <sc-for list="{{r.celle}}" as="c" hint-placeholder-count="7">
+          <div style="display: flex; justify-content: center">
+            <div style="{{c.stile}}">{{c.testo}}</div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-for>
+  </section>
+
+  <section aria-label="Passi per voce" style="background: #FFFFFF; border: 1px solid #E9E2F0; border-radius: 20px; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px">
+    <h2 style="margin: 0 0 4px; font-size: 16px; font-weight: 900">Passi per voce</h2>
+    <sc-for list="{{righe}}" as="r" hint-placeholder-count="5">
+      <div style="display: grid; grid-template-columns: 1fr auto auto; gap: 12px; align-items: baseline; font-size: 14px; font-weight: 700; padding: 4px 0; border-top: 1px solid #F3EEF7">
+        <span>{{r.nome}}</span>
+        <span style="color: #6E5A80">{{r.coseTesto}}</span>
+        <span style="font-weight: 900; min-width: 64px; text-align: right">{{r.passiTesto}}</span>
+      </div>
+    </sc-for>
+    <p style="margin: 6px 0 0; font-size: 12px; font-weight: 700; color: #6E5A80; line-height: 1.4">Voti, partite e gesti di casa fanno salire il percorso, ma non contano per le chiavi.</p>
+  </section>
+
+  <a href="#" style="display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-radius: 20px; border: 1px dashed #CFC4DA; background: transparent; color: #2B1D3A; text-decoration: none">
+    <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" fill="none" stroke="#6E5A80" stroke-width="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="#6E5A80" stroke-width="2"></path></svg>
+    <span style="display: flex; flex-direction: column; gap: 1px">
+      <span style="font-size: 14px; font-weight: 800">Premi e forzieri</span>
+      <span style="font-size: 12px; font-weight: 700; color: #6E5A80">Protetti dal PIN genitori</span>
+    </span>
+  </a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"completamento":{"editor":"range","default":100,"min":0,"max":100,"step":1,"unit":"%"},"$preview":{"width":390,"height":1320}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const pct = Math.max(0, Math.min(100, this.props.completamento ?? 100));
+    const def = [
+      { nome: 'Compiti', passi: 10, n: [3, 2, 3, 4, 3, 0, 0] },
+      { nome: 'Cartella', passi: 5, n: [1, 1, 1, 1, 0, 0, 1] },
+      { nome: 'Borsa', passi: 2, n: [0, 0, 0, 1, 0, 0, 1] },
+      { nome: 'Ripasso', passi: 10, n: [0, 1, 1, 0, 0, 0, 0] },
+      { nome: 'Dieci minuti', passi: 10, n: [1, 1, 1, 1, 1, 1, 1] }
+    ];
+    let coseTot = 0, passiTot = 0;
+    def.forEach((r) => r.n.forEach((x) => { coseTot += x; passiTot += x * r.passi; }));
+    let resto = Math.round((pct / 100) * coseTot);
+    const fatti = def.map((r) => r.n.map(() => 0));
+    for (let d = 0; d < 7; d++) {
+      for (let i = 0; i < def.length; i++) {
+        const k = Math.min(def[i].n[d], resto);
+        fatti[i][d] = k;
+        resto -= k;
+      }
+    }
+    let coseFatte = 0, passiFatti = 0;
+    const base = 'width: 30px; height: 30px; border-radius: 9px; display: flex; align-items: center; justify-content: center; box-sizing: border-box; font-size: 11px; font-weight: 900;';
+    const righe = def.map((r, i) => {
+      let fr = 0, nr = 0;
+      const celle = r.n.map((n, d) => {
+        const f = fatti[i][d];
+        fr += f; nr += n;
+        if (n === 0) return { stile: base + ' color: #CFC4DA;', testo: '·' };
+        if (f === n) return { stile: base + ' background: #C2185B; color: #FFFFFF;', testo: n > 1 ? f + '/' + n : 'ok' };
+        return { stile: base + ' border: 2px solid #BBA7CC; color: #6E5A80; background: #FFFFFF;', testo: f + '/' + n };
+      });
+      coseFatte += fr;
+      passiFatti += fr * r.passi;
+      return { nome: r.nome, celle, coseTesto: fr + ' di ' + nr, passiTesto: fr * r.passi + ' / ' + nr * r.passi };
+    });
+    const pctPassi = passiTot ? Math.round((passiFatti / passiTot) * 100) : 0;
+    const pctCose = coseTot ? Math.round((coseFatte / coseTot) * 100) : 0;
+    const soglia1 = Math.ceil(0.7 * passiTot);
+    const soglia3 = Math.ceil(0.95 * coseTot);
+    const k1 = passiFatti >= soglia1;
+    const k3 = k1 && coseFatte >= soglia3;
+    return {
+      pctPassi, pctCose, passiFatti, passiTot, coseFatte, coseTot,
+      frasePassi: k1 ? '1ª chiave presa: soglia di ' + soglia1 + ' passi superata.' : 'Alla 1ª chiave mancano ' + (soglia1 - passiFatti) + ' passi (soglia ' + soglia1 + ').',
+      fraseCose: coseFatte >= soglia3 ? '3ª chiave presa: almeno ' + soglia3 + ' cose su ' + coseTot + '.' : 'Alla 3ª chiave mancano ' + (soglia3 - coseFatte) + ' cose (soglia ' + soglia3 + ').',
+      chiaviPreviste: k3 ? 3 : k1 ? 2 : 0,
+      giorni: ['Lu', 'Ma', 'Me', 'Gi', 'Ve', 'Sa', 'Do'],
+      righe
+    };
+  }
+}
+</script>
+</body>
+</html>
