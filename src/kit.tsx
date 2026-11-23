@@ -42,6 +42,7 @@ export function Testata({ sopra, titolo, riga, posa, sfondo, misura = 170 }: { s
         {riga && <div className="riga">{riga}</div>}
       </div>
       {posa && <Sticker posa={posa} misura={misura} className="testata-avatar" />}
+      <TestataMini />
     </header>
   );
 }
