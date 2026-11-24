@@ -7,26 +7,25 @@
 // uguale per tutti i fotogrammi con margine, avanti-indietro dove il giro scatterebbe. Scrive anche
 // <id>-fermo.webp, il primo fotogramma, per chi ha il movimento ridotto, e <id>-passo1..3.webp per le
 // vignette "Come si fa".
-import { mkdirSync, statSync } from "node:fs";
-import sharp from "sharp";
+import { mkdirSync, statSync } from 'node:fs';
+import sharp from 'sharp';
 
-const SORGENTE =
-  process.argv[2] ?? "C:/progetti/ace/asset/avatar/lani/esercizi";
-const DESTINAZIONE = "public/assets/trick";
+const SORGENTE = process.argv[2] ?? 'C:/progetti/ace/asset/avatar/lani/esercizi';
+const DESTINAZIONE = 'public/assets/trick';
 
 // id usato dall'app -> file originale (i primi due sono pose base, non escono nelle sessioni)
 const TRICK = {
-  "palleggio-base": "4-trick_palleggio-base_v3.gif",
-  "bagher-base": "4-trick_bagher-base_v3.gif",
-  "bagher-un-braccio": "4-trick_bagher-un-braccio_v1.gif",
-  "palleggio-seduta": "4-trick_palleggio-seduta_v1.gif",
-  "battito-mani": "4-trick_battito-mani_v2.gif",
-  "giro-su-se-stessa": "4-trick_giro-su-se-stessa_v1.gif",
-  "uno-alto-uno-basso": "4-trick_uno-alto-uno-basso_v2.gif",
-  "bagher-palleggio-alternati": "4-trick_bagher-palleggio-alternati_v2.gif",
-  "palleggio-di-lato": "4-trick_palleggio-di-lato_v2.gif",
-  pancake: "4-trick_pancake_v3.gif",
-  "muro-rimbalzo": "4-trick_muro-rimbalzo_v2.gif",
+  'palleggio-base': '4-trick_palleggio-base_v3.gif',
+  'bagher-base': '4-trick_bagher-base_v3.gif',
+  'bagher-un-braccio': '4-trick_bagher-un-braccio_v1.gif',
+  'palleggio-seduta': '4-trick_palleggio-seduta_v1.gif',
+  'battito-mani': '4-trick_battito-mani_v2.gif',
+  'giro-su-se-stessa': '4-trick_giro-su-se-stessa_v1.gif',
+  'uno-alto-uno-basso': '4-trick_uno-alto-uno-basso_v2.gif',
+  'bagher-palleggio-alternati': '4-trick_bagher-palleggio-alternati_v2.gif',
+  'palleggio-di-lato': '4-trick_palleggio-di-lato_v2.gif',
+  pancake: '4-trick_pancake_v3.gif',
+  'muro-rimbalzo': '4-trick_muro-rimbalzo_v2.gif',
 };
 
 // verde dello sfondo: quanto il verde supera il rosso e il blu (sfondo ~55-70, Lani e contorno bianco ~0)
@@ -52,11 +51,7 @@ const verde = (d, i) => d[i + 1] - Math.max(d[i], d[i + 2]);
 
 function differenza(a, b) {
   let s = 0;
-  for (let i = 0; i < a.length; i += 4)
-    s +=
-      Math.abs(a[i] - b[i]) +
-      Math.abs(a[i + 1] - b[i + 1]) +
-      Math.abs(a[i + 2] - b[i + 2]);
+  for (let i = 0; i < a.length; i += 4) s += Math.abs(a[i] - b[i]) + Math.abs(a[i + 1] - b[i + 1]) + Math.abs(a[i + 2] - b[i + 2]);
   return s / (a.length / 4);
 }
 
@@ -80,8 +75,7 @@ function togliVerde(f, W, H) {
     }
   };
   // semi: ogni pixel di verde pieno (anche le sacche chiuse, tra braccia e corpo); si allarga sui bordi sfumati
-  for (let p = 0; p < W * H; p++)
-    if (verde(o, p * 4) >= VERDE_SEME && o[p * 4] >= ROSSO_SFONDO) semina(p);
+  for (let p = 0; p < W * H; p++) if (verde(o, p * 4) >= VERDE_SEME && o[p * 4] >= ROSSO_SFONDO) semina(p);
   while (coda.length) {
     const p = coda.pop();
     const x = p % W;
@@ -94,14 +88,7 @@ function togliVerde(f, W, H) {
     if (!sfondo[p]) continue;
     const i = p * 4;
     const v = verde(o, i);
-    const a =
-      v >= VERDE_PIENO
-        ? 0
-        : v <= VERDE_NIENTE
-          ? 255
-          : Math.round(
-              (255 * (VERDE_PIENO - v)) / (VERDE_PIENO - VERDE_NIENTE),
-            );
+    const a = v >= VERDE_PIENO ? 0 : v <= VERDE_NIENTE ? 255 : Math.round((255 * (VERDE_PIENO - v)) / (VERDE_PIENO - VERDE_NIENTE));
     o[i + 3] = a;
     if (a === 0) o[i] = o[i + 1] = o[i + 2] = 0;
     else if (v > 0) o[i + 1] = Math.max(o[i], o[i + 2]);
@@ -116,29 +103,19 @@ for (const [id, file] of Object.entries(TRICK)) {
   const meta = await sharp(percorso, { animated: true }).metadata();
   const { width: W, pageHeight: H, pages: N } = meta;
   const ritardo = meta.delay?.[0] ?? 100;
-  const { data } = await sharp(percorso, { animated: true })
-    .ensureAlpha()
-    .raw()
-    .toBuffer({ resolveWithObject: true });
-  let fotogrammi = Array.from({ length: N }, (_, n) =>
-    data.subarray(n * W * H * 4, (n + 1) * W * H * 4),
-  );
+  const { data } = await sharp(percorso, { animated: true }).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  let fotogrammi = Array.from({ length: N }, (_, n) => data.subarray(n * W * H * 4, (n + 1) * W * H * 4));
 
   // fotogrammi fermi in coda: si tiene solo il primo della serie
   let fine = fotogrammi.length;
-  while (
-    fine > 2 &&
-    differenza(fotogrammi[fine - 1], fotogrammi[fine - 2]) < FERMO
-  )
-    fine--;
+  while (fine > 2 && differenza(fotogrammi[fine - 1], fotogrammi[fine - 2]) < FERMO) fine--;
   const tagliati = fotogrammi.length - fine;
   fotogrammi = fotogrammi.slice(0, fine);
 
   const scatto = differenza(fotogrammi.at(-1), fotogrammi[0]);
   const avantiIndietro = scatto > SCATTO;
   fotogrammi = fotogrammi.filter((_, n) => n % PASSO === 0);
-  if (avantiIndietro)
-    fotogrammi = [...fotogrammi, ...fotogrammi.slice(1, -1).reverse()];
+  if (avantiIndietro) fotogrammi = [...fotogrammi, ...fotogrammi.slice(1, -1).reverse()];
 
   const puliti = fotogrammi.map((f) => togliVerde(f, W, H));
 
@@ -168,13 +145,7 @@ for (const [id, file] of Object.entries(TRICK)) {
     await Promise.all(
       puliti.map((f) => {
         const r = Buffer.alloc(w * h * 4);
-        for (let y = 0; y < h; y++)
-          f.copy(
-            r,
-            y * w * 4,
-            ((y + y0) * W + x0) * 4,
-            ((y + y0) * W + x1 + 1) * 4,
-          );
+        for (let y = 0; y < h; y++) f.copy(r, y * w * 4, ((y + y0) * W + x0) * 4, ((y + y0) * W + x1 + 1) * 4);
         let p = sharp(r, { raw: { width: w, height: h, channels: 4 } });
         if (SCALA !== 1) p = p.resize(lw, lh);
         return p.raw().toBuffer();
@@ -185,8 +156,7 @@ for (const [id, file] of Object.entries(TRICK)) {
   // alfa netta (0 o 255): metà del peso di un fotogramma era l'alfa sfumata; il contorno bianco dello sticker regge il bordo netto
   for (let i = 3; i < ritagliati.length; i += 4) {
     ritagliati[i] = ritagliati[i] >= 128 ? 255 : 0;
-    if (!ritagliati[i])
-      ritagliati[i - 1] = ritagliati[i - 2] = ritagliati[i - 3] = 0;
+    if (!ritagliati[i]) ritagliati[i - 1] = ritagliati[i - 2] = ritagliati[i - 3] = 0;
   }
 
   const uscita = `${DESTINAZIONE}/${id}.webp`;
@@ -208,10 +178,7 @@ for (const [id, file] of Object.entries(TRICK)) {
   let passi = 0;
   for (const i of [1, 2, 3]) {
     const file = `${DESTINAZIONE}/${id}-passo${i}.webp`;
-    await unFotogramma(
-      Math.min(andata - 1, Math.round((andata * (2 * i - 1)) / 6)),
-      file,
-    );
+    await unFotogramma(Math.min(andata - 1, Math.round((andata * (2 * i - 1)) / 6)), file);
     passi += statSync(file).size;
   }
 
