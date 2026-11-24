@@ -11,6 +11,7 @@
     "test": "vitest run",
     "icone": "node scripts/icone.mjs",
     "avatar:piccoli": "node scripts/avatar-piccoli.mjs",
+    "trick:webp": "node scripts/trick-webp.mjs",
     "simula": "set TARATURA=1&& vitest run scripts/simulatore/taratura",
     "prova:schema": "node scripts/prova-schema.mjs",
     "prova:allinea": "node scripts/allinea-main.mjs",
