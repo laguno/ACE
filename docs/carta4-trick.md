@@ -21,3 +21,16 @@ Decisione del 24/11 (Jarvis e signore): per il prototipo si tengono tutte; si ri
 - `muro-rimbalzo`: il muro non è disegnato, la palla esce a destra e torna.
 - `bagher-un-braccio`: palla sopra la testa a lato (già noto).
 - Vestiti giusti in tutte le undici (maglietta viola, tuta bordeaux, scarpe bianche), mai la divisa.
+
+## Schermata (Fase 2, 24/11)
+
+- **Dove**: in fondo a Oggi, fascia "PROVA — Palla al muro: trick" con VIA, **solo nelle build di prova** (`vite --mode locale`, cioè ACE Prova, e il server di sviluppo). In produzione la condizione è falsa al build: `src/Carta4.tsx` non entra nel pacchetto e i trick non entrano nel precache (`globIgnores` in `vite.config.ts`; controllato sulla build).
+- **File**: `src/Carta4.tsx` (schermata), `src/lib/regole/trick.ts` + test (scaletta, fase dai secondi passati, 8 trick su 9 senza ripetizioni, segnali, fumetti, record), `data/config-trick.json` (**tutte le durate**, vibrazioni e testi, PROVVISORIO), `e2e/carta4.e2e.ts`.
+- **Sessione**: 60" di riscaldamento (palleggio base, poi bagher base, poi negli ultimi 20" arriva il primo trick), 8 blocchi da 40" + 20", 60" di record. "3, 2, 1… cambio!" negli ultimi 3" di ogni fase, vibrazione corta a ogni secondo del conto e lunga al cambio, "Ancora 10 secondi!" nel lavoro. Allenatore in basso a sinistra con il fumetto (pollice nel lavoro, timeout in pausa, applaude alla fine).
+- **"Come si fa"**: la prima volta che un trick arriva (nella pausa prima, o negli ultimi 20" del riscaldamento) tre vignette numerate con un fotogramma e una riga; da quando comincia il suo lavoro è "visto" e resta il "?" per riaprirla.
+- **Record**: un trick a caso fra gli otto; si festeggia (`lani-cima`, coppa) solo se batte il migliore salvato. `lani-festeggia` non si usa: è in divisa.
+- **Stato provvisorio, solo sul telefono**: `localStorage` `ace-prova:trick:visti` e `ace-prova:trick:record`. Niente server, niente passi, niente migrazioni.
+- **Schermo spento / app in sottofondo**: la fase si calcola dall'ora di avvio, quindi al rientro il timer è giusto; mentre lo schermo è spento non vibra. Lo schermo resta acceso con la Wake Lock API dove il telefono la offre (da verificare su ACE Prova).
+- **Movimento ridotto**: solo `<id>-fermo.webp`, niente transizioni né salti, niente vibrazione (come i sensi di ACE).
+- Aggiunte rispetto alla lista: il pulsante **Esci** (senza, Lani non può uscire) e il **muro stilizzato** accanto al trick del muro (deciso il 24/11).
+- **Altro difetto notato**: nelle GIF Lani ha lo chignon e niente occhiali, negli sticker dell'app capelli sciolti e occhiali.

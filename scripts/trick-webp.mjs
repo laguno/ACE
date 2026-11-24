@@ -5,7 +5,8 @@
 //
 // Per ogni GIF: toglie il verde (trasparenza), taglia i fotogrammi fermi in coda, un solo ritaglio
 // uguale per tutti i fotogrammi con margine, avanti-indietro dove il giro scatterebbe. Scrive anche
-// <id>-fermo.webp, il primo fotogramma, per chi ha il movimento ridotto.
+// <id>-fermo.webp, il primo fotogramma, per chi ha il movimento ridotto, e <id>-passo1..3.webp per le
+// vignette "Come si fa".
 import { mkdirSync, statSync } from "node:fs";
 import sharp from "sharp";
 
@@ -194,12 +195,25 @@ for (const [id, file] of Object.entries(TRICK)) {
   })
     .webp({ ...QUALITA, loop: 0, delay: puliti.map(() => ritardo * PASSO) })
     .toFile(uscita);
+  const unFotogramma = (k, file) =>
+    sharp(ritagliati.subarray(k * lw * lh * 4, (k + 1) * lw * lh * 4), {
+      raw: { width: lw, height: lh, channels: 4 },
+    })
+      .webp(QUALITA)
+      .toFile(file);
   const fermo = `${DESTINAZIONE}/${id}-fermo.webp`;
-  await sharp(ritagliati.subarray(0, lw * lh * 4), {
-    raw: { width: lw, height: lh, channels: 4 },
-  })
-    .webp(QUALITA)
-    .toFile(fermo);
+  await unFotogramma(0, fermo);
+  // tre momenti del gesto per le vignette "Come si fa" (a 1/6, 3/6 e 5/6 del giro, prima dell'avanti-indietro)
+  const andata = Math.ceil(fine / PASSO);
+  let passi = 0;
+  for (const i of [1, 2, 3]) {
+    const file = `${DESTINAZIONE}/${id}-passo${i}.webp`;
+    await unFotogramma(
+      Math.min(andata - 1, Math.round((andata * (2 * i - 1)) / 6)),
+      file,
+    );
+    passi += statSync(file).size;
+  }
 
   righe.push({
     id,
@@ -211,8 +225,9 @@ for (const [id, file] of Object.entries(TRICK)) {
     palla_al_bordo: bordoAlto,
     kB: +(statSync(uscita).size / 1024).toFixed(1),
     fermo_kB: +(statSync(fermo).size / 1024).toFixed(1),
+    vignette_kB: +(passi / 1024).toFixed(1),
   });
 }
 console.table(righe);
-const totale = righe.reduce((s, r) => s + r.kB + r.fermo_kB, 0);
+const totale = righe.reduce((s, r) => s + r.kB + r.fermo_kB + r.vignette_kB, 0);
 console.log(`Totale: ${totale.toFixed(1)} kB`);

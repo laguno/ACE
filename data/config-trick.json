@@ -1,0 +1,115 @@
+{
+  "nota": "PROVVISORIO (24/11/2026): carta 4 dei dieci minuti, 'Palla al muro: trick', prototipo solo per ACE Prova (docs/carta4-trick.md). Tutte le durate della sessione stanno qui, in secondi. Niente passi: il prototipo non tocca il server. Nomi al massimo quattro parole; testi da confermare col signore.",
+  "durate": {
+    "riscaldamento": 60,
+    "blocchi": 8,
+    "lavoro": 40,
+    "pausa": 20,
+    "record": 60,
+    "conto_alla_rovescia": 3,
+    "avviso": 10
+  },
+  "vibrazione_ms": { "conto": 80, "cambio": [200, 80, 200] },
+  "riscaldamento": [
+    { "id": "palleggio-base", "nome": "Palleggio base" },
+    { "id": "bagher-base", "nome": "Bagher base" }
+  ],
+  "trick": [
+    {
+      "id": "bagher-un-braccio",
+      "nome": "Bagher a un braccio",
+      "come": [
+        "Un braccio teso, l'altro dietro.",
+        "Colpisci con l'avambraccio.",
+        "Palla dritta, non troppo alta."
+      ]
+    },
+    {
+      "id": "palleggio-seduta",
+      "nome": "Palleggio da seduta",
+      "come": [
+        "Siediti a gambe incrociate.",
+        "Mani a coppa sopra la fronte.",
+        "Spingi la palla in alto, dritta."
+      ]
+    },
+    {
+      "id": "battito-mani",
+      "nome": "Battito di mani",
+      "come": [
+        "Palleggia alto.",
+        "Mentre è su, batti le mani.",
+        "Mani pronte prima che scenda."
+      ]
+    },
+    {
+      "id": "giro-su-se-stessa",
+      "nome": "Giro su te stessa",
+      "come": [
+        "Palleggia bello alto.",
+        "Fai un giro veloce.",
+        "Riprendila in palleggio."
+      ]
+    },
+    {
+      "id": "uno-alto-uno-basso",
+      "nome": "Uno alto, uno basso",
+      "come": [
+        "Un palleggio basso, vicino.",
+        "Uno alto, sopra la testa.",
+        "Alterna senza fermarti."
+      ]
+    },
+    {
+      "id": "bagher-palleggio-alternati",
+      "nome": "Bagher e palleggio",
+      "come": [
+        "Un tocco di bagher.",
+        "Il tocco dopo in palleggio.",
+        "Avanti così, alternando."
+      ]
+    },
+    {
+      "id": "palleggio-di-lato",
+      "nome": "Palleggio di lato",
+      "come": [
+        "Palleggia sopra la testa.",
+        "Fai un passo di lato.",
+        "Torna indietro, sempre palleggiando."
+      ]
+    },
+    {
+      "id": "pancake",
+      "nome": "Pancake da ferma",
+      "come": [
+        "Lancia la palla davanti, bassa.",
+        "Mano piatta a terra, sotto la palla.",
+        "La palla rimbalza sul dorso."
+      ]
+    },
+    {
+      "id": "muro-rimbalzo",
+      "nome": "Muro e rimbalzo",
+      "come": [
+        "Lancia la palla contro il muro.",
+        "Lasciala rimbalzare a terra.",
+        "Riprendila in palleggio o bagher."
+      ]
+    }
+  ],
+  "fumetti": {
+    "riscaldamento": "Scaldiamo braccia e gambe.",
+    "lavoro": "Vai, tocchi puliti!",
+    "pausa": "Respira. Ora tocca a questo.",
+    "avviso": "Ancora 10 secondi!",
+    "cambio": "3, 2, 1… cambio!",
+    "record": "Quanti di fila? Conta!",
+    "fine": "Dieci minuti fatti. Bel lavoro."
+  },
+  "record": {
+    "domanda": "Quanti di fila?",
+    "battuto": "Record nuovo: {n}!",
+    "primo": "Primo record: {n}. Domani lo batti?",
+    "resta": "Il record resta {migliore}. Oggi {n}."
+  }
+}

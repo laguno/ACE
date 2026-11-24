@@ -44,6 +44,8 @@ export default defineConfig({
       workbox: {
         // i suoni (public/suoni, pochi kB) anche senza rete, come le immagini
         globPatterns: ['**/*.{js,css,html,png,webp,svg,woff2,wav}'],
+        // carta 4 (PROTOTIPO, docs/carta4-trick.md): i trick senza rete solo nelle build di prova (`--mode locale`)
+        globIgnores: process.argv.includes('locale') ? [] : ['assets/trick/**'],
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         importScripts: ['push-sw.js'],
         // Senza rete: le letture di Supabase (GET /rest/v1) vanno prima in rete e, se la rete non

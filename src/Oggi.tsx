@@ -1,28 +1,69 @@
-import { useEffect, useState } from 'react';
-import { Bell, CaretDown, CaretRight, Cards, ClipboardText, Lightbulb, Volleyball } from '@phosphor-icons/react';
-import { impegniTra, piuGiorni, oraAdesso, useGiornata, type Impegno } from './giornata';
-import { Attesa, Riquadro, Sticker, Testata } from './kit';
-import { Frase, type Momento } from './Frase';
-import { Fotografa, SELECT_RICHIESTE, descrizione, type RichiestaFoto } from './Foto';
-import * as C from './lib/calendario';
-import * as N from './lib/nuvola';
-import * as R from './lib/regole';
-import { GIORNI, MESI, RigaCompito, SELECT_COMPITI, adesso, maiuscola, mostraValore, spuntaCompito, useAnnulla, type Compito } from './spunte';
-import { attivaNotifiche, notifichePossibili } from './notifiche';
-import { supabase } from './supabase';
-import { DieciMinuti } from './DieciMinuti';
-import { PillolaPartita } from './ProssimaPartita';
-import { useREvolutionDa } from './accensione';
-import { PianoDelGiorno } from './Metacognizione';
-import CartaOggi from './CartaOggi';
-import { Aiuto } from './Tutor';
-import type { Dove } from './lib/regole/tabellina';
+import { Suspense, lazy, useEffect, useState } from "react";
+import {
+  Bell,
+  CaretDown,
+  CaretRight,
+  Cards,
+  ClipboardText,
+  Lightbulb,
+  Volleyball,
+} from "@phosphor-icons/react";
+import {
+  impegniTra,
+  piuGiorni,
+  oraAdesso,
+  useGiornata,
+  type Impegno,
+} from "./giornata";
+import { Attesa, Riquadro, Sticker, Testata } from "./kit";
+import { Frase, type Momento } from "./Frase";
+import {
+  Fotografa,
+  SELECT_RICHIESTE,
+  descrizione,
+  type RichiestaFoto,
+} from "./Foto";
+import * as C from "./lib/calendario";
+import * as N from "./lib/nuvola";
+import * as R from "./lib/regole";
+import {
+  GIORNI,
+  MESI,
+  RigaCompito,
+  SELECT_COMPITI,
+  adesso,
+  maiuscola,
+  mostraValore,
+  spuntaCompito,
+  useAnnulla,
+  type Compito,
+} from "./spunte";
+import { attivaNotifiche, notifichePossibili } from "./notifiche";
+import { supabase } from "./supabase";
+import { DieciMinuti } from "./DieciMinuti";
+import { PillolaPartita } from "./ProssimaPartita";
+import { useREvolutionDa } from "./accensione";
+import { PianoDelGiorno } from "./Metacognizione";
+import CartaOggi from "./CartaOggi";
+import { Aiuto } from "./Tutor";
+import type { Dove } from "./lib/regole/tabellina";
 
 // Oggi — design/Oggi.html (mattina) e design/Pomeriggio.html (pomeriggio).
 // ponytail: riga dell'umore facoltativa e foto dei compiti, più avanti.
 
-type Cosa = { titolo: string; sotto: string; icona: 'verifica' | 'sport' | 'promemoria' };
-type Apri = (v: 'Studio' | 'Astra') => void;
+// Carta 4 dei dieci minuti (PROTOTIPO, 24/11): solo nelle build di prova (ACE Prova con `--mode locale`,
+// server di sviluppo). In produzione la condizione è falsa al build e il modulo non entra nel pacchetto.
+const Carta4 =
+  import.meta.env.DEV || import.meta.env.MODE === "locale"
+    ? lazy(() => import("./Carta4"))
+    : null;
+
+type Cosa = {
+  titolo: string;
+  sotto: string;
+  icona: "verifica" | "sport" | "promemoria";
+};
+type Apri = (v: "Studio" | "Astra") => void;
 const ICONE = {
   verifica: (
     <Riquadro colore="rosa">
@@ -41,14 +82,20 @@ const ICONE = {
   ),
 };
 
-export default function Oggi({ apri = () => {}, vai }: { apri?: Apri; vai?: (d: Dove) => void }) {
+export default function Oggi({
+  apri = () => {},
+  vai,
+}: {
+  apri?: Apri;
+  vai?: (d: Dove) => void;
+}) {
   const giornata = useGiornata();
   const rEvolutionDa = useREvolutionDa();
   if (!giornata) return <Attesa />;
   const oggi = R.giornoRoma(new Date());
   return (
     <>
-      {C.momento(oraAdesso(), giornata.chiusura) === 'mattina' ? (
+      {C.momento(oraAdesso(), giornata.chiusura) === "mattina" ? (
         <Mattina impegni={giornata.impegni} apri={apri} vai={vai} />
       ) : (
         <Pomeriggio chiusura={giornata.chiusura} apri={apri} vai={vai} />
@@ -59,12 +106,27 @@ export default function Oggi({ apri = () => {}, vai }: { apri?: Apri; vai?: (d: 
           <DieciMinuti oggi={oggi} />
         </section>
       )}
+      {Carta4 && (
+        <section className="schermo dopo">
+          <Suspense fallback={null}>
+            <Carta4 />
+          </Suspense>
+        </section>
+      )}
       <AttivaNotifiche />
     </>
   );
 }
 
-function Mattina({ impegni, apri, vai }: { impegni: Impegno[]; apri: Apri; vai?: (d: Dove) => void }) {
+function Mattina({
+  impegni,
+  apri,
+  vai,
+}: {
+  impegni: Impegno[];
+  apri: Apri;
+  vai?: (d: Dove) => void;
+}) {
   const oggi = R.giornoRoma(new Date());
   const [cose, setCose] = useState<Cosa[]>();
   const [ieri, setIeri] = useState(0);
@@ -75,37 +137,103 @@ function Mattina({ impegni, apri, vai }: { impegni: Impegno[]; apri: Apri; vai?:
 
   useEffect(() => {
     Promise.all([
-      supabase.from('verifiche').select('tipo, materie(nome)').eq('data', R.iso(oggi)),
-      supabase.from('impostazioni').select('valore').eq('chiave', 'materiale_cartella').maybeSingle(),
-      supabase.from('fogli_firma').select('titolo').is('dato_il', null).is('consegnato_il', null).limit(1),
-      supabase.from('movimenti_passi').select('passi, moltiplicatore').eq('giorno', R.iso(piuGiorni(oggi, -1))),
+      supabase
+        .from("verifiche")
+        .select("tipo, materie(nome)")
+        .eq("data", R.iso(oggi)),
+      supabase
+        .from("impostazioni")
+        .select("valore")
+        .eq("chiave", "materiale_cartella")
+        .maybeSingle(),
+      supabase
+        .from("fogli_firma")
+        .select("titolo")
+        .is("dato_il", null)
+        .is("consegnato_il", null)
+        .limit(1),
+      supabase
+        .from("movimenti_passi")
+        .select("passi, moltiplicatore")
+        .eq("giorno", R.iso(piuGiorni(oggi, -1))),
       impegniTra(new Date(), piuGiorni(oggi, 8)),
-      supabase.from('settimane').select('chiavi').not('chiavi', 'is', null).order('inizio', { ascending: false }).limit(1),
-      supabase.from('serate').select('cartella_il').eq('data', R.iso(piuGiorni(oggi, -1))).not('cartella_il', 'is', null).limit(1),
-      supabase.from('verifiche').select('id', { count: 'exact', head: true }).eq('data', R.iso(piuGiorni(oggi, 1))),
+      supabase
+        .from("settimane")
+        .select("chiavi")
+        .not("chiavi", "is", null)
+        .order("inizio", { ascending: false })
+        .limit(1),
+      supabase
+        .from("serate")
+        .select("cartella_il")
+        .eq("data", R.iso(piuGiorni(oggi, -1)))
+        .not("cartella_il", "is", null)
+        .limit(1),
+      supabase
+        .from("verifiche")
+        .select("id", { count: "exact", head: true })
+        .eq("data", R.iso(piuGiorni(oggi, 1))),
     ]).then(([v, m, f, mov, prossimi, w, sera, vd]) => {
       // la frase di oggi è una sola: con una verifica domani si tiene per la sera
-      setMomento((vd.count ?? 0) > 0 ? null : oggi.getDay() === 1 ? 'inizio_settimana' : 'apertura');
+      setMomento(
+        (vd.count ?? 0) > 0
+          ? null
+          : oggi.getDay() === 1
+            ? "inizio_settimana"
+            : "apertura",
+      );
       const lista: Cosa[] = [];
-      for (const x of (v.data ?? []) as unknown as { tipo: string; materie: { nome: string } | null }[])
-        lista.push({ titolo: `${maiuscola(x.tipo)} di ${x.materie?.nome ?? 'oggi'}`, sotto: 'Oggi, in classe', icona: 'verifica' });
-      const sport = impegni.find((i) => C.tipoImpegno(i.titolo) !== 'famiglia');
+      for (const x of (v.data ?? []) as unknown as {
+        tipo: string;
+        materie: { nome: string } | null;
+      }[])
+        lista.push({
+          titolo: `${maiuscola(x.tipo)} di ${x.materie?.nome ?? "oggi"}`,
+          sotto: "Oggi, in classe",
+          icona: "verifica",
+        });
+      const sport = impegni.find((i) => C.tipoImpegno(i.titolo) !== "famiglia");
       if (sport) {
         const ora = C.oraRoma(sport.inizio);
-        const partita = C.tipoImpegno(sport.titolo) === 'partita';
+        const partita = C.tipoImpegno(sport.titolo) === "partita";
         lista.push({
-          titolo: `${partita ? 'Partita' : 'Allenamento'} alle ${ora}`,
-          sotto: R.giornoDiScuola(oggi) && ora < '16:00' ? 'Esci con cartella e borsa insieme' : partita ? 'Borsa pronta prima di uscire' : 'Borsa pronta per il pomeriggio',
-          icona: 'sport',
+          titolo: `${partita ? "Partita" : "Allenamento"} alle ${ora}`,
+          sotto:
+            R.giornoDiScuola(oggi) && ora < "16:00"
+              ? "Esci con cartella e borsa insieme"
+              : partita
+                ? "Borsa pronta prima di uscire"
+                : "Borsa pronta per il pomeriggio",
+          icona: "sport",
         });
       }
-      const materiale = (m.data?.valore as string[][] | undefined)?.[oggi.getDay()] ?? [];
-      if (materiale[0]) lista.push({ titolo: materiale[0], sotto: 'Controlla che ci sia nello zaino', icona: 'promemoria' });
-      else if (f.data?.[0]) lista.push({ titolo: f.data[0].titolo, sotto: 'Da far firmare: portalo a mamma o papà', icona: 'promemoria' });
+      const materiale =
+        (m.data?.valore as string[][] | undefined)?.[oggi.getDay()] ?? [];
+      if (materiale[0])
+        lista.push({
+          titolo: materiale[0],
+          sotto: "Controlla che ci sia nello zaino",
+          icona: "promemoria",
+        });
+      else if (f.data?.[0])
+        lista.push({
+          titolo: f.data[0].titolo,
+          sotto: "Da far firmare: portalo a mamma o papà",
+          icona: "promemoria",
+        });
       setCose(lista.slice(0, 3));
-      setIeri((mov.data ?? []).reduce((a, x) => a + Math.round(x.passi * x.moltiplicatore), 0));
+      setIeri(
+        (mov.data ?? []).reduce(
+          (a, x) => a + Math.round(x.passi * x.moltiplicatore),
+          0,
+        ),
+      );
       setIeriChiusa((sera.data ?? []).length > 0);
-      setFamiglia(prossimi.filter((i) => C.tipoImpegno(i.titolo) === 'famiglia').slice(0, 3));
+      setFamiglia(
+        prossimi
+          .filter((i) => C.tipoImpegno(i.titolo) === "famiglia")
+          .slice(0, 3),
+      );
       setChiavi(w.data?.[0]?.chiavi ?? null);
     });
   }, []);
@@ -114,17 +242,24 @@ function Mattina({ impegni, apri, vai }: { impegni: Impegno[]; apri: Apri; vai?:
   if (!cose)
     return (
       <section className="schermo">
-        <Testata sfondo="mattina" posa="lani-buongiorno" misura={92} piccola sopra={`${maiuscola(GIORNI[oggi.getDay()])} ${oggi.getDate()} ${MESI[oggi.getMonth()]}`} titolo="Buongiorno, Lani" />
+        <Testata
+          sfondo="mattina"
+          posa="lani-buongiorno"
+          misura={92}
+          piccola
+          sopra={`${maiuscola(GIORNI[oggi.getDay()])} ${oggi.getDate()} ${MESI[oggi.getMonth()]}`}
+          titolo="Buongiorno, Lani"
+        />
       </section>
     );
-  const sport = impegni.find((i) => C.tipoImpegno(i.titolo) !== 'famiglia');
+  const sport = impegni.find((i) => C.tipoImpegno(i.titolo) !== "famiglia");
   const riga = R.giornoDiScuola(oggi)
     ? sport
-      ? `Scuola, poi ${C.tipoImpegno(sport.titolo) === 'partita' ? 'partita' : 'allenamento'}.`
-      : 'Scuola, poi pomeriggio a casa.'
+      ? `Scuola, poi ${C.tipoImpegno(sport.titolo) === "partita" ? "partita" : "allenamento"}.`
+      : "Scuola, poi pomeriggio a casa."
     : sport
-      ? `Oggi ${C.tipoImpegno(sport.titolo) === 'partita' ? 'partita' : 'allenamento'}.`
-      : 'Niente scuola oggi.';
+      ? `Oggi ${C.tipoImpegno(sport.titolo) === "partita" ? "partita" : "allenamento"}.`
+      : "Niente scuola oggi.";
 
   return (
     <section className="schermo">
@@ -161,7 +296,11 @@ function Mattina({ impegni, apri, vai }: { impegni: Impegno[]; apri: Apri; vai?:
       {ieri > 0 && (
         <p className="pillola-oro">
           <Sticker posa="bart-sonnecchia" misura={52} />
-          <span>{ieriChiusa ? 'Ieri sera hai chiuso tutto: Bart ha dormito tranquillo' : 'Passi di ieri'}</span>
+          <span>
+            {ieriChiusa
+              ? "Ieri sera hai chiuso tutto: Bart ha dormito tranquillo"
+              : "Passi di ieri"}
+          </span>
           <b className="numero" role="img" aria-label={`${ieri} passi`}>
             +{ieri}
           </b>
@@ -176,18 +315,26 @@ function Mattina({ impegni, apri, vai }: { impegni: Impegno[]; apri: Apri; vai?:
               <Sticker posa="mamma-passaggio" misura={40} />
             </span>
             <h2>In famiglia</h2>
-            <CaretDown className="freccia-famiglia" size={20} weight="bold" aria-hidden />
+            <CaretDown
+              className="freccia-famiglia"
+              size={20}
+              weight="bold"
+              aria-hidden
+            />
           </summary>
           <ul>
             {famiglia.map((i) => {
               const g = R.giornoRoma(i.inizio);
-              const quando = R.iso(g) === R.iso(oggi) ? '' : `${GIORNI[g.getDay()].slice(0, 3)} `;
+              const quando =
+                R.iso(g) === R.iso(oggi)
+                  ? ""
+                  : `${GIORNI[g.getDay()].slice(0, 3)} `;
               return (
                 <li key={i.inizio + i.titolo}>
                   <b>
                     {quando}
-                    {i.tutto_il_giorno ? '' : C.oraRoma(i.inizio)}
-                  </b>{' '}
+                    {i.tutto_il_giorno ? "" : C.oraRoma(i.inizio)}
+                  </b>{" "}
                   {i.titolo}
                 </li>
               );
@@ -200,13 +347,22 @@ function Mattina({ impegni, apri, vai }: { impegni: Impegno[]; apri: Apri; vai?:
         <div className="carta riga-chiavi">
           <span>
             <small>Chiavi della settimana</small>
-            <span className="chiavi" role="img" aria-label={`${chiavi} chiavi su 3`}>
+            <span
+              className="chiavi"
+              role="img"
+              aria-label={`${chiavi} chiavi su 3`}
+            >
               {[1, 2, 3].map((k) => (
-                <Sticker key={k} posa={k <= chiavi ? 'chiave-piena' : 'chiave-vuota'} cartella="oggetti" misura={40} />
+                <Sticker
+                  key={k}
+                  posa={k <= chiavi ? "chiave-piena" : "chiave-vuota"}
+                  cartella="oggetti"
+                  misura={40}
+                />
               ))}
             </span>
           </span>
-          <button className="collegamento" onClick={() => apri('Astra')}>
+          <button className="collegamento" onClick={() => apri("Astra")}>
             Vai su Astra <CaretRight size={18} weight="bold" aria-hidden />
           </button>
         </div>
@@ -217,48 +373,85 @@ function Mattina({ impegni, apri, vai }: { impegni: Impegno[]; apri: Apri; vai?:
   );
 }
 
-type Sessione = { id: string; numero: number; tipo: string; verifica_id: string; verifiche: { data: string; materie: { nome: string } | null } | null };
-type Pallino = { id: string; numero: number; data_prevista: string; fatta_il: string | null };
-const COSA_SESSIONE: Record<string, string> = { rilettura_flashcard: 'rilettura e flash card', flashcard_mappa: 'flash card e mappa', quiz: 'quiz', quiz_errori: 'quiz breve sugli errori' };
+type Sessione = {
+  id: string;
+  numero: number;
+  tipo: string;
+  verifica_id: string;
+  verifiche: { data: string; materie: { nome: string } | null } | null;
+};
+type Pallino = {
+  id: string;
+  numero: number;
+  data_prevista: string;
+  fatta_il: string | null;
+};
+const COSA_SESSIONE: Record<string, string> = {
+  rilettura_flashcard: "rilettura e flash card",
+  flashcard_mappa: "flash card e mappa",
+  quiz: "quiz",
+  quiz_errori: "quiz breve sugli errori",
+};
 const P = R.CONFIG.passi.obbligatori;
 
-function Pomeriggio({ chiusura, apri, vai }: { chiusura: string | null; apri: Apri; vai?: (d: Dove) => void }) {
+function Pomeriggio({
+  chiusura,
+  apri,
+  vai,
+}: {
+  chiusura: string | null;
+  apri: Apri;
+  vai?: (d: Dove) => void;
+}) {
   const oggi = R.giornoRoma(new Date());
   const domani = R.prossimoGiornoDiScuola(oggi);
   const [compiti, setCompiti] = useState<Compito[]>();
   const [ripasso, setRipasso] = useState<Sessione | null>(null);
   const [pallini, setPallini] = useState<Pallino[]>([]);
   const [carte, setCarte] = useState(0);
-  const [errore, setErrore] = useState('');
+  const [errore, setErrore] = useState("");
   const [aiuto, setAiuto] = useState<Compito>();
   const [foto, setFoto] = useState<RichiestaFoto[]>([]);
-  const [fotoFatta, setFotoFatta] = useState('');
+  const [fotoFatta, setFotoFatta] = useState("");
   const attesa = useAnnulla();
 
   useEffect(() => {
     Promise.all([
-      supabase.from('compiti').select(SELECT_COMPITI).eq('scadenza', R.iso(domani)),
       supabase
-        .from('sessioni_ripasso')
-        .select('id, numero, tipo, verifica_id, verifiche(data, materie(nome))')
-        .eq('data_prevista', R.iso(oggi))
-        .is('fatta_il', null)
+        .from("compiti")
+        .select(SELECT_COMPITI)
+        .eq("scadenza", R.iso(domani)),
+      supabase
+        .from("sessioni_ripasso")
+        .select("id, numero, tipo, verifica_id, verifiche(data, materie(nome))")
+        .eq("data_prevista", R.iso(oggi))
+        .is("fatta_il", null)
         .limit(1),
-      supabase.from('flashcard').select('id', { count: 'exact', head: true }).lte('prossima_revisione', R.iso(oggi)).eq('segnalata_sbagliata', false),
-      supabase.from('richieste_foto').select(SELECT_RICHIESTE).eq('stato', 'aperta').order('creato_il').limit(3),
+      supabase
+        .from("flashcard")
+        .select("id", { count: "exact", head: true })
+        .lte("prossima_revisione", R.iso(oggi))
+        .eq("segnalata_sbagliata", false),
+      supabase
+        .from("richieste_foto")
+        .select(SELECT_RICHIESTE)
+        .eq("stato", "aperta")
+        .order("creato_il")
+        .limit(3),
     ]).then(([c, s, k, rf]) => {
       setFoto((rf.data ?? []) as unknown as RichiestaFoto[]);
-      if (c.error) return setErrore('Non riesco a leggere i compiti. Riprova tra poco.');
+      if (c.error)
+        return setErrore("Non riesco a leggere i compiti. Riprova tra poco.");
       const lista = (c.data ?? []) as unknown as Compito[];
       setCompiti(lista.sort((a, b) => N.peso(b.testo) - N.peso(a.testo)));
       const sessione = ((s.data ?? [])[0] as unknown as Sessione) ?? null;
       setRipasso(sessione);
       if (sessione)
         supabase
-          .from('sessioni_ripasso')
-          .select('id, numero, data_prevista, fatta_il')
-          .eq('verifica_id', sessione.verifica_id)
-          .order('numero')
+          .from("sessioni_ripasso")
+          .select("id, numero, data_prevista, fatta_il")
+          .eq("verifica_id", sessione.verifica_id)
+          .order("numero")
           .then(({ data }) => setPallini((data ?? []) as Pallino[]));
       setCarte(k.count ?? 0);
     });
@@ -269,15 +462,25 @@ function Pomeriggio({ chiusura, apri, vai }: { chiusura: string | null; apri: Ap
       <p role="alert">{errore}</p>
     ) : (
       <section className="schermo pomeriggio">
-        <Testata sfondo="pomeriggio" posa="lani-contenta" misura={92} piccola sopra={`${maiuscola(GIORNI[oggi.getDay()])} ${oggi.getDate()}`} titolo="Ciao, Lani" />
+        <Testata
+          sfondo="pomeriggio"
+          posa="lani-contenta"
+          misura={92}
+          piccola
+          sopra={`${maiuscola(GIORNI[oggi.getDay()])} ${oggi.getDate()}`}
+          titolo="Ciao, Lani"
+        />
       </section>
     );
-  if (aiuto) return <Aiuto compito={aiuto} chiudi={() => setAiuto(undefined)} />;
+  if (aiuto)
+    return <Aiuto compito={aiuto} chiudi={() => setAiuto(undefined)} />;
   const daFare = compiti.filter((c) => !c.fatto_il);
-  const segna = (id: string) => (fatto_il: string | null) => setCompiti((l) => l?.map((x) => (x.id === id ? { ...x, fatto_il } : x)));
+  const segna = (id: string) => (fatto_il: string | null) =>
+    setCompiti((l) => l?.map((x) => (x.id === id ? { ...x, fatto_il } : x)));
   // i fatti vanno in fondo, dopo quelli da fare; nei 5 secondi di "Annulla" la riga resta dov'è,
   // così non scappa da sotto il dito (sort è stabile: l'ordine per peso resta)
-  const inFondo = (c: Compito) => Number(!!c.fatto_il && !attesa.inAttesa(c.id));
+  const inFondo = (c: Compito) =>
+    Number(!!c.fatto_il && !attesa.inAttesa(c.id));
   const ordinati = [...compiti].sort((a, b) => inFondo(a) - inFondo(b));
   const ver = ripasso?.verifiche;
 
@@ -301,10 +504,13 @@ function Pomeriggio({ chiusura, apri, vai }: { chiusura: string | null; apri: Ap
           <>
             <div className="testa-carta" data-ancora="compiti">
               <h2>Compiti per {GIORNI[domani.getDay()]}</h2>
-              {mostraValore(compiti.some((c) => c.fatto_il)) && <span className="valore">+{P.compiti} ciascuno</span>}
+              {mostraValore(compiti.some((c) => c.fatto_il)) && (
+                <span className="valore">+{P.compiti} ciascuno</span>
+              )}
             </div>
             <p className="nota">
-              In quest'ordine.{chiusura && <> Hai tempo fino alle {chiusura}.</>}
+              In quest'ordine.
+              {chiusura && <> Hai tempo fino alle {chiusura}.</>}
             </p>
             <ul className="spunte ordine">
               {ordinati.map((c, i) => (
@@ -312,21 +518,36 @@ function Pomeriggio({ chiusura, apri, vai }: { chiusura: string | null; apri: Ap
                   key={c.id}
                   c={c}
                   numero={i + 1}
-                  nota={c === compiti[0] && !c.fatto_il ? 'Inizia da qui: è il più lungo' : undefined}
+                  nota={
+                    c === compiti[0] && !c.fatto_il
+                      ? "Inizia da qui: è il più lungo"
+                      : undefined
+                  }
                   onSpunta={() => {
                     segna(c.id)(adesso());
-                    attesa.avvia(c.id, () => spuntaCompito(c.id, segna(c.id), setErrore));
+                    attesa.avvia(c.id, () =>
+                      spuntaCompito(c.id, segna(c.id), setErrore),
+                    );
                   }}
-                  onAnnulla={attesa.inAttesa(c.id) ? () => attesa.annulla(c.id, () => segna(c.id)(null)) : undefined}
+                  onAnnulla={
+                    attesa.inAttesa(c.id)
+                      ? () => attesa.annulla(c.id, () => segna(c.id)(null))
+                      : undefined
+                  }
                   onAiuto={() => setAiuto(c)}
                   valore={P.compiti}
                 />
               ))}
             </ul>
-            {daFare.length === 0 && <p className="lady">Compiti finiti. Il resto del pomeriggio è tuo.</p>}
+            {daFare.length === 0 && (
+              <p className="lady">
+                Compiti finiti. Il resto del pomeriggio è tuo.
+              </p>
+            )}
             {daFare.length > 0 && (
               <p className="nota piccola">
-                <Lightbulb size={16} weight="bold" aria-hidden /> Bloccata? Tocca la lampadina: ti spiego l'argomento, non l'esercizio.
+                <Lightbulb size={16} weight="bold" aria-hidden /> Bloccata?
+                Tocca la lampadina: ti spiego l'argomento, non l'esercizio.
               </p>
             )}
           </>
@@ -336,23 +557,41 @@ function Pomeriggio({ chiusura, apri, vai }: { chiusura: string | null; apri: Ap
       {ripasso && ver?.data && (
         <div className="carta">
           <div className="testa-carta">
-            <h2>Ripasso: {ver.materie?.nome?.toLowerCase() ?? 'verifica'}</h2>
-            {mostraValore(false) && <span className="valore">+{P.ripasso}</span>}
+            <h2>Ripasso: {ver.materie?.nome?.toLowerCase() ?? "verifica"}</h2>
+            {mostraValore(false) && (
+              <span className="valore">+{P.ripasso}</span>
+            )}
           </div>
           <p>
-            Verifica {GIORNI[R.giorno(ver.data).getDay()]} {R.giorno(ver.data).getDate()}. Oggi la sessione {ripasso.numero}
-            {pallini.length ? ` di ${pallini.length}` : ''}: {COSA_SESSIONE[ripasso.tipo] ?? 'ripasso'}, 15 minuti.
+            Verifica {GIORNI[R.giorno(ver.data).getDay()]}{" "}
+            {R.giorno(ver.data).getDate()}. Oggi la sessione {ripasso.numero}
+            {pallini.length ? ` di ${pallini.length}` : ""}:{" "}
+            {COSA_SESSIONE[ripasso.tipo] ?? "ripasso"}, 15 minuti.
           </p>
           <div className="riga-pallini">
             <ol className="pallini" aria-label="Sessioni di ripasso">
               {pallini.map((s) => (
-                <li key={s.id} className={s.fatta_il ? 'fatta' : s.data_prevista === R.iso(oggi) ? 'oggi' : ''}>
+                <li
+                  key={s.id}
+                  className={
+                    s.fatta_il
+                      ? "fatta"
+                      : s.data_prevista === R.iso(oggi)
+                        ? "oggi"
+                        : ""
+                  }
+                >
                   <span aria-hidden />
-                  {s.data_prevista === R.iso(oggi) ? 'oggi' : GIORNI[R.giorno(s.data_prevista).getDay()].slice(0, 3)}
+                  {s.data_prevista === R.iso(oggi)
+                    ? "oggi"
+                    : GIORNI[R.giorno(s.data_prevista).getDay()].slice(0, 3)}
                 </li>
               ))}
             </ol>
-            <button className="secondario compatto" onClick={() => apri('Studio')}>
+            <button
+              className="secondario compatto"
+              onClick={() => apri("Studio")}
+            >
               <Cards size={20} weight="bold" aria-hidden /> Inizia
             </button>
           </div>
@@ -360,19 +599,30 @@ function Pomeriggio({ chiusura, apri, vai }: { chiusura: string | null; apri: Ap
       )}
 
       {carte > 0 && (
-        <button className="pillola-lilla" onClick={() => apri('Studio')}>
+        <button className="pillola-lilla" onClick={() => apri("Studio")}>
           <Sticker posa="passo" cartella="oggetti" misura={52} />
           <span>
-            Carte del giorno: {carte} carte, circa {Math.max(2, Math.round((Math.min(carte, 12) * 25) / 60))} minuti
+            Carte del giorno: {carte} carte, circa{" "}
+            {Math.max(2, Math.round((Math.min(carte, 12) * 25) / 60))} minuti
           </span>
         </button>
       )}
 
       <PianoDelGiorno
         cose={[
-          ...daFare.map((c) => ({ voce: `compito:${c.id}`, titolo: c.materie?.nome ? `${c.materie.nome}: ${c.testo}` : c.testo })),
-          ...(ripasso ? [{ voce: `ripasso:${ripasso.id}`, titolo: `Ripasso di ${ver?.materie?.nome?.toLowerCase() ?? 'verifica'}` }] : []),
-          ...(carte > 0 ? [{ voce: 'carte', titolo: 'Carte del giorno' }] : []),
+          ...daFare.map((c) => ({
+            voce: `compito:${c.id}`,
+            titolo: c.materie?.nome ? `${c.materie.nome}: ${c.testo}` : c.testo,
+          })),
+          ...(ripasso
+            ? [
+                {
+                  voce: `ripasso:${ripasso.id}`,
+                  titolo: `Ripasso di ${ver?.materie?.nome?.toLowerCase() ?? "verifica"}`,
+                },
+              ]
+            : []),
+          ...(carte > 0 ? [{ voce: "carte", titolo: "Carte del giorno" }] : []),
         ]}
       />
 
@@ -380,9 +630,18 @@ function Pomeriggio({ chiusura, apri, vai }: { chiusura: string | null; apri: Ap
         <div className="carta" data-ancora="foto">
           <div className="testa-carta">
             <h2>Da fotografare</h2>
-            {mostraValore(!!fotoFatta) && <span className="valore">+{R.CONFIG.passi.foto_compito} ciascuna</span>}
+            {mostraValore(!!fotoFatta) && (
+              <span className="valore">
+                +{R.CONFIG.passi.foto_compito} ciascuna
+              </span>
+            )}
           </div>
-          {foto.length > 0 && <p className="nota">Le pagine del libro di carta che ACE ti chiede, mentre fai i compiti.</p>}
+          {foto.length > 0 && (
+            <p className="nota">
+              Le pagine del libro di carta che ACE ti chiede, mentre fai i
+              compiti.
+            </p>
+          )}
           <ul className="lista-foto">
             {foto.map((r) => (
               <li key={r.id}>
@@ -393,13 +652,19 @@ function Pomeriggio({ chiusura, apri, vai }: { chiusura: string | null; apri: Ap
                   studio
                   fatto={(p) => {
                     setFoto((l) => l.filter((x) => x.id !== r.id));
-                    setFotoFatta(p > 0 ? `Foto salvata: +${p}.` : 'Foto salvata.');
+                    setFotoFatta(
+                      p > 0 ? `Foto salvata: +${p}.` : "Foto salvata.",
+                    );
                   }}
                 />
               </li>
             ))}
           </ul>
-          {fotoFatta && <p className="nota accento" role="status">{fotoFatta}</p>}
+          {fotoFatta && (
+            <p className="nota accento" role="status">
+              {fotoFatta}
+            </p>
+          )}
         </div>
       )}
     </section>
@@ -413,7 +678,10 @@ function AttivaNotifiche() {
   return (
     <div className="carta promemoria">
       <p>Vuoi i promemoria di ACE? Al massimo 3 al giorno.</p>
-      <button className="secondario" onClick={() => attivaNotifiche().finally(() => setVedi(false))}>
+      <button
+        className="secondario"
+        onClick={() => attivaNotifiche().finally(() => setVedi(false))}
+      >
         Attiva i promemoria
       </button>
     </div>
