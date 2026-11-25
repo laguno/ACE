@@ -258,7 +258,7 @@ export function SessioneDieci({ carta, visore, avvio, oggi, pronto, errore, esci
         <span className="sessione-carta">
           {carta.nome}
           <span className="sessione-totale">
-            {mmss(totale)} <small>di {mmss(TOTALE)}</small>
+            {mmss(totale)}
           </span>
         </span>
         {esercizio?.come && !finale && !striscia && (

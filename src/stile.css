@@ -1638,8 +1638,7 @@ body[data-sfondo='sera'] {
 .sessione > * { position: relative; }
 .sessione :focus-visible { outline-color: var(--lime); }
 .sessione-carta { color: #fff; font: 400 22px/1.1 'Bebas Neue', Impact, 'Arial Narrow', sans-serif; letter-spacing: 0.06em; }
-.sessione-totale { display: block; color: var(--lime); font-size: 30px; }
-.sessione-totale small { color: #b9bce0; font-size: 18px; }
+.sessione-totale { display: block; margin-top: 2px; color: #8a8db8; font: 800 14px Nunito, sans-serif; letter-spacing: 0.04em; }
 .sessione-esci, .sessione-aiuto { border-color: #2f3260; background: transparent; color: #b9bce0; box-shadow: none; }
 .sessione-nome { color: #fff; font: 400 40px/1 'Bebas Neue', Impact, 'Arial Narrow', sans-serif; letter-spacing: 0.04em; }
 .sessione-pausa { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; }
