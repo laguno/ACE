@@ -84,6 +84,37 @@ verifica('record: salvato sulla riga di oggi', (await val(null, 'select record f
 await fallisce('record: fuori misura', LANI, `select segna_record(5000, 'Squat')`);
 await come(null, 'delete from carte_del_giorno');
 verifica('record: senza ruota girata non si segna', (await val(LANI, `select segna_record(3, 'Squat')`)) === false);
+// giorni di allenamento o partita (0073): niente carte pesanti; la prova si fa "di domenica"
+const oggiVero = await val(null, `select pg_get_functiondef('public.oggi()'::regprocedure)`);
+await come(null, `create or replace function public.oggi() returns date language sql stable as $$ select date '2027-01-17' $$`);
+const campo = async (titolo) => {
+  await come(null, 'delete from impegni_famiglia');
+  await come(null, `insert into impegni_famiglia (id, inizio, titolo) values ('x', '2027-01-17T18:30:00+01:00', '${titolo}')`);
+};
+const giri = async () => {
+  const uscite = new Set();
+  for (let i = 0; i < 40; i++) {
+    await come(null, `delete from carte_del_giorno where data = oggi()`);
+    uscite.add(await val(LANI, 'select gira_ruota()'));
+  }
+  return [...uscite].sort();
+};
+await come(null, 'delete from carte_del_giorno');
+await campo('Allenamento Pallavolo Leilani U-13');
+verifica('campo: con l\'allenamento solo carte leggere', (await giri()).every((c) => [3, 4, 6, 7].includes(c)));
+await campo('Partita Lani: FOXES vs U14R-EVOLUTION');
+verifica('campo: con la partita solo carte leggere', (await giri()).every((c) => [3, 4, 6, 7].includes(c)));
+await campo('[LANI ASSENTE] Partita U13: X vs Y');
+verifica('campo: se Lani è assente tornano le pesanti', (await giri()).some((c) => [1, 2, 5].includes(c)));
+await campo('Tennis Leonardo');
+verifica('campo: gli impegni di famiglia non contano', (await giri()).some((c) => [1, 2, 5].includes(c)));
+await come(null, 'delete from carte_del_giorno');
+await come(null, `insert into carte_del_giorno (data, carta) values ('2027-01-11', 3), ('2027-01-12', 4), ('2027-01-13', 6), ('2027-01-14', 7)`);
+await campo('Allenamento Lani');
+verifica('campo: restano solo pesanti, una Calma in più', (await val(LANI, 'select gira_ruota()')) === 7);
+await come(null, 'delete from impegni_famiglia');
+await come(null, 'delete from carte_del_giorno');
+await come(null, oggiVero);
 // annuncio di R-Evolution (0034): l'accensione del genitore accoda il popup, una volta per giorno
 await come(PAPA, `insert into impostazioni (chiave, valore) values ('r_evolution_da', '"2026-11-23"')`);
 await come(PAPA, `delete from impostazioni where chiave = 'r_evolution_da'`);
