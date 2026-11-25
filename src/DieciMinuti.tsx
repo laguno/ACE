@@ -134,11 +134,20 @@ export function DieciMinuti({ oggi }: { oggi: Date }) {
           <circle cx="195" cy="140" r="46" fill="none" stroke="#fff" strokeOpacity="0.07" strokeWidth="3" />
         </svg>
         <div className="fascia-testa">
-          <span className="tag">{c ? `CARTA ${c.n}` : 'LA CARTA DI OGGI'}</span>
+          <span className="tag">{c ? `CARTA ${c.n}` : stato.il ? 'DIECI MINUTI' : 'LA CARTA DI OGGI'}</span>
           <span className="entro">{stato.il ? 'fatti' : `entro le ${FINESTRA.ultimo_avvio}`}</span>
         </div>
 
-        {!c ? (
+        {!c && stato.il ? (
+          // fatti prima delle carte (il giorno del passaggio, col menu di prima): niente ruota
+          <div className="fascia-corpo">
+            <div className="fascia-testo">
+              <b className="grande">FATTI!</b>
+              <span>10 minuti. Il coach approva.</span>
+            </div>
+            <Sticker posa="allenatore-applaude" misura={96} className="fascia-allenatore" />
+          </div>
+        ) : !c ? (
           <Ruota uscite={stato.uscite} gira={gira} fermata={(n) => setStato((x) => x && { ...x, carta: n, uscite: [...new Set([...x.uscite, n])] })} />
         ) : (
           <>

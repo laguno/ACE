@@ -84,3 +84,12 @@ test('dieci minuti: se il server non li conta, niente "il coach approva" e lo di
   await expect(f.getByRole('alert')).toHaveText("Questa volta non li ho potuti contare: l'ora del telefono non torna. Domani si riprova.");
   await expect(f.getByText(/Il coach approva/)).toHaveCount(0);
 });
+
+test('dieci minuti: fatti prima delle carte (giorno del passaggio), niente ruota', async ({ page }) => {
+  await page.clock.install({ time: LUNEDI_MATTINA });
+  await finto(page, dati({ serate: [{ data: '2027-01-11', dieci_minuti_da: '2027-01-11T06:00:00Z', dieci_minuti_il: '2027-01-11T06:11:00Z', dieci_minuti_esercizio: 'plank' }] }));
+  await page.goto('/');
+  const f = fascia(page);
+  await expect(f.getByText('FATTI!')).toBeVisible();
+  await expect(f.getByRole('button', { name: 'GIRA LA RUOTA' })).toHaveCount(0);
+});
