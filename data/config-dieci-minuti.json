@@ -39,6 +39,12 @@
     {
       "n": 1,
       "nome": "Gambe da muro",
+      "tema": {
+        "motivo": "futurismo",
+        "fondo": "#B3241B",
+        "anello": "#F2C230",
+        "colori": { "giallo": "#F2C230", "nero": "#111111", "crema": "#F3E9D2" }
+      },
       "peso": "pesante",
       "pesca": "rotazione",
       "figura": "lani-dieci-minuti",
@@ -54,6 +60,12 @@
     {
       "n": 2,
       "nome": "Core d'acciaio",
+      "tema": {
+        "motivo": "steampunk",
+        "fondo": "#3A2314",
+        "anello": "#D9A44A",
+        "colori": { "chiaro": "#D9A44A", "ottone": "#C8963E", "rame": "#8A5A2B" }
+      },
       "peso": "pesante",
       "pesca": "rotazione",
       "figura": "lani-dieci-minuti",
@@ -68,6 +80,12 @@
     {
       "n": 3,
       "nome": "Riflessi",
+      "tema": {
+        "motivo": "cyberpunk",
+        "fondo": "#0A0A1F",
+        "anello": "#00E5FF",
+        "colori": { "ciano": "#00E5FF", "magenta": "#FF2BD6", "palazzi": "#1B1B44" }
+      },
       "peso": "leggera",
       "pesca": "caso",
       "figura": "lani-dieci-minuti",
@@ -122,6 +140,12 @@
     {
       "n": 5,
       "nome": "Caviglie e equilibrio",
+      "tema": {
+        "motivo": "afrofuturismo",
+        "fondo": "#2B1050",
+        "anello": "#E0A526",
+        "colori": { "oro": "#E0A526", "verde": "#2F9E5B", "bruciato": "#D9531E" }
+      },
       "peso": "pesante",
       "pesca": "rotazione",
       "figura": "lani-dieci-minuti",
@@ -136,6 +160,12 @@
     {
       "n": 6,
       "nome": "Allungamento",
+      "tema": {
+        "motivo": "solarpunk",
+        "fondo": "#1E6A3C",
+        "anello": "#F5D547",
+        "colori": { "sole": "#F5D547", "foglia": "#8BD17C", "chiara": "#B5E59A", "celle": "#C8F0A0" }
+      },
       "peso": "leggera",
       "pesca": "rotazione",
       "figura": "lani-dieci-minuti",
@@ -150,6 +180,12 @@
     {
       "n": 7,
       "nome": "Calma",
+      "tema": {
+        "motivo": "celestiale",
+        "fondo": "#14123A",
+        "anello": "#C9BCFF",
+        "colori": { "lavanda": "#C9BCFF", "nebulosa": "#8E7CF0", "azzurra": "#6FD3E0", "aurora": "#7FE0D0", "lilla": "#B9A6F5", "linee": "#E6E0FF" }
+      },
       "peso": "leggera",
       "pesca": "rotazione",
       "figura": "lani-dieci-minuti",

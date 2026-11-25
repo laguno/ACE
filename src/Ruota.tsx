@@ -9,7 +9,16 @@ import { useMovimentoRidotto, vibra } from './SessioneDieci';
 
 const SPICCHIO = 360 / CARTE.length;
 const R = 150;
-const colori = ['#ffb3d1', '#c9b6ff', '#b8f0d9', '#ffe08a', '#a8dcff', '#ffcfa8', '#e3d4ff'];
+// un dettaglio del motivo di ogni carta, vicino al bordo dello spicchio (specifica sfondi del 25/11)
+const DETTAGLI: Record<string, string> = {
+  futurismo: 'M-13 6 L13 -9 L2 8 Z M-12 -8 L4 -6 L-10 -2 Z',
+  steampunk: 'M-3 -11 H3 L4 -7 L8 -9 L11 -4 L8 -2 V2 L11 4 L8 9 L4 7 L3 11 H-3 L-4 7 L-8 9 L-11 4 L-8 2 V-2 L-11 -4 L-8 -9 L-4 -7 Z M0 -4 A4 4 0 1 0 0 4 A4 4 0 1 0 0 -4 Z',
+  cyberpunk: 'M-14 9 H14 V11 H-14 Z M-12 9 V-3 H-6 V9 Z M-3 9 V-11 H4 V9 Z M7 9 V0 H12 V9 Z',
+  retrofuturismo: 'M0 -7 A7 7 0 1 0 0 7 A7 7 0 1 0 0 -7 Z M-15 3 Q0 11 15 -3 Q2 4 -15 3 Z',
+  afrofuturismo: 'M-15 7 L-8 -7 L-1 7 Z M1 7 L8 -7 L15 7 Z',
+  solarpunk: 'M0 -6 A6 6 0 1 0 0 6 A6 6 0 1 0 0 -6 Z M-1.5 -13 H1.5 V-8 H-1.5 Z M-1.5 8 H1.5 V13 H-1.5 Z M-13 -1.5 H-8 V1.5 H-13 Z M8 -1.5 H13 V1.5 H8 Z',
+  celestiale: 'M0 -12 L3 -3 L12 0 L3 3 L0 12 L-3 3 L-12 0 L-3 -3 Z',
+};
 
 const immagine = (n: number) => (n === 4 ? '/assets/trick/palleggio-base-fermo.webp' : n === 3 ? '/assets/avatar/lani/lani-vr.webp' : '/assets/avatar/lani/lani-dieci-minuti.webp');
 
@@ -52,11 +61,12 @@ export function Ruota({ uscite, gira, fermata }: { uscite: number[]; gira: () =>
         {CARTE.map((c, i) => {
           const [x1, y1] = punto(i * SPICCHIO, R - 4);
           const [x2, y2] = punto((i + 1) * SPICCHIO, R - 4);
-          const [ix, iy] = punto((i + 0.5) * SPICCHIO, R * 0.62);
+          const [ix, iy] = punto((i + 0.5) * SPICCHIO, R * 0.6);
           const spenta = uscite.includes(c.n) && c.n !== carta;
           return (
             <g key={c.n} className={spenta ? 'spenta' : undefined}>
-              <path d={`M${R} ${R} L${x1} ${y1} A${R - 4} ${R - 4} 0 0 1 ${x2} ${y2} Z`} fill={colori[i]} />
+              <path d={`M${R} ${R} L${x1} ${y1} A${R - 4} ${R - 4} 0 0 1 ${x2} ${y2} Z`} fill={c.tema?.fondo} />
+              {c.tema && <path className="dettaglio" d={DETTAGLI[c.tema.motivo]} fill={c.tema.anello} fillRule="evenodd" transform={`rotate(${(i + 0.5) * SPICCHIO} ${ix} ${iy}) translate(${ix} ${iy - 41})`} />}
               <image href={immagine(c.n)} x={ix - 30} y={iy - 30} width="60" height="60" transform={`rotate(${(i + 0.5) * SPICCHIO} ${ix} ${iy})`} />
               <text x={ix} y={iy + 44} transform={`rotate(${(i + 0.5) * SPICCHIO} ${ix} ${iy})`}>
                 {c.n}

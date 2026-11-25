@@ -216,3 +216,27 @@ test('carta 4: il muro che manca nella GIF è disegnato accanto al trick del mur
   const { violations } = await new AxeBuilder({ page }).include('.sessione').withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice']).analyze();
   expect(violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target).join(' ')}`)).toEqual([]);
 });
+
+for (const c of config.carte) {
+  test(`sfondo della carta ${c.n}`, async ({ page }) => {
+    await page.setViewportSize({ width: 412, height: 915 });
+    await apri(page, c.n);
+    await expect(sessione(page, c.n).locator(`.sfondo.${c.tema.motivo}`)).toBeVisible();
+    // a metà del terzo blocco di lavoro
+    await salta(page, 190);
+    await avanti(page, 1);
+    // tempo vero per le dissolvenze (costellazioni)
+    await page.waitForTimeout(2200);
+    await page.screenshot({ path: `e2e/risultati/sfondo-${c.n}.png` });
+  });
+}
+
+test('la ruota usa i colori dei temi', async ({ page }) => {
+  await page.setViewportSize({ width: 412, height: 915 });
+  await page.clock.install({ time: LUNEDI });
+  await finto(page, dati(1, { carte_del_giorno: [], ruota: [] }));
+  await page.goto('/');
+  const ruota = page.locator('.ruota-disco');
+  await expect(ruota.locator('path').first()).toHaveAttribute('fill', config.carte[0].tema.fondo);
+  await ruota.screenshot({ path: 'e2e/risultati/ruota-temi.png' });
+});

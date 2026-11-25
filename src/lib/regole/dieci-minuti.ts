@@ -28,7 +28,7 @@ export type Carta = {
   record: RecordCarta | null;
   visore?: { interruttore: string; figura: string; esercizio: Esercizio; record: RecordCarta | null };
 };
-export const CARTE = config.carte as Carta[];
+export const CARTE = config.carte as unknown as Carta[];
 export const carta = (n: number): Carta | undefined => CARTE.find((c) => c.n === n);
 
 export type Fase =

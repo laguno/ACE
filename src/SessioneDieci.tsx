@@ -252,7 +252,15 @@ export function SessioneDieci({ carta, visore, avvio, oggi, pronto, errore, esci
 
   return (
     <>
-      {carta.tema && <Sfondo tema={carta.tema} esercizio={posa.id} />}
+      {carta.tema && (
+        <Sfondo
+          tema={carta.tema}
+          esercizio={posa.id}
+          lavoro={fase?.tipo === 'lavoro'}
+          cambio={!!fase && fase.tipo !== 'record' && mancano <= T.durate.conto_alla_rovescia}
+          avanzamento={1 - totale / TOTALE}
+        />
+      )}
       <div className="sessione-testa">
         <button className="sessione-esci" onClick={esci}>
           Esci

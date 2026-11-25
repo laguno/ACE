@@ -192,7 +192,7 @@ export function DieciMinuti({ oggi }: { oggi: Date }) {
       </section>
 
       {aperto && inCorso && c && stato.da && (
-        <div className={c.tema ? 'sessione tema' : 'sessione'} style={c.tema && ({ '--anello': c.tema.anello } as CSSProperties)} role="dialog" aria-modal="true" aria-label={`Dieci minuti: ${c.nome}`}>
+        <div className={c.tema ? `sessione tema tema-${c.tema.motivo}` : 'sessione'} style={c.tema && ({ '--anello': c.tema.anello } as CSSProperties)} role="dialog" aria-modal="true" aria-label={`Dieci minuti: ${c.nome}`}>
           <SessioneDieci carta={c} visore={conVisore} avvio={new Date(stato.da).getTime()} oggi={data} pronto={pronto} errore={errore} esci={() => setAperto(false)} segnaFatto={fatto} />
         </div>
       )}

@@ -1670,7 +1670,7 @@ body[data-sfondo='sera'] {
 .ruota { position: relative; display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 8px; }
 .ruota-disco { width: min(78vw, 300px); height: auto; transition: transform 3.2s cubic-bezier(0.17, 0.67, 0.21, 1); }
 .ruota-disco path { stroke: #14162e; stroke-width: 3; }
-.ruota-disco text { font: 800 20px 'Baloo 2', Nunito, sans-serif; fill: #14162e; text-anchor: middle; }
+.ruota-disco text { font: 800 20px 'Baloo 2', Nunito, sans-serif; fill: #fff; text-anchor: middle; }
 .ruota-disco .spenta { opacity: 0.28; filter: grayscale(1); }
 .ruota-bordo { fill: none; stroke: #c6ff3d; stroke-width: 6; }
 .ruota-perno { fill: #14162e; stroke: #c6ff3d; stroke-width: 4; }
@@ -1690,3 +1690,4 @@ body[data-sfondo='sera'] {
   .retrofuturismo .orbite { top: 24vh; }
   .retrofuturismo .orbita { top: calc(24vh + min(31vw, 143px)); }
 }
+.ruota-disco path.dettaglio { stroke: none; }

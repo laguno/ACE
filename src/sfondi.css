@@ -48,3 +48,118 @@
   .retrofuturismo .giro { transform: rotate(-20deg); }
   .retrofuturismo .dritto { transform: rotate(20deg); }
 }
+
+/* altre sei carte (Fase 2) */
+.sfondo > * { position: absolute; }
+.sfondo .pieno { inset: 0; width: 100%; height: 100%; }
+
+/* carta 1: futurismo storico */
+.futurismo .nero { fill: var(--nero); }
+.futurismo .crema { fill: var(--crema); }
+.futurismo .giallo { fill: var(--giallo); }
+.futurismo .forza { inset: -20% -40%; transform: rotate(-32deg); }
+.futurismo .forza i { position: absolute; left: 0; width: 34%; height: 3px; border-radius: 3px; background: linear-gradient(90deg, transparent, #fff); opacity: 0.55; animation: sfreccia 1.8s linear infinite; }
+.futurismo .forza .f0 { top: 22%; }
+.futurismo .forza .f1 { top: 31%; animation-delay: -0.5s; }
+.futurismo .forza .f2 { top: 44%; animation-delay: -1.2s; height: 2px; }
+.futurismo .forza .f3 { top: 58%; animation-delay: -0.3s; }
+.futurismo .forza .f4 { top: 69%; animation-delay: -1.5s; height: 2px; }
+.futurismo .forza .f5 { top: 80%; animation-delay: -0.9s; }
+.futurismo .scia { top: 24vh; left: 0; width: 100%; opacity: 0; animation: scia 2s ease-out infinite; }
+.futurismo .scia i { display: block; height: 7px; margin-bottom: 14px; border-radius: 7px; background: linear-gradient(90deg, transparent, var(--crema) 70%, var(--giallo)); }
+.futurismo .scia i:nth-child(2) { margin-left: 12%; }
+@keyframes sfreccia { from { transform: translateX(-60%); } to { transform: translateX(320%); } }
+@keyframes scia { 0% { opacity: 0; transform: translateX(-100%); } 15% { opacity: 0.9; } 45%, 100% { opacity: 0; transform: translateX(100%); } }
+
+/* carta 2: steampunk */
+.steampunk .tubo { fill: none; stroke: var(--rame); stroke-width: 15; }
+.steampunk .ingranaggio { fill: var(--ottone); animation: ruota-lenta 24s linear infinite; }
+.steampunk .ingranaggio .corona { fill: none; stroke: var(--ottone); stroke-width: 9; }
+.steampunk .ingranaggio .perno { fill: var(--chiaro); }
+.steampunk .g1 { top: -34px; right: -34px; width: 150px; height: 150px; }
+.steampunk .g2 { top: 82px; right: 8px; width: 66px; height: 66px; animation-direction: reverse; animation-duration: 12s; }
+.steampunk .g3 { bottom: 17vh; left: -46px; width: 120px; height: 120px; animation-direction: reverse; }
+.steampunk .rivetti { top: 0; bottom: 0; width: 12px; background: radial-gradient(circle at 6px 6px, var(--chiaro) 3.5px, var(--rame) 4.5px, transparent 5.5px) 0 0 / 12px 44px; opacity: 0.8; }
+.steampunk .rivetti.sinistra { left: 3px; }
+.steampunk .rivetti.destra { right: 3px; }
+.steampunk .vapore { left: 30px; top: 20vh; }
+.steampunk .vapore i { position: absolute; width: 46px; height: 46px; border-radius: 50%; background: #fff; opacity: 0; animation: sbuffo 1.8s ease-out both; }
+.steampunk .vapore i:nth-child(2) { left: 22px; animation-delay: 0.2s; }
+.steampunk .vapore i:nth-child(3) { left: 6px; animation-delay: 0.4s; }
+@keyframes ruota-lenta { to { transform: rotate(360deg); } }
+@keyframes sbuffo { 0% { opacity: 0.7; transform: translateY(0) scale(0.4); } 100% { opacity: 0; transform: translateY(-90px) scale(1.6); } }
+/* tacche da manometro attorno al timer */
+.sessione.tema-steampunk .sessione-anello::before { inset: -11px; background: repeating-conic-gradient(var(--anello) 0 1.2deg, transparent 1.2deg 9deg); -webkit-mask: radial-gradient(closest-side, transparent calc(100% - 9px), #000 calc(100% - 8px)); mask: radial-gradient(closest-side, transparent calc(100% - 9px), #000 calc(100% - 8px)); }
+
+/* carta 3: cyberpunk */
+.cyberpunk .citta { left: 0; bottom: 34vh; width: 100%; height: 20vh; opacity: 0.95; }
+.cyberpunk .palazzo { fill: var(--palazzi); }
+.cyberpunk .finestra { fill: var(--ciano); }
+.cyberpunk .suolo { left: 0; right: 0; bottom: 0; height: 34vh; overflow: hidden; border-top: 2px solid var(--magenta); perspective: 160px; }
+.cyberpunk .griglia { position: absolute; left: -100%; right: -100%; top: -60%; bottom: 0; transform-origin: 50% 100%; transform: rotateX(62deg); overflow: hidden; }
+.cyberpunk .griglia::before { content: ''; position: absolute; inset: -40px 0 0; background: repeating-linear-gradient(0deg, var(--magenta) 0 2px, transparent 2px 40px), repeating-linear-gradient(90deg, var(--magenta) 0 2px, transparent 2px 40px); opacity: 0.55; animation: scorre 1.4s linear infinite; }
+.cyberpunk .glitch { inset: 0; }
+.cyberpunk .glitch i { position: absolute; height: 5px; background: var(--ciano); opacity: 0.45; }
+.cyberpunk .glitch i:nth-child(1) { top: 14vh; left: 0; width: 24%; }
+.cyberpunk .glitch i:nth-child(2) { top: 27vh; right: 0; width: 32%; background: var(--magenta); }
+.cyberpunk .glitch i:nth-child(3) { top: 39vh; left: 8%; width: 14%; height: 10px; }
+.cyberpunk .glitch.forte i { height: 14px; animation: glitch 1s steps(2) infinite; }
+@keyframes scorre { from { transform: translateY(0); } to { transform: translateY(40px); } }
+@keyframes glitch { 0% { transform: translateX(0) scaleX(1); opacity: 0.9; } 50% { transform: translateX(36px) scaleX(1.8); opacity: 0.4; } 100% { transform: translateX(-30px) scaleX(0.7); opacity: 0.9; } }
+/* doppio anello ciano e magenta leggermente sfasato */
+.sessione.tema-cyberpunk .sessione-anello { box-shadow: -5px 2px 0 -1px #ff2bd6, 5px -2px 0 -1px #00e5ff; }
+
+/* carta 5: afrofuturismo */
+.afrofuturismo .fasce { top: calc(64px + env(safe-area-inset-top)); left: 0; right: 0; display: flex; flex-direction: column; gap: 5px; }
+.afrofuturismo .fasce i { display: block; height: 10px; }
+.afrofuturismo .f-oro { background: var(--oro); }
+.afrofuturismo .f-verde { background: repeating-linear-gradient(90deg, var(--verde) 0 28px, transparent 28px 36px); }
+.afrofuturismo .f-bruciato { background: repeating-linear-gradient(90deg, var(--bruciato) 0 10px, transparent 10px 18px); }
+.afrofuturismo .fasce svg { width: 100%; height: 22px; fill: none; stroke: var(--oro); stroke-width: 4; }
+.afrofuturismo .fasce.ritmo > * { animation: battito 0.8s ease-in-out infinite; }
+.afrofuturismo .circuiti { inset: 0; }
+.afrofuturismo .circuito { position: absolute; top: 30vh; width: 50px; height: 40vh; }
+.afrofuturismo .circuito.sinistra { left: 0; }
+.afrofuturismo .circuito.destra { right: 0; transform: scaleX(-1); }
+.afrofuturismo .circuito svg { position: absolute; inset: 0; width: 100%; height: 100%; fill: var(--oro); stroke: var(--oro); stroke-width: 2.5; }
+.afrofuturismo .circuito path { fill: none; }
+.afrofuturismo .circuito .spento { opacity: 0.3; }
+.afrofuturismo .circuito .acceso { opacity: 0; transition: opacity 1.5s; filter: drop-shadow(0 0 5px #e0a526); }
+.afrofuturismo .accesi .acceso { opacity: 1; }
+@keyframes battito { 0%, 100% { transform: scaleY(1); opacity: 1; } 50% { transform: scaleY(1.35); opacity: 0.6; } }
+/* fila di triangoli d'oro sopra la fascia del nome, fuori dal testo */
+.sessione.tema-afrofuturismo > .sessione-fascia::before { content: ''; position: absolute; left: 0; right: 0; bottom: 100%; height: 14px; background: conic-gradient(from 150deg at 50% 0, #e0a526 60deg, transparent 0) 0 0 / 24px 14px; }
+
+/* carta 6: solarpunk */
+.solarpunk .sole { top: 66px; right: 4px; width: 128px; height: 128px; fill: var(--sole); transition: transform 1s linear; }
+.solarpunk .foglia { width: 52px; height: 86px; fill: var(--foglia); opacity: 0.9; transform-origin: 50% 100%; animation: apre 9s ease-in-out infinite alternate; }
+.solarpunk .foglia .vena { fill: none; stroke: var(--chiara); stroke-width: 3; }
+.solarpunk .l1 { left: -8px; top: 22vh; --piega: 52deg; }
+.solarpunk .l2 { left: 4px; top: 34vh; fill: var(--chiara); --piega: 28deg; animation-delay: -3s; }
+.solarpunk .l3 { right: -8px; top: 44vh; --piega: -50deg; animation-delay: -5s; }
+.solarpunk .l4 { right: 6px; top: 62vh; width: 36px; height: 60px; fill: var(--chiara); --piega: -28deg; animation-delay: -2s; }
+.solarpunk .celle { left: -12px; bottom: 11vh; width: 170px; height: 156px; fill: none; stroke: var(--celle); stroke-width: 3; opacity: 0.6; }
+@keyframes apre { from { transform: rotate(var(--piega)) scaleX(0.45); } to { transform: rotate(var(--piega)) scaleX(1); } }
+
+/* carta 7: celestiale. Niente effetti bruschi. */
+.celestiale .nebulosa { width: 120vw; height: 46vh; border-radius: 50%; opacity: 0.55; }
+.celestiale .n1 { top: -6vh; left: -50vw; background: radial-gradient(closest-side, var(--nebulosa), transparent); }
+.celestiale .n2 { bottom: 4vh; right: -55vw; background: radial-gradient(closest-side, var(--azzurra), transparent); }
+.celestiale .aurora { left: -25%; width: 150%; height: 12vh; border-radius: 50%; opacity: 0.4; animation: aurora 9s ease-in-out infinite alternate; }
+.celestiale .a1 { top: 12vh; background: radial-gradient(closest-side, var(--aurora), transparent); }
+.celestiale .a2 { top: 21vh; background: radial-gradient(closest-side, var(--lilla), transparent); animation-delay: -4.5s; }
+.celestiale .cielo { inset: 0; background: radial-gradient(1.6px 1.6px at 22px 34px, #fff, transparent 100%) 0 0 / 130px 170px, radial-gradient(1px 1px at 80px 110px, #fff, transparent 100%) 0 0 / 150px 130px; opacity: 0.7; }
+.celestiale .costellazioni { top: 8vh; left: 0; width: 100%; fill: var(--linee); stroke: var(--linee); stroke-width: 1; }
+.celestiale .costellazioni circle { stroke: none; }
+.celestiale .costellazioni g { transition: opacity 2s; }
+.celestiale .costellazioni .spenta { opacity: 0; }
+@keyframes aurora { from { transform: translateX(-9%) scaleY(0.8); } to { transform: translateX(9%) scaleY(1.2); } }
+/* anelli d'alone: si allargano sull'inspiro (4 secondi) e si stringono sull'espiro */
+.sessione.tema-celestiale .sessione-anello::before { inset: -4px; border: 2px solid var(--anello); box-shadow: 0 0 22px var(--anello), 0 0 0 5px rgba(201, 188, 255, 0.2); animation: respiro 8s ease-in-out infinite; }
+@keyframes respiro { 0%, 100% { transform: scale(0.98); opacity: 0.5; } 50% { transform: scale(1.05); opacity: 0.85; } }
+
+.sessione:has(.sfondo.fermo) .sessione-anello::before { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .sfondo *, .sfondo *::before, .sessione.tema .sessione-anello::before { animation: none !important; transition: none !important; }
+  .futurismo .scia, .steampunk .vapore { display: none; }
+}
