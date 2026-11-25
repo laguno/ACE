@@ -274,12 +274,6 @@ export function SessioneDieci({ carta, visore, avvio, oggi, pronto, errore, esci
           <Figura carta={carta} esercizio={posa} figura={figura} ridotto={ridotto} />
         )}
       </div>
-      {fase?.tipo === 'pausa' && (
-        <p className="sessione-pausa">
-          <b>PAUSA</b> <span>Il prossimo esercizio sarà:</span>
-        </p>
-      )}
-      <h2 className="sessione-nome">{posa.nome}</h2>
       <Anello fase={fase} mancano={mancano} />
       <span className="sessione-totale">{mmss(totale)}</span>
 
@@ -328,6 +322,15 @@ export function SessioneDieci({ carta, visore, avvio, oggi, pronto, errore, esci
           <p>{fumetto(fase, mancano, carta, !!rec)}</p>
         </div>
       )}
+
+      <div className="sessione-fascia">
+        {fase?.tipo === 'pausa' && (
+          <p className="sessione-pausa">
+            <b>PAUSA</b> <span>Il prossimo esercizio sarà:</span>
+          </p>
+        )}
+        <h2 className="sessione-nome">{posa.nome}</h2>
+      </div>
     </>
   );
 }

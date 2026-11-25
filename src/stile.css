@@ -1656,6 +1656,14 @@ body[data-sfondo='sera'] {
 .sessione-via, .sessione-record button, .sessione-chiudi, .sessione-scelte button { border: 0; background: var(--lime); color: #14162e; font-family: 'Bebas Neue', Impact, 'Arial Narrow', sans-serif; font-weight: 400; letter-spacing: 0.06em; box-shadow: 0 5px 0 #8dba1f; }
 .sessione-via:active, .sessione-record button:active, .sessione-chiudi:active { box-shadow: 0 2px 0 #8dba1f; }
 .sessione-errore { color: #ff8fb1; }
+/* il nome dell'esercizio (e la pausa) nella fascia in fondo, da bordo a bordo (specifica sfondi del 25/11) */
+.sessione > .sessione-fascia { flex: none; align-self: stretch; width: auto; max-width: none; display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 0 -16px calc(-12px - env(safe-area-inset-bottom)); padding: 10px 16px calc(12px + env(safe-area-inset-bottom)); background: rgba(0, 0, 0, 0.45); text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6); }
+.sessione-pausa b { text-shadow: none; }
+/* la figura prende lo spazio che resta, così il nome in fascia non esce dallo schermo */
+.sessione > .sessione-centro { flex: 1 1 0; grid-template: minmax(0, 1fr) / minmax(0, 1fr); min-height: 120px; max-height: 270px; }
+.sessione-centro .sessione-figura { width: 100%; height: 100%; min-height: 0; }
+/* senza il fumetto sopra (SEGNA FATTO) la fascia resta comunque in fondo */
+.sessione > .sessione-via + .sessione-fascia { margin-top: 0; }
 /* la ruota: sette spicchi, freccia in alto, carte già uscite spente */
 .ruota { position: relative; display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 8px; }
 .ruota-disco { width: min(78vw, 300px); height: auto; transition: transform 3.2s cubic-bezier(0.17, 0.67, 0.21, 1); }
