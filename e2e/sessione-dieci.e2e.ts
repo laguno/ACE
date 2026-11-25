@@ -142,7 +142,14 @@ test('carta 1: sticker fisso, esercizi a rotazione, record degli squat', async (
   await salta(page, 70);
   await expect(nome(page, 1)).toHaveText('Squat');
   await expect(s.getByText('Vai così, bene!')).toBeVisible();
-  await salta(page, 60 * 5);
+  await expect(s.locator('.sessione-totale')).toHaveText(/^8:[45][0-9] di 10:00$/);
+  // pausa: si vede che è pausa e quale esercizio arriva
+  await salta(page, 35);
+  await expect(s.getByText('PAUSA')).toBeVisible();
+  await expect(s.getByText('Il prossimo esercizio sarà:')).toBeVisible();
+  await expect(nome(page, 1)).toHaveText('Affondi');
+  await page.screenshot({ path: 'e2e/risultati/dieci-pausa.png' });
+  await salta(page, 60 * 5 - 35);
   await expect(nome(page, 1)).toHaveText('Squat'); // sesto blocco: si ricomincia
   await salta(page, 60 * 3 - 10 + 5);
   await expect(s.getByLabel('Quanti squat in 30 secondi?')).toBeVisible();

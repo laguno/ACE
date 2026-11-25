@@ -1629,9 +1629,34 @@ body[data-sfondo='sera'] {
 .sessione-record fieldset { margin: 0; padding: 0; border: 0; }
 .sessione-record legend { margin-bottom: 6px; font: 800 16px Nunito, sans-serif; }
 .sessione-scelte { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-.sessione-scelte button { font-size: 18px; }
+.sessione-scelte button { font-size: 24px; }
 .sessione-errore { margin: 0; font-weight: 800; color: var(--fucsia); text-align: center; }
 .sessione > .sessione-via { margin-top: auto; font-size: 22px; }
+/* 25/11: la sessione torna scura e grintosa come il timer dei dieci minuti di prima (inchiostro, lime, "10" sullo sfondo) */
+.sessione { --contorno: #0b0c1f; --lime: #c6ff3d; color: #fff; background: #14162e; }
+.sessione::before { content: '10'; position: fixed; left: -10px; bottom: 40px; font: 400 260px/1 'Bebas Neue', Impact, 'Arial Narrow', sans-serif; color: var(--lime); opacity: 0.06; pointer-events: none; }
+.sessione > * { position: relative; }
+.sessione :focus-visible { outline-color: var(--lime); }
+.sessione-carta { color: #fff; font: 400 22px/1.1 'Bebas Neue', Impact, 'Arial Narrow', sans-serif; letter-spacing: 0.06em; }
+.sessione-totale { display: block; color: var(--lime); font-size: 30px; }
+.sessione-totale small { color: #b9bce0; font-size: 18px; }
+.sessione-esci, .sessione-aiuto { border-color: #2f3260; background: transparent; color: #b9bce0; box-shadow: none; }
+.sessione-nome { color: #fff; font: 400 40px/1 'Bebas Neue', Impact, 'Arial Narrow', sans-serif; letter-spacing: 0.04em; }
+.sessione-pausa { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; }
+.sessione-pausa b { padding: 2px 14px; background: var(--lime); color: #14162e; font: 400 32px/1.1 'Bebas Neue', Impact, 'Arial Narrow', sans-serif; letter-spacing: 0.1em; transform: skewX(-10deg); }
+.sessione-pausa span { color: #b9bce0; font: 800 16px Nunito, sans-serif; }
+.sessione-anello .pista { stroke: #2f3260; }
+.sessione-anello .tempo { stroke: var(--lime); }
+.sessione-anello.pausa .tempo { stroke: #8f7bff; }
+.sessione-anello.riscaldamento .tempo, .sessione-anello.record .tempo, .sessione-anello.fine .tempo { stroke: #ffc93d; }
+.sessione-anello::before, .sessione-anello::after { border-color: #2f3260; }
+.sessione-anello::after { background: #14162e; }
+.sessione-anello [role='timer'] { color: #fff; font-family: 'Bebas Neue', Impact, 'Arial Narrow', sans-serif; font-weight: 400; font-size: clamp(56px, 10vh, 84px); }
+.sessione-coach p, .sessione-come li, .sessione-record p { color: #3d2350; }
+.sessione-record legend, .sessione-record label { color: #fff; }
+.sessione-via, .sessione-record button, .sessione-chiudi, .sessione-scelte button { border: 0; background: var(--lime); color: #14162e; font-family: 'Bebas Neue', Impact, 'Arial Narrow', sans-serif; font-weight: 400; letter-spacing: 0.06em; box-shadow: 0 5px 0 #8dba1f; }
+.sessione-via:active, .sessione-record button:active, .sessione-chiudi:active { box-shadow: 0 2px 0 #8dba1f; }
+.sessione-errore { color: #ff8fb1; }
 /* la ruota: sette spicchi, freccia in alto, carte già uscite spente */
 .ruota { position: relative; display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 8px; }
 .ruota-disco { width: min(78vw, 300px); height: auto; transition: transform 3.2s cubic-bezier(0.17, 0.67, 0.21, 1); }

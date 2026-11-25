@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Sticker } from './kit';
 import {
   DIECI as T,
+  durataTotale,
   esercizioInVista,
   eserciziDellaSessione,
   esitoRecord,
@@ -29,6 +30,8 @@ import { supabase } from './supabase';
 
 const CHIAVE_VISTI = 'ace:dieci-minuti:visti'; // trick di cui Lani ha già visto "Come si fa" (solo interfaccia)
 const FASI = scaletta();
+const TOTALE = durataTotale(FASI);
+const mmss = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 const GIRO = 2 * Math.PI * 104;
 
 // Nella WebView di ACE navigator.vibrate tace (il guscio non ha il permesso VIBRATE): lì serve il plugin
@@ -181,6 +184,8 @@ export function SessioneDieci({ carta, visore, avvio, oggi, pronto, errore, esci
   const fase = adesso?.fase ?? null;
   const mancano = adesso?.mancano ?? 0;
   const inCorso = !!fase;
+  // il conto dei dieci minuti: quanto manca alla fine della sessione
+  const totale = Math.max(0, Math.ceil(TOTALE - (ora - avvio) / 1000));
   useSchermoAcceso(inCorso || !pronto);
 
   useEffect(() => {
@@ -250,7 +255,12 @@ export function SessioneDieci({ carta, visore, avvio, oggi, pronto, errore, esci
         <button className="sessione-esci" onClick={esci}>
           Esci
         </button>
-        <span className="sessione-carta">{carta.nome}</span>
+        <span className="sessione-carta">
+          {carta.nome}
+          <span className="sessione-totale">
+            {mmss(totale)} <small>di {mmss(TOTALE)}</small>
+          </span>
+        </span>
         {esercizio?.come && !finale && !striscia && (
           <button className="sessione-aiuto" aria-label={`Come si fa: ${esercizio.nome}`} onClick={() => setCome(true)}>
             ?
@@ -267,6 +277,11 @@ export function SessioneDieci({ carta, visore, avvio, oggi, pronto, errore, esci
           <Figura carta={carta} esercizio={posa} figura={figura} ridotto={ridotto} />
         )}
       </div>
+      {fase?.tipo === 'pausa' && (
+        <p className="sessione-pausa">
+          <b>PAUSA</b> <span>Il prossimo esercizio sarà:</span>
+        </p>
+      )}
       <h2 className="sessione-nome">{posa.nome}</h2>
       <Anello fase={fase} mancano={mancano} />
 
