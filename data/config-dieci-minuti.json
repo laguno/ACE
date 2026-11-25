@@ -22,7 +22,7 @@
     "avviso": "Ancora 10 secondi!",
     "cambio": "3, 2, 1… cambio!",
     "record": "Ultimo minuto: il record!",
-    "calma": "Respira piano. Sei brava.",
+    "calma": "Respira piano, così va bene.",
     "fine": "Dieci minuti fatti. Bel lavoro."
   },
   "esito": {
@@ -147,7 +147,7 @@
       "peso": "leggera",
       "pesca": "rotazione",
       "figura": "lani-dieci-minuti",
-      "fumetto_lavoro": "Respira piano. Sei brava.",
+      "fumetto_lavoro": "Respira piano, così va bene.",
       "esercizi": [
         { "id": "respirazione", "nome": "Respirazione lenta" },
         { "id": "scansione", "nome": "Scansione del corpo" },

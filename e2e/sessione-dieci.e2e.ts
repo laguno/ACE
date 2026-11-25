@@ -162,7 +162,7 @@ test('carta 7: niente record, il minuto finale è respirazione', async ({ page }
   const s = sessione(page, 7);
   await salta(page, 545);
   await expect(nome(page, 7)).toHaveText('Respirazione');
-  await expect(s.getByText('Respira piano. Sei brava.')).toBeVisible();
+  await expect(s.getByText('Respira piano, così va bene.')).toBeVisible();
   await expect(s.getByRole('textbox')).toHaveCount(0);
   await expect(s.getByRole('spinbutton')).toHaveCount(0);
 });
