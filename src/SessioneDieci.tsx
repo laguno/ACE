@@ -257,9 +257,6 @@ export function SessioneDieci({ carta, visore, avvio, oggi, pronto, errore, esci
         </button>
         <span className="sessione-carta">
           {carta.nome}
-          <span className="sessione-totale">
-            {mmss(totale)}
-          </span>
         </span>
         {esercizio?.come && !finale && !striscia && (
           <button className="sessione-aiuto" aria-label={`Come si fa: ${esercizio.nome}`} onClick={() => setCome(true)}>
@@ -284,6 +281,7 @@ export function SessioneDieci({ carta, visore, avvio, oggi, pronto, errore, esci
       )}
       <h2 className="sessione-nome">{posa.nome}</h2>
       <Anello fase={fase} mancano={mancano} />
+      <span className="sessione-totale">{mmss(totale)}</span>
 
       {finale && rec && (
         <div className="sessione-record">
