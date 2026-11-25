@@ -1,0 +1,50 @@
+/* Sfondi dei dieci minuti (specifica del 25/11). Parti comuni a tutte le carte con un tema. */
+.sessione > .sfondo { position: fixed; inset: 0; width: auto; max-width: none; overflow: hidden; pointer-events: none; }
+.sfondo.fermo * { animation-play-state: paused !important; }
+.sessione.tema::before { content: none; }
+/* timer e testi sempre su una base nera al 50%: il motivo non passa mai sotto una scritta */
+.sessione.tema .sessione-anello { border-radius: 50%; background: rgba(0, 0, 0, 0.5); }
+.sessione.tema .sessione-anello::before { border: 0; }
+.sessione.tema .sessione-anello::after { border-color: rgba(255, 255, 255, 0.18); background: transparent; }
+.sessione.tema .sessione-anello .pista { stroke: rgba(255, 255, 255, 0.18); }
+.sessione.tema .sessione-anello .tempo { stroke: var(--anello); }
+.sessione.tema .sessione-carta, .sessione.tema .sessione-totale { padding: 4px 12px; border-radius: 999px; background: rgba(0, 0, 0, 0.5); color: #fff; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6); }
+.sessione.tema .sessione-carta { flex: 0 1 auto; margin: 0 auto; }
+.sessione.tema > .sessione-totale { width: auto; align-self: center; }
+.sessione.tema .sessione-esci, .sessione.tema .sessione-aiuto { border-color: rgba(255, 255, 255, 0.35); background: rgba(0, 0, 0, 0.5); color: #fff; }
+.sessione.tema .sessione-anello [role='timer'], .sessione.tema .sessione-pausa span { color: #fff; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6); }
+.sessione.tema .sessione-record { padding: 8px 10px; border-radius: 18px; background: rgba(0, 0, 0, 0.5); }
+.sessione.tema .sessione-errore { padding: 4px 12px; border-radius: 12px; background: rgba(0, 0, 0, 0.6); }
+
+/* carta 4: retrofuturismo */
+.retrofuturismo > * { position: absolute; }
+.retrofuturismo .orbite { top: 8vh; left: 50%; width: 112vw; max-width: 520px; transform: translateX(-50%); fill: none; stroke: var(--crema); stroke-width: 1.5; opacity: 0.5; }
+.retrofuturismo .orbite .seconda { stroke-dasharray: 3 7; }
+.retrofuturismo .orbita { top: calc(8vh + min(31vw, 143px)); left: 50%; width: 0; height: 0; transform: rotate(-12deg) scaleY(0.39); }
+.retrofuturismo .giro { animation: giro-orbita 2.6s ease-in-out both; }
+.retrofuturismo .posto { position: absolute; transform: translate(min(43vw, 200px), 0); }
+.retrofuturismo .dritto { animation: giro-contrario 2.6s ease-in-out both; }
+.retrofuturismo .pianeta { position: absolute; width: 60px; height: 60px; margin: -30px; transform: scaleY(2.56) rotate(12deg); fill: none; stroke-linecap: round; }
+.retrofuturismo .palla { fill: #fff; }
+.retrofuturismo .rossa { stroke: var(--rosso); stroke-width: 4; }
+.retrofuturismo .verde { stroke: var(--verde); stroke-width: 5; }
+.retrofuturismo .anello-dietro, .retrofuturismo .anello-davanti { stroke: var(--crema); stroke-width: 2.5; }
+.retrofuturismo .anello-dietro { opacity: 0.5; }
+.retrofuturismo .boomerang { top: 13vh; left: -14px; width: 78px; fill: var(--arancio); transform: rotate(-28deg); }
+.retrofuturismo .stella { width: 18px; height: 18px; fill: var(--crema); animation: lampeggia 2.4s ease-in-out infinite; }
+.retrofuturismo .s1 { top: 11vh; right: 9%; width: 26px; height: 26px; }
+.retrofuturismo .s2 { top: 23vh; left: 8%; animation-delay: -0.6s; }
+.retrofuturismo .s3 { top: 37vh; right: 5%; animation-delay: -1.2s; }
+.retrofuturismo .s4 { top: 49vh; left: 5%; width: 24px; height: 24px; animation-delay: -1.8s; }
+.retrofuturismo .s5 { top: 62vh; right: 7%; width: 13px; height: 13px; animation-delay: -0.9s; }
+.retrofuturismo .s6 { top: 70vh; left: 11%; width: 11px; height: 11px; animation-delay: -1.5s; }
+@keyframes giro-orbita { from { transform: rotate(-20deg); } to { transform: rotate(340deg); } }
+@keyframes giro-contrario { from { transform: rotate(20deg); } to { transform: rotate(-340deg); } }
+@keyframes lampeggia { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+
+/* movimento ridotto: tutto fermo, restano colore e motivo */
+@media (prefers-reduced-motion: reduce) {
+  .sfondo * { animation: none !important; }
+  .retrofuturismo .giro { transform: rotate(-20deg); }
+  .retrofuturismo .dritto { transform: rotate(20deg); }
+}

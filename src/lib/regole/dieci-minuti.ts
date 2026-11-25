@@ -12,7 +12,10 @@ export type RecordCarta =
   | { tipo: 'numero'; su: string; domanda: string }
   | { tipo: 'scelta'; su: string; domanda: string; valori: string[] }
   | { tipo: 'trick'; domanda: string };
+/** Sfondo della sessione (specifica del 25/11): colori e motivo, disegnato in src/Sfondo.tsx. */
+export type Tema = { motivo: string; fondo: string; anello: string; colori: Record<string, string> };
 export type Carta = {
+  tema?: Tema;
   n: number;
   nome: string;
   peso: 'pesante' | 'leggera';

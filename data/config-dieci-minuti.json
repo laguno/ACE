@@ -95,6 +95,12 @@
       "peso": "leggera",
       "pesca": "caso",
       "figura": "trick",
+      "tema": {
+        "motivo": "retrofuturismo",
+        "fondo": "#123A5E",
+        "anello": "#F28C28",
+        "colori": { "crema": "#F3E9D2", "arancio": "#F28C28", "rosso": "#D7261E", "verde": "#1E9E4A" }
+      },
       "fumetto_lavoro": "Vai, tocchi puliti!",
       "riscaldamento": [
         { "id": "palleggio-base", "nome": "Palleggio base" },

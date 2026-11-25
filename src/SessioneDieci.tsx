@@ -19,6 +19,7 @@ import {
   type Esercizio,
   type Fase,
 } from './lib/regole/dieci-minuti';
+import { Sfondo } from './Sfondo';
 import { supabase } from './supabase';
 
 // La sessione dei dieci minuti a tutto schermo, uguale per le sette carte (progetto del 25/11,
@@ -251,6 +252,7 @@ export function SessioneDieci({ carta, visore, avvio, oggi, pronto, errore, esci
 
   return (
     <>
+      {carta.tema && <Sfondo tema={carta.tema} esercizio={posa.id} />}
       <div className="sessione-testa">
         <button className="sessione-esci" onClick={esci}>
           Esci

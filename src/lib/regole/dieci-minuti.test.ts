@@ -186,3 +186,18 @@ describe('dieci minuti: mazzo della settimana (spicchi spenti)', () => {
     expect(usciteInSettimana(giorni, '2026-11-22')).toEqual([3]);
   });
 });
+
+describe('sfondi', () => {
+  const luce = (rgb: number[]) => {
+    const [r, g, b] = rgb.map((v) => (v / 255 <= 0.03928 ? v / 255 / 12.92 : ((v / 255 + 0.055) / 1.055) ** 2.4));
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  it('il testo bianco sulla base nera al 50% ha contrasto almeno 4,5 su ogni fondo', () => {
+    const temi = CARTE.flatMap((c) => (c.tema ? [c.tema] : []));
+    expect(temi.length).toBeGreaterThan(0);
+    for (const tema of temi) {
+      const base = [1, 3, 5].map((i) => parseInt(tema.fondo.slice(i, i + 2), 16) * 0.5);
+      expect(1.05 / (luce(base) + 0.05)).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+});

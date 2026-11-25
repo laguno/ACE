@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { Sticker } from './kit';
 import * as R from './lib/regole';
 import { carta as cartaN, usciteInSettimana, type Carta } from './lib/regole/dieci-minuti';
@@ -192,7 +192,7 @@ export function DieciMinuti({ oggi }: { oggi: Date }) {
       </section>
 
       {aperto && inCorso && c && stato.da && (
-        <div className="sessione" role="dialog" aria-modal="true" aria-label={`Dieci minuti: ${c.nome}`}>
+        <div className={c.tema ? 'sessione tema' : 'sessione'} style={c.tema && ({ '--anello': c.tema.anello } as CSSProperties)} role="dialog" aria-modal="true" aria-label={`Dieci minuti: ${c.nome}`}>
           <SessioneDieci carta={c} visore={conVisore} avvio={new Date(stato.da).getTime()} oggi={data} pronto={pronto} errore={errore} esci={() => setAperto(false)} segnaFatto={fatto} />
         </div>
       )}
