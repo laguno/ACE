@@ -1680,3 +1680,13 @@ body[data-sfondo='sera'] {
 .interruttore-visore { display: flex; align-items: center; gap: 10px; min-height: 44px; margin-top: 8px; color: #fff; font-weight: 800; }
 .interruttore-visore input { width: 24px; height: 24px; accent-color: #c6ff3d; }
 @media (prefers-reduced-motion: reduce) { .ruota-disco { transition: none; } }
+
+/* le animazioni dei trick più piccole: ingrandite si vedono i pixel (25/11) */
+.sessione-centro .sessione-figura.trick { height: 68%; align-self: center; }
+/* 25/11: figura, timer e conto scendono; lo spazio libero sta sopra la figura, non sotto il conto */
+.sessione > .sessione-centro { margin-top: auto; }
+.sessione > .sessione-coach { margin-top: 0; }
+@media (min-height: 780px) {
+  .retrofuturismo .orbite { top: 24vh; }
+  .retrofuturismo .orbita { top: calc(24vh + min(31vw, 143px)); }
+}

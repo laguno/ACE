@@ -106,7 +106,7 @@ function Figura({ carta, esercizio, figura, ridotto }: { carta: Carta; esercizio
       </div>
     );
   return (
-    <div className={`sessione-figura${esercizio.id === 'muro-rimbalzo' ? ' con-muro' : ''}`}>
+    <div className={`sessione-figura trick${esercizio.id === 'muro-rimbalzo' ? ' con-muro' : ''}`}>
       <img src={src(esercizio.id, ridotto)} alt="" />
       {esercizio.id === 'muro-rimbalzo' && <span className="sessione-muro" aria-hidden />}
     </div>
