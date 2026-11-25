@@ -1,3 +1,4 @@
+import { Capacitor, registerPlugin } from '@capacitor/core';
 import { useEffect, useRef, useState } from 'react';
 import { Sticker } from './kit';
 import { TRICK_CONFIG as T, esitoRecord, faseA, fumetto, pescaTrick, scaletta, segnale, trickDelRecord, trickInVista, type Fase, type Trick } from './lib/regole/trick';
@@ -13,6 +14,20 @@ const CHIAVE_RECORD = 'ace-prova:trick:record';
 const FASI = scaletta();
 const GIRO = 2 * Math.PI * 104;
 type Posa = { id: string; nome: string };
+
+// Nella WebView di ACE/ACE Prova navigator.vibrate tace (il guscio non ha il permesso VIBRATE): lì serve
+// il plugin nativo Haptics, presente dall'APK con @capacitor/haptics. Lo si chiama per nome, senza il
+// pacchetto JS, così il prototipo non aggiunge dipendenze; nel browser resta navigator.vibrate.
+const Haptics = registerPlugin<{ vibrate(o: { duration: number }): Promise<void> }>('Haptics');
+function vibra(schema: number | number[]) {
+  if (!(Capacitor.isNativePlatform() && Capacitor.isPluginAvailable('Haptics'))) return void navigator.vibrate?.(schema);
+  // [vibra, pausa, vibra, ...] come navigator.vibrate
+  let t = 0;
+  [schema].flat().forEach((ms, i) => {
+    if (i % 2 === 0) setTimeout(() => void Haptics.vibrate({ duration: ms }).catch(() => {}), t);
+    t += ms;
+  });
+}
 
 function leggi<V>(chiave: string, vuoto: V): V {
   try {
@@ -146,8 +161,8 @@ function Sessione({ esci }: { esci: () => void }) {
     ultimo.current = chiave;
     const s = segnale(fase, mancano);
     if (ridotto || document.visibilityState !== 'visible') return;
-    if (s === 'conto') navigator.vibrate?.(T.vibrazione_ms.conto);
-    if (s === 'cambio') navigator.vibrate?.(T.vibrazione_ms.cambio);
+    if (s === 'conto') vibra(T.vibrazione_ms.conto);
+    if (s === 'cambio') vibra(T.vibrazione_ms.cambio);
   }, [chiave]);
 
   // un trick è "visto" quando comincia il suo lavoro: da lì la striscia resta dietro al "?"

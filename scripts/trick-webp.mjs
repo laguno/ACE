@@ -36,15 +36,16 @@ const SCATTO = 12; // differenza ultimo -> primo sopra cui il giro si vede scatt
 const MARGINE = 10; // px attorno all'ingombro di tutti i fotogrammi
 // Peso (prove del 24/11): un fotogramma costa 4-7 kB comunque (il WebP non ha compensazione del moto;
 // senza perdita, sfocatura e qualità più bassa guadagnano poco). Si scende solo con meno fotogrammi e
-// lato più piccolo. Variante "intermedia" (questa, scelta il 24/11): 3/4 del lato, 10 fotogrammi al secondo.
-// Altre: "leggera" PASSO=2 (5 al secondo, ~840 kB), "fluida" SCALA=1 Q=60 (~2,5 MB), da riga di comando.
+// lato più piccolo. Dal 25/11 (prova sul telefono: la "intermedia", 3/4 del lato a qualità 50, si vedeva
+// sgranata) misura piena dell'originale e qualità 75, ~3,1 MB. Altre da riga di comando: "intermedia"
+// SCALA=0.75 Q=50 (~1,8 MB), "leggera" SCALA=0.75 Q=50 PASSO=2 (~840 kB).
 const QUALITA = {
-  quality: +(process.env.Q ?? 50),
+  quality: +(process.env.Q ?? 75),
   effort: 6,
   smartSubsample: true,
   minSize: true,
 };
-const SCALA = +(process.env.SCALA ?? 0.75); // lato del WebP rispetto al ritaglio
+const SCALA = +(process.env.SCALA ?? 1); // lato del WebP rispetto al ritaglio
 const PASSO = +(process.env.PASSO ?? 1); // 2 = un fotogramma su due (5 al secondo)
 
 const verde = (d, i) => d[i + 1] - Math.max(d[i], d[i + 2]);
