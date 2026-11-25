@@ -1,0 +1,160 @@
+{
+  "nota": "Dieci minuti a carte (progetto del signore con Jarvis del 25/11/2026, docs/dieci-minuti.md). Tutte le durate in secondi. La ruota (server, funzione gira_ruota) assegna una carta al giorno dal mazzo della settimana. Ogni carta: 1' di riscaldamento uguale per tutte, 8 blocchi da 40\" + 20\", 1' di record. Nelle carte con meno di 8 esercizi gli esercizi si ripetono in ordine fisso fino a 8 (pesca: 'rotazione'); nelle carte 3 e 4 se ne pescano 8 diversi (pesca: 'caso'). Peso: 'pesante' (1, 2, 5) o 'leggera' (3, 4, 6, 7), usato dalla tappa 2 (giorni di allenamento e partita). Nomi al massimo quattro parole. Le carte senza animazione usano gli sticker di Lani in abiti da allenamento.",
+  "durate": {
+    "riscaldamento": 60,
+    "blocchi": 8,
+    "lavoro": 40,
+    "pausa": 20,
+    "record": 60,
+    "conto_alla_rovescia": 3,
+    "avviso": 10
+  },
+  "vibrazione_ms": { "conto": 80, "cambio": [200, 80, 200], "ruota": [30, 40, 30, 40, 30, 40, 120] },
+  "riscaldamento": [
+    { "id": "camminata", "nome": "Camminata sul posto" },
+    { "id": "rotazioni", "nome": "Rotazioni spalle e caviglie" }
+  ],
+  "fumetti": {
+    "riscaldamento": "Scaldiamo braccia e gambe.",
+    "lavoro": "Vai così, bene!",
+    "pausa": "Respira. Ora tocca a questo.",
+    "arriva": "Guarda: ora tocca a questo.",
+    "avviso": "Ancora 10 secondi!",
+    "cambio": "3, 2, 1… cambio!",
+    "record": "Ultimo minuto: il record!",
+    "calma": "Respira piano. Sei brava.",
+    "fine": "Dieci minuti fatti. Bel lavoro."
+  },
+  "esito": {
+    "battuto": "Record nuovo: {n}!",
+    "primo": "Primo record: {n}. La prossima volta lo batti?",
+    "resta": "Il record resta {migliore}. Oggi {n}."
+  },
+  "ruota": {
+    "titolo": "La carta di oggi",
+    "gira": "GIRA LA RUOTA",
+    "uscite": "Già uscite questa settimana: spente."
+  },
+  "carte": [
+    {
+      "n": 1,
+      "nome": "Gambe da muro",
+      "peso": "pesante",
+      "pesca": "rotazione",
+      "figura": "lani-dieci-minuti",
+      "esercizi": [
+        { "id": "squat", "nome": "Squat" },
+        { "id": "affondi", "nome": "Affondi" },
+        { "id": "affondi-laterali", "nome": "Affondi laterali" },
+        { "id": "salti-stella", "nome": "Salti a stella" },
+        { "id": "ponte-glutei", "nome": "Ponte per i glutei" }
+      ],
+      "record": { "tipo": "numero", "su": "Squat in 30 secondi", "domanda": "Quanti squat in 30 secondi?" }
+    },
+    {
+      "n": 2,
+      "nome": "Core d'acciaio",
+      "peso": "pesante",
+      "pesca": "rotazione",
+      "figura": "lani-dieci-minuti",
+      "esercizi": [
+        { "id": "plank", "nome": "Plank" },
+        { "id": "plank-laterale", "nome": "Plank laterale" },
+        { "id": "dead-bug", "nome": "Dead bug" },
+        { "id": "superman", "nome": "Superman" }
+      ],
+      "record": { "tipo": "numero", "su": "Secondi di plank", "domanda": "Quanti secondi di plank?" }
+    },
+    {
+      "n": 3,
+      "nome": "Riflessi",
+      "peso": "leggera",
+      "pesca": "caso",
+      "figura": "lani-dieci-minuti",
+      "esercizi": [
+        { "id": "presa-due-mani", "nome": "Presa a due mani" },
+        { "id": "presa-destra", "nome": "Presa mano destra" },
+        { "id": "presa-sinistra", "nome": "Presa mano sinistra" },
+        { "id": "muro-rimbalzo-presa", "nome": "Muro, rimbalzo, presa" },
+        { "id": "mano-opposta", "nome": "Presa con mano opposta" },
+        { "id": "presa-bassa", "nome": "Presa bassa in ricezione" },
+        { "id": "battito-presa", "nome": "Lancio, battito, presa" },
+        { "id": "sfida-famiglia", "nome": "Sfida di famiglia" }
+      ],
+      "record": { "tipo": "numero", "su": "Prese di fila", "domanda": "Quante prese di fila?" },
+      "visore": {
+        "interruttore": "Ho il visore",
+        "figura": "lani-vr",
+        "esercizio": { "id": "beat-saber", "nome": "Beat Saber" },
+        "record": null
+      }
+    },
+    {
+      "n": 4,
+      "nome": "Palla al muro: trick",
+      "peso": "leggera",
+      "pesca": "caso",
+      "figura": "trick",
+      "fumetto_lavoro": "Vai, tocchi puliti!",
+      "riscaldamento": [
+        { "id": "palleggio-base", "nome": "Palleggio base" },
+        { "id": "bagher-base", "nome": "Bagher base" }
+      ],
+      "esercizi": [
+        { "id": "bagher-un-braccio", "nome": "Bagher a un braccio", "come": ["Un braccio teso, l'altro dietro.", "Colpisci con l'avambraccio.", "Palla dritta, non troppo alta."] },
+        { "id": "palleggio-seduta", "nome": "Palleggio da seduta", "come": ["Siediti a gambe incrociate.", "Mani a coppa sopra la fronte.", "Spingi la palla in alto, dritta."] },
+        { "id": "battito-mani", "nome": "Battito di mani", "come": ["Palleggia alto.", "Mentre è su, batti le mani.", "Mani pronte prima che scenda."] },
+        { "id": "giro-su-se-stessa", "nome": "Giro su te stessa", "come": ["Palleggia bello alto.", "Fai un giro veloce.", "Riprendila in palleggio."] },
+        { "id": "uno-alto-uno-basso", "nome": "Uno alto, uno basso", "come": ["Un palleggio basso, vicino.", "Uno alto, sopra la testa.", "Alterna senza fermarti."] },
+        { "id": "bagher-palleggio-alternati", "nome": "Bagher e palleggio", "come": ["Un tocco di bagher.", "Il tocco dopo in palleggio.", "Avanti così, alternando."] },
+        { "id": "palleggio-di-lato", "nome": "Palleggio di lato", "come": ["Palleggia sopra la testa.", "Fai un passo di lato.", "Torna indietro, sempre palleggiando."] },
+        { "id": "pancake", "nome": "Pancake da ferma", "come": ["Lancia la palla davanti, bassa.", "Mano piatta a terra, sotto la palla.", "La palla rimbalza sul dorso."] },
+        { "id": "muro-rimbalzo", "nome": "Muro e rimbalzo", "come": ["Lancia la palla contro il muro.", "Lasciala rimbalzare a terra.", "Riprendila in palleggio o bagher."] }
+      ],
+      "record": { "tipo": "trick", "domanda": "Quanti di fila?" }
+    },
+    {
+      "n": 5,
+      "nome": "Caviglie e equilibrio",
+      "peso": "pesante",
+      "pesca": "rotazione",
+      "figura": "lani-dieci-minuti",
+      "esercizi": [
+        { "id": "una-gamba", "nome": "Una gamba sola" },
+        { "id": "saltelli", "nome": "Saltelli" },
+        { "id": "skip", "nome": "Skip" },
+        { "id": "punte", "nome": "Sulle punte" }
+      ],
+      "record": { "tipo": "numero", "su": "Secondi su una gamba", "domanda": "Quanti secondi su una gamba?" }
+    },
+    {
+      "n": 6,
+      "nome": "Allungamento",
+      "peso": "leggera",
+      "pesca": "rotazione",
+      "figura": "lani-dieci-minuti",
+      "esercizi": [
+        { "id": "farfalla", "nome": "Farfalla" },
+        { "id": "busto-avanti", "nome": "Busto in avanti" },
+        { "id": "quadricipiti", "nome": "Allungo quadricipiti" },
+        { "id": "spalle", "nome": "Allungo spalle" }
+      ],
+      "record": { "tipo": "scelta", "su": "Busto in avanti", "domanda": "Fin dove arrivi?", "valori": ["Ginocchia", "Caviglie", "Punte", "Oltre"] }
+    },
+    {
+      "n": 7,
+      "nome": "Calma",
+      "peso": "leggera",
+      "pesca": "rotazione",
+      "figura": "lani-dieci-minuti",
+      "fumetto_lavoro": "Respira piano. Sei brava.",
+      "esercizi": [
+        { "id": "respirazione", "nome": "Respirazione lenta" },
+        { "id": "scansione", "nome": "Scansione del corpo" },
+        { "id": "allungamento-dolce", "nome": "Allungamento dolce" }
+      ],
+      "finale": { "id": "respiro-finale", "nome": "Respirazione" },
+      "record": null
+    }
+  ]
+}

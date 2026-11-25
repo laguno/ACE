@@ -345,12 +345,7 @@ test('premi dietro il PIN: senza il PIN giusto i forzieri non si vedono', async 
 });
 
 test('Impostazioni: R-Evolution con conferma, dieci minuti, frasi, orari', async ({ page }) => {
-  const menu = [
-    { id: 'plank', nome: 'Plank e varianti', tipo: 'forza_riflessi', creato_il: '2026-11-13T10:00:00Z' },
-    { id: 'visore', nome: 'Riflessi con il visore', tipo: 'forza_riflessi', creato_il: '2026-11-13T10:00:01Z' },
-    { id: 'respiro', nome: 'Respirazione guidata', tipo: 'recupero', creato_il: '2026-11-13T10:00:02Z' },
-  ];
-  const { t } = await finto(page, { ...dati(), esercizi_dieci_minuti: menu, frasi: [{ id: 'x1', testo: 'Affrettati lentamente.', autore: 'motto latino', di_famiglia: false }] });
+  const { t } = await finto(page, { ...dati(), frasi: [{ id: 'x1', testo: 'Affrettati lentamente.', autore: 'motto latino', di_famiglia: false }] });
   await page.goto('/');
   await scheda(page, 'Impostazioni');
 
@@ -364,15 +359,11 @@ test('Impostazioni: R-Evolution con conferma, dieci minuti, frasi, orari', async
   await expect(page.getByRole('status')).toContainText('R-Evolution spenta');
   expect(t.impostazioni.find((i) => i.chiave === 'r_evolution_da')).toBeUndefined();
 
-  await page.getByRole('button', { name: /^Dieci minuti/ }).click();
-  await expect(page.getByRole('button', { name: 'Togli: Respirazione guidata' })).toBeDisabled();
-  await page.getByLabel('Esercizio nuovo').fill('Mobilità delle spalle');
-  await page.getByLabel('Tipo').selectOption('recupero');
-  await page.getByRole('button', { name: 'Aggiungi al menu' }).click();
-  await expect(page.getByRole('status')).toHaveText('Esercizio aggiunto al menu.');
-  expect(t.esercizi_dieci_minuti.find((e) => e.nome === 'Mobilità delle spalle')).toMatchObject({ tipo: 'recupero' });
-  await page.getByRole('button', { name: 'Togli: Riflessi con il visore' }).click();
-  await expect(page.getByRole('status')).toHaveText('Esercizio tolto dal menu.');
+  // dal 25/11 le carte le sceglie la ruota: qui l'elenco delle sette, in sola lettura
+  await page.getByRole('button', { name: /^Dieci minuti.*7 carte, le sceglie la ruota/ }).click();
+  await expect(page.getByText('1. Gambe da muro')).toBeVisible();
+  await expect(page.getByText('7. Calma')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Aggiungi al menu' })).toHaveCount(0);
   await page.getByRole('button', { name: '‹ Impostazioni' }).click();
 
   await page.getByRole('button', { name: /^Frasi di famiglia/ }).click();

@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import * as R from '../lib/regole';
-import { AreaTesto, Attesa, CampoData, CampoTesto, Elenco, Foglio, Interruttore, Riga, Scelta } from '../kit';
+import { CARTE } from '../lib/regole/dieci-minuti';
+import { AreaTesto, Attesa, CampoData, CampoTesto, Elenco, Foglio, Interruttore, Riga } from '../kit';
 import { scegliSuono, suonoAcceso } from '../sensi';
 import { GIORNI, MESI } from '../spunte';
 import Stato from '../Stato';
@@ -12,7 +13,7 @@ import type { Props } from './comune';
 // pagine per controllare (Stato di ACE, Vetrina, Regole) e, sul telefono di un genitore, l'uscita.
 
 type Pagina = 'sera' | 'obiettivo' | 'dieci' | 'frasi' | 'pin' | 'stato' | 'vetrina' | 'regole';
-type Valori = { caricate: boolean; chiusura: Record<string, string>; materiale: Record<string, string[]>; obiettivo: number; rEvolutionDa: string | null | 'errore'; esercizi: number; frasi: number };
+type Valori = { caricate: boolean; chiusura: Record<string, string>; materiale: Record<string, string[]>; obiettivo: number; rEvolutionDa: string | null | 'errore'; frasi: number };
 const SETTIMANA = [1, 2, 3, 4, 5, 6, 0];
 const TITOLI: Record<Pagina, string> = { sera: 'Sera e cartella', obiettivo: 'Obiettivo media', dieci: 'Dieci minuti', frasi: 'Frasi di famiglia', pin: 'PIN dell’area', stato: 'Stato di ACE', vetrina: 'Vetrina', regole: 'Regole del gioco' };
 
@@ -28,10 +29,9 @@ export default function Impostazioni({ client, avvisa, esci, sospeso }: Props & 
   useEffect(() => sospeso?.(modificato), [modificato]);
 
   async function carica() {
-    const [im, re, es, fr] = await Promise.all([
+    const [im, re, fr] = await Promise.all([
       client.from('impostazioni').select('chiave, valore').in('chiave', ['ora_chiusura', 'materiale_cartella', 'obiettivo_media']),
       client.from('impostazioni').select('valore').eq('chiave', R.CHIAVE_R_EVOLUTION).maybeSingle(),
-      client.from('esercizi_dieci_minuti').select('id', { count: 'exact', head: true }),
       client.from('frasi').select('id', { count: 'exact', head: true }).eq('di_famiglia', true),
     ]);
     const m = Object.fromEntries((im.data ?? []).map((r) => [r.chiave, r.valore]));
@@ -43,7 +43,6 @@ export default function Impostazioni({ client, avvisa, esci, sospeso }: Props & 
       obiettivo: Number(m.obiettivo_media ?? 7.35),
       // in errore niente interruttore, sennò si riscrive la data vera
       rEvolutionDa: re.error ? 'errore' : typeof re.data?.valore === 'string' ? re.data.valore : null,
-      esercizi: es.count ?? 0,
       frasi: fr.count ?? 0,
     });
   }
@@ -81,7 +80,7 @@ export default function Impostazioni({ client, avvisa, esci, sospeso }: Props & 
           </Foglio>
         )}
         {pagina === 'obiettivo' && <Obiettivo client={client} v={v} fatto={fatto} />}
-        {pagina === 'dieci' && <MenuDieciMinuti client={client} fatto={(s) => fatto(s, false)} />}
+        {pagina === 'dieci' && <CarteDieciMinuti />}
         {pagina === 'frasi' && <FrasiDiFamiglia client={client} fatto={(s) => fatto(s, false)} />}
         {pagina === 'pin' && <Pin client={client} fatto={fatto} />}
         {pagina === 'stato' && <Stato client={client} />}
@@ -107,7 +106,7 @@ export default function Impostazioni({ client, avvisa, esci, sospeso }: Props & 
             onChange={(acceso) => setChiede(acceso ? 'accendi' : 'spegni')}
           />
         </li>
-        <Riga titolo="Dieci minuti" sotto={`${v.esercizi} ${v.esercizi === 1 ? 'esercizio' : 'esercizi'} nel menu`} vai={() => setPagina('dieci')} />
+        <Riga titolo="Dieci minuti" sotto={`${CARTE.length} carte, le sceglie la ruota`} vai={() => setPagina('dieci')} />
         <Riga titolo="Frasi di famiglia" sotto={v.frasi ? `${v.frasi} ${v.frasi === 1 ? 'frase' : 'frasi'}` : 'Nessuna'} vai={() => setPagina('frasi')} />
         <Riga titolo="PIN dell’area" sotto="Sui dispositivi di Lani; resta aperta 10 minuti dall’ultima azione" vai={() => setPagina('pin')} />
         <li>
@@ -257,69 +256,18 @@ function Pin({ client, fatto }: { client: Props['client']; fatto: (s: string) =>
   );
 }
 
-const TIPI_DIECI_MINUTI = [
-  ['forza_riflessi', 'Forza e riflessi (giorni senza pallavolo)'],
-  ['recupero', 'Recupero (giorni di pallavolo)'],
-] as const;
-
-/** Menu dei dieci minuti (docs/01): lo cambiano i genitori. Almeno un esercizio per tipo resta. */
-function MenuDieciMinuti({ client, fatto }: { client: Props['client']; fatto: (s: string) => void }) {
-  const [menu, setMenu] = useState<R.EsercizioDieciMinuti[]>([]);
-  const carica = () =>
-    client
-      .from('esercizi_dieci_minuti')
-      .select('id, nome, tipo')
-      .order('creato_il')
-      .then(({ data }) => setMenu(data ?? []));
-  useEffect(() => {
-    carica();
-  }, []);
-
-  async function aggiungi(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = e.currentTarget;
-    const f = new FormData(form);
-    const { error } = await client.from('esercizi_dieci_minuti').insert({ nome: String(f.get('nome')).trim(), tipo: String(f.get('tipo')) });
-    fatto(error ? 'Esercizio non salvato: forse c’è già.' : 'Esercizio aggiunto al menu.');
-    if (!error) {
-      form.reset();
-      carica();
-    }
-  }
-  async function togli(id: string) {
-    const { error } = await client.from('esercizi_dieci_minuti').delete().eq('id', id);
-    fatto(error ? 'Esercizio non tolto.' : 'Esercizio tolto dal menu.');
-    carica();
-  }
-
+/** Dieci minuti a carte (25/11, docs/dieci-minuti.md): le sceglie la ruota, qui si vedono e basta. */
+function CarteDieciMinuti() {
   return (
     <>
-      <p className="ga-nota">Al mattino l’app propone un esercizio del tipo giusto per la giornata; Lani può sceglierne un altro.</p>
-      {TIPI_DIECI_MINUTI.map(([tipo, titolo]) => {
-        const delTipo = menu.filter((x) => x.tipo === tipo);
-        return (
-          <Sezione key={tipo} titolo={titolo}>
-            <Elenco>
-              {delTipo.map((x) => (
-                <Riga
-                  key={x.id}
-                  titolo={x.nome}
-                  azione={
-                    <button type="button" className="ga-btn tenue" disabled={delTipo.length < 2} onClick={() => togli(x.id)} aria-label={`Togli: ${x.nome}`}>
-                      Togli
-                    </button>
-                  }
-                />
-              ))}
-            </Elenco>
-          </Sezione>
-        );
-      })}
-      <form className="ga-modulo" onSubmit={aggiungi} aria-label="Aggiungi un esercizio">
-        <CampoTesto etichetta="Esercizio nuovo" name="nome" maxLength={60} required autoComplete="off" placeholder="Corda, addominali…" />
-        <Scelta etichetta="Tipo" name="tipo" defaultValue="forza_riflessi" opzioni={TIPI_DIECI_MINUTI} />
-        <button className="ga-btn pieno largo">Aggiungi al menu</button>
-      </form>
+      <p className="ga-nota">Ogni giorno Lani gira la ruota: esce una carta che non è ancora uscita da lunedì. Le carte e i loro esercizi stanno nel file di configurazione dei dieci minuti. Il vecchio menu resta nello storico.</p>
+      <Sezione titolo="Le sette carte">
+        <Elenco>
+          {CARTE.map((c) => (
+            <Riga key={c.n} titolo={`${c.n}. ${c.nome}`} sotto={`${c.peso === 'pesante' ? 'Pesante' : 'Leggera'} · ${c.esercizi.map((e) => e.nome).join(', ')}`} />
+          ))}
+        </Elenco>
+      </Sezione>
     </>
   );
 }

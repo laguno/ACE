@@ -45,6 +45,33 @@ export type Database = {
         Update: { creata_il?: string; giorno?: string; segnata_da?: string | null }
         Relationships: []
       }
+      carte_del_giorno: {
+        Row: {
+          carta: number
+          data: string
+          girata_il: string
+          record: number | null
+          record_il: string | null
+          record_su: string | null
+        }
+        Insert: {
+          carta: number
+          data?: string
+          girata_il?: string
+          record?: number | null
+          record_il?: string | null
+          record_su?: string | null
+        }
+        Update: {
+          carta?: number
+          data?: string
+          girata_il?: string
+          record?: number | null
+          record_il?: string | null
+          record_su?: string | null
+        }
+        Relationships: []
+      }
       classifiche: {
         Row: {
           aggiornata_il: string
@@ -1678,6 +1705,7 @@ export type Database = {
           testo: string
         }[]
       }
+      gira_ruota: { Args: never; Returns: number }
       imposta_pin: { Args: { p_pin: string }; Returns: undefined }
       lancia_chiavi: { Args: never; Returns: undefined }
       lancia_classifiche: { Args: { p_corpo?: Json }; Returns: undefined }
@@ -1700,6 +1728,7 @@ export type Database = {
         Args: { p_id: string; p_in_campo: boolean }
         Returns: boolean
       }
+      segna_record: { Args: { p_su: string; p_valore: number }; Returns: boolean }
       segna_tipo_verifica: {
         Args: { p_id: string; p_tipo: Database["public"]["Enums"]["tipo_verifica"] }
         Returns: undefined

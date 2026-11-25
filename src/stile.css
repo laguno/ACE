@@ -1573,56 +1573,76 @@ body[data-sfondo='sera'] {
 
 /* Carta 4 dei dieci minuti, "Palla al muro: trick" (PROTOTIPO 24/11, solo build di prova, src/Carta4.tsx).
    Sportiva ma di caramella: contorno prugna marcato, ombra piena sfalsata, fucsia e burro. */
-.carta4-fascia { --contorno: #3d2350; position: relative; padding: 16px; border: 3px solid var(--contorno); border-radius: 24px; background: repeating-linear-gradient(135deg, var(--burro-chiaro) 0 18px, #fff8d9 18px 36px); box-shadow: 4px 5px 0 var(--contorno); }
-.carta4-fascia h2 { margin: 6px 0 2px; font-size: 24px; line-height: 1.1; }
-.carta4-fascia p { margin: 0; font-weight: 700; }
-.carta4-prova { display: inline-block; padding: 2px 10px; border: 2px solid var(--contorno); border-radius: 999px; background: var(--bianco); font: 800 12px Nunito, sans-serif; letter-spacing: 0.08em; }
-.carta4-via, .carta4-record button, .carta4-chiudi { min-height: 52px; border: 3px solid #3d2350; border-radius: 16px; background: var(--accento); color: var(--su-colore); font: 800 22px 'Baloo 2', Nunito, sans-serif; box-shadow: 0 5px 0 #3d2350; cursor: pointer; }
-.carta4-via { width: 100%; margin-top: 12px; font-size: 26px; letter-spacing: 0.06em; }
-.carta4-via:active, .carta4-record button:active, .carta4-chiudi:active { transform: translateY(3px); box-shadow: 0 2px 0 #3d2350; }
+.sessione-via, .sessione-record button, .sessione-chiudi, .sessione-scelte button { min-height: 52px; border: 3px solid #3d2350; border-radius: 16px; background: var(--accento); color: var(--su-colore); font: 800 22px 'Baloo 2', Nunito, sans-serif; box-shadow: 0 5px 0 #3d2350; cursor: pointer; }
+.sessione-via { width: 100%; margin-top: 12px; font-size: 26px; letter-spacing: 0.06em; }
+.sessione-via:active, .sessione-record button:active, .sessione-chiudi:active { transform: translateY(3px); box-shadow: 0 2px 0 #3d2350; }
 
-.carta4 { --contorno: #3d2350; position: fixed; inset: 0; z-index: 30; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: calc(12px + env(safe-area-inset-top)) 16px calc(12px + env(safe-area-inset-bottom)); overflow-y: auto; color: var(--testo); background: repeating-linear-gradient(135deg, var(--panna) 0 22px, var(--rosa) 22px 44px); }
-.carta4 > * { width: 100%; max-width: 430px; }
-.carta4 :focus-visible { outline: 3px solid var(--accento); outline-offset: 3px; }
-.carta4-testa { display: flex; justify-content: space-between; align-items: center; min-height: 48px; }
-.carta4-esci, .carta4-aiuto { min-width: 48px; min-height: 48px; border: 3px solid var(--contorno); border-radius: 999px; background: var(--bianco); color: var(--testo); font: 800 15px Nunito, sans-serif; box-shadow: 2px 3px 0 var(--contorno); cursor: pointer; }
-.carta4-esci { padding: 0 16px; }
-.carta4-aiuto { margin-left: auto; font: 800 24px/1 'Baloo 2', Nunito, sans-serif; }
-.carta4-centro { display: grid; place-items: center; min-height: clamp(150px, 31vh, 270px); }
-.carta4-figura { display: flex; align-items: flex-end; justify-content: center; height: clamp(150px, 31vh, 270px); }
-.carta4-figura img { height: 100%; max-width: 100%; object-fit: contain; }
-.carta4-figura.con-muro img { max-width: calc(100% - 30px); }
+.sessione { --contorno: #3d2350; position: fixed; inset: 0; z-index: 30; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: calc(12px + env(safe-area-inset-top)) 16px calc(12px + env(safe-area-inset-bottom)); overflow-y: auto; color: var(--testo); background: repeating-linear-gradient(135deg, var(--panna) 0 22px, var(--rosa) 22px 44px); }
+.sessione > * { width: 100%; max-width: 430px; }
+.sessione :focus-visible { outline: 3px solid var(--accento); outline-offset: 3px; }
+.sessione-testa { display: flex; justify-content: space-between; align-items: center; min-height: 48px; }
+.sessione-esci, .sessione-aiuto { min-width: 48px; min-height: 48px; border: 3px solid var(--contorno); border-radius: 999px; background: var(--bianco); color: var(--testo); font: 800 15px Nunito, sans-serif; box-shadow: 2px 3px 0 var(--contorno); cursor: pointer; }
+.sessione-esci { padding: 0 16px; }
+.sessione-aiuto { margin-left: auto; font: 800 24px/1 'Baloo 2', Nunito, sans-serif; }
+.sessione-centro { display: grid; place-items: center; min-height: clamp(150px, 31vh, 270px); }
+.sessione-figura { display: flex; align-items: flex-end; justify-content: center; height: clamp(150px, 31vh, 270px); }
+.sessione-figura img { height: 100%; max-width: 100%; object-fit: contain; }
+.sessione-figura.con-muro img { max-width: calc(100% - 30px); }
 /* il muro che manca nella GIF (decisione del 24/11): mattoni di caramella a destra, dove arriva la palla */
-.carta4-muro { flex: none; width: 26px; height: 92%; margin-left: -6px; border: 3px solid var(--contorno); border-radius: 8px 8px 4px 4px; background: repeating-linear-gradient(0deg, var(--rosa-bordo) 0 14px, var(--contorno) 14px 16px), var(--rosa-bordo); box-shadow: 3px 3px 0 var(--contorno); }
-.carta4-nome { margin: 0; text-align: center; font-size: 30px; line-height: 1.05; }
-.carta4-anello { position: relative; width: clamp(150px, 25vh, 210px); aspect-ratio: 1; margin: 0 auto; }
-.carta4-anello svg { width: 100%; height: 100%; display: block; }
-.carta4-anello circle { fill: none; stroke-width: 20; }
-.carta4-anello .pista { stroke: var(--bianco); filter: drop-shadow(0 0 0 var(--contorno)); }
-.carta4-anello .tempo { stroke: var(--fucsia); stroke-linecap: round; transition: stroke-dashoffset 250ms linear; }
-.carta4-anello.pausa .tempo { stroke: var(--viola); }
-.carta4-anello.riscaldamento .tempo, .carta4-anello.record .tempo, .carta4-anello.fine .tempo { stroke: #e0a800; }
-.carta4-anello::before { content: ''; position: absolute; inset: 0; border: 3px solid var(--contorno); border-radius: 50%; }
-.carta4-anello::after { content: ''; position: absolute; inset: 20%; border: 3px solid var(--contorno); border-radius: 50%; background: var(--bianco); }
-.carta4-anello [role='timer'] { position: absolute; inset: 0; z-index: 1; display: grid; place-items: center; font: 800 clamp(44px, 8vh, 68px)/1 'Baloo 2', Nunito, sans-serif; }
-.carta4-anello.fine [role='timer'] { font-size: clamp(20px, 3.4vh, 28px); }
-.carta4-coach { display: flex; align-items: flex-end; gap: 8px; margin-top: auto; }
-.carta4-coach img { flex: none; width: 72px; height: 72px; object-fit: contain; }
-.carta4-coach p { position: relative; margin: 0 0 18px; padding: 8px 14px; border: 3px solid var(--contorno); border-radius: 18px 18px 18px 4px; background: var(--bianco); font: 800 16px/1.25 Nunito, sans-serif; box-shadow: 2px 3px 0 var(--contorno); }
-.carta4-come ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-.carta4-come li { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 6px; border: 3px solid var(--contorno); border-radius: 16px; background: var(--bianco); box-shadow: 2px 3px 0 var(--contorno); font: 800 13px/1.2 Nunito, sans-serif; text-align: center; }
-.carta4-come img { height: clamp(80px, 15vh, 130px); max-width: 100%; object-fit: contain; }
-.carta4-come .numero { position: absolute; top: -10px; left: -8px; width: 28px; height: 28px; display: grid; place-items: center; border: 3px solid var(--contorno); border-radius: 50%; background: var(--burro); font: 800 15px 'Baloo 2', Nunito, sans-serif; }
-.carta4-chiudi { width: 100%; margin-top: 10px; font-size: 18px; min-height: 48px; }
-.carta4-record form { display: flex; align-items: flex-end; gap: 10px; }
-.carta4-record label { flex: 1; display: flex; flex-direction: column; gap: 4px; font: 800 16px Nunito, sans-serif; }
-.carta4-record input { min-height: 52px; padding: 0 12px; border: 3px solid var(--contorno); border-radius: 14px; background: var(--bianco); color: var(--testo); font: 800 26px 'Baloo 2', Nunito, sans-serif; }
-.carta4-record button { padding: 0 20px; }
-.carta4-record p { margin: 0; padding: 10px 14px; border: 3px solid var(--contorno); border-radius: 16px; background: var(--bianco); font: 800 18px/1.25 Nunito, sans-serif; text-align: center; }
-.carta4-record p.battuto { background: var(--burro); font-size: 22px; }
+.sessione-muro { flex: none; width: 26px; height: 92%; margin-left: -6px; border: 3px solid var(--contorno); border-radius: 8px 8px 4px 4px; background: repeating-linear-gradient(0deg, var(--rosa-bordo) 0 14px, var(--contorno) 14px 16px), var(--rosa-bordo); box-shadow: 3px 3px 0 var(--contorno); }
+.sessione-nome { margin: 0; text-align: center; font-size: 30px; line-height: 1.05; }
+.sessione-anello { position: relative; width: clamp(150px, 25vh, 210px); aspect-ratio: 1; margin: 0 auto; }
+.sessione-anello svg { width: 100%; height: 100%; display: block; }
+.sessione-anello circle { fill: none; stroke-width: 20; }
+.sessione-anello .pista { stroke: var(--bianco); filter: drop-shadow(0 0 0 var(--contorno)); }
+.sessione-anello .tempo { stroke: var(--fucsia); stroke-linecap: round; transition: stroke-dashoffset 250ms linear; }
+.sessione-anello.pausa .tempo { stroke: var(--viola); }
+.sessione-anello.riscaldamento .tempo, .sessione-anello.record .tempo, .sessione-anello.fine .tempo { stroke: #e0a800; }
+.sessione-anello::before { content: ''; position: absolute; inset: 0; border: 3px solid var(--contorno); border-radius: 50%; }
+.sessione-anello::after { content: ''; position: absolute; inset: 20%; border: 3px solid var(--contorno); border-radius: 50%; background: var(--bianco); }
+.sessione-anello [role='timer'] { position: absolute; inset: 0; z-index: 1; display: grid; place-items: center; font: 800 clamp(44px, 8vh, 68px)/1 'Baloo 2', Nunito, sans-serif; }
+.sessione-anello.fine [role='timer'] { font-size: clamp(20px, 3.4vh, 28px); }
+.sessione-coach { display: flex; align-items: flex-end; gap: 8px; margin-top: auto; }
+.sessione-coach img { flex: none; width: 72px; height: 72px; object-fit: contain; }
+.sessione-coach p { position: relative; margin: 0 0 18px; padding: 8px 14px; border: 3px solid var(--contorno); border-radius: 18px 18px 18px 4px; background: var(--bianco); font: 800 16px/1.25 Nunito, sans-serif; box-shadow: 2px 3px 0 var(--contorno); }
+.sessione-come ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.sessione-come li { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 6px; border: 3px solid var(--contorno); border-radius: 16px; background: var(--bianco); box-shadow: 2px 3px 0 var(--contorno); font: 800 13px/1.2 Nunito, sans-serif; text-align: center; }
+.sessione-come img { height: clamp(80px, 15vh, 130px); max-width: 100%; object-fit: contain; }
+.sessione-come .numero { position: absolute; top: -10px; left: -8px; width: 28px; height: 28px; display: grid; place-items: center; border: 3px solid var(--contorno); border-radius: 50%; background: var(--burro); font: 800 15px 'Baloo 2', Nunito, sans-serif; }
+.sessione-chiudi { width: 100%; margin-top: 10px; font-size: 18px; min-height: 48px; }
+.sessione-record form { display: flex; align-items: flex-end; gap: 10px; }
+.sessione-record label { flex: 1; display: flex; flex-direction: column; gap: 4px; font: 800 16px Nunito, sans-serif; }
+.sessione-record input { min-height: 52px; padding: 0 12px; border: 3px solid var(--contorno); border-radius: 14px; background: var(--bianco); color: var(--testo); font: 800 26px 'Baloo 2', Nunito, sans-serif; }
+.sessione-record button { padding: 0 20px; }
+.sessione-record p { margin: 0; padding: 10px 14px; border: 3px solid var(--contorno); border-radius: 16px; background: var(--bianco); font: 800 18px/1.25 Nunito, sans-serif; text-align: center; }
+.sessione-record p.battuto { background: var(--burro); font-size: 22px; }
 @media (prefers-reduced-motion: no-preference) {
-  .carta4-festa { animation: carta4-salto 700ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
-  .carta4-record p.battuto { animation: carta4-salto 500ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+  .sessione-festa { animation: sessione-salto 700ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+  .sessione-record p.battuto { animation: sessione-salto 500ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
 }
-@media (prefers-reduced-motion: reduce) { .carta4-anello .tempo { transition: none; } }
-@keyframes carta4-salto { from { transform: scale(0.6); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .sessione-anello .tempo { transition: none; } }
+@keyframes sessione-salto { from { transform: scale(0.6); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* dieci minuti a carte (25/11): nome della carta in testa alla sessione, record a quattro scelte, errore */
+.sessione-carta { font: 800 16px Nunito, sans-serif; color: var(--testo); text-align: center; flex: 1; }
+.sessione-figura .sticker { height: 100%; width: auto; max-width: 100%; object-fit: contain; }
+.sessione-record fieldset { margin: 0; padding: 0; border: 0; }
+.sessione-record legend { margin-bottom: 6px; font: 800 16px Nunito, sans-serif; }
+.sessione-scelte { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.sessione-scelte button { font-size: 18px; }
+.sessione-errore { margin: 0; font-weight: 800; color: var(--fucsia); text-align: center; }
+.sessione > .sessione-via { margin-top: auto; font-size: 22px; }
+/* la ruota: sette spicchi, freccia in alto, carte già uscite spente */
+.ruota { position: relative; display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 8px; }
+.ruota-disco { width: min(78vw, 300px); height: auto; transition: transform 3.2s cubic-bezier(0.17, 0.67, 0.21, 1); }
+.ruota-disco path { stroke: #14162e; stroke-width: 3; }
+.ruota-disco text { font: 800 20px 'Baloo 2', Nunito, sans-serif; fill: #14162e; text-anchor: middle; }
+.ruota-disco .spenta { opacity: 0.28; filter: grayscale(1); }
+.ruota-bordo { fill: none; stroke: #c6ff3d; stroke-width: 6; }
+.ruota-perno { fill: #14162e; stroke: #c6ff3d; stroke-width: 4; }
+.ruota-freccia { position: absolute; top: -6px; z-index: 1; width: 0; height: 0; border-left: 16px solid transparent; border-right: 16px solid transparent; border-top: 28px solid #c6ff3d; filter: drop-shadow(0 3px 0 #14162e); }
+.ruota-gira { width: 100%; }
+.ruota-nota, .ruota-gira-ancora { margin: 0; color: #b9bce0; font-weight: 700; text-align: center; }
+.interruttore-visore { display: flex; align-items: center; gap: 10px; min-height: 44px; margin-top: 8px; color: #fff; font-weight: 800; }
+.interruttore-visore input { width: 24px; height: 24px; accent-color: #c6ff3d; }
+@media (prefers-reduced-motion: reduce) { .ruota-disco { transition: none; } }

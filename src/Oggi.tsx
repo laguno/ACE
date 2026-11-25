@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Bell, CaretDown, CaretRight, Cards, ClipboardText, Lightbulb, Volleyball } from '@phosphor-icons/react';
 import { impegniTra, piuGiorni, oraAdesso, useGiornata, type Impegno } from './giornata';
 import { Attesa, Riquadro, Sticker, Testata } from './kit';
@@ -20,10 +20,6 @@ import type { Dove } from './lib/regole/tabellina';
 
 // Oggi — design/Oggi.html (mattina) e design/Pomeriggio.html (pomeriggio).
 // ponytail: riga dell'umore facoltativa e foto dei compiti, più avanti.
-
-// Carta 4 dei dieci minuti (PROTOTIPO, 24/11): solo nelle build di prova (ACE Prova con `--mode locale`,
-// server di sviluppo). In produzione la condizione è falsa al build e il modulo non entra nel pacchetto.
-const Carta4 = import.meta.env.DEV || import.meta.env.MODE === 'locale' ? lazy(() => import('./Carta4')) : null;
 
 type Cosa = { titolo: string; sotto: string; icona: 'verifica' | 'sport' | 'promemoria' };
 type Apri = (v: 'Studio' | 'Astra') => void;
@@ -61,13 +57,6 @@ export default function Oggi({ apri = () => {}, vai }: { apri?: Apri; vai?: (d: 
         <section className="schermo dopo">
           <PillolaPartita />
           <DieciMinuti oggi={oggi} />
-        </section>
-      )}
-      {Carta4 && (
-        <section className="schermo dopo">
-          <Suspense fallback={null}>
-            <Carta4 />
-          </Suspense>
         </section>
       )}
       <AttivaNotifiche />

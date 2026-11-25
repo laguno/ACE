@@ -235,7 +235,7 @@
     "non_ripetere_prima_di_giorni": 30
   },
   "dieci_minuti": {
-    "nota": "Sprint 2 (decisi dal signore il 13/11), finestra cambiata il 23/11/2026: si avviano dalle 6:00, l'ultimo avvio alle 21:20 (finiscono entro le 21:30), da quando R-Evolution è accesa. Per le chiavi contano 6 giorni su 7: un giorno jolly a settimana. Il menu sta nella tabella esercizi_dieci_minuti (lo cambiano i genitori in Impostazioni). Recupero nei giorni di pallavolo, forza e riflessi negli altri.",
+    "nota": "Sprint 2 (decisi dal signore il 13/11), finestra cambiata il 23/11/2026: si avviano dalle 6:00, l'ultimo avvio alle 21:20 (finiscono entro le 21:30), da quando R-Evolution è accesa. Per le chiavi contano 6 giorni su 7: un giorno jolly a settimana. Dal 25/11/2026 a carte: la ruota assegna una delle sette carte (data/config-dieci-minuti.json, docs/dieci-minuti.md); il vecchio menu esercizi_dieci_minuti resta nello storico.",
     "secondi": 600,
     "finestra": { "da": "06:00", "a": "21:30", "ultimo_avvio": "21:20" },
     "giorni_a_settimana": 6

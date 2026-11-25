@@ -63,6 +63,27 @@ verifica('menu dei dieci minuti: il genitore aggiunge', (await val(null, `select
 await fallisce('menu dei dieci minuti: tipo sconosciuto', PAPA, `insert into esercizi_dieci_minuti (nome, tipo) values ('Salti', 'salti')`);
 await come(PAPA, `delete from esercizi_dieci_minuti where nome = 'Corda'`);
 verifica('menu dei dieci minuti: il genitore toglie', (await val(null, `select count(*)::int from esercizi_dieci_minuti`)) === 5);
+
+// dieci minuti a carte (0072): la ruota la fissa il server, una carta al giorno, mazzo della settimana
+const carta1 = await val(LANI, 'select gira_ruota()');
+verifica('ruota: dà una carta da 1 a 7', carta1 >= 1 && carta1 <= 7);
+verifica('ruota: rigirata dà la stessa carta', (await val(LANI, 'select gira_ruota()')) === carta1);
+verifica('ruota: una riga sola per oggi', (await val(null, 'select count(*)::int from carte_del_giorno')) === 1);
+await come(LANI, `update carte_del_giorno set carta = case when carta = 1 then 2 else 1 end where data = oggi()`);
+verifica('ruota: Lani non cambia la carta', (await val(null, 'select carta from carte_del_giorno')) === carta1);
+await fallisce('ruota: Lani non scrive righe', LANI, `insert into carte_del_giorno (data, carta) values (oggi() + 1, 2)`);
+await fallisce('ruota: anon no', null, 'select gira_ruota()', 'anon');
+// sei giorni già girati da lunedì: resta una sola carta nel mazzo
+await come(null, 'delete from carte_del_giorno');
+await come(null, `insert into carte_del_giorno (data, carta) select oggi() - g, g from generate_series(1, extract(isodow from oggi())::int - 1) g`);
+const giaUscite = (await come(null, 'select carta from carte_del_giorno')).rows.map((r) => r.carta);
+const nuova = await val(LANI, 'select gira_ruota()');
+verifica('ruota: non ripete una carta uscita da lunedì', !giaUscite.includes(nuova));
+verifica('record: Lani lo segna', (await val(LANI, `select segna_record(12, 'Squat in 30 secondi')`)) === true);
+verifica('record: salvato sulla riga di oggi', (await val(null, 'select record from carte_del_giorno where data = oggi()')) === 12);
+await fallisce('record: fuori misura', LANI, `select segna_record(5000, 'Squat')`);
+await come(null, 'delete from carte_del_giorno');
+verifica('record: senza ruota girata non si segna', (await val(LANI, `select segna_record(3, 'Squat')`)) === false);
 // annuncio di R-Evolution (0034): l'accensione del genitore accoda il popup, una volta per giorno
 await come(PAPA, `insert into impostazioni (chiave, valore) values ('r_evolution_da', '"2026-11-23"')`);
 await come(PAPA, `delete from impostazioni where chiave = 'r_evolution_da'`);
@@ -235,7 +256,7 @@ for (const t of tabelle) {
 const larghe = (await come(null, `select tablename || ' ' || cmd || ' ' || policyname p from pg_policies where schemaname = 'public' and cmd in ('DELETE', 'ALL') and coalesce(qual, '') not like '%e_genitore()%' and policyname <> 'proprie'`)).rows;
 verifica('nessuna regola di cancellazione oltre ai genitori', larghe.length === 0 || (console.log(larghe), false));
 // funzioni chiamabili da un utente: solo queste (registra_passi, tenta_enigma... solo dal server)
-const FUNZIONI = ['controlla_pin', 'correggi_partita', 'e_famiglia', 'e_genitore', 'frase_del_giorno', 'imposta_pin', 'oggi', 'rispondi_partita', 'segna_tipo_verifica', 'sposta_verifica', 'storna_spunta', 'vedi_saldo', 'verifica_pin'];
+const FUNZIONI = ['controlla_pin', 'correggi_partita', 'e_famiglia', 'e_genitore', 'frase_del_giorno', 'gira_ruota', 'imposta_pin', 'oggi', 'rispondi_partita', 'segna_record', 'segna_tipo_verifica', 'sposta_verifica', 'storna_spunta', 'vedi_saldo', 'verifica_pin'];
 const chiamabili = (await come(null, `select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.prorettype <> 'trigger'::regtype and has_function_privilege('authenticated', p.oid, 'execute') order by 1`)).rows.map((r) => r.proname);
 verifica('funzioni chiamabili da Lani e genitori: solo quelle previste', JSON.stringify(chiamabili) === JSON.stringify(FUNZIONI) || (console.log(chiamabili), false));
 const perAnon = (await come(null, `select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.prorettype <> 'trigger'::regtype and has_function_privilege('anon', p.oid, 'execute')`)).rows;

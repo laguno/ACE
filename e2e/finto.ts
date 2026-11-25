@@ -131,6 +131,21 @@ export async function finto(page: Pick<Page, 'addInitScript' | 'route'>, t: Tabe
       return json(uno ? { prima, adesso } : [{ prima, adesso }]);
     }
 
+    // dieci minuti a carte: la prova dice quale carta esce e in che giorno (t.ruota), come farebbe il server
+    if (nome === 'rpc/gira_ruota') {
+      const r = t.ruota?.[0];
+      if (!r) return json({ message: 'ruota senza esito' }, 500);
+      const c = (t.carte_del_giorno ??= []);
+      if (!c.some((x) => x.data === r.data)) c.push({ data: r.data, carta: r.carta, record: null, record_su: null });
+      return json(c.find((x) => x.data === r.data)?.carta);
+    }
+    if (nome === 'rpc/segna_record') {
+      const { p_valore, p_su } = req.postDataJSON();
+      const oggi = (t.carte_del_giorno ?? []).find((x) => x.data === t.ruota?.[0]?.data);
+      if (oggi) Object.assign(oggi, { record: p_valore, record_su: p_su });
+      return json(!!oggi);
+    }
+
     if (metodo === 'GET' || metodo === 'HEAD') {
       const trovate = ordina(filtra(righe, url.searchParams), url.searchParams.get('order')).map((r) => unisci(t, nome, r, url.searchParams.get('select')));
       if (uno) return trovate.length ? json(trovate[0]) : json({ code: 'PGRST116', message: 'nessuna riga' }, 406);

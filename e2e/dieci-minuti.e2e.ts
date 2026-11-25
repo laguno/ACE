@@ -1,12 +1,13 @@
 import { expect, test } from '@playwright/test';
 import { finto } from './finto';
 
-// Sprint 2: dieci minuti al mattino in Oggi, dalle 6 alle 13 (config dieci_minuti.finestra), da
-// quando i genitori accendono R-Evolution. Menu dalla tabella esercizi_dieci_minuti.
+// Dieci minuti in Oggi (sprint 2; dal 23/11 dalle 6:00, ultimo avvio 21:20), da quando i genitori accendono
+// R-Evolution. Dal 25/11 a carte: Lani gira la ruota, il server fissa la carta del giorno, poi VIA.
 const LUNEDI_MATTINA = new Date('2027-01-11T07:30:00+01:00');
+const MERCOLEDI = new Date('2027-01-13T17:00:00+01:00');
 const ACCESA = [{ chiave: 'r_evolution_da', valore: '2027-01-07' }];
 
-const dati = (impostazioni: Record<string, unknown>[] = ACCESA) => ({
+const dati = (altro: Record<string, Record<string, unknown>[]> = {}, impostazioni: Record<string, unknown>[] = ACCESA) => ({
   materie: [],
   compiti: [],
   lezioni: [],
@@ -16,39 +17,44 @@ const dati = (impostazioni: Record<string, unknown>[] = ACCESA) => ({
   impegni_famiglia: [],
   serate: [] as Record<string, unknown>[],
   movimenti_passi: [],
-  esercizi_dieci_minuti: [
-    { id: 'plank', nome: 'Plank e varianti', tipo: 'forza_riflessi', creato_il: '2026-11-13T10:00:00Z' },
-    { id: 'respiro', nome: 'Respirazione guidata', tipo: 'recupero', creato_il: '2026-11-13T10:00:01Z' },
-    { id: 'corda', nome: 'Salti con la corda', tipo: 'forza_riflessi', creato_il: '2026-11-14T10:00:00Z' },
-  ],
+  carte_del_giorno: [] as Record<string, unknown>[],
+  ...altro,
 });
 
-// v2: la fascia in stile allenamento (regione "Dieci minuti") e, dopo VIA, il timer a tutto schermo
-const carta = (page: import('@playwright/test').Page) => page.getByRole('region', { name: 'Dieci minuti' });
-const timer = (page: import('@playwright/test').Page) => page.getByRole('dialog', { name: 'Dieci minuti, timer' });
+const fascia = (page: import('@playwright/test').Page) => page.getByRole('region', { name: 'Dieci minuti' });
 
-test('dieci minuti al mattino: si sceglie dal menu, si avvia, si spunta solo in fondo', async ({ page }) => {
-  await page.clock.install({ time: LUNEDI_MATTINA });
-  const { chiamate, t } = await finto(page, dati(), { passi: { passi: 10 } });
+test('dieci minuti: si gira la ruota, esce la carta, riaprendo resta la stessa', async ({ page }) => {
+  await page.clock.install({ time: MERCOLEDI });
+  // lunedì e martedì già uscite la 1 e la 6: spicchi spenti
+  const { t } = await finto(
+    page,
+    dati({
+      carte_del_giorno: [
+        { data: '2027-01-11', carta: 1 },
+        { data: '2027-01-12', carta: 6 },
+      ],
+      ruota: [{ data: '2027-01-13', carta: 2 }],
+    }),
+  );
   await page.goto('/');
-  const c = carta(page);
-  await expect(c.getByText('entro le 21:20')).toBeVisible();
-  await c.getByRole('button', { name: 'Cambia esercizio' }).click();
-  await expect(c.getByRole('radio')).toHaveCount(3);
-  await c.getByRole('radio', { name: 'Salti con la corda' }).check();
-  await c.getByRole('button', { name: 'VIA' }).click();
-  await expect.poll(() => t.serate[0]).toMatchObject({ data: '2027-01-11', dieci_minuti_esercizio: 'corda' });
-  // il timer è a tutto schermo e non si salta: SEGNA FATTO compare solo in fondo
-  await expect(timer(page).getByRole('button', { name: 'PAUSA' })).toBeVisible();
-  await expect(timer(page).getByRole('button', { name: 'SEGNA FATTO' })).toHaveCount(0);
-  await page.screenshot({ path: 'e2e/risultati/dieci-minuti.png', fullPage: true });
+  const f = fascia(page);
+  await expect(f.getByText('LA CARTA DI OGGI')).toBeVisible();
+  await expect(f.getByText('Già uscite questa settimana: spente.')).toBeVisible();
+  await expect(f.locator('.ruota-disco .spenta')).toHaveCount(2);
+  await expect(f.getByRole('button', { name: 'VIA' })).toHaveCount(0);
+  await page.screenshot({ path: 'e2e/risultati/dieci-ruota.png', fullPage: true });
 
-  await page.clock.runFor(10 * 60 * 1000 + 5000);
-  await timer(page).getByRole('button', { name: 'SEGNA FATTO' }).click();
-  await expect(c.getByText('FATTI!')).toBeVisible();
-  await expect(c.getByText(/Salti con la corda, 10 minuti/)).toBeVisible();
-  await expect.poll(() => t.serate[0]?.dieci_minuti_il).toBeTruthy();
-  await expect.poll(() => chiamate).toEqual([{ tipo: 'dieci_minuti', id: '2027-01-11' }]);
+  await f.getByRole('button', { name: 'GIRA LA RUOTA' }).click();
+  await page.clock.runFor(3500);
+  await expect(f.getByText('CORE D’ACCIAIO'.replace('’', "'"))).toBeVisible();
+  await expect(f.getByText('CARTA 2')).toBeVisible();
+  await expect(f.getByRole('button', { name: 'VIA' })).toBeVisible();
+  expect(t.carte_del_giorno.find((x) => x.data === '2027-01-13')).toMatchObject({ carta: 2 });
+  await page.screenshot({ path: 'e2e/risultati/dieci-carta.png', fullPage: true });
+
+  await page.reload();
+  await expect(fascia(page).getByText('CARTA 2')).toBeVisible();
+  await expect(fascia(page).getByRole('button', { name: 'GIRA LA RUOTA' })).toHaveCount(0);
 });
 
 test('dieci minuti: dopo l\'ultimo avvio delle 21:20 non si avviano più', async ({ page }) => {
@@ -56,25 +62,25 @@ test('dieci minuti: dopo l\'ultimo avvio delle 21:20 non si avviano più', async
   await finto(page, dati());
   await page.goto('/');
   await expect(page.getByRole('button', { name: 'R-Evolution' })).toBeVisible();
-  await expect(carta(page)).toHaveCount(0);
+  await expect(fascia(page)).toHaveCount(0);
 });
 
 test('dieci minuti: con R-Evolution spenta non ci sono', async ({ page }) => {
   await page.clock.install({ time: LUNEDI_MATTINA });
-  await finto(page, dati([]));
+  await finto(page, dati({}, []));
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Buongiorno, Lani' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Dieci minuti' })).toHaveCount(0);
+  await expect(fascia(page)).toHaveCount(0);
 });
 
-test('dieci minuti: se il server non li conta, niente "Bart approva" e lo dice', async ({ page }) => {
+test('dieci minuti: se il server non li conta, niente "il coach approva" e lo dice', async ({ page }) => {
   await page.clock.install({ time: LUNEDI_MATTINA });
-  await finto(page, dati());
+  await finto(page, dati({ carte_del_giorno: [{ data: '2027-01-11', carta: 7 }] }));
   await page.goto('/');
-  const c = carta(page);
-  await c.getByRole('button', { name: 'VIA' }).click();
-  await page.clock.runFor(10 * 60 * 1000 + 5000);
-  await timer(page).getByRole('button', { name: 'SEGNA FATTO' }).click();
-  await expect(c.getByRole('alert')).toHaveText("Questa volta non li ho potuti contare: l'ora del telefono non torna. Domani si riprova.");
-  await expect(c.getByText(/Il coach approva/)).toHaveCount(0);
+  const f = fascia(page);
+  await f.getByRole('button', { name: 'VIA' }).click();
+  await page.clock.fastForward(10 * 60 * 1000 + 6000);
+  await page.getByRole('button', { name: 'SEGNA FATTO' }).click();
+  await expect(f.getByRole('alert')).toHaveText("Questa volta non li ho potuti contare: l'ora del telefono non torna. Domani si riprova.");
+  await expect(f.getByText(/Il coach approva/)).toHaveCount(0);
 });
