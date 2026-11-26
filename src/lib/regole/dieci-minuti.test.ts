@@ -99,9 +99,9 @@ describe('dieci minuti: esercizi degli 8 blocchi', () => {
     expect(a).not.toEqual(b);
   });
 
-  it('carta 3 col visore: Beat Saber per tutti i blocchi e nessun record; senza, la palla e le prese di fila', () => {
+  it('carta 3 col visore: Beat Saber per tutti i blocchi e la combo più lunga; senza, la palla e le prese di fila', () => {
     expect(new Set(eserciziDellaSessione(carta(3)!, true).map((e) => e.id))).toEqual(new Set(['beat-saber']));
-    expect(recordDellaCarta(carta(3)!, true)).toBeNull();
+    expect(recordDellaCarta(carta(3)!, true)).toMatchObject({ tipo: 'numero', su: 'Combo più lunga' });
     expect(recordDellaCarta(carta(3)!)).toMatchObject({ tipo: 'numero', su: 'Prese di fila' });
   });
 

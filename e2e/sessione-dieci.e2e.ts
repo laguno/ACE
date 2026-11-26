@@ -174,9 +174,13 @@ test('carta 7: niente record, il minuto finale è respirazione', async ({ page }
   await expect(s.getByRole('spinbutton')).toHaveCount(0);
 });
 
-test('carta 3: "Ho il visore" fa Beat Saber senza record; di base la palla rimbalzina', async ({ page }) => {
+test('carta 3: "Ho il visore" fa Beat Saber con la combo più lunga; di base la palla rimbalzina', async ({ page }) => {
   await page.clock.install({ time: LUNEDI });
-  await finto(page, dati(3));
+  const prima = [
+    { data: '2027-01-04', carta: 3, record: 500, record_su: 'Prese di fila' },
+    { data: '2027-01-05', carta: 3, record: 100, record_su: 'Combo più lunga' },
+  ];
+  await finto(page, dati(3, { carte_del_giorno: [{ data: OGGI, carta: 3, record: null, record_su: null }, ...prima] }));
   await page.goto('/');
   const fascia = page.getByRole('region', { name: 'Dieci minuti' });
   const visore = fascia.getByRole('checkbox', { name: 'Ho il visore' });
@@ -189,7 +193,10 @@ test('carta 3: "Ho il visore" fa Beat Saber senza record; di base la palla rimba
   await salta(page, 70);
   await expect(nome(page, 3)).toHaveText('Beat Saber');
   await salta(page, 475);
-  await expect(s.getByRole('spinbutton')).toHaveCount(0);
+  await s.getByLabel('Qual è la combo più lunga?').fill('120');
+  await s.getByRole('button', { name: 'Salva' }).click();
+  // il record delle prese di fila (500) non conta: col visore si confronta solo la combo
+  await expect(s.getByRole('status')).toHaveText('Record nuovo: 120!');
 });
 
 test('movimento ridotto: solo il primo fotogramma, e niente vibrazione', async ({ page }) => {

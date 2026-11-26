@@ -79,7 +79,7 @@ export function eserciziDellaSessione(c: Carta, visore = false, caso: () => numb
   return Array.from({ length: blocchi }, (_, i) => base[i % base.length]);
 }
 
-/** Il record della carta (null: nessuno, come la Calma o la carta 3 col visore). */
+/** Il record della carta (null: nessuno, come la Calma); la carta 3 col visore ne ha uno suo. */
 export function recordDellaCarta(c: Carta, visore = false): RecordCarta | null {
   return visore && c.visore ? c.visore.record : c.record;
 }

@@ -104,7 +104,7 @@
         "interruttore": "Ho il visore",
         "figura": "lani-vr",
         "esercizio": { "id": "beat-saber", "nome": "Beat Saber" },
-        "record": null
+        "record": { "tipo": "numero", "su": "Combo più lunga", "domanda": "Qual è la combo più lunga?" }
       }
     },
     {
