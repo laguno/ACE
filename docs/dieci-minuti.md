@@ -40,6 +40,10 @@ Progetto del signore con Jarvis del 25/11/2026 (testo completo incollato in chat
 - Pronte tutte quelle del riscaldamento comune e della carta 1; gli id con l'animazione sono in `animati` nel config, gli altri mostrano lo sticker. Originali con il nome `<carta>-<nome>_<esercizio>_v<n>.gif`, abbinati in `scripts/trick-webp.mjs`.
 - Rotazioni divise in `rotazioni-spalle` e `rotazioni-caviglie`: il riscaldamento fa camminata, spalle, caviglie (circa 13 secondi l'una).
 - Conversione: pause ferme in coda tagliate in tutte; `affondi-laterali` e `rotazioni-caviglie` accodano il giro specchiato; `rotazioni-caviglie` usa i fotogrammi 0-19; `rotazioni-spalle` ha soglie del verde più basse per le scie. Qualità 75, nessun ingrandimento.
+- Consegna completa di Jarvis (27/11, `ace/consegna-claude-code-gif-esercizi-2026-11-27.md`): carte 2, 3, 5, 6, 7. Nella carta 2 il **dead bug diventa bird dog**. Lavorazioni per id in testa a `scripts/trick-webp.mjs` (specchio accodato, solo primi N fotogrammi, avanti-indietro, Calma a metà velocità; anche gli affondi ora hanno lo specchio). `presa-destra` e `presa-sinistra` vengono dallo stesso file, una specchiata; il muro della carta 3 è specchiato e si usa il muro disegnato a destra della carta 4.
+- Calma: niente taglio della coda (movimento troppo lento, la scansione restava con 2 fotogrammi). `ID=a,b npm run trick:webp` rifà solo quelli.
+- Senza GIF, sticker fisso: sfida di famiglia, Beat Saber, respiro finale.
+- Non fatto: ingrandimento 2× con un modello per disegni (serve scaricare il programma: da decidere).
 
 ## Difetti degli originali che il taglio non risolve
 

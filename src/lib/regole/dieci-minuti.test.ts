@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import {
   CARTE,
@@ -68,6 +69,13 @@ describe('dieci minuti: le sette carte', () => {
     const tutto = JSON.stringify(DIECI).toLowerCase();
     expect(tutto).not.toMatch(/sedia/);
     expect(tutto).not.toMatch(/lani-(festeggia|divisa|stanca)/);
+  });
+
+  it('ogni esercizio ha la sua animazione, tranne quelli senza GIF', () => {
+    const ids = [...DIECI.riscaldamento, ...CARTE.filter((c) => c.figura !== 'trick').flatMap((c) => c.esercizi)].map((e) => e.id);
+    // senza GIF (consegna del 27/11): sfida di famiglia; il finale della Calma e Beat Saber non sono in elenco
+    expect([...ids].filter((id) => id !== 'sfida-famiglia').sort()).toEqual([...DIECI.animati].sort());
+    for (const id of DIECI.animati) for (const f of [`${id}.webp`, `${id}-fermo.webp`]) expect(existsSync(`public/assets/trick/${f}`), f).toBe(true);
   });
 
   it('i trick della carta 4 hanno tre righe di "Come si fa"', () => {

@@ -9,7 +9,7 @@
     "conto_alla_rovescia": 3,
     "avviso": 10
   },
-  "animati": ["camminata", "rotazioni-spalle", "rotazioni-caviglie", "squat", "affondi", "affondi-laterali", "salti-stella", "ponte-glutei"],
+  "animati": ["camminata", "rotazioni-spalle", "rotazioni-caviglie", "squat", "affondi", "affondi-laterali", "salti-stella", "ponte-glutei", "plank", "plank-laterale", "bird-dog", "superman", "presa-due-mani", "presa-destra", "presa-sinistra", "muro-rimbalzo-presa", "mano-opposta", "presa-bassa", "battito-presa", "una-gamba", "saltelli", "skip", "punte", "farfalla", "busto-avanti", "quadricipiti", "spalle", "respirazione", "scansione", "allungamento-dolce"],
   "vibrazione_ms": { "conto": 80, "cambio": [200, 80, 200], "ruota": [30, 40, 30, 40, 30, 40, 120] },
   "riscaldamento": [
     { "id": "camminata", "nome": "Camminata sul posto" },
@@ -74,7 +74,7 @@
       "esercizi": [
         { "id": "plank", "nome": "Plank" },
         { "id": "plank-laterale", "nome": "Plank laterale" },
-        { "id": "dead-bug", "nome": "Dead bug" },
+        { "id": "bird-dog", "nome": "Bird dog" },
         { "id": "superman", "nome": "Superman" }
       ],
       "record": { "tipo": "numero", "su": "Secondi di plank", "domanda": "Quanti secondi di plank?" }

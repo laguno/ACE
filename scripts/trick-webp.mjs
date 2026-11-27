@@ -12,6 +12,7 @@ import sharp from 'sharp';
 
 const SORGENTE = process.argv[2] ?? 'C:/progetti/ace/asset/avatar/lani/esercizi';
 const DESTINAZIONE = 'public/assets/trick';
+const SOLTANTO = process.env.ID?.split(','); // ID=scansione,punte: rifà solo quelli
 
 // id usato dall'app -> file originale (i primi due sono pose base, non escono nelle sessioni)
 const TRICK = {
@@ -35,11 +36,40 @@ const TRICK = {
   'affondi-laterali': '1-gambe_affondo-laterale_v1.gif',
   'salti-stella': '1-gambe_salto-stella_v1.gif',
   'ponte-glutei': '1-gambe_ponte-glutei_v1.gif',
+  plank: '2-core_plank_v1.gif',
+  'plank-laterale': '2-core_plank-laterale_v1.gif',
+  'bird-dog': '2-core_bird-dog_v1.gif',
+  superman: '2-core_superman_v1.gif',
+  'presa-due-mani': '3-riflessi_presa-due-mani_v1.gif',
+  'presa-destra': '3-riflessi_presa-una-mano_v1.gif',
+  'presa-sinistra': '3-riflessi_presa-una-mano_v1.gif',
+  'muro-rimbalzo-presa': '3-riflessi_muro_v1.gif',
+  'mano-opposta': '3-riflessi_mano-opposta_v2.gif',
+  'presa-bassa': '3-riflessi_presa-bassa_v2.gif',
+  'battito-presa': '3-riflessi_battito-presa_v1.gif',
+  'una-gamba': '5-caviglie_una-gamba_v1.gif',
+  saltelli: '5-caviglie_saltelli_v2.gif',
+  skip: '5-caviglie_skip_v2.gif',
+  punte: '5-caviglie_punte_v1.gif',
+  farfalla: '6-allungamento_farfalla_v1.gif',
+  'busto-avanti': '6-allungamento_busto-avanti_v1.gif',
+  quadricipiti: '6-allungamento_quadricipiti_v1.gif',
+  spalle: '6-allungamento_spalle_v1.gif',
+  respirazione: '7-calma_respirazione_v1.gif',
+  scansione: '7-calma_scansione_v1.gif',
+  'allungamento-dolce': '7-calma_allungamento-dolce_v1.gif',
 };
+// lavorazioni dalla consegna di Jarvis del 27/11 (ace/consegna-claude-code-gif-esercizi-2026-11-27.md)
 // solo i primi N fotogrammi: dopo comincia un secondo giro e il loop scatta
-const SOLO = { 'rotazioni-caviglie': 20 };
+const SOLO = { 'rotazioni-caviglie': 20, punte: 13, farfalla: 20 };
 // esercizi disegnati da un lato solo: dopo il giro si accoda lo stesso specchiato, per l'altro lato
-const SPECCHIA = new Set(['affondi-laterali', 'rotazioni-caviglie']);
+const SPECCHIA = new Set(['rotazioni-caviglie', 'affondi', 'affondi-laterali', 'plank-laterale', 'bird-dog', 'una-gamba', 'quadricipiti', 'spalle', 'allungamento-dolce']);
+// specchiati per intero: l'altra mano, e il muro (così la palla va a destra, dove l'app disegna il muro)
+const ROVESCIA = new Set(['presa-sinistra', 'muro-rimbalzo-presa']);
+// avanti e indietro anche se lo scatto è sotto soglia
+const AVANTI_INDIETRO = new Set(['plank', 'bird-dog', 'una-gamba', 'punte', 'respirazione', 'scansione', 'allungamento-dolce']);
+// la Calma va a metà velocità
+const LENTA = new Set(['respirazione', 'scansione', 'allungamento-dolce']);
 
 // verde dello sfondo: quanto il verde supera il rosso e il blu (sfondo ~55-70, Lani e contorno bianco ~0)
 const VERDE_PIENO = 32; // da qui in su: trasparente
@@ -133,6 +163,7 @@ function specchiati(fotogrammi, W, H) {
 mkdirSync(DESTINAZIONE, { recursive: true });
 const righe = [];
 for (const [id, file] of Object.entries(TRICK)) {
+  if (SOLTANTO && !SOLTANTO.includes(id)) continue;
   const percorso = `${SORGENTE}/${file}`;
   const meta = await sharp(percorso, { animated: true }).metadata();
   const { width: W, pageHeight: H, pages: N } = meta;
@@ -140,18 +171,20 @@ for (const [id, file] of Object.entries(TRICK)) {
   const { data } = await sharp(percorso, { animated: true }).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   let fotogrammi = Array.from({ length: SOLO[id] ?? N }, (_, n) => data.subarray(n * W * H * 4, (n + 1) * W * H * 4));
 
-  // fotogrammi fermi in coda: si tiene solo il primo della serie
+  // fotogrammi fermi in coda: si tiene solo il primo della serie. Non nella Calma, dove il movimento è
+  // così lento da sembrare fermo (la scansione restava con 2 fotogrammi)
   let fine = fotogrammi.length;
-  while (fine > 2 && differenza(fotogrammi[fine - 1], fotogrammi[fine - 2]) < FERMO) fine--;
+  while (!LENTA.has(id) && fine > 2 && differenza(fotogrammi[fine - 1], fotogrammi[fine - 2]) < FERMO) fine--;
   const tagliati = fotogrammi.length - fine;
   fotogrammi = fotogrammi.slice(0, fine);
 
   const scatto = differenza(fotogrammi.at(-1), fotogrammi[0]);
-  const avantiIndietro = scatto > SCATTO;
+  const avantiIndietro = AVANTI_INDIETRO.has(id) || scatto > SCATTO;
   fotogrammi = fotogrammi.filter((_, n) => n % PASSO === 0);
   if (avantiIndietro) fotogrammi = [...fotogrammi, ...fotogrammi.slice(1, -1).reverse()];
 
-  const puliti = fotogrammi.map((f) => togliVerde(f, W, H, SCIE.has(id)));
+  let puliti = fotogrammi.map((f) => togliVerde(f, W, H, SCIE.has(id)));
+  if (ROVESCIA.has(id)) puliti = specchiati(puliti, W, H);
   if (SPECCHIA.has(id)) puliti.push(...specchiati(puliti, W, H));
 
   // un solo ritaglio: ingombro di tutti i fotogrammi più margine
@@ -198,7 +231,7 @@ for (const [id, file] of Object.entries(TRICK)) {
   await sharp(ritagliati, {
     raw: { width: lw, height: lh * puliti.length, channels: 4, pageHeight: lh },
   })
-    .webp({ ...QUALITA, loop: 0, delay: puliti.map(() => ritardo * PASSO) })
+    .webp({ ...QUALITA, loop: 0, delay: puliti.map(() => ritardo * PASSO * (LENTA.has(id) ? 2 : 1)) })
     .toFile(uscita);
   const unFotogramma = (k, file) =>
     sharp(ritagliati.subarray(k * lw * lh * 4, (k + 1) * lw * lh * 4), {
