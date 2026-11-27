@@ -101,7 +101,8 @@ function useSchermoAcceso(attivo: boolean) {
 const src = (id: string, ridotto: boolean) => `/assets/trick/${id}${ridotto ? '-fermo' : ''}.webp`;
 
 function Figura({ carta, esercizio, figura, ridotto }: { carta: Carta; esercizio: Esercizio; figura: string; ridotto: boolean }) {
-  if (carta.figura !== 'trick')
+  // carta 4: tutti trick; le altre: l'animazione dove c'è già ("animati" nel config), se no lo sticker
+  if (carta.figura !== 'trick' && !T.animati.includes(esercizio.id))
     return (
       <div className="sessione-figura">
         <Sticker posa={figura} misura={240} />

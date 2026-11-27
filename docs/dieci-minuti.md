@@ -31,6 +31,11 @@ Progetto del signore con Jarvis del 25/11/2026 (testo completo incollato in chat
 - **Peso**: dal 25/11 misura piena degli originali (168-367 px di lato) e qualità 75, 10 fotogrammi al secondo: 3,1 MB in tutto, 120-463 kB per trick. Prima c'era la variante "intermedia" scelta il 24/11 (3/4 del lato, qualità 50, 1,8 MB), ma sul telefono si vedeva sgranata; scorrevolezza giudicata accettabile. Gli originali sono piccoli (alti al massimo 360 px) e la figura arriva a 270 px CSS: su un telefono a densità ~2,6 l'immagine resta comunque ingrandita. Altre varianti da riga di comando: "intermedia" `SCALA=0.75 Q=50`, "leggera" `SCALA=0.75 Q=50 PASSO=2` (~840 kB).
 - Entrano da soli nel precache del service worker (`globPatterns` comprende `webp`).
 
+## Animazioni delle altre carte (27/11, con Jarvis)
+
+- Pronte `squat` (di profilo) e `ponte-glutei`; gli id con l'animazione sono in `animati` nel config, gli altri mostrano lo sticker. Originali con il nome `<carta>-<nome>_<esercizio>_v<n>.gif`, abbinati in `scripts/trick-webp.mjs`.
+- Da fare quando arrivano: rotazioni divise in `rotazioni-spalle` e `rotazioni-caviglie` (il riscaldamento le alterna); affondi laterali e rotazioni caviglie sono di un lato solo, l'altro si ottiene specchiando.
+
 ## Difetti degli originali che il taglio non risolve
 
 Decisione del 24/11 (Jarvis e signore): per il prototipo si tengono tutte; si rifà con Gemini solo quello che non funziona nella prova con Lani. Il muro mancante si disegna nella schermata (muro stilizzato a destra del trick). Da verificare con Lani: capisce il trick da sola, dal nome e dal movimento?

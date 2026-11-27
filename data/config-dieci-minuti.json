@@ -9,6 +9,7 @@
     "conto_alla_rovescia": 3,
     "avviso": 10
   },
+  "animati": ["squat", "ponte-glutei"],
   "vibrazione_ms": { "conto": 80, "cambio": [200, 80, 200], "ruota": [30, 40, 30, 40, 30, 40, 120] },
   "riscaldamento": [
     { "id": "camminata", "nome": "Camminata sul posto" },

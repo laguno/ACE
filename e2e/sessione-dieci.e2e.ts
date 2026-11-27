@@ -141,6 +141,8 @@ test('carta 1: sticker fisso, esercizi a rotazione, record degli squat', async (
   await expect(s.locator('.sessione-figura img')).toHaveAttribute('src', /lani-dieci-minuti\.webp$/);
   await salta(page, 70);
   await expect(nome(page, 1)).toHaveText('Squat');
+  await expect(s.locator('.sessione-figura img')).toHaveAttribute('src', '/assets/trick/squat.webp');
+  await page.screenshot({ path: 'e2e/risultati/dieci-squat.png' });
   await expect(s.getByText('Vai così, bene!')).toBeVisible();
   await expect(s.locator('.sessione-totale')).toHaveText(/^8:[45][0-9]$/);
   // pausa: si vede che è pausa e quale esercizio arriva

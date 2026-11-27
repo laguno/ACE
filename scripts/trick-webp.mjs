@@ -26,6 +26,9 @@ const TRICK = {
   'palleggio-di-lato': '4-trick_palleggio-di-lato_v2.gif',
   pancake: '4-trick_pancake_v3.gif',
   'muro-rimbalzo': '4-trick_muro-rimbalzo_v2.gif',
+  // esercizi delle altre carte (27/11): gli originali tengono il nome <carta>-<nome>_<esercizio>_v<n>
+  squat: '1-gambe_squat_v1.gif',
+  'ponte-glutei': '1-gambe_ponte-glutei_v1.gif',
 };
 
 // verde dello sfondo: quanto il verde supera il rosso e il blu (sfondo ~55-70, Lani e contorno bianco ~0)
@@ -177,7 +180,8 @@ for (const [id, file] of Object.entries(TRICK)) {
   // tre momenti del gesto per le vignette "Come si fa" (a 1/6, 3/6 e 5/6 del giro, prima dell'avanti-indietro)
   const andata = Math.ceil(fine / PASSO);
   let passi = 0;
-  for (const i of [1, 2, 3]) {
+  // le vignette servono solo ai trick ("Come si fa")
+  for (const i of file.startsWith('4-trick') ? [1, 2, 3] : []) {
     const file = `${DESTINAZIONE}/${id}-passo${i}.webp`;
     await unFotogramma(Math.min(andata - 1, Math.round((andata * (2 * i - 1)) / 6)), file);
     passi += statSync(file).size;
