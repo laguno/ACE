@@ -13,6 +13,7 @@ import {
   recordDellaCarta,
   riscaldamentoDi,
   scaletta,
+  scalettaUnica,
   segnale,
   suCosa,
   type Carta,
@@ -32,6 +33,7 @@ import { supabase } from './supabase';
 const CHIAVE_VISTI = 'ace:dieci-minuti:visti'; // trick di cui Lani ha già visto "Come si fa" (solo interfaccia)
 const FASI = scaletta();
 const TOTALE = durataTotale(FASI);
+const FASI_VISORE = scalettaUnica();
 const mmss = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 const GIRO = 2 * Math.PI * 104;
 
@@ -136,17 +138,17 @@ function ComeSiFa({ esercizio, chiudi }: { esercizio: Esercizio; chiudi?: () => 
   );
 }
 
-function Anello({ fase, mancano }: { fase: Fase | null; mancano: number }) {
+function Anello({ fase, mancano, orario }: { fase: Fase | null; mancano: number; orario: boolean }) {
   const durata = fase ? fase.a - fase.da : 1;
   const resto = fase ? mancano / durata : 0;
   return (
-    <div className={`sessione-anello ${fase?.tipo ?? 'fine'}`}>
+    <div className={`sessione-anello ${fase?.tipo ?? 'fine'}${orario && fase ? ' orario' : ''}`}>
       <svg viewBox="0 0 240 240" aria-hidden>
         <circle className="pista" cx="120" cy="120" r="104" />
         <circle className="tempo" cx="120" cy="120" r="104" strokeDasharray={GIRO} strokeDashoffset={GIRO * (1 - resto)} transform="rotate(-90 120 120)" />
       </svg>
       <span role="timer" aria-live="off" aria-label={fase ? `Mancano ${mancano} secondi` : 'Finito'}>
-        {fase ? mancano : 'FATTO'}
+        {fase ? (orario ? mmss(mancano) : mancano) : 'FATTO'}
       </span>
     </div>
   );
@@ -181,7 +183,7 @@ export function SessioneDieci({ carta, visore, avvio, oggi, pronto, errore, esci
   const [erroreRecord, setErroreRecord] = useState('');
   const ultimo = useRef('');
 
-  const adesso = faseA(FASI, (ora - avvio) / 1000);
+  const adesso = faseA(visore ? FASI_VISORE : FASI, (ora - avvio) / 1000);
   const fase = adesso?.fase ?? null;
   const mancano = adesso?.mancano ?? 0;
   const inCorso = !!fase;
@@ -197,7 +199,8 @@ export function SessioneDieci({ carta, visore, avvio, oggi, pronto, errore, esci
   // "3, 2, 1, cambio": vibrazione dove c'è, mai col movimento ridotto (come i sensi di ACE)
   const chiave = `${fase?.da}:${mancano}`;
   useEffect(() => {
-    if (!fase || ultimo.current === chiave) return;
+    // col visore parte e basta: niente "3, 2, 1" né cambi
+    if (visore || !fase || ultimo.current === chiave) return;
     ultimo.current = chiave;
     const s = segnale(fase, mancano);
     if (ridotto || document.visibilityState !== 'visible') return;
@@ -257,7 +260,7 @@ export function SessioneDieci({ carta, visore, avvio, oggi, pronto, errore, esci
           tema={carta.tema}
           esercizio={posa.id}
           lavoro={fase?.tipo === 'lavoro'}
-          cambio={!!fase && fase.tipo !== 'record' && mancano <= T.durate.conto_alla_rovescia}
+          cambio={!visore && !!fase && fase.tipo !== 'record' && mancano <= T.durate.conto_alla_rovescia}
           avanzamento={1 - totale / TOTALE}
         />
       )}
@@ -284,8 +287,8 @@ export function SessioneDieci({ carta, visore, avvio, oggi, pronto, errore, esci
           <Figura carta={carta} esercizio={posa} figura={figura} ridotto={ridotto} />
         )}
       </div>
-      <Anello fase={fase} mancano={mancano} />
-      <span className="sessione-totale">{mmss(totale)}</span>
+      <Anello fase={fase} mancano={mancano} orario={visore} />
+      {!visore && <span className="sessione-totale">{mmss(totale)}</span>}
 
       {finale && rec && (
         <div className="sessione-record">
@@ -329,7 +332,7 @@ export function SessioneDieci({ carta, visore, avvio, oggi, pronto, errore, esci
       ) : (
         <div className="sessione-coach">
           <Sticker posa={posaCoach} misura={72} />
-          <p>{fumetto(fase, mancano, carta, !!rec)}</p>
+          <p>{visore && fase ? T.fumetti.lavoro : fumetto(fase, mancano, carta, !!rec)}</p>
         </div>
       )}
 

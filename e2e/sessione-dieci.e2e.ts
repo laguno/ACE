@@ -190,9 +190,14 @@ test('carta 3: "Ho il visore" fa Beat Saber con la combo più lunga; di base la 
   await fascia.getByRole('button', { name: 'VIA' }).click();
   const s = sessione(page, 3);
   await expect(s.locator('.sessione-figura img')).toHaveAttribute('src', /lani-vr\.webp$/);
-  await salta(page, 70);
+  // parte subito: niente riscaldamento, un solo conto alla rovescia
   await expect(nome(page, 3)).toHaveText('Beat Saber');
-  await salta(page, 475);
+  await expect(s.getByRole('timer')).toHaveText(/^(10:00|9:5[0-9])$/);
+  await page.screenshot({ path: 'e2e/risultati/dieci-visore.png' });
+  await salta(page, 545);
+  await expect(s.getByText('PAUSA')).toHaveCount(0);
+  await expect(s.getByRole('spinbutton')).toHaveCount(0);
+  await salta(page, 60);
   await s.getByLabel('Qual è la combo più lunga?').fill('120');
   await s.getByRole('button', { name: 'Salva' }).click();
   // il record delle prese di fila (500) non conta: col visore si confronta solo la combo

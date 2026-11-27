@@ -51,6 +51,9 @@ export function scaletta(d: ConfigDieci['durate'] = config.durate): Fase[] {
 
 export const durataTotale = (fasi: Fase[]) => fasi.at(-1)?.a ?? 0;
 
+/** Col visore (26/11): un blocco solo lungo quanto la sessione, senza riscaldamento, pause né cambi. */
+export const scalettaUnica = (d: ConfigDieci['durate'] = config.durate): Fase[] => [{ tipo: 'lavoro', da: 0, a: durataTotale(scaletta(d)), blocco: 0 }];
+
 /** La fase in corso dopo `secondi` dall'avvio, con i secondi che mancano alla sua fine; null a sessione finita. */
 export function faseA(fasi: Fase[], secondi: number): { fase: Fase; mancano: number } | null {
   const fase = fasi.find((f) => secondi >= f.da && secondi < f.a);

@@ -9,6 +9,7 @@ Progetto del signore con Jarvis del 25/11/2026 (testo completo incollato in chat
 - Sette carte: 1 Gambe da muro, 2 Core d'acciaio, 5 Caviglie e equilibrio (pesanti); 3 Riflessi, 4 Palla al muro: trick, 6 Allungamento, 7 Calma (leggere). Niente sedia al muro, mai la divisa.
 - Confermate il 25/11 le proposte di Jarvis: giorno fatto = dieci minuti completati; migrazione additiva; online con la carta 4 animata e le altre con sticker fisso (animazioni dopo); carta 3 con l'interruttore "Ho il visore" (di base palla rimbalzina); esercizi a rotazione fino a 8 blocchi (carte 3 e 4: otto diversi); riscaldamento e minuto finale uguali per tutte (Calma: respirazione, senza record).
 - Carta 3 col visore (26/11): record **Combo più lunga** (0-999, nessuna migrazione), confrontato solo con le combo.
+- Col visore (26/11): una sola sessione di 10 minuti, senza riscaldamento, pause, cambi né vibrazioni; il record si scrive alla fine.
 - Tappa 2 (migrazione `0073`): nei giorni di allenamento o partita niente carte pesanti; se restano solo pesanti, una Calma in più. Lo decide `gira_ruota()` con le righe di `impegni_famiglia` del giorno; una carta già assegnata resta.
 - Sfondi (25/11, specifica di Jarvis): un tema per carta in `data/config-dieci-minuti.json`, disegni in `src/Sfondo.tsx` e `src/sfondi.css`, carattere Orbitron nella sessione. La scia della carta 1 va a ritmo, ogni 2 secondi in lavoro.
 

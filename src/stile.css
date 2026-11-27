@@ -1691,3 +1691,5 @@ body[data-sfondo='sera'] {
   .retrofuturismo .orbita { top: calc(24vh + min(31vw, 143px)); }
 }
 .ruota-disco path.dettaglio { stroke: none; }
+/* col visore l'anello mostra minuti e secondi (10:00): cifre più piccole */
+.sessione-anello.orario [role='timer'] { font-size: clamp(26px, 4.4vh, 36px); }

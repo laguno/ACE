@@ -14,6 +14,7 @@ import {
   recordDellaCarta,
   riscaldamentoDi,
   scaletta,
+  scalettaUnica,
   segnale,
   suCosa,
   usciteInSettimana,
@@ -103,6 +104,10 @@ describe('dieci minuti: esercizi degli 8 blocchi', () => {
     expect(new Set(eserciziDellaSessione(carta(3)!, true).map((e) => e.id))).toEqual(new Set(['beat-saber']));
     expect(recordDellaCarta(carta(3)!, true)).toMatchObject({ tipo: 'numero', su: 'Combo più lunga' });
     expect(recordDellaCarta(carta(3)!)).toMatchObject({ tipo: 'numero', su: 'Prese di fila' });
+  });
+
+  it('col visore un blocco solo, lungo quanto la sessione', () => {
+    expect(scalettaUnica()).toEqual([{ tipo: 'lavoro', da: 0, a: durataTotale(scaletta()), blocco: 0 }]);
   });
 
   it('il visore conta solo nella carta 3', () => {
