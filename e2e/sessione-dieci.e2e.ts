@@ -197,11 +197,16 @@ test('carta 3: "Ho il visore" fa Beat Saber con la combo più lunga; di base la 
   await salta(page, 545);
   await expect(s.getByText('PAUSA')).toHaveCount(0);
   await expect(s.getByRole('spinbutton')).toHaveCount(0);
-  await salta(page, 60);
+  // finiti i 10 minuti (col margine del server), SEGNA FATTO aspetta il record
+  await salta(page, 70);
+  const segna = s.getByRole('button', { name: 'SEGNA FATTO' });
+  await expect(s.getByRole('timer')).toHaveText('FATTO');
+  await expect(segna).toHaveCount(0);
   await s.getByLabel('Qual è la combo più lunga?').fill('120');
   await s.getByRole('button', { name: 'Salva' }).click();
   // il record delle prese di fila (500) non conta: col visore si confronta solo la combo
   await expect(s.getByRole('status')).toHaveText('Record nuovo: 120!');
+  await expect(segna).toBeVisible();
 });
 
 test('movimento ridotto: solo il primo fotogramma, e niente vibrazione', async ({ page }) => {

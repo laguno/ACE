@@ -325,7 +325,8 @@ export function SessioneDieci({ carta, visore, avvio, oggi, pronto, errore, esci
           {errore}
         </p>
       )}
-      {!fase && pronto ? (
+      {/* col visore prima si salva il record: SEGNA FATTO chiude la sessione e si perderebbe (26/11) */}
+      {!fase && pronto && (!visore || esito) ? (
         <button className="sessione-via" onClick={segnaFatto} autoFocus>
           SEGNA FATTO
         </button>
