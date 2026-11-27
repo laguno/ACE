@@ -27,9 +27,19 @@ const TRICK = {
   pancake: '4-trick_pancake_v3.gif',
   'muro-rimbalzo': '4-trick_muro-rimbalzo_v2.gif',
   // esercizi delle altre carte (27/11): gli originali tengono il nome <carta>-<nome>_<esercizio>_v<n>
+  camminata: '0-riscaldamento_camminata_v1.gif',
+  'rotazioni-spalle': '0-riscaldamento_rotazioni-spalle_v1.gif',
+  'rotazioni-caviglie': '0-riscaldamento_rotazioni-caviglie_v2.gif',
   squat: '1-gambe_squat_v1.gif',
+  affondi: '1-gambe_affondo_v1.gif',
+  'affondi-laterali': '1-gambe_affondo-laterale_v1.gif',
+  'salti-stella': '1-gambe_salto-stella_v1.gif',
   'ponte-glutei': '1-gambe_ponte-glutei_v1.gif',
 };
+// solo i primi N fotogrammi: dopo comincia un secondo giro e il loop scatta
+const SOLO = { 'rotazioni-caviglie': 20 };
+// esercizi disegnati da un lato solo: dopo il giro si accoda lo stesso specchiato, per l'altro lato
+const SPECCHIA = new Set(['affondi-laterali', 'rotazioni-caviglie']);
 
 // verde dello sfondo: quanto il verde supera il rosso e il blu (sfondo ~55-70, Lani e contorno bianco ~0)
 const VERDE_PIENO = 32; // da qui in su: trasparente
@@ -62,18 +72,21 @@ function differenza(a, b) {
 // lo sfondo è verde chiaro (rosso ~100-130); le strisce verdi della palla sono scure (rosso < 80) e restano
 const ROSSO_SFONDO = 80;
 const VERDE_SEME = 45; // verde pieno dello sfondo (~55-70): i bordi sfumati delle strisce della palla non ci arrivano
-const diSfondo = (d, i) => verde(d, i) >= VERDE_NIENTE && d[i] >= ROSSO_SFONDO;
+// GIF con le scie del movimento (archi bianchi sfumati sul verde): soglie più basse, se no restano puntini
+const SCIE = new Set(['rotazioni-spalle']);
+const diSfondo = (d, i, niente) => verde(d, i) >= niente && d[i] >= ROSSO_SFONDO;
 
 /**
  * Alfa dal verde, solo sullo sfondo: riempimento che parte dal verde pieno e si allarga sul verde chiaro
  * sfumato. Le strisce verdi scure della palla non sono verde chiaro e restano. Via il riflesso verde sui bordi semitrasparenti.
  */
-function togliVerde(f, W, H) {
+function togliVerde(f, W, H, scie) {
+  const [pieno, niente] = scie ? [14, 4] : [VERDE_PIENO, VERDE_NIENTE];
   const o = Buffer.from(f);
   const sfondo = new Uint8Array(W * H);
   const coda = [];
   const semina = (p) => {
-    if (!sfondo[p] && diSfondo(o, p * 4)) {
+    if (!sfondo[p] && diSfondo(o, p * 4, niente)) {
       sfondo[p] = 1;
       coda.push(p);
     }
@@ -92,12 +105,29 @@ function togliVerde(f, W, H) {
     if (!sfondo[p]) continue;
     const i = p * 4;
     const v = verde(o, i);
-    const a = v >= VERDE_PIENO ? 0 : v <= VERDE_NIENTE ? 255 : Math.round((255 * (VERDE_PIENO - v)) / (VERDE_PIENO - VERDE_NIENTE));
+    const a = v >= pieno ? 0 : v <= niente ? 255 : Math.round((255 * (pieno - v)) / (pieno - niente));
     o[i + 3] = a;
     if (a === 0) o[i] = o[i + 1] = o[i + 2] = 0;
     else if (v > 0) o[i + 1] = Math.max(o[i], o[i + 2]);
   }
   return o;
+}
+
+// specchio attorno al centro della figura nel primo fotogramma, così al cambio di lato non salta
+function specchiati(fotogrammi, W, H) {
+  let [a, b] = [W, 0];
+  for (let i = 3; i < W * H * 4; i += 4)
+    if (fotogrammi[0][i] > 160) {
+      const x = ((i - 3) / 4) % W;
+      if (x < a) a = x;
+      if (x > b) b = x;
+    }
+  return fotogrammi.map((f) => {
+    const o = Buffer.alloc(f.length);
+    for (let y = 0; y < H; y++)
+      for (let x = Math.max(0, a + b - W + 1); x <= Math.min(W - 1, a + b); x++) f.copy(o, (y * W + x) * 4, (y * W + a + b - x) * 4, (y * W + a + b - x + 1) * 4);
+    return o;
+  });
 }
 
 mkdirSync(DESTINAZIONE, { recursive: true });
@@ -108,7 +138,7 @@ for (const [id, file] of Object.entries(TRICK)) {
   const { width: W, pageHeight: H, pages: N } = meta;
   const ritardo = meta.delay?.[0] ?? 100;
   const { data } = await sharp(percorso, { animated: true }).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
-  let fotogrammi = Array.from({ length: N }, (_, n) => data.subarray(n * W * H * 4, (n + 1) * W * H * 4));
+  let fotogrammi = Array.from({ length: SOLO[id] ?? N }, (_, n) => data.subarray(n * W * H * 4, (n + 1) * W * H * 4));
 
   // fotogrammi fermi in coda: si tiene solo il primo della serie
   let fine = fotogrammi.length;
@@ -121,7 +151,8 @@ for (const [id, file] of Object.entries(TRICK)) {
   fotogrammi = fotogrammi.filter((_, n) => n % PASSO === 0);
   if (avantiIndietro) fotogrammi = [...fotogrammi, ...fotogrammi.slice(1, -1).reverse()];
 
-  const puliti = fotogrammi.map((f) => togliVerde(f, W, H));
+  const puliti = fotogrammi.map((f) => togliVerde(f, W, H, SCIE.has(id)));
+  if (SPECCHIA.has(id)) puliti.push(...specchiati(puliti, W, H));
 
   // un solo ritaglio: ingombro di tutti i fotogrammi più margine
   let [x0, y0, x1, y1] = [W, H, 0, 0];

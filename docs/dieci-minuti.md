@@ -37,8 +37,9 @@ Progetto del signore con Jarvis del 25/11/2026 (testo completo incollato in chat
 
 ## Animazioni delle altre carte (27/11, con Jarvis)
 
-- Pronte `squat` (di profilo) e `ponte-glutei`; gli id con l'animazione sono in `animati` nel config, gli altri mostrano lo sticker. Originali con il nome `<carta>-<nome>_<esercizio>_v<n>.gif`, abbinati in `scripts/trick-webp.mjs`.
-- Da fare quando arrivano: rotazioni divise in `rotazioni-spalle` e `rotazioni-caviglie` (il riscaldamento le alterna); affondi laterali e rotazioni caviglie sono di un lato solo, l'altro si ottiene specchiando.
+- Pronte tutte quelle del riscaldamento comune e della carta 1; gli id con l'animazione sono in `animati` nel config, gli altri mostrano lo sticker. Originali con il nome `<carta>-<nome>_<esercizio>_v<n>.gif`, abbinati in `scripts/trick-webp.mjs`.
+- Rotazioni divise in `rotazioni-spalle` e `rotazioni-caviglie`: il riscaldamento fa camminata, spalle, caviglie (circa 13 secondi l'una).
+- Conversione: pause ferme in coda tagliate in tutte; `affondi-laterali` e `rotazioni-caviglie` accodano il giro specchiato; `rotazioni-caviglie` usa i fotogrammi 0-19; `rotazioni-spalle` ha soglie del verde più basse per le scie. Qualità 75, nessun ingrandimento.
 
 ## Difetti degli originali che il taglio non risolve
 

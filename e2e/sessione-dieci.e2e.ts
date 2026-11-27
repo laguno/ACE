@@ -134,11 +134,11 @@ test('record: si festeggia solo quando batte il migliore dei giorni prima', asyn
   await page.screenshot({ path: 'e2e/risultati/dieci-record.png' });
 });
 
-test('carta 1: sticker fisso, esercizi a rotazione, record degli squat', async ({ page }) => {
+test('carta 1: animazioni, esercizi a rotazione, record degli squat', async ({ page }) => {
   await apri(page, 1);
   const s = sessione(page, 1);
   await expect(nome(page, 1)).toHaveText('Camminata sul posto');
-  await expect(s.locator('.sessione-figura img')).toHaveAttribute('src', /lani-dieci-minuti\.webp$/);
+  await expect(s.locator('.sessione-figura img')).toHaveAttribute('src', '/assets/trick/camminata.webp');
   await salta(page, 70);
   await expect(nome(page, 1)).toHaveText('Squat');
   await expect(s.locator('.sessione-figura img')).toHaveAttribute('src', '/assets/trick/squat.webp');
@@ -151,6 +151,7 @@ test('carta 1: sticker fisso, esercizi a rotazione, record degli squat', async (
   await expect(s.getByText('Il prossimo esercizio sarà:')).toBeVisible();
   await expect(s.locator('.sessione-anello')).toHaveClass(/prepara/);
   await expect(nome(page, 1)).toHaveText('Affondi');
+  await expect(s.locator('.sessione-figura img')).toHaveAttribute('src', '/assets/trick/affondi-fermo.webp');
   await page.screenshot({ path: 'e2e/risultati/dieci-pausa.png' });
   await salta(page, 60 * 5 - 35);
   await expect(nome(page, 1)).toHaveText('Squat'); // sesto blocco: si ricomincia

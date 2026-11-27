@@ -9,11 +9,12 @@
     "conto_alla_rovescia": 3,
     "avviso": 10
   },
-  "animati": ["squat", "ponte-glutei"],
+  "animati": ["camminata", "rotazioni-spalle", "rotazioni-caviglie", "squat", "affondi", "affondi-laterali", "salti-stella", "ponte-glutei"],
   "vibrazione_ms": { "conto": 80, "cambio": [200, 80, 200], "ruota": [30, 40, 30, 40, 30, 40, 120] },
   "riscaldamento": [
     { "id": "camminata", "nome": "Camminata sul posto" },
-    { "id": "rotazioni", "nome": "Rotazioni spalle e caviglie" }
+    { "id": "rotazioni-spalle", "nome": "Rotazioni spalle" },
+    { "id": "rotazioni-caviglie", "nome": "Rotazioni caviglie" }
   ],
   "fumetti": {
     "riscaldamento": "Scaldiamo braccia e gambe.",
