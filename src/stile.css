@@ -1693,3 +1693,6 @@ body[data-sfondo='sera'] {
 .ruota-disco path.dettaglio { stroke: none; }
 /* col visore l'anello mostra minuti e secondi (10:00): cifre più piccole */
 .sessione-anello.orario [role='timer'] { font-size: clamp(26px, 4.4vh, 36px); }
+/* preparazione (pausa e fine riscaldamento): anello e secondi in lime, diversi da tutti i temi */
+.sessione-anello.prepara .tempo, .sessione.tema .sessione-anello.prepara .tempo { stroke: var(--lime); }
+.sessione-anello.prepara [role='timer'], .sessione.tema .sessione-anello.prepara [role='timer'] { color: var(--lime); }

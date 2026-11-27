@@ -139,11 +139,11 @@ function ComeSiFa({ esercizio, chiudi }: { esercizio: Esercizio; chiudi?: () => 
   );
 }
 
-function Anello({ fase, mancano, orario }: { fase: Fase | null; mancano: number; orario: boolean }) {
+function Anello({ fase, mancano, orario, prepara }: { fase: Fase | null; mancano: number; orario: boolean; prepara: boolean }) {
   const durata = fase ? fase.a - fase.da : 1;
   const resto = fase ? mancano / durata : 0;
   return (
-    <div className={`sessione-anello ${fase?.tipo ?? 'fine'}${orario && fase ? ' orario' : ''}`}>
+    <div className={`sessione-anello ${fase?.tipo ?? 'fine'}${orario && fase ? ' orario' : ''}${prepara ? ' prepara' : ''}`}>
       <svg viewBox="0 0 240 240" aria-hidden>
         <circle className="pista" cx="120" cy="120" r="104" />
         <circle className="tempo" cx="120" cy="120" r="104" strokeDasharray={GIRO} strokeDashoffset={GIRO * (1 - resto)} transform="rotate(-90 120 120)" />
@@ -221,6 +221,8 @@ export function SessioneDieci({ carta, visore, avvio, oggi, pronto, errore, esci
 
   const vista = fase ? esercizioInVista(fase, mancano, esercizi) : null;
   const finale = !fase || fase.tipo === 'record';
+  // pausa e fine riscaldamento: si vede chi arriva, ma non si lavora ancora (27/11)
+  const prepara = !!vista?.prossimo;
   const delRecord = rec?.tipo === 'trick' ? esercizi.find((e) => e.nome === su) : undefined;
   const esercizioFinale: Esercizio | undefined = rec ? (delRecord ?? { id: 'record', nome: rec.tipo === 'trick' ? su : rec.su }) : carta.finale;
   // nell'ultima pausa arriva il record
@@ -285,10 +287,10 @@ export function SessioneDieci({ carta, visore, avvio, oggi, pronto, errore, esci
         ) : striscia && esercizio ? (
           <ComeSiFa esercizio={esercizio} chiudi={come ? () => setCome(false) : undefined} />
         ) : (
-          <Figura carta={carta} esercizio={posa} figura={figura} ridotto={ridotto} />
+          <Figura carta={carta} esercizio={posa} figura={figura} ridotto={ridotto || (prepara && carta.figura !== 'trick')} />
         )}
       </div>
-      <Anello fase={fase} mancano={mancano} orario={visore} />
+      <Anello fase={fase} mancano={mancano} orario={visore} prepara={prepara} />
       {!visore && <span className="sessione-totale">{mmss(totale)}</span>}
 
       {finale && rec && (
@@ -339,9 +341,9 @@ export function SessioneDieci({ carta, visore, avvio, oggi, pronto, errore, esci
       )}
 
       <div className="sessione-fascia">
-        {fase?.tipo === 'pausa' && (
+        {(fase?.tipo === 'pausa' || prepara) && (
           <p className="sessione-pausa">
-            <b>PAUSA</b> <span>Il prossimo esercizio sarà:</span>
+            <b>{prepara ? 'PREPARATI' : 'PAUSA'}</b> <span>Il prossimo esercizio sarà:</span>
           </p>
         )}
         <h2 className="sessione-nome">{posa.nome}</h2>
