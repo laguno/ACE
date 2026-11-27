@@ -261,3 +261,15 @@ test('la ruota usa i colori dei temi', async ({ page }) => {
   await expect(ruota.locator('path').first()).toHaveAttribute('fill', config.carte[0].tema.fondo);
   await ruota.screenshot({ path: 'e2e/risultati/ruota-temi.png' });
 });
+
+test('telefono indietro rispetto al server: si parte dalla camminata, senza lo sticker del plank', async ({ page }) => {
+  await page.clock.install({ time: LUNEDI });
+  // l'ora di avvio la mette il server: qui è 5 secondi avanti rispetto al telefono
+  const da = new Date(LUNEDI.getTime() + 5000).toISOString();
+  await finto(page, dati(1, { serate: [{ data: OGGI, dieci_minuti_da: da, dieci_minuti_il: null }] }));
+  await page.goto('/');
+  await page.getByRole('region', { name: 'Dieci minuti' }).getByRole('button', { name: 'APRI IL TIMER' }).click();
+  const s = sessione(page, 1);
+  await expect(s.locator('.sessione-figura img')).toHaveAttribute('src', '/assets/trick/camminata.webp', { timeout: 2000 });
+  await expect(s.getByRole('button', { name: 'SEGNA FATTO' })).toHaveCount(0);
+});

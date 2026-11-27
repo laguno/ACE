@@ -185,12 +185,14 @@ export function SessioneDieci({ carta, visore, avvio, oggi, pronto, errore, esci
   const [erroreRecord, setErroreRecord] = useState('');
   const ultimo = useRef('');
 
-  const adesso = faseA(visore ? FASI_VISORE : FASI, (ora - avvio) / 1000);
+  // l'avvio lo timbra il server: col telefono indietro sarebbe negativo, e la sessione sembrerebbe finita
+  const passati = Math.max(0, (ora - avvio) / 1000);
+  const adesso = faseA(visore ? FASI_VISORE : FASI, passati);
   const fase = adesso?.fase ?? null;
   const mancano = adesso?.mancano ?? 0;
   const inCorso = !!fase;
   // il conto dei dieci minuti: quanto manca alla fine della sessione
-  const totale = Math.max(0, Math.ceil(TOTALE - (ora - avvio) / 1000));
+  const totale = Math.max(0, Math.ceil(TOTALE - passati));
   useSchermoAcceso(inCorso || !pronto);
 
   useEffect(() => {
@@ -229,7 +231,7 @@ export function SessioneDieci({ carta, visore, avvio, oggi, pronto, errore, esci
   // nell'ultima pausa arriva il record
   const esercizio: Esercizio | null = finale || (fase.tipo === 'pausa' && !vista) ? (esercizioFinale ?? null) : (vista?.esercizio ?? null);
   const base = riscaldamentoDi(carta);
-  const posa: Esercizio = esercizio ?? base[Math.min(base.length - 1, Math.floor(((ora - avvio) / 1000 / (T.durate.riscaldamento - T.durate.pausa)) * base.length))];
+  const posa: Esercizio = esercizio ?? base[Math.min(base.length - 1, Math.floor((passati / (T.durate.riscaldamento - T.durate.pausa)) * base.length))];
   const striscia = !!esercizio?.come && !finale && (come || (!!vista?.prossimo && !visti.has(esercizio.id)));
   // festa con lani-cima (coppa, maglia lilla): lani-festeggia è in divisa, che nei dieci minuti non si usa
   const festa = esito?.tipo === 'battuto';
