@@ -17,9 +17,9 @@ Storia delle sessioni, decisioni prese e scelte approvate: `docs/storico.md`.
 - **Pubblicato il 28/11** con l'ok del signore: backup `ace-2026-11-28_10-39-41.sql`, nessuna migrazione né Edge Function, `main` con avanzamento semplice.
 - **Cosa c'è in più**: animazioni di tutte le carte (bird dog al posto del dead bug), PREPARATI al cambio, ruota con una posa per carta, carta 3 col visore a blocco unico con record «Combo più lunga», corretto lo sticker del plank all'avvio. Decisioni: `docs/dieci-minuti.md`.
 - **Senza GIF, sticker fisso**: sfida di famiglia, Beat Saber, respiro finale. Non fatto l'ingrandimento 2× (serve scaricare un programma: da decidere).
-- **APK 1.3** (da `sensi-2`) installato il 28/11 sul telefono di Lani; vibrazione e notifiche non ancora provate. Da portare in `main` le righe del guscio (versionCode 4, `@capacitor/haptics`), se no il prossimo APK da `main` torna alla 1.2.
+- **APK 1.3** (da `sensi-2`) installato il 28/11 sul telefono di Lani; vibrazione e notifiche non ancora provate. Righe del guscio in `main` dal 28/11 ~12:20 (`0e6bbc0`, backup `ace-2026-11-28_12-20-12.sql`).
 - **Da confermare, una domanda per volta**: carta 4 con riscaldamento suo; tolta la pausa del timer; fumetto "Respira e preparati." cambiato senza chiedere.
-- **4 prove a schermo rosse già prima di questo rilascio**: `dispositivi` (Motorola, 3) e barra a cinque voci a 320 px.
+- **Corretto, da pubblicare** (in `rilascio-v2`, non in `main`): affondo piegato sulla ruota per la carta 1; le 4 prove a schermo rosse erano un falso allarme (`node_modules` collegato, il server di prova rifiutava i font), ora 243 passate, 31 saltate.
 
 ## La mia settimana, regole del 23/11 e restyling v2: IN PRODUZIONE (23/11 ~22:00, `c1bc408`)
 
