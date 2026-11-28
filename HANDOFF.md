@@ -8,17 +8,18 @@ Storia delle sessioni, decisioni prese e scelte approvate: `docs/storico.md`.
 2. **Taratura dei passi**: non ritoccata. Con le regole del 23/11, a 7200 passi la cima resta al 100% con impegno 90% e "furbetta"; all'80% scende da 80% a 70%; al 75% da 30% a 10%. **Verso il 14/12** (tre settimane di dati veri) guardare passi e cose fatte da Lani e decidere se ritarare (`npm run simula`, con tutti i `TOTALI`). I numeri li decide il signore.
 3. **Sensi 2: cosa manca per pubblicarli** (codice pronto in `sensi-2`, dentro `gioco-con-tabellina`, NON in produzione; in produzione c'è la prima versione con i suoni Kenney):
    - **i suoni**, il blocco vero. Famiglie senza suono in `docs/mappa-sensi.md` (worktree `app-sensi`): scatto della foto, passi che salgono, traguardo, tempo finito, bel voto, novità, gesto di famiglia. Da rivedere: spunta (anche voci di cartella e borsa) e chiave. Partita vinta non scatta mai (il popup chiede sempre "com'è andata"). Da decidere silenzio o suono morbido: calmo, qualcosa non va. Si parte dalla spunta: il signore mette i candidati in `C:\progetti\ace\suoni-nuovi\spunta\` (la cartella non c'è ancora);
-   - **APK 1.3** da compilare e installare sul telefono di Lani (vibrazione nativa con `@capacitor/haptics`);
+   - **APK 1.3** installato il 28/11: vibrazione da provare;
    - **prova sull'iPad e sul Samsung**: suono dopo il rientro dal background, tasto silenzioso, vibrazione.
 4. **Differenze dalle bozze v2 da decidere**: voto previsto a bottoni come la bozza (5-9) o select (3-10 a mezzi, come ora); liste di Oggi sotto i gettoni; Oggi pomeriggio lilla o azzurro come la bozza; legenda in La mia settimana; "Tutte le partite" in R-Evolution; testata compatta di Oggi con i passi (chiesta dal signore prima della regola "una moneta per schermata").
 
-## Dieci minuti a carte: IN PRODUZIONE (25/11 ~17:30, `48c1242`)
+## Dieci minuti a carte: IN PRODUZIONE (25/11 `48c1242`; animazioni e visore 28/11 ~10:45 `9bbedbc`)
 
-- **Pubblicato** con l'ok del signore: backup `ace-2026-11-25_17-21-28.sql`, migrazioni `0072` e `0073`, `main` con avanzamento semplice, Vercel success. Nessuna Edge Function toccata. Decisioni e struttura: `docs/dieci-minuti.md`.
-- **Cosa c'è**: ruota del giorno, sette carte con sfondo proprio (Orbitron), record, tappa 2 (con allenamento o partita niente carte pesanti). Provato su ACE Prova solo in parte: movimenti degli sfondi, fermo in background e fluidità non verificati sul telefono.
-- **GIF mancanti (31)**: carta 4 completa; mancano riscaldamento comune (`camminata`, `rotazioni`) e tutti gli esercizi delle carte 1, 2, 3, 5, 6, 7 (id in `data/config-dieci-minuti.json`; facoltativa `beat-saber`). Chiederle più grandi di 640x360. Finché mancano c'è lo sticker in plank.
-- **Da confermare, una domanda per volta**: carta 3 col visore: record «Combo più lunga» (deciso il 26/11, fatto in `feature/dieci-minuti`, NON in produzione); carta 4 con riscaldamento suo; tolta la pausa del timer; fumetto "Respira e preparati." cambiato senza chiedere.
-- **Vibrazione** sul telefono di Lani: col plugin nativo serve l'APK 1.3, altrimenti usa quella del browser.
+- **Pubblicato il 28/11** con l'ok del signore: backup `ace-2026-11-28_10-39-41.sql`, nessuna migrazione né Edge Function, `main` con avanzamento semplice.
+- **Cosa c'è in più**: animazioni di tutte le carte (bird dog al posto del dead bug), PREPARATI al cambio, ruota con una posa per carta, carta 3 col visore a blocco unico con record «Combo più lunga», corretto lo sticker del plank all'avvio. Decisioni: `docs/dieci-minuti.md`.
+- **Senza GIF, sticker fisso**: sfida di famiglia, Beat Saber, respiro finale. Non fatto l'ingrandimento 2× (serve scaricare un programma: da decidere).
+- **APK 1.3** (da `sensi-2`) installato il 28/11 sul telefono di Lani; vibrazione e notifiche non ancora provate. Da portare in `main` le righe del guscio (versionCode 4, `@capacitor/haptics`), se no il prossimo APK da `main` torna alla 1.2.
+- **Da confermare, una domanda per volta**: carta 4 con riscaldamento suo; tolta la pausa del timer; fumetto "Respira e preparati." cambiato senza chiedere.
+- **4 prove a schermo rosse già prima di questo rilascio**: `dispositivi` (Motorola, 3) e barra a cinque voci a 320 px.
 
 ## La mia settimana, regole del 23/11 e restyling v2: IN PRODUZIONE (23/11 ~22:00, `c1bc408`)
 
