@@ -19,7 +19,7 @@ Storia delle sessioni, decisioni prese e scelte approvate: `docs/storico.md`.
 - **Senza GIF, sticker fisso**: sfida di famiglia, Beat Saber, respiro finale. Non fatto l'ingrandimento 2× (serve scaricare un programma: da decidere).
 - **APK 1.3** (da `sensi-2`) installato il 28/11 sul telefono di Lani; vibrazione e notifiche non ancora provate. Righe del guscio in `main` dal 28/11 ~12:20 (`0e6bbc0`, backup `ace-2026-11-28_12-20-12.sql`).
 - **Da confermare, una domanda per volta**: carta 4 con riscaldamento suo; tolta la pausa del timer; fumetto "Respira e preparati." cambiato senza chiedere.
-- **Corretto, da pubblicare** (in `rilascio-v2`, non in `main`): affondo piegato sulla ruota per la carta 1; le 4 prove a schermo rosse erano un falso allarme (`node_modules` collegato, il server di prova rifiutava i font), ora 243 passate, 31 saltate.
+- **Pubblicato il 28/11 ~18:10** (`c0d2c0c`, backup `ace-2026-11-28_18-10-04.sql`): affondo piegato sulla ruota per la carta 1. Le 4 prove a schermo rosse erano un falso allarme (`node_modules` collegato, il server di prova rifiutava i font): ora 243 passate, 31 saltate.
 
 ## La mia settimana, regole del 23/11 e restyling v2: IN PRODUZIONE (23/11 ~22:00, `c1bc408`)
 
