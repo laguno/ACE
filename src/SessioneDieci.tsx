@@ -51,6 +51,8 @@ export function vibra(schema: number | number[]) {
   });
 }
 
+const CHIAVE_PAUSA = 'ace:dieci-minuti:pausa';
+
 function leggi<V>(chiave: string, vuoto: V): V {
   try {
     return (JSON.parse(localStorage.getItem(chiave) ?? 'null') as V) ?? vuoto;
@@ -185,8 +187,22 @@ export function SessioneDieci({ carta, visore, avvio, oggi, pronto, errore, esci
   const [erroreRecord, setErroreRecord] = useState('');
   const ultimo = useRef('');
 
+  // Pausa (rimessa il 28/11): sta sul telefono, legata all'ora di avvio. Il server conta dall'avvio,
+  // quindi allunga solo l'attesa. Col visore non c'è (26/11: niente pause).
+  const [pausa, setPausa] = useState(() => {
+    const p = leggi<{ avvio: number; ms: number; dal: number | null } | null>(CHIAVE_PAUSA, null);
+    return p?.avvio === avvio ? p : { avvio, ms: 0, dal: null };
+  });
+  const fermo = pausa.dal !== null;
+  function metti() {
+    const t = Date.now();
+    const nuova = pausa.dal === null ? { ...pausa, dal: t } : { avvio, ms: pausa.ms + t - pausa.dal, dal: null };
+    setOra(t);
+    setPausa(nuova);
+    scrivi(CHIAVE_PAUSA, nuova);
+  }
   // l'avvio lo timbra il server: col telefono indietro sarebbe negativo, e la sessione sembrerebbe finita
-  const passati = Math.max(0, (ora - avvio) / 1000);
+  const passati = Math.max(0, ((pausa.dal ?? ora) - avvio - pausa.ms) / 1000);
   const adesso = faseA(visore ? FASI_VISORE : FASI, passati);
   const fase = adesso?.fase ?? null;
   const mancano = adesso?.mancano ?? 0;
@@ -265,7 +281,7 @@ export function SessioneDieci({ carta, visore, avvio, oggi, pronto, errore, esci
         <Sfondo
           tema={carta.tema}
           esercizio={posa.id}
-          lavoro={fase?.tipo === 'lavoro'}
+          lavoro={!fermo && fase?.tipo === 'lavoro'}
           cambio={!visore && !!fase && fase.tipo !== 'record' && mancano <= T.durate.conto_alla_rovescia}
           avanzamento={1 - totale / TOTALE}
         />
@@ -277,6 +293,11 @@ export function SessioneDieci({ carta, visore, avvio, oggi, pronto, errore, esci
         <span className="sessione-carta">
           {carta.nome}
         </span>
+        {!visore && fase && (
+          <button className="sessione-esci sessione-ferma" onClick={metti}>
+            {fermo ? 'Riprendi' : 'Pausa'}
+          </button>
+        )}
         {esercizio?.come && !finale && !striscia && (
           <button className="sessione-aiuto" aria-label={`Come si fa: ${esercizio.nome}`} onClick={() => setCome(true)}>
             ?
@@ -290,11 +311,11 @@ export function SessioneDieci({ carta, visore, avvio, oggi, pronto, errore, esci
         ) : striscia && esercizio ? (
           <ComeSiFa esercizio={esercizio} chiudi={come ? () => setCome(false) : undefined} />
         ) : (
-          <Figura carta={carta} esercizio={posa} figura={figura} ridotto={ridotto || (prepara && carta.figura !== 'trick')} />
+          <Figura carta={carta} esercizio={posa} figura={figura} ridotto={ridotto || fermo || (prepara && carta.figura !== 'trick')} />
         )}
       </div>
       <Anello fase={fase} mancano={mancano} orario={visore} prepara={prepara} />
-      {!visore && <span className="sessione-totale">{mmss(totale)}</span>}
+      {!visore && <span className="sessione-totale">{fermo && fase ? `in pausa · ${mmss(totale)}` : mmss(totale)}</span>}
 
       {finale && rec && (
         <div className="sessione-record">

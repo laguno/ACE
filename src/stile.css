@@ -1583,6 +1583,8 @@ body[data-sfondo='sera'] {
 .sessione-testa { display: flex; justify-content: space-between; align-items: center; min-height: 48px; }
 .sessione-esci, .sessione-aiuto { min-width: 48px; min-height: 48px; border: 3px solid var(--contorno); border-radius: 999px; background: var(--bianco); color: var(--testo); font: 800 15px Nunito, sans-serif; box-shadow: 2px 3px 0 var(--contorno); cursor: pointer; }
 .sessione-esci { padding: 0 16px; }
+.sessione-ferma { margin-left: auto; }
+.sessione-ferma ~ .sessione-aiuto { margin-left: 0; }
 .sessione-aiuto { margin-left: auto; font: 800 24px/1 'Baloo 2', Nunito, sans-serif; }
 .sessione-centro { display: grid; place-items: center; min-height: clamp(150px, 31vh, 270px); }
 .sessione-figura { display: flex; align-items: flex-end; justify-content: center; height: clamp(150px, 31vh, 270px); }

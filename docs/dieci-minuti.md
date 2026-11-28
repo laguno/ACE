@@ -22,7 +22,7 @@ Progetto del signore con Jarvis del 25/11/2026 (testo completo incollato in chat
 - **Schermate**: `src/DieciMinuti.tsx` (fascia in Oggi: ruota, poi carta del giorno con VIA, poi FATTI), `src/Ruota.tsx` (sette spicchi, uscite spente, suono e vibrazione), `src/SessioneDieci.tsx` (sessione a tutto schermo per tutte le carte). Regole pure in `src/lib/regole/dieci-minuti.ts` con test.
 - **Sticker**: solo `lani-dieci-minuti` (plank) e `lani-vr` sono in abiti da allenamento, quindi le carte 1, 2, 3, 5, 6, 7 usano il primo (carta 3 col visore il secondo). Gli altri sticker di Lani sono in abiti da scuola.
 - **Impostazioni dei genitori**: il vecchio menu degli esercizi è diventato l'elenco delle sette carte, in sola lettura.
-- Il timer non ha più la pausa (come il prototipo): la fase si calcola dall'ora di avvio timbrata dal server.
+- La fase si calcola dall'ora di avvio timbrata dal server. **Pausa rimessa il 28/11** (tolta col prototipo): bottone Pausa/Riprendi in testa alla sessione, salvato sul telefono, vale anche uscendo e rientrando; il server conta dall'avvio, quindi allunga solo l'attesa. Col visore non c'è.
 
 ## Carta 4: asset dei trick (24-25/11)
 

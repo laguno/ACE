@@ -273,3 +273,26 @@ test('telefono indietro rispetto al server: si parte dalla camminata, senza lo s
   await expect(s.locator('.sessione-figura img')).toHaveAttribute('src', '/assets/trick/camminata.webp', { timeout: 2000 });
   await expect(s.getByRole('button', { name: 'SEGNA FATTO' })).toHaveCount(0);
 });
+
+test('pausa: il timer si ferma, resta fermo uscendo, e riprende da dove era', async ({ page }) => {
+  await apri(page, 1);
+  const s = sessione(page, 1);
+  await salta(page, 70); // primo blocco di lavoro, a circa 10" dall'inizio
+  await s.getByRole('button', { name: 'Pausa' }).click();
+  const fermo = await timer(page, 1).textContent();
+  const esercizio = await nome(page, 1).textContent();
+  await salta(page, 700); // più di tutta la sessione
+  await expect(timer(page, 1)).toHaveText(fermo!);
+  await expect(s.getByText(/in pausa/)).toBeVisible();
+  await expect(s.getByRole('button', { name: 'SEGNA FATTO' })).toHaveCount(0);
+
+  await s.getByRole('button', { name: 'Esci' }).click();
+  await page.getByRole('region', { name: 'Dieci minuti' }).getByRole('button', { name: 'APRI IL TIMER' }).click();
+  await expect(timer(page, 1)).toHaveText(fermo!);
+  await expect(nome(page, 1)).toHaveText(esercizio!);
+
+  await s.getByRole('button', { name: 'Riprendi' }).click();
+  await avanti(page, 3);
+  await expect(timer(page, 1)).not.toHaveText(fermo!);
+  await expect(nome(page, 1)).toHaveText(esercizio!);
+});
