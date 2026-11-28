@@ -20,7 +20,9 @@ const DETTAGLI: Record<string, string> = {
   celestiale: 'M0 -12 L3 -3 L12 0 L3 3 L0 12 L-3 3 L-12 0 L-3 -3 Z',
 };
 
-const immagine = (n: number) => (n === 4 ? '/assets/trick/palleggio-base-fermo.webp' : n === 3 ? '/assets/avatar/lani/lani-vr.webp' : '/assets/avatar/lani/lani-dieci-minuti.webp');
+// una posa per carta (28/11): il primo fotogramma di un suo esercizio
+const POSE: Record<number, string> = { 1: 'squat', 2: 'plank', 3: 'presa-due-mani', 4: 'palleggio-base', 5: 'una-gamba', 6: 'farfalla', 7: 'respirazione' };
+const immagine = (n: number) => `/assets/trick/${POSE[n]}-fermo.webp`;
 
 function punto(gradi: number, r: number) {
   const a = ((gradi - 90) * Math.PI) / 180;
