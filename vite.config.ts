@@ -1,3 +1,4 @@
+import { realpathSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { configDefaults, defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
@@ -20,6 +21,9 @@ export default defineConfig({
       'npm:web-push@3.6.7': fileURLToPath(new URL('./supabase/functions/_prove/web-push-finto.ts', import.meta.url)),
     },
   },
+  // nelle copie di lavoro node_modules può essere un collegamento a un'altra cartella: senza questo il
+  // server di sviluppo rifiuta i font e le prove a schermo misurano il carattere di riserva
+  server: { fs: { allow: ['.', realpathSync(fileURLToPath(new URL('./node_modules', import.meta.url)))] } },
   plugins: [
     react(),
     VitePWA({

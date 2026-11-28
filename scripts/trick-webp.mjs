@@ -241,6 +241,8 @@ for (const [id, file] of Object.entries(TRICK)) {
       .toFile(file);
   const fermo = `${DESTINAZIONE}/${id}-fermo.webp`;
   await unFotogramma(0, fermo);
+  // la ruota vuole una posa che si capisca da ferma: il primo fotogramma dell'affondo è in piedi
+  if (id === 'affondi') await unFotogramma(8, `${DESTINAZIONE}/${id}-posa.webp`);
   // tre momenti del gesto per le vignette "Come si fa" (a 1/6, 3/6 e 5/6 del giro, prima dell'avanti-indietro)
   const andata = Math.ceil(fine / PASSO);
   let passi = 0;

@@ -42,7 +42,7 @@ Progetto del signore con Jarvis del 25/11/2026 (testo completo incollato in chat
 - Conversione: pause ferme in coda tagliate in tutte; `affondi-laterali` e `rotazioni-caviglie` accodano il giro specchiato; `rotazioni-caviglie` usa i fotogrammi 0-19; `rotazioni-spalle` ha soglie del verde più basse per le scie. Qualità 75, nessun ingrandimento.
 - Consegna completa di Jarvis (27/11, `ace/consegna-claude-code-gif-esercizi-2026-11-27.md`): carte 2, 3, 5, 6, 7. Nella carta 2 il **dead bug diventa bird dog**. Lavorazioni per id in testa a `scripts/trick-webp.mjs` (specchio accodato, solo primi N fotogrammi, avanti-indietro, Calma a metà velocità; anche gli affondi ora hanno lo specchio). `presa-destra` e `presa-sinistra` vengono dallo stesso file, una specchiata; il muro della carta 3 è specchiato e si usa il muro disegnato a destra della carta 4.
 - Calma: niente taglio della coda (movimento troppo lento, la scansione restava con 2 fotogrammi). `ID=a,b npm run trick:webp` rifà solo quelli.
-- Ruota (28/11): una posa per carta, primo fotogramma di un suo esercizio (`POSE` in `src/Ruota.tsx`).
+- Ruota (28/11): una posa per carta (`POSE` in `src/Ruota.tsx`): primo fotogramma di un suo esercizio, per la carta 1 un affondo piegato (`affondi-posa.webp`).
 - Senza GIF, sticker fisso: sfida di famiglia, Beat Saber, respiro finale.
 - Non fatto: ingrandimento 2× con un modello per disegni (serve scaricare il programma: da decidere).
 
@@ -59,16 +59,3 @@ Decisione del 24/11 (Jarvis e signore): per il prototipo si tengono tutte; si ri
 - Vestiti giusti in tutte le undici (maglietta viola, tuta bordeaux, scarpe bianche), mai la divisa.
 
 Limite di qualità (25/11): le GIF sono 640x360 a 256 colori e Lani occupa circa 170x360 px; sul telefono la figura si ingrandisce 2-2,5 volte, quindi resta sgranata anche a qualità piena. Non ci sono i video originali: il signore ha deciso di andare avanti così.
-
-## Difetti degli originali che il taglio non risolve
-
-Decisione del 24/11 (Jarvis e signore): per il prototipo si tengono tutte; si rifà con Gemini solo quello che non funziona nella prova con Lani. Il muro mancante si disegna nella schermata (muro stilizzato a destra del trick). Da verificare con Lani: capisce il trick da sola, dal nome e dal movimento?
-
-
-- `battito-mani`: **non c'è la palla**, Lani batte solo le mani.
-- Palla tagliata dal bordo alto della GIF in alcuni fotogrammi: palleggio base, palleggio da seduta, giro su se stessa, uno alto uno basso, palleggio di lato, bagher e palleggio alternati.
-- `pancake`: Lani va in ginocchio e colpisce di bagher; la mano piatta a terra sotto la palla non si vede.
-- `muro-rimbalzo`: il muro non è disegnato, la palla esce a destra e torna.
-- `bagher-un-braccio`: palla sopra la testa a lato (già noto).
-- Vestiti giusti in tutte le undici (maglietta viola, tuta bordeaux, scarpe bianche), mai la divisa.
-

@@ -20,9 +20,9 @@ const DETTAGLI: Record<string, string> = {
   celestiale: 'M0 -12 L3 -3 L12 0 L3 3 L0 12 L-3 3 L-12 0 L-3 -3 Z',
 };
 
-// una posa per carta (28/11): il primo fotogramma di un suo esercizio
-const POSE: Record<number, string> = { 1: 'squat', 2: 'plank', 3: 'presa-due-mani', 4: 'palleggio-base', 5: 'una-gamba', 6: 'farfalla', 7: 'respirazione' };
-const immagine = (n: number) => `/assets/trick/${POSE[n]}-fermo.webp`;
+// una posa per carta (28/11): un fotogramma di un suo esercizio, il primo salvo l'affondo (posa piegata)
+const POSE: Record<number, string> = { 1: 'affondi-posa', 2: 'plank-fermo', 3: 'presa-due-mani-fermo', 4: 'palleggio-base-fermo', 5: 'una-gamba-fermo', 6: 'farfalla-fermo', 7: 'respirazione-fermo' };
+const immagine = (n: number) => `/assets/trick/${POSE[n]}.webp`;
 
 function punto(gradi: number, r: number) {
   const a = ((gradi - 90) * Math.PI) / 180;
