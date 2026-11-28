@@ -18,7 +18,7 @@ Storia delle sessioni, decisioni prese e scelte approvate: `docs/storico.md`.
 - **Cosa c'è in più**: animazioni di tutte le carte (bird dog al posto del dead bug), PREPARATI al cambio, ruota con una posa per carta, carta 3 col visore a blocco unico con record «Combo più lunga», corretto lo sticker del plank all'avvio. Decisioni: `docs/dieci-minuti.md`.
 - **Senza GIF, sticker fisso**: sfida di famiglia, Beat Saber, respiro finale. Non fatto l'ingrandimento 2× (serve scaricare un programma: da decidere).
 - **APK 1.3** (da `sensi-2`) installato il 28/11 sul telefono di Lani; vibrazione e notifiche non ancora provate. Righe del guscio in `main` dal 28/11 ~12:20 (`0e6bbc0`, backup `ace-2026-11-28_12-20-12.sql`).
-- **Da confermare, una domanda per volta**: fumetto "Respira e preparati." cambiato senza chiedere. (Pausa del timer rimessa il 28/11, su ACE Prova, non pubblicata. Carta 4 col riscaldamento suo, palleggio e bagher base: confermato il 28/11.)
+- **Da confermare, una domanda per volta**: fumetto "Respira e preparati." cambiato senza chiedere. (Pausa del timer rimessa e pubblicata il 28/11 ~18:27 (`196a4cd`, backup `ace-2026-11-28_18-26-14.sql`), non provata sul telefono. Carta 4 col riscaldamento suo, palleggio e bagher base: confermato il 28/11.)
 - **Pubblicato il 28/11 ~18:10** (`c0d2c0c`, backup `ace-2026-11-28_18-10-04.sql`): affondo piegato sulla ruota per la carta 1. Le 4 prove a schermo rosse erano un falso allarme (`node_modules` collegato, il server di prova rifiutava i font): ora 243 passate, 31 saltate.
 
 ## La mia settimana, regole del 23/11 e restyling v2: IN PRODUZIONE (23/11 ~22:00, `c1bc408`)
